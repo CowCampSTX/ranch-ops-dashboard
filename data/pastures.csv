@@ -1,0 +1,9 @@
+pasture_id,name,acres,planned_graze_days,min_rest_days
+P1,North Flat,640,21,45
+P2,Windmill,560,18,45
+P3,Sand Hills,720,21,60
+P4,Lone Tree,480,14,45
+P5,Creek Bottom,400,14,45
+P6,Cedar Draw,600,18,45
+P7,South Divide,700,21,60
+P8,Home Trap,200,10,30

@@ -1,0 +1,7 @@
+group,task,last_done,next_due,status
+Cows,Fly tag check,2026-06-05,2026-09-01,done
+Cows,Pinkeye check,2026-08-01,2026-10-03,open
+Heifers,Pre-breeding vaccine,2026-06-10,,done
+Heifers,Pregnancy check,2026-09-20,2026-10-25,open
+Yearlings,Booster vaccine,2026-06-02,2026-09-15,open
+Yearlings,Deworm,2026-06-02,2026-11-01,open
