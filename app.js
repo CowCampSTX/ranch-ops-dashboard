@@ -137,7 +137,7 @@ function grazingTimeline(d) {
           text(s, x1, y - 2 + 0, `+${over}d`, { "text-anchor": "end", class: "ink", dy: "-1" });
         }
       }
-      if (x1 - x0 > 34) text(s, x0 + 4, y + 17, p.pasture_id, { fill: cur ? "#fff" : "var(--ink-2)", style: `fill:${cur ? "#fff" : "var(--ink-2)"}` });
+      if (x1 - x0 > 34) text(s, x0 + 4, y + 17, p.pasture_id, { fill: cur ? "var(--on-s1)" : "var(--ink-2)", style: `fill:${cur ? "var(--on-s1)" : "var(--ink-2)"}` });
       const hit = svg("rect", { x: x0, y, width: Math.max(4, x1 - x0), height: 26, fill: "transparent" }, s);
       const len = Math.round((new Date(end) - new Date(mv.in_date)) / DAY);
       hover(hit, `<b>${g} in ${p.name}</b><br>${fmtDate(mv.in_date)} to ${cur ? "now" : fmtDate(end)} (${len} days)<br>Plan: ${p.planned_graze_days} days`);

@@ -7,51 +7,40 @@
 <meta name="description" content="One page for a ranch manager: what needs attention today across water, grazing, gain, herd health and budget. Fictional data.">
 <style>
 :root {
-  color-scheme: light;
-  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #6f6d68;
-  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.04);
-  --s1: #2a78d6; --s1-soft: #b7d3f6; --bar: #d6d4cc;
-  --critical: #d03b3b; --serious: #ec835a; --warning: #fab219; --good: #0ca30c;
-  --div-pos: #2a78d6; --div-neg: #e34948;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a988f;
-    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
-    --s1: #3987e5; --s1-soft: #1c3a5e; --bar: #3a3a37;
-    --div-pos: #3987e5; --div-neg: #e66767;
-  }
-}
-:root[data-theme="dark"] {
   color-scheme: dark;
-  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a988f;
-  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
-  --s1: #3987e5; --s1-soft: #1c3a5e; --bar: #3a3a37;
-  --div-pos: #3987e5; --div-neg: #e66767;
+  --page: #000000; --surface: #0c0d0c; --surface-2: #121412; --ink: #f2f1ec; --ink-2: #c4c3ba; --muted: #8f8e86;
+  --grid: #1f211f; --axis: #34372f; --border: rgba(255,255,255,0.08); --wash: rgba(255,255,255,0.04);
+  --s1: #3ecf73; --s1-soft: #123d22; --on-s1: #04150a; --bar: #2a2c28;
+  --critical: #ef5350; --serious: #f0875c; --warning: #fab219; --good: #3ecf73;
+  --div-pos: #3ecf73; --div-neg: #ef5350;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.55 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--s1); color: var(--on-s1); }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px 40px; }
-header { padding: 28px 0 12px; }
-h1 { font-size: 26px; margin: 0 0 2px; }
-h2 { font-size: 17px; margin: 0 0 2px; }
+header { padding: 40px 0 20px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+header::before { content: ""; display: block; width: 44px; height: 3px; border-radius: 2px; background: var(--s1); margin-bottom: 16px; box-shadow: 0 0 12px rgba(62,207,115,0.6); }
+h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px; }
+h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 4px; }
 p { margin: 0 0 8px; }
 .sub, .note { color: var(--ink-2); }
 .note { font-size: 13px; color: var(--muted); }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; min-width: 0; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px; }
-.tile .k { color: var(--ink-2); font-size: 13px; }
-.tile .v { font-size: 26px; font-weight: 600; }
+.card { background: linear-gradient(180deg, var(--surface-2), var(--surface)); border: 1px solid var(--border); border-radius: 14px; padding: 20px; min-width: 0; box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 8px 24px rgba(0,0,0,0.5); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 20px 0; }
+.tile { border-top: 2px solid var(--s1-soft); }
+.tile .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+.tile .v { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .tile .d { color: var(--muted); font-size: 12px; }
 .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 20px; }
 @media (max-width: 900px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
 .chip { font: inherit; font-size: 13px; padding: 4px 12px; border: 1px solid var(--axis); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; }
-.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.chip:hover { border-color: var(--s1); }
+.chip[aria-pressed="true"] { background: var(--s1); color: var(--on-s1); border-color: var(--s1); font-weight: 600; }
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
 th, td { padding: 8px; border-bottom: 1px solid var(--grid); text-align: left; vertical-align: top; }
-th { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+tbody tr:hover td, tr:hover td { background: var(--wash); }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .scroll { overflow-x: auto; }
 .sev { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
@@ -69,6 +58,8 @@ svg.chart .ink { fill: var(--ink); font-weight: 600; }
 .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
 .tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,.15); border-radius: 8px; padding: 8px 10px; font-size: 13px; display: none; z-index: 10; max-width: 280px; }
 .wide { margin-top: 20px; }
+code { font-size: 12px; background: var(--wash); border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px; }
+a { color: var(--s1); }
 </style>
 </head>
 <body>
@@ -96,7 +87,7 @@ svg.chart .ink { fill: var(--ink); font-weight: 600; }
   <div class="grid2">
     <section class="card">
       <h2>Grazing rotation</h2>
-      <p class="note">Each group's pasture moves this season. The current stay is blue; days past the planned move are marked.</p>
+      <p class="note">Each group's pasture moves this season. The current stay is green; days past the planned move are marked.</p>
       <div id="grazing"></div>
     </section>
     <section class="card">

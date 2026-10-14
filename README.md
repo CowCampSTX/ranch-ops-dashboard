@@ -49,7 +49,7 @@ Some design choices:
 ![Water tank levels](docs/water.png)
 ![Grazing rotation and daily gain](docs/grazing-gain.png)
 
-Every chart has hover details, the page works in light and dark mode and on a phone, and it has no dependencies or
+Every chart has hover details, the page uses a dark theme and works on a phone, and it has no dependencies or
 build step.
 
 ## The example data
