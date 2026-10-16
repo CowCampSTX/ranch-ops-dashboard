@@ -1,0 +1,172 @@
+{
+ "checked": [
+  {
+   "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Fetched with WebFetch; curl gave 'CONNECT tunnel failed, response 403'. Metadata is correct: 'Prescribed Grazing', Range Technical Note No. 9, April 2017, running header 'SOUTH DAKOTA TECHNICAL GUIDE NOTICE SD-424'. VERIFIED: p.4 'Livestock movements should be based on plant growth and utilization and not calendar dates.' and 'Calendar dates may be used as a guide when developing grazing schedules.' p.3 'Keeping the grazing periods as short as practical, especially during periods of fast plant growth, will minimize the opportunity ... to graze plant regrowth prior to plant recovery.' p.3, once-over use ('When two or more pastures are planned to be grazed only one time'): rangeland 'minimum of 45 consecutive days of rest during the growing season', pasture 30. p.3, 2+ grazings ('When two or more pastures are planned to be grazed two or more times during a growing season'): 'Each pasture will be deferred for a minimum of 90 days during the growing season.' The p.4 Table 1 range values match the research: 20-30%* West fast 40, slow 60; East 35/55. 40-50%: West 50/70, East 45/65. Footnote: 'Fast growth usually refers to grasses in a vegetative, pre-boot stage.' Note: 'Under drought conditions, recovery periods may need to be extended to 90 days or longer'. Utilization limits match: 50% seasonal and 30% temporal (p.4), 65% browse and 60% dormant season (p.6). Table 3 (p.6, titled 'Minimum Height of Pasture Species') gives end stubble WWG 4, CWG 3, switchgrass 8, big & sand bluestem 6, KBG 2, sideoats 2, and begin heights WWG 6-10 etc., all as cited. Riparian 'residual heights of 4 to 8 inches is commonly cited as adequate' (Section IV, p.7). App. B p.16: 'Monitor grazing lands frequently and ensure animals have access to dependable water.' Phase I removes 10% in the first month; Phase II removes 20-40% and says 'Routinely monitor conditions such as soil moisture and plant growth on a weekly basis'; Phase III says 'measure remaining forage in all pastures', 'combine remaining herds into one herd', with 30%+ removal on p.16. All verified. MISREAD: the research says '>1 mile to water = very large field needing herding or water relocation'. The source says 'A very large field would roughly be where the distance to water is greater than one mile' ('could be considerably larger on smooth terrain'). Its point is that continuous season-long use gives adequate recovery only on very large fields where livestock are herded or redistributed by changing water. It does not say every field over 1 mile needs herding. The page number for this passage came back inconsistently from two fetches (p.2 and p.3)."
+  },
+  {
+   "url": "https://extension.sdstate.edu/sites/default/files/2026-07/MC-04340.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Designing a Grazing Plan That Guides Decisions', MC-04340, Krista Ehlert, '(c) 2026, South Dakota Board of Regents'. No other date seen, so 'undated' is accurate. VERIFIED: Section 4 'movement to the next pasture should follow plant growth \u2013 not the calendar.' Example 4: 'If green needlegrass does not reach 6-8 inches by June 10, delay entry into early-season pastures.' and 'If rainfall totals fall 30% below average by May 15, initiate a 15% destocking plan.' Section 6: 'Monitor regularly. Short, consistent checks outperform occasional, detailed assessments.' Example 5 rancher documents 'rotation dates, cattle behavior, forage conditions, and rainfall'."
+  },
+  {
+   "url": "https://www.ars.usda.gov/ARSUserFiles/51815/67. 2020 REM - CARM - adaptive multipaddock rotational grazing - vegetation and livestock responses.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Augustine, Derner, Fernandez-Gimenez, Porensky, Wilmer, Briske & CARM Stakeholder Group. REM 73:796-810, 2020, doi 10.1016/j.rama.2020.07.005. 2013 pretreatment, 2014-2018 treatment, CPER near Nunn CO. Biomass thresholds: loamy 300 lb/ac in 2014-15 and 450 in 2016-18 (mixed 400/500, sandy 450/550). Max days: varied by site in 2014, 'dropped entirely' in 2015, 24 d in 2016, 21 d in 2017, 14 d early and 21 d mid-late season in 2018, so '14-21 d by 2018' is correct. Methods: 'cattle were moved when a threshold was met in vegetation biomass, cattle behavior, or a maximum number of grazing days'. Behaviour was checked '3 d/wk', including 'whether any cattle displayed signs of attempting to leave the pasture', and was an explicit move criterion (App. B 'Yes' 2014-2018). Same stocking rate: 'the same total number of steers grazed in the CARM and TRM pastures'. Abstract: 'a 12\u201316% reduction in total cattle weight gain relative to continuous grazing'. Vegetation: 'little supporting evidence for grazing management effects on C3 graminoid abundance or production'. Claim (rule 2) that it says nothing on move lead time: no lead-time statement surfaced, but absence was not exhaustively checked."
+  },
+  {
+   "url": "https://extensionpubs.unl.edu/publication/g1908/na/pdf/view",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "'Switchgrass, Big Bluestem, and Indiangrass for Grazing and Hay', G1908, R.B. Mitchell (USDA-ARS) and B.E. Anderson, 'Issued December 2008' (date correct). VERIFIED: under rotational stocking, livestock graze until a benchmark such as target stubble height or readiness of another pasture is reached, then 'Livestock then are moved to the next pasture.' Big bluestem and indiangrass: graze no more than 2-3 weeks to about one-half the original height, or alternatively 'to a stubble height of 4 to 6 inches' (needs longer rest). Switchgrass: 4-6 in stubble then 30-45 d rest, or keep 8-16 in. CORRECTION to the research note 'covers warm-season tame pasture, not native range': the guide calls these 'native warm-season grasses'. It recommends certified cultivars, which implies seeded stands, but it does not call them tame. 'Seeded native warm-season pasture' is more accurate."
+  },
+  {
+   "url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Cover and footer: 'GRAZING MANAGEMENT', 'CODE 528', 'June 2025'. General Criteria, verbatim: 'Develop and implement a monitoring strategy that supports adaptive management and documents decisions based upon ecological triggers and thresholds to optimize the conservation outcome.' 'Manage livestock numbers and grazing periods to adjust the intensity, frequency, timing, duration, and distribution...' 'Provide adequate quantity, quality, and distribution of drinking water for animals during periods of occupancy.' 'Provide desired plants sufficient recovery time from grazing/browsing to meet planned objectives.' 'Deferment or rest should be planned for critical periods of plant or animal needs.' PARTLY: 'Implement longer rest periods before perennial forage dormant seasons to extend root growth' is NOT a General Criterion. It sits under 'Additional Criteria to Reduce Runoff and Compaction and Enhance or Maintain Key Soil Health Components...'. The rest rule quotes it next to the general criteria without saying it applies only to that purpose. The CPS gives no support for 'planned_next_pasture' (data field) beyond the general water and monitoring criteria; that link is loose."
+  },
+  {
+   "url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "R1780, Meehan, Sedivec, Printz. 'Revised October 2024'; no original date shown, so the research is correct. Table 1 recovery (min days): rangeland fast (May/June) 45 western ND / 30 eastern; slow (July/August) 65 / 45. Introduced pasture 25/15 fast, 35/25 slow. All match. Measure before turnout and during grazing to prevent overuse; 'Final utilization levels should be evaluated within three days of livestock removal.' 'You should take a minimum of 30 measurements for each key species across a pasture.' Avoid water sources, salt sites and gates. Removal % = (1 - grazed/ungrazed) x 100. WWG: 75% height removal is about 58% by weight (Table 3). Table 5 classes: slight-moderate <40, full 40-60, close 60-80, severe >80. Rule of thumb about 50% by weight. Native cool-season reaches 3.5-leaf mid-late May or early June. One extra point the research did not use: the document also suggests targeting about 50% weight use per grazing period, which is looser than SD TN9's 30% temporal limit. The two sources disagree on the per-stay ceiling."
+  },
+  {
+   "url": "https://www.nrcs.usda.gov/resources/guides-and-instructions/grazing-management-code-528-conservation-practice-standard",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Title 'Grazing Management (Code 528) Conservation Practice Standard'. Verbatim: 'Updated in 2026, the next review of this national conservation practice standard is expected to begin October 2030.' Links '528 NHCP CPS Grazing Management 2025' (the cited PDF), plus NED and PO documents. The page does not say the practice was renamed from 'Prescribed Grazing'; it uses that phrase only in a video heading ('Conservation at Work: Prescribed Grazing'). This matches the research's own caveat that the rename is an inference."
+  },
+  {
+   "url": "https://ndsu.edu/agriculture/sites/default/files/2022-10/Grazing_Mgmt_for_Rangeland.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "no",
+   "notes": "'GRAZING MANAGEMENT FOR RANGELAND', Llewellyn L. Manske, NDSU Dickinson Research Extension Center. METADATA: the document is listed under '1999 Research Reports', the study ran 1984-1994, and citations span 1988-1998. The research's data_years 'not stated in fetched text' is wrong (should be 1984-1994), and pub_date can be given as a 1999 DREC research report. VERIFIED: three pastures, each 'grazed for 15 days between 1 June and 15 July', then 30 days each from mid-July to mid-October. The rationale is the 'third-leaf stage and flowering phenophase'. PARTLY WRONG INFERENCE: 'about 30 d between a pasture's first and second use' holds only for the first pasture, if the order repeats. My arithmetic: P1 out Jun 15, in Jul 16 = 30 d; P2 out Jun 30, in Aug 15 = 45 d; P3 out Jul 15, in Sep 14 = 60 d. Rest ranges about 30-60 d. The order of the second rotation was not confirmed in the fetch."
+  },
+  {
+   "url": "https://extension.arizona.edu/sites/extension.arizona.edu/files/attachment/utilstudies.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Utilization Studies and Residual Measurements', Interagency Technical Reference 1734-3 (supersedes BLM TR 4400-3). By BLM, USDA Forest Service, NRCS Grazing Land Technology Institute and Cooperative Extension Service. 1996, 'Revised in 1997, 1999'. VERIFIED: residual or stubble 'may be preferable because it is the plant biomass remaining that will have an important impact on plant health, potential regrowth'. Utilization/residual data 'should not be used alone to determine stocking rates'. Seasonal values 'cannot simply be added together to get total utilization for the year'. 'Light grazing use during a drought year can appear to be the same as heavy use' in a wetter year. Key species and key area definitions are present."
+  },
+  {
+   "url": "https://www.ars.usda.gov/ARSUserFiles/30123025/Publications/2022/Derner%20et%20al%202022%20Rangelands%20-%20adaptive%20grazing%20management%20for%20outcome-driven%20focus.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Derner, Budd, Grissom, Kachergis, Augustine, Wilmer, Scasta, Ritten. Rangelands 44(1):111-118, 2022, doi 10.1016/j.rala.2021.02.004. Case studies: Rancho Largo (CO), Red Canyon Ranch (TNC, WY), CARM (CPER, CO). VERIFIED: 'residual biomass thresholds for ecological sites using visual obstruction readings' are a move benchmark, read 'before cattle entry into each pasture and weekly' and at exit. Red Canyon uses 'stubble height measurements' plus judgement to time removal from riparian areas (no threshold value given). Verbatim: 'Short-term observations and monitoring procedures should be simple, quick, and based on consistent methods.' Selection of 'less desirable plants' is 'an early indicator' of unmet nutritional needs. NOT SUPPORTED AS WORDED: 'weight gain indicates whether forage quality is adequate'. The article says gains will decline unless higher-quality forage is provided by moving, and cattle weighing is one way to track the effect of rotation decisions. That is close, but the article does not state it as a diagnostic."
+  },
+  {
+   "url": "https://www.ndsu.edu/agriculture/ag-hub/publications/determining-carrying-capacity-and-stocking-rates-range-and-pasture-north-dakota",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "R1810, Meehan, Sedivec, Printz, Brummer. Published November 2018, reviewed April 2024, page modified January 16, 2025, all as stated. AU = 'a 1,000-pound cow with a 6-month-old or younger calf'. 'Average consumption of an AU for one month is 913 pounds of air-dried forage.' AUE: 1.00, 1.07, 1.15, yearling (600-800 lb) 0.70, mature bull 1.40. Harvest efficiency: season-long native 25%, wet meadow 12.5%, tame 30%; it 'includes the take half, leave half concept'. Example 1: 100 x 1.15 x 5.5 = 632.5 AUM, as quoted. The example itself uses bulls at 1.50 AUE, which conflicts with the 1.40 in its own Table 1; this does not affect the research. Drought: 'early adjustments of the stocking rate will need to occur'."
+  },
+  {
+   "url": "https://sdgrass.org/range-101-efficiencies-of-rotational-grazing/",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Sandy Smart byline, South Dakota Grassland Coalition, 'May 2021'. Page published and modified 2023-10-26, so metadata is correct. CONFLATION: the '25% harvest efficiency at 50% utilization' comes from Smart's 2010 REM paper (63:397-406). The '29% loss through trampling, wildlife, insects, and senescence' comes from a separate NDSU long-term comparison. The research presents them as one finding. Planning values: simple rotation '30% harvest efficiency'; intensive rotation 'plan for a 40% harvest efficiency'. The 35% appears only in an eight-paddock example ('we could safely plan for 35%'), so '35-40% intensive' is a loose merge. Cited studies also include the 2010 and 2013 REM papers and Nebraska EC 86-113-C (1986). data_years omits the 2010 paper, which is the actual source of the 25% figure."
+  },
+  {
+   "url": "https://extensionpubs.unl.edu/publication/ec127/na/pdf/view",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Grazing Systems for Nebraska Sandhills Rangeland', EC127, Schacht, Volesky, Bauer, Stephenson, (c) 2011. Verbatim: 'common stocking rates used in the Sandhills (0.75 AUM/acre)'; AUM 'is equivalent to about 780 lb of air-dry forage'; continuous 'a harvest efficiency of 25 percent'; rotation 'a harvest efficiency of 30 to 35 percent'; deferred rotation 'for 30 to 45 days'; short-duration '(3 to 10 days)'. Barta Brothers 1999-2008: 'there are no vegetation productivity and animal performance improvements with SDG'. Heifer gains were about 1.8 lb/d in both systems. All claims match."
+  },
+  {
+   "url": "https://ars.usda.gov/ARSUserFiles/52548/207. Hartman et al 2020 Ecoshpere - seasonal grassland productivity forcast for Great Plains using Grass-Cast.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Hartman, Parton, Derner, Schulte, Smith, Peck, Day, Del Grosso, Lutz, Fuchs, Chen, Gao. Ecosphere 11(11): e03280, 2020, doi 10.1002/ecs2.3280. Daymet 1980-2016, GIMMS NDVI3g 1982-2015, MODIS evaluation 2000-2018, forecasts 2017-2018. All data years are correct. 'On average, Grass-Cast and MODIS were in the same category 69% of the time.' The abstract says over '20-yr', the results cover 19 years; this is a minor inconsistency in the paper. 'Confidence in Grass-Cast forecasts increased substantially by late May or early June.' 'does not differentiate between desirable forage species and undesirable species'; 'does not directly account for local management practices such as grazing intensity in the previous year'. County level in 2017-18 and a 10x10 km grid from 2019. 'updated approximately every two weeks from April through July'. Ten Great Plains states."
+  },
+  {
+   "url": "https://grasscast.unl.edu/Outlook/About.aspx",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'About Our Maps | Grassland Productivity Forecast'. Partners: CSU, USDA, NDMC, University of Arizona. Example maps 'produced on April 29, 2019'; footer '(c)2026'. '10 km x 10km'. 'Grass-Cast is updated every two weeks to incorporate newly observed weather data'; the page itself does not limit this to the growing season. 'almost 40 years of historical data' and a '38-year average'. 'cannot tell the difference between desirable forage species and undesirable species'. 'does not directly account for local management practices'. 'Producers should not rely on Grass-Cast as a sole source for making management decisions'. Public land managers should not use it 'as a sole source of information for setting stocking rates, determining turnout dates, or other aspects of lease agreements, allotments or permits', which supports the 'stocking, turnout or permit' wording. Gray or white cells: 'no forecast is available due to insufficient data or weak statistical relationships'."
+  },
+  {
+   "url": "https://grasscast.unl.edu/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Verbatim: 'As of August 31, 2026, all relevant precipitation data have been observed for the 2026 Grass-Cast season.' and 'Grass-Cast estimates the change in Total Production NOT Grazeable Production.' The 'Download Maps' and 'Data CSV' link text is present, but the fetched link targets were empty placeholders. This is consistent with the research's 'not tested'. NDMC (UNL), (c)2026. Areas: Great Plains and Southwest."
+  },
+  {
+   "url": "https://extension.sdstate.edu/reading-range-range-readiness-grazing-timing-and-drought-considerations",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Krista Ehlert, originally by Jessalyn Bachler; 'updated April 13, 2022'. 'Research has demonstrated that precipitation received during these months [April, May, June] accurately predicts annual forage production in the central and northern Great Plains (Smart et al. 2020)'. The research's word 'strongly' is a paraphrase; the source says 'accurately'. The reference list gives 2021, an in-text/reference mismatch in the source. Native cool-season grasses 'should not be grazed until they reach the 3.5-leaf stage'; tame grasses are ready at three-leaf. NW SD native turnout is 'generally around the end of May or beginning of June', tame 'beginning of May'. 'general rules of thumb'. Inadequate spring moisture means turnout will be later. Overgrazed pastures 'need adequate time (up to a year) to recover'."
+  },
+  {
+   "url": "https://beef.unl.edu/green-not-always-growth-nebraska-pasture-conditions-after-late-rains/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Green Is Not Always Growth: Nebraska Pasture Conditions After Late Rains', Ben Beckman, Ryan Benjamin (Nebraska Extension Educators) and Mitch Stephenson (UNL), August 1, 2026, BeefWatch. Verbatim 'windshield green is not the same as cow days'. 'Pastures need to be walked. Look at plant height, leaf area, residual forage' (also bare ground, regrowth, evenness of use). 'consider slowing rotations, increasing recovery time, reducing stocking pressure, or finding additional feed resources.' 'For the week ending July 20, 2026, USDA/NASS rated Nebraska pasture and range condition at 35% very poor', with 33% poor, 24% fair and 8% good. The page does not name a publisher; 'Nebraska Extension / UNL BeefWatch' is inferred from the domain and affiliations, which is reasonable."
+  },
+  {
+   "url": "https://bookstore.ksre.ksu.edu/download/summer-grazing-strategies-for-stocker-cattle-in-the-kansas-flint-hills_MF3232",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "no",
+   "notes": "MF3232, Clenton Owensby and Walter Fick, February 2016 (title, authors and date correct). OVERSTATED: 'remove stockers when gains fall below 1 lb/head/day' is not a recommendation. The document describes traditional practice: stockers were 'removed in early fall when weight gains had declined to less than 1 pound per head per day.' Rule 10's context, 'K-State uses a gain threshold for season removal', overstates this. Gain loss: 'Gains may be reduced as much as 30 to 40 pounds per animal' for systems that 'move animals from one grazed area to an area not previously grazed during the same season'. Moderate rate 'about 4 acres per steer'. 'In the Flint Hills, the most economically efficient, sustainable grazing system is continuous grazing.' DATA YEARS INCORRECT: the tables are 9-, 10-, 8- and 10-year averages (Table 5 uses 2003-2013 market values), not just '10-year and 8-year'."
+  },
+  {
+   "url": "https://extension.sdstate.edu/south-dakota-grazing-readiness-spring-turnout-map",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Jameson Brennan, Hector Menendez, Krista Ehlert (with Ken Olson). Visible 'Updated April 08, 2022'; metadata update time 2024-10-04. GDD to 3.5-leaf: crested wheatgrass 516, western wheatgrass 1,170, green needlegrass 1,209, blue grama 1,296. Requirements come from USDA-ARS Mandan work. The tool uses the 'PRISM 40-year dataset'; the research's 'climate normals' is a slight relabel. Cottonwood green needlegrass average May 29, earliest May 15 (latest June 7 in text vs June 8 in caption). 'by recording turn in dates every year, producers can begin to see trends'."
+  },
+  {
+   "url": "https://www.nrcs.usda.gov/sites/default/files/2023-06/Guide_To_Pasture_Condition_Scoring_JAN2020.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "'Guide to Pasture Condition Scoring', USDA NRCS, January 2020 (scoresheet 1/28/2020). 'PCS involves the visual evaluation of 10 indicators'; ratings run '(1) to ... (5)'. 'the best time to score a pasture is just before it is grazed' and 'several times a year during critical management periods'. PARTLY: the data field says PCS 'applies to tame pasture, not rangeland'. The guide is framed around improved pastures ('four basic functional groups for improved pastures'), but it does not explicitly exclude rangeland in the fetched text, so this is inference."
+  },
+  {
+   "url": "https://droughtmonitor.unl.edu/DmData/DataDownload/WebServiceInfo.aspx",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "'Web Service Information | U.S. Drought Monitor' (NDMC/UNL with USDA, NOAA, NASA). Template 'https://usdmdataservices.unl.edu/api/[area]/[statistics type]?aoi=[aoi]'. Area 'CountyStatistics' is listed, with aoi as a 5-digit FIPS. Date format 'M/D/YYYY'. 'By default the data are output in CSV format'; JSON/XML via the Accept header. No API key mentioned. Inconsistencies confirmed: RegionalClimateCenterStatistics vs RegionStatistics, HucStatistics vs HUCStatistics, and GetBasicStatisticsByAreaPercent missing from its table. PARTLY: the page has no statement of update or release frequency. 'Weekly' (data field update_frequency and integration refresh) comes only from statistics being given 'for each week' and is not stated as a release schedule. The research's integration entry hedges this, but the data_fields row states 'Weekly' flatly."
+  },
+  {
+   "url": "https://rangelands.app/products",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Rangeland Analysis Platform (NRCS, BLM, Univ. of Montana; ARS footer). 30 m cover from 1986 to present; 10 m western US 2018 to present. Production in 'lbs/acre', annual and 16-day; '16-day production estimates for the current year are provisional and will be recalculated at the end of the year.' Access: web map, GEE, GeoTIFF/COG, rapr; API docs are linked only. 'freely available for use by the public'; 'have not placed any restriction on its use or reproduction'; no warranty. Production is 'primarily intended for rangeland ecosystems' and 'not to be used in agricultural lands, i.e., croplands'. Cover MAE ranges from 2.6% (tree) to 10.2% (perennial forb and grass). For production, 'traditional error metrics (e.g., MSE, RMSE) are not available', with r=0.63 against NRI plots. All match the research."
+  }
+ ],
+ "classification_disputes": [
+  "Rule 'PROPOSED: Water availability during occupancy and at the destination' is classed A-supported-general, which is too generous. CPS 528 does support the principle: 'Provide adequate quantity, quality, and distribution of drinking water for animals during periods of occupancy'. But the rule as proposed is mostly ranch choice (C): treating a critical or silent tank as a reason on the grazing row, and letting destination tank status block or delay a move. The research itself says 'Which water severities block a move is a ranch choice'. Its supporting SD TN9 citation is also misread. The '>1 mile = very large field' passage is about when continuous season-long use can still give recovery, not a requirement to herd or relocate water. Suggest: A for 'water during occupancy', C for the destination check and severity mapping.",
+  "Rule 'PROPOSED: Derive planned graze days from forage demand (AU-days)' is classed A-supported-general. The arithmetic method (AU, AUM, AUE, harvest efficiency) is general extension practice (NDSU R1810, UNL EC127), so A fits the method. Every constant it needs is not general: 913 vs 780 lb/AUM; harvest efficiency 25% (R1810 native), 30-35% (EC127 rotation), 40% (SD Grassland Coalition intensive planning); forage production is site and year specific. Any numeric output or default should be presented as B, not A. The rules table should not show a computed planned-days figure as 'supported general guidance'.",
+  "Rule 'PROPOSED: Cattle behaviour and performance as a move signal' (B) rests partly on overstated evidence. K-State MF3232 does not recommend removing stockers below 1 lb/head/day. It describes traditional practice ('removed in early fall when weight gains had declined to less than 1 pound per head per day'). Derner et al. 2022 does not say weight gain 'indicates whether forage quality is adequate'. Only the CARM behaviour trigger (Augustine et al. 2020, explicit move criterion, 3 d/wk checks) is directly supported. B is acceptable only if the K-State and Derner wording is corrected. As written, the gain-threshold element is a ranch choice (C) borrowed from a Flint Hills stocker description.",
+  "Rule 'UNUSED DATA -> PROPOSED: Rest/recovery check' (B is fine) cites CPS 528 'Implement longer rest periods before perennial forage dormant seasons to extend root growth' as if it were general guidance. It appears only under the purpose-specific 'Additional Criteria to Reduce Runoff and Compaction and Enhance or Maintain Key Soil Health Components'. Also, R1780 suggests about 50% weight use per grazing period while SD TN9 caps temporal use at 30%. The recovery minimums tied to 'utilization level' (SD TN9 Table 1) therefore depend on a ceiling the two sources set differently."
+ ],
+ "summary": "I checked all 23 unique URLs with WebFetch, and every one was reachable. Direct curl was refused for every host ('curl: (56) CONNECT tunnel failed, response 403'), so I could not read any PDF by eye. All quotes below come from WebFetch's model-summarised text (quotes capped at about 125 characters).\n\n**Fully supported (14):** SD MC-04340, CARM 2020, CPS 528 landing page, R1780, TR 1734-3, R1810, UNL EC127, Hartman 2020, Grass-Cast About, Grass-Cast home, SDSU Reading the Range, BeefWatch Aug 2026, SDSU Readiness Map, RAP.\n\nAll the main numbers checked out:\n- **SD TN9 Table 1:** West River 40/60, East River 35/55 at 20-30% use; 50/70 and 45/65 at 40-50%.\n- **SD TN9 rest and utilization:** 45 d once-over rest; 90 d deferral; 50% seasonal / 30% temporal / 65% browse / 60% dormant-season use; Table 3 stubble heights.\n- **NDSU R1780:** 45/30 fast and 65/45 slow; 30 readings; within 3 days of removal; 75% height = about 58% by weight.\n- **NDSU R1810:** 913 lb/AUM; AUE 1.00/1.07/1.15/0.70/1.40; harvest efficiency 25/12.5/30%.\n- **UNL EC127:** 0.75 AUM/ac and 780 lb/AUM.\n- **CARM:** biomass thresholds 300 then 450 lb/ac; cap dropped 2015, 14-21 d by 2018; behaviour checks 3 d/wk as an explicit move trigger; 12-16% lower gain at the same stocking rate.\n- **Grass-Cast:** 69% category agreement; reliable by late May/June; season final as of Aug 31, 2026.\n\n**Partly supported (9):**\n- **SD TN9:** the '>1 mile to water' passage is misread. It defines a very large field; it does not say such fields need herding or water relocation.\n- **CPS 528:** 'longer rest before dormant seasons' is a soil-health purpose criterion, not a General Criterion.\n- **UNL G1908:** the guide calls these 'native warm-season grasses', not tame pasture.\n- **Manske:** the '30 d between uses' inference holds only for the first pasture (by my arithmetic, about 30/45/60 d).\n- **SD Grassland Coalition:** the 25% harvest efficiency and the 29% loss come from different studies. Intensive rotation is planned at 40%; 35% is one example.\n- **Derner 2022:** 'weight gain indicates forage quality is adequate' is not stated.\n- **K-State MF3232:** the 1 lb/hd/d figure describes traditional practice, not a recommendation.\n- **NRCS Pasture Condition Scoring guide:** 'not rangeland' is inference.\n- **USDM:** the page states no update frequency.\n\n**Metadata errors (2):**\n- **Manske:** data years are 1984-1994 and it is listed as a 1999 research report, not 'not stated'.\n- **MF3232:** the tables are 9-, 10-, 8- and 10-year averages, not just 10- and 8-year.\n\nAll other titles, publishers and dates matched, including R1810 (Nov 2018, reviewed Apr 2024, modified Jan 16, 2025), R1780 (revised Oct 2024), CPS 528 (June 2025; landing page 'Updated in 2026 ... October 2030') and SD TN9 (April 2017, SD-424).\n\n**Classification disputes (4):**\n- The water rule's A is too generous; the destination and severity logic is C.\n- The forage-demand rule is A for the method only; its constants are B.\n- The behaviour rule's gain-threshold element rests on overstated K-State and Derner evidence.\n- The rest rule leans on a purpose-specific CPS 528 bullet.\n\nBriske et al. 2008, cited in feature_notes, had no URL and was not checked. No repo files were modified. Scratch directory: /tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/cite-grazing/ (empty download folder dl/; all downloads failed)."
+}

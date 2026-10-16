@@ -1,0 +1,134 @@
+{
+ "verdicts": [
+  {
+   "title": "Any tile error hides the whole exception table; the yearling tile requires a group literally named 'Yearlings'",
+   "verdict": "confirmed",
+   "evidence": "I reran it independently in headless Chromium on scratch copies with the CSVs edited (scratch vb.mjs and vb3.mjs). Results:\n- no-yearlings (Yearlings renamed to Steers in groups, moves, weights and health): uncaught [\"Cannot read properties of undefined (reading 'adg')\"]. The asof line still read \"Example Ranch (fictional), 4,300 acres in 8 pastures. Data as of September 30, 2026 at 6:00 PM.\" Every section count was 0: {\"tiles\":0,\"chips\":0,\"excRows\":0,\"waterMinis\":0,\"grazingSvg\":0,\"gainSvg\":0,\"budgetSvg\":0,\"budgetRows\":0,\"rules\":0}.\n- numeric-group (Heifers renamed to 2025): uncaught [\"g.group.toLowerCase is not a function\"], all counts 0.\n- Header-only groups.csv and header-only weights.csv each gave the same 'adg' error with all counts 0.\n- I also checked the regression input against the real exceptions.js (regcheck.mjs): Cows only, T2 20/20/20 gives [[\"critical\",\"Tank T2 (Windmill)\",\"Down to 20% full\"]], which matches the auditor's hand value.\n- Code: app.js:48 uses find(g => g.group === \"Yearlings\"), :56 dereferences gain.adg, and :225 calls tiles() first with no isolation.",
+   "corrections": "Severity high is fair. The consequence wording overstates one point. The broken page does not read as an all-clear: the Needs attention card has no chips, no rows and no 'Nothing needs attention' sentence, and every other card is empty too, so it looks broken. The real harm is that every alert is hidden with no error message under a current-looking as-of stamp. Add one trigger: a 'Yearlings' group that exists but has no weigh-ins yet (for example an empty weights.csv) throws the same way."
+  },
+  {
+   "title": "No load-failure handling: a missing, aborted or empty CSV leaves a blank page with no message",
+   "verdict": "confirmed",
+   "evidence": "Browser, my scenarios:\n- 404-water: uncaught [\"Cannot read properties of undefined (reading 'localeCompare')\"], console [\"Failed to load resource: the server responded with a status of 404 (File not found)\"], asof \"\", all section counts 0.\n- 404-meta: \"Cannot read properties of undefined (reading 'slice')\", asof \"\".\n- 404-pastures: \"Cannot read properties of undefined (reading 'name')\", asof \"\".\n- abort-water (route aborted): uncaught [\"Failed to fetch\"], console [\"Failed to load resource: net::ERR_FAILED\"], all counts 0.\n- Header-only pastures: 'name' error. Header-only meta: \"Cannot read properties of undefined (reading 'as_of')\".\n- Code: app.js:221 never checks res.ok and has no catch.",
+   "corrections": "The title and the report summary overgeneralize 'empty'. A header-only water.csv does not throw: it is the silent all-clear in finding 3. A header-only moves.csv does not throw either. It gives \"Grazing (0)\" and \"Nothing in grazing needs attention.\", plus 12 NaN attributes in the grazing chart. A header-only weights.csv or groups.csv throws only through the tile code from finding 1, not in the loader. Only empty pastures.csv and meta.csv blank the page through findExceptions. Severity high stands for 404 or abort on pastures, moves, weights, water or meta. That GitHub Pages' HTML 404 behaves the same is still an inference."
+  },
+  {
+   "title": "Silent all-clear when health.csv or budget.csv is missing or empty, or water.csv is empty",
+   "verdict": "confirmed",
+   "evidence": "Browser:\n- 404-health (python 404, and separately a routed 404 with an HTML body): no uncaught error. Chips [\"All (8)\",\"Water (3)\",\"Grazing (1)\",\"Gain (2)\",\"Health (0)\",\"Budget (2)\"]. Clicking Health showed [\"Nothing in health needs attention.\"]. The tile read \"NEEDS ATTENTION | 8 | 2 critical, 5 serious, 1 warning\".\n- empty-health: same chips.\n- empty-water: tile \"WATER TANKS OK | 0 of 0 | 0 need a look\", \"NEEDS ATTENTION | 7 | 0 critical, 5 serious, 2 warning\", \"Water (0)\", waterMinis 0.\n- 404-budget: \"Budget (0)\". empty-budget: \"Budget (0)\".\n- Code: exceptions.js:141 skips rows whose status !== 'open', and the HTML-body rows have no status key.",
+   "corrections": "One more silent all-clear is missing from the list: a header-only moves.csv. It gives \"Grazing (0)\" and \"Nothing in grazing needs attention.\". The grazing chart shows group names with 0 bars and 12 NaN attributes. The water alerts also lose their 'Heifers here now' context: the T4 row becomes \"Tank T4 (Lone Tree)\". Add moves to the fix and the regression test. Severity high is fair."
+  },
+  {
+   "title": "CSV text is injected through innerHTML: script from pasture names, tags and group names runs, and a payload can delete the alert rows",
+   "verdict": "confirmed",
+   "evidence": "Browser:\n- xss-pasture (P4 named <img src=x onerror=\"window.__xss=(window.__xss||0)+1\">): window.__xss = 2 after load, from the #exceptions row and the T4 water heading. The T4 row text read \"Tank T4 (, Heifers here now)\".\n- Hovering the T4 water chart raised the flag to 3. Tooltip innerHTML: \"<b>T4 <img src=\\\"x\\\" onerror=\\\"window.__xss=(window.__xss||0)+1\\\"></b><br>Sep 27, 12...\".\n- A benign name with no script, 'Lone Tree <A', also corrupts the page. The T4 critical row became \"Tank T4 (Lone Tree\" and its HTML was \"Tank T4 (Lone Tree <a, heifers=\\\"\\\" here=\\\"\\\" now)<=\\\"\\\" td=\\\"\\\"></a,>\", so the 'Heifers here now' context was silently removed.\n- All nine cited lines (app.js:28, 54, 68, 82, 104, 143, 170, 194, 198) interpolate CSV values into innerHTML.",
+   "corrections": "The behaviour is confirmed and medium is fair for a portfolio piece. The threat model needs one qualification. In the shipped static site the CSVs live in the same repo as app.js, so anyone who can edit them can already edit the code; there is no trust boundary today. The script risk becomes real only when exports come from outside the repo, which is the README's real-data path. The more likely everyday harm is benign '<' text silently deleting context from an alert row, as the 'Lone Tree <A' case shows."
+  },
+  {
+   "title": "A tank with no reading in the last 7 days crashes the water charts and every section drawn after them",
+   "verdict": "confirmed",
+   "evidence": "Browser sensor-dead-8d (T6 rows after 2026-09-22T12:00 removed):\n- uncaught [\"Cannot read properties of undefined (reading 'time')\"]\n- counts {\"tiles\":5,\"chips\":6,\"excRows\":11,\"waterMinis\":0,\"grazingSvg\":0,\"gainSvg\":0,\"budgetSvg\":0,\"budgetRows\":0,\"rules\":0}, so the tiles and the 10 alert rows survive.\n\nOther checks:\n- regcheck.mjs: T2 with its last reading at 2026-09-21T12:00 gives \"No reading for 222 hours; last level 70%\", which matches the hand value of 9 d 6 h.\n- The rules list at app.js:204-214 has 11 entries, so 12 <tr> including the header is right.\n- Code: app.js:90-93 reads rows[rows.length-1].time with no guard against an empty rows array.",
+   "corrections": ""
+  },
+  {
+   "title": "Infinity and NaN reach the display: a zero-budget category, an empty budget file and a missing budget file",
+   "verdict": "confirmed",
+   "evidence": "Browser:\n- zero-budget (2026-09,Drought feed,0,500): row \"Serious | Budget | Drought feed | Infinity% over season to date ($500)\", chart label \"+Infinity%\", 36 NaN attributes, 36 console errors such as \"Error: <line> attribute x1: Expected length, \\\"NaN\\\".\"\n- 404-budget: tile \"SPEND VS BUDGET | \u2212NaN% | $NaN of $NaN, season to date\", table \"undefined\\t$NaN\\t$NaN\\t$NaN\".\n- empty-budget: \"\u2212NaN% | $0 of $0\".\n- Regression value: with lim 0.3, x(0) = 140 + 0.5*366 = 323 (computed in regcheck.mjs), and the Fuel bar width is max(1, 0) = 1.",
+   "corrections": "There is a further common trigger. A category with budget 0 and actual 0 (for example 'Contingency,0,0') rightly raises no alert. But pct = 0/0 = NaN makes lim NaN, so every bar and gridline loses its position (21 NaN attributes) and the chart shows \"\u2212NaN%\". Observed: labels [\"+25%\",\"+21%\",\"\u22121%\",\"\u22123%\",\"\u22125%\",\"\u22127%\",\"\u2212NaN%\"]. Add a 0/0 row to the regression test and expect 0 NaN attributes. The healthbudget audit's AB-02 also covers this case."
+  },
+  {
+   "title": "A blank tank level becomes a critical leak alarm: 'Dropped 70 points in 24 hours, now %'",
+   "verdict": "confirmed",
+   "evidence": "- Browser blank-level (T1's 2026-09-30T18:00 level blank): \"Critical | Water | Tank T1 (North Flat) | Dropped 100 points in 24 hours, now % | Check for a leak or a stuck float...\". The tile moved to \"WATER TANKS OK | 4 of 8 | 4 need a look\" and \"NEEDS ATTENTION | 11 | 3 critical\".\n- regcheck.mjs, R16 data: [[\"critical\",\"Dropped 70 points in 24 hours, now %\"]].\n- With the blank row dropped (the proposed fix): [] and silentHours 6, which matches the auditor's expected value of no alert.",
+   "corrections": "The defect is broader than the leak wording. Because '' < 25 is always true (exceptions.js:112), any blank latest level produces a critical row. When the earlier level is under 30 points above it, the row reads \"Down to % full\": with a prior level of 28, regcheck gave [[\"critical\",\"Down to % full\"]]. Severity medium is fair."
+  },
+  {
+   "title": "'Water tanks OK' tile parses the tank id back out of display text and undercounts ids containing a space",
+   "verdict": "partially-confirmed",
+   "evidence": "- Browser tank-space-3 (T2, T4 and T6 renamed Well 2, Well 4, Well 6): tile \"WATER TANKS OK | 7 of 8 | 1 need a look\" while the chips show \"Water (3)\" and there are 3 water rows.\n- regcheck: the subjects for Well 1 and Well 2 split to [\"Well\",\"Well\"].\n- However, renaming only T2 to 'Well 2' gave the correct \"5 of 8 | 3 need a look\".",
+   "corrections": "The undercount happens only when two or more alerting tanks share the same first word (for example 'Well 2' and 'Well 4'), or when the first word equals another alerting tank's id. One tank id with a space on its own is counted correctly. Severity low is fair, and the R17 regression value 'Water tanks OK: 0 of 2 | 2 need a look' is correct."
+  },
+  {
+   "title": "Empty-state and zero-variance wording: 'Nothing in all needs attention.' and '\u22120.0%'",
+   "verdict": "confirmed",
+   "evidence": "Browser:\n- all-clear (tiny data where no rule fires): rows [\"Nothing in all needs attention.\"], tiles include \"SPEND VS BUDGET | \u22123.3% | $2,900 of $3,000\".\n- on-budget (Fuel 1000/1000, Labor 2000/2000): \"SPEND VS BUDGET | \u22120.0% | $3,000 of $3,000, season to date\".",
+   "corrections": "The same root cause also appears in the chart. An exactly-on-budget category gets the chart label \"\u22120%\" and the tooltip \"Fuel | Budget $1,000 | Actual $1,000 | Under by $0\" (app.js:193-194; observed labels [\"Fuel\",\"\u22120%\",...]). Extend the fix and the test to the chart. Severity low is fair."
+  },
+  {
+   "title": "Activating a filter chip drops keyboard focus to <body>",
+   "verdict": "confirmed",
+   "evidence": "Browser: I focused the Water chip and pressed Enter. Result {\"active\":\"BODY\",\"rows\":3,\"pressed\":[\"Water\"]}. A Tab afterwards landed on \"BUTTON All (10)\".",
+   "corrections": ""
+  },
+  {
+   "title": "Tooltips run off-screen on a phone (water tooltip unclamped horizontally; all tooltips unclamped vertically)",
+   "verdict": "partially-confirmed",
+   "evidence": "- With a mouse at 390x844, the clamping gap is real. Water tooltip {\"left\":361,\"right\":439,\"iw\":390}. Gain dot about 20 px above the bottom: {\"top\":838,\"bottom\":916,\"ih\":844}.\n- In a real phone context (isMobile and hasTouch, deviceScaleFactor 2), tapping a gain dot, a budget bar, a water chart or a grazing bar never showed a tooltip: display stayed 'none'.\n- The pointer events a tap delivers are [\"pointerdown\",\"pointerup\",\"pointerleave\",\"click\"], with no pointermove.\n- A press-and-drag showed the tooltip only while the finger was down (\"block\") and hid it on lift (\"none\").",
+   "corrections": "The 'on a phone' framing is wrong. The off-screen clamp issue affects narrow mouse-driven windows. On a touch phone the tooltips do not appear at all on tap, which is a worse defect and is reported under missed. Keep low for the clamp, and retitle it as narrow-window tooltip clamping."
+  },
+  {
+   "title": "Grazing timeline month lines are hard-coded to June-September 2026",
+   "verdict": "confirmed",
+   "evidence": "Month-line x positions (x1) in the browser:\n- baseline: [74,192,314,436]\n- season-2027 (every date shifted one year later): [-1362,-1244,-1122,-1000]\n- tiny season starting 2026-09-15: [-3290,-2338,-1354,-370]\n- season-2025: [1510,1628,1750,1872], with labels at 1548-1905 px beyond the 1280 px viewport\n\nNo horizontal page scroll appeared (scrollWidth equals clientWidth at 1280 and at 390). Regression arithmetic: the span from 2027-05-01 to 08-31 is 122 days; x(Jun 1) = 194.95 and x(Aug 1) = 432.95, both inside 74..550.",
+   "corrections": "The regression test should say whether the season's start month (May 1 at x=74) counts as a month line. As written it expects exactly Jun, Jul and Aug."
+  }
+ ],
+ "missed": [
+  {
+   "title": "Chart details are unreachable on a touch phone (a tap never shows a tooltip) and by keyboard",
+   "area": "rendering / tooltips / accessibility",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "app.js:26-33 (hover() listens only for pointermove and pointerleave), app.js:101-107 (water hit rect, same pattern), index.html:59 (.tip), app.js:83/119/155/183 (charts expose only role=img and aria-label; no focusable targets)",
+   "repro": "node docs/audit/diagnostics/render.skeptic.browser.mjs <scratchDir> 8932 (section M1). This loads the unmodified page at 390x844 with isMobile, hasTouch and deviceScaleFactor 2, then calls page.touchscreen.tap on the first #gain circle, the first #budgetChart rect, a water chart hit rect and a grazing hit rect. It then presses Tab 40 times on the desktop page.",
+   "expected": "Tapping a gain dot shows its tooltip and keeps it up until the next tap. For the first dot that is 'H001 (Heifers)', 0.54 lbs/day: (1169-1138)/57 days = 0.544, worked out from weights.csv. Chart details are also reachable by keyboard, or there is a text alternative.",
+   "actual": "tooltip display after a tap: {\"gain dot\":\"none\",\"budget bar\":\"none\",\"water chart\":\"none\",\"grazing bar\":\"none\"}; pointer events a tap delivers to a gain dot: [\"pointerdown\",\"pointerup\",\"pointerleave\",\"click\"]; press-and-drag: tooltip while finger down / after lift: [\"block\",\"none\"]; distinct elements reached by 40 Tab presses: [\"BUTTON:All\",\"BUTTON:Water\",\"BUTTON:Grazing\",\"BUTTON:Gain\",\"BUTTON:Health\",\"BUTTON:Budget\",\"BODY\"]",
+   "consequence": "In the field, on the phone a manager actually carries, the hover details on all four charts are unavailable: which tag a gain dot is, a tank's readings by time, move dates, and budget dollars in the chart. The alert table still works, so no alert is lost. But the README claims 'Every chart has hover details ... and works on a phone', and an evaluator who taps a dot on a phone gets nothing. Keyboard users get no chart detail at all. This may overlap an earlier baseline browser check (browser-check.mjs), but the render audit missed it and framed the phone problem as off-screen tooltips.",
+   "regression_test": "Playwright with viewport 390x844, isMobile, hasTouch. Tap the first #gain circle. Expect tip.style.display === 'block' and tip.innerText to start with 'H001 (Heifers)' and contain '0.54 lbs/day'. Tap an empty area and expect 'none'. On desktop, Tab past the chips and expect focus on an element inside #gain or #water whose focus shows the same detail text.",
+   "proposed_fix": "Show the tooltip on pointerdown or click as well as on pointermove. For pointerType 'touch', keep it visible until the next tap outside the target. Give hit targets tabindex=0 with focus and blur handlers that call the same tooltip code, or add a short data table or 'details' list under each chart.",
+   "effort": "M"
+  },
+  {
+   "title": "Long group or budget category names overflow their fixed label gutters: they overlap the bars and dots, or are cut off at the card edge",
+   "area": "rendering / chart labels",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "app.js:116 and :127 (grazing m.l = 74, label at x=0), app.js:151 and :165 (gain m.l = 74), app.js:180 and :190 (budget m.l = 140, label end-anchored at x=130)",
+   "repro": "node docs/audit/diagnostics/render.skeptic.browser.mjs <scratchDir> 8932 (section M2). Data: Heifers renamed 'Replacement heifers' in groups, moves, weights and health; budget category 'Water and fencing' renamed 'Water development and fencing repairs'. A screenshot is written to <scratchDir>/long-names.png.",
+   "expected": "Each group label ends before its plot starts (x <= 70, with the plot at 74), and each budget label starts at x >= 0 inside the svg. Longer names are wrapped, truncated with a full-name title, or the gutter grows to fit.",
+   "actual": "grazing: \"Replacement heifers: x 0..116 (plot starts at 74)\"; gain: \"Replacement heifers: x 0..116 (plot starts at 74)\"; budget: \"Water development and fencing repairs: x -93..130 (svg starts at 0)\". The screenshot shows 'Replacement' overlapped by the P8/P5 bars, the label running into the gain dots, and the budget label cut to 'development and fencing repairs' at the left edge.",
+   "consequence": "Real operations use group names longer than about 9 characters ('Replacement heifers', 'Fall pairs') and long ledger categories. The first pasture bars and gain dots then sit on top of the group name, and the budget category is unreadable. This is cosmetic, but it shows up as soon as real data replaces the example.",
+   "regression_test": "Use the long-names data. For every text.lbl in #grazing and #gain, expect getBBox().x + width <= 70. For every category label in #budgetChart, expect getBBox().x >= 0. Values worked out by hand from the margins in app.js.",
+   "proposed_fix": "Measure the labels after drawing (getComputedTextLength), set m.l to the longest label plus 8 before laying out the plot, and cap it with an ellipsis plus a <title> holding the full name.",
+   "effort": "S"
+  },
+  {
+   "title": "A blank head or acres cell is string-concatenated into the headline numbers ('Head on grass 180150')",
+   "area": "tile values / display text",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "app.js:50 (d.groups.reduce((s, g) => s + g.head, 0)), app.js:223 (acres reduce), exceptions.js:30 (a blank cell stays '')",
+   "repro": "node docs/audit/diagnostics/render.skeptic.browser.mjs <scratchDir> 8932 (section M3). Three cases: (a) groups.csv 'Heifers,first-calf heifers,,1.0' (head blank); (b) 'Cows,cow-calf pairs,,0.0'; (c) pastures.csv 'P8,Home Trap,,10,30' (acres blank).",
+   "expected": "(a) 330 known head (180 + 150), with a note that the Heifers count is missing, or a 'data missing' marker. Never a concatenated string. (c) '4,100 acres' (4,300 - 200) with a note that one pasture has no acreage.",
+   "actual": "(a) \"HEAD ON GRASS | 180150 | 180 cows, heifers, 150 yearlings\"; (b) \"HEAD ON GRASS | 045150 | cows, 45 heifers, 150 yearlings\"; (c) asof \"Example Ranch (fictional), 4100 acres in 8 pastures...\" (no thousands separator, because the sum became a string, and the missing 200 acres go unmentioned). No error is raised.",
+   "consequence": "One missing cell in an export turns the headline herd count into 180,150 head. That figure is obviously wrong and makes the whole page look untrustworthy. No alert is lost, but a manager or evaluator stops believing the numbers. The CSV audit covers blank actual, planned_graze_days, target and weight cells, but not head or acres.",
+   "regression_test": "Case (a): expect the 'Head on grass' value to be '330' (or a 'missing' marker) and not to match /^\\d{5,}$/. Case (c): expect the asof line to contain '4,100 acres' plus a missing-acreage note, or to flag the missing value. Values worked out by hand from groups.csv and pastures.csv.",
+   "proposed_fix": "Parse numeric columns with Number(), treat non-finite values as missing, sum only finite values, and show 'n of m groups reporting' or a missing-data note. Better, validate the numeric columns once at load (see the load-failure finding).",
+   "effort": "S"
+  },
+  {
+   "title": "No stale-data warning: the page presents an old export as today's report",
+   "area": "failure states / data freshness",
+   "status": "design-limitation",
+   "severity": "low",
+   "location": "app.js:223 (the as-of line is the only freshness signal), exceptions.js:95 (every rule is relative to meta.as_of, never to the current time)",
+   "repro": "node docs/audit/diagnostics/render.skeptic.browser.mjs <scratchDir> 8932 (section M4). The unmodified data is loaded with page.clock.setFixedTime(new Date('2026-10-16T09:00:00')).",
+   "expected": "When now - as_of is more than about 24-36 h, a visible banner such as 'Data is 15 days old (as of Sep 30, 6:00 PM); check the export'. Sep 30 18:00 to Oct 16 09:00 is 15 d 15 h, worked out by hand. For the fictional demo, an explicit 'example data frozen at Sep 30, 2026' label instead.",
+   "actual": "now / asof line / age wording on the page: {\"now\":\"Fri Oct 16 2026 09:00\",\"asof\":\"Example Ranch (fictional), 4,300 acres in 8 pastures. Data as of September 30, 2026 at 6:00 PM.\",\"ageWords\":null}",
+   "consequence": "If the nightly export stops, the page keeps showing the last run's alerts as if they were current, and the only clue is the muted as-of line. Every rule, including the silent-sensor rule, is measured against the stale as_of, so nothing fires. This is the classic way an ops dashboard fails silently.",
+   "regression_test": "Playwright with the clock set to 2026-10-16T09:00 and the committed data. Expect a banner containing '15 days'. With the clock at 2026-09-30T20:00 (2 h after as_of), expect no banner.",
+   "proposed_fix": "Compute age = Date.now() - as_of and show a serious banner above the tiles once it passes a RULES.staleHours threshold. Add a DEMO flag, or a meta.csv column, so the fictional demo says 'example data' instead of raising a false alarm.",
+   "effort": "S"
+  }
+ ]
+}

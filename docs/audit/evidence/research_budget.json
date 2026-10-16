@@ -1,0 +1,983 @@
+{
+ "topic": "Ranch operating budget monitoring (budget vs actual, materiality, phasing, fuel and repairs, zero budgets, credits, cash vs accrual) for the ranch-ops-dashboard Budget area",
+ "rules": [
+  {
+   "rule": "CURRENT: Serious when a category is more than 10% over budget, season to date (exceptions.js RULES.budgetSerious = 0.10; budgetStatus sums every row in budget.csv per category, pct = (actual - budget) / budget).",
+   "decision_supported": "Whether the manager should find out what drove a category overrun now and decide whether to reforecast.",
+   "required_inputs": "Per-category monthly budget and actual. Today there is no as_of filter, no closed-month flag, no dollar test and no record of the accounting basis.",
+   "context": "Any operation. The fictional ranch runs mixed cow-calf and yearling stocker groups (groups.csv: 180 cow-calf pairs, 45 first-calf heifers, 150 yearling steers), and the season shown is Jun-Sep 2026.",
+   "classification": "D-synthetic-demo",
+   "evidence": "OBSERVED (node docs/audit/diagnostics/budget.materiality.research.mjs): committed data gives 'Fuel budget 9600 actual 11640 cur pct 21.3% -> current: serious' and 'Repairs budget 7200 actual 9000 cur pct 25.0% -> current: serious'. Scenario S2: 'Ear tags budget 200 actual 230 cur pct 15.0% -> current: serious', 'Labor budget 36000 actual 38700 cur pct 7.5% -> current: warning', 'Feed (big) budget 90000 actual 92700 cur pct 3.0% -> current: -'. OBSERVED (node docs/audit/diagnostics/healthbudget.repro.mjs): BU-01 'serious | Hay | Infinity% over season to date ($500)'; BU-06 adding Oct/Nov plan rows with actual 0 gives 'Fuel 11640/14400 = -19.2%; Repairs 9000/10800 = -16.7%; (no alerts)'. EXTERNAL: no extension, agency or peer-reviewed source found that sets 10% for ranch budget categories. Institutional variance policies that use 10% pair it with a dollar test (UW MAA: '+/- 10% or more AND +/- $5,000 or more'). Others use different percentages joined by OR (U Alberta: 5% or $100,000 unfavorable). GFOA speaks only of 'significant' variances and gives no number.",
+   "limitations": "Percent-only: it ignores scale, so a $30 overrun on a small line outranks a $2,700 overrun on a large one. It compares against the full-season straight-line sum of whatever rows are in the file, not the plan to date. Division by zero produces Infinity or NaN. Future plan rows dilute the result. No source validates 10% for ranch use.",
+   "configurable": "Yes. RULES.budgetSerious is a single constant, but on its own it cannot express a dollar materiality test.",
+   "missing_data_blocks": "A closed month with no actual for a category; a zero or blank budget (percent is undefined); plan rows after as_of; an unknown cash or accrual basis. Each should stop a confident serious call for that category.",
+   "recommendation": "Keep 10% only as a labelled demonstration setting inside the combined percent-and-dollar rule below. Compute it over closed months only, and label it in the UI and README as a ranch-chosen setting, not a validated standard.",
+   "sources": [
+    {
+     "title": "Variance analysis thresholds (Management Accounting & Analysis)",
+     "publisher": "University of Washington Finance, Management Accounting & Analysis",
+     "url": "https://finance.uw.edu/maa/node/228",
+     "pub_date": "2014-02-28 (page submission date; page marked ON HOLD, replaced by monthly financial reporting)",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "An institutional example of a combined rule: explanation required only if variance is >= 10% AND >= $5,000 (both conditions)."
+    },
+    {
+     "title": "Budget Variance Accountability Procedure",
+     "publisher": "University of Alberta (UAPPOL)",
+     "url": "https://ualberta.ca/en/alfresco/uappol/finance/budget-variance-accountability/procedure/budget-variance-accountability-procedure.pdf",
+     "pub_date": "Approved 2006-07-17; editorial amendments 2025-05-20",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Different percentages and dollar amounts, joined by OR: unfavorable variance 'exceeds 5% ... or $100,000'; favorable 'exceeds 5% ... or $500,000'. Shows that thresholds and AND/OR logic are organizational choices."
+    },
+    {
+     "title": "Budget Monitoring (best practice)",
+     "publisher": "Government Finance Officers Association (GFOA)",
+     "url": "https://gfoa.org/materials/budget-monitoring",
+     "pub_date": "Board approved 2018-03-31",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Monitoring should analyze 'why deviations occurred' and assign responsibility. It names no numeric threshold, only 'significant' variances."
+    },
+    {
+     "title": "AS 2105: Consideration of Materiality in Planning and Performing an Audit",
+     "publisher": "PCAOB",
+     "url": "https://pcaobus.org/oversight/standards/auditing-standards/details/AS2105",
+     "pub_date": "Effective for audits of fiscal years beginning on or after 2010-12-15",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Para .03: materiality evaluation 'requires consideration of both qualitative and quantitative factors'. Para .07: lesser amounts can matter. This is an analogy only (audit materiality, not ranch budgeting)."
+    }
+   ]
+  },
+  {
+   "rule": "CURRENT: Warning when a category is 5-10% over budget season to date (RULES.budgetWarn = 0.05; code tests pct > 0.05 and pct > 0.10 with strict inequalities; warning text omits dollars; action 'Watch it next month').",
+   "decision_supported": "Whether to keep an eye on a category before it becomes serious.",
+   "required_inputs": "Same as the serious rule.",
+   "context": "Any operation; demo data.",
+   "classification": "D-synthetic-demo",
+   "evidence": "OBSERVED (healthbudget.repro.mjs): BU-08 'exactly 5.0% over (1,050 vs 1,000)' produced '(no alerts)', although the rules table and README say '5-10%'. BU-09 '9.6%: warning | X | 10% over season to date' vs '10.4%: serious | X | 10% over season to date ($104)': both texts say 10% at different severities. BU-11 warning text '6% over season to date' has no dollar amount. EXTERNAL: 5% is used by U Alberta, but only with a dollar alternative and at institutional scale. No ranch-specific validation was found.",
+   "limitations": "The boundary does not match the documented text. Rounding hides which band applies. Without dollars the manager cannot judge materiality.",
+   "configurable": "Yes (RULES.budgetWarn).",
+   "missing_data_blocks": "Same as the serious rule.",
+   "recommendation": "Make boundaries inclusive (>=) so the rule matches '5-10%'. Print one decimal place and always print dollars. Fold this into the combined rule's warning band.",
+   "sources": [
+    {
+     "title": "Budget Variance Accountability Procedure",
+     "publisher": "University of Alberta (UAPPOL)",
+     "url": "https://ualberta.ca/en/alfresco/uappol/finance/budget-variance-accountability/procedure/budget-variance-accountability-procedure.pdf",
+     "pub_date": "Approved 2006-07-17; editorial amendments 2025-05-20",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "A 5% percentage threshold used together with a dollar alternative."
+    },
+    {
+     "title": "Variance analysis thresholds (Management Accounting & Analysis)",
+     "publisher": "University of Washington Finance, Management Accounting & Analysis",
+     "url": "https://finance.uw.edu/maa/node/228",
+     "pub_date": "2014-02-28 (page submission date)",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Thresholds are stated as 'equal to or greater than' (inclusive) for both percent and dollars."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Combined percent-and-dollar materiality per category over closed months (V = actual - plan to date; p = V / plan). Serious if p >= seriousPct AND V >= seriousUsd. Warning if p >= warnPct AND V >= warnUsd. Large-dollar override: warning if V >= largeUsd whatever p is. Dollar floors are either fixed dollars or a share of the total season-to-date operating budget, so they scale with ranch size. Demo values used in the diagnostic: warnPct 5%, seriousPct 10%, warnUsd $500, seriousUsd $1,000, largeUsd $2,500, unbudgetedUsd $250.",
+   "decision_supported": "Which category overruns deserve the manager's time this month, ranked by both relative and absolute size.",
+   "required_inputs": "Monthly phased budget and actual per category; books-closed-through month; threshold config (pct and USD pairs, optionally per category); total season-to-date operating budget if floors are a share of total; optional reforecast column.",
+   "context": "Any cow-calf or stocker operation. Dollar floors must be set by each ranch for its scale. The fictional ranch's season-to-date total budget is $88,400 (Jun-Sep).",
+   "classification": "B-context-dependent",
+   "evidence": "OBSERVED (budget.materiality.research.mjs, proposed rule with demo values): committed data unchanged in outcome, 'Fuel ... proposed ...: serious 21.3% and $2040 over' and 'Repairs ...: serious 25.0% and $1800 over'. S2: 'Ear tags ... proposed: -' (15%/$30 no longer serious); 'Labor ... warning 7.5% and $2700 over'; 'Feed (big) ... warning $2700 over (only 3.0%)'. OBSERVED (budget.fuel.pricevolume.research.mjs): 'Fuel over $ 2040 21.3% of category 2.31% of total budget'; 'Repairs over $ 1800 25.0% of category 2.04% of total budget'. EXTERNAL: combined percent and dollar tests are a common institutional design: UW uses AND (10% and $5,000), U Alberta uses OR (5% or $100,000). PCAOB AS 2105 treats materiality as quantitative plus qualitative. Extension budgets show category sizes differ by an order of magnitude (UNL 2026 400-cow budget: feed $801/cow vs fuel and energy $35/cow, repairs $38/cow; ND Farm Management Education 2020: feed and grazing $412/cow vs fuel $18.73/cow), so a single percent band treats very different dollar stakes alike.",
+   "limitations": "The structure is supported. The specific numbers are not: no ranch-specific study validating any percent or dollar pair was found. AND vs OR and the override amount are management choices. Qualitative triggers (e.g., a vet-and-health underspend reflecting missed scheduled work) are not captured by numbers alone.",
+   "configurable": "Yes, and it must be: the dollar floors depend on ranch scale and the owner's tolerance. Per-category overrides are useful (e.g., labor vs ear tags).",
+   "missing_data_blocks": "Missing actual for any closed month in the category; no budget entered (route to the unbudgeted rule); thresholds not configured (show variance but no severity); basis unknown (show a label).",
+   "recommendation": "Adopt this as the budget rule, with the thresholds in RULES clearly labelled as demonstration settings and editable. Show both percent and dollars in every alert text. Offer 'share of total season budget' as the default way to scale dollar floors (e.g., warn at 0.5% of total, serious at 1%, both D-class demo values).",
+   "sources": [
+    {
+     "title": "Variance analysis thresholds (Management Accounting & Analysis)",
+     "publisher": "University of Washington Finance, Management Accounting & Analysis",
+     "url": "https://finance.uw.edu/maa/node/228",
+     "pub_date": "2014-02-28 (page submission date)",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Combined percent AND dollar materiality test (10% and $5,000)."
+    },
+    {
+     "title": "Budget Variance Accountability Procedure",
+     "publisher": "University of Alberta (UAPPOL)",
+     "url": "https://ualberta.ca/en/alfresco/uappol/finance/budget-variance-accountability/procedure/budget-variance-accountability-procedure.pdf",
+     "pub_date": "Approved 2006-07-17; editorial amendments 2025-05-20",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Percent OR dollar trigger (5% or $100,000 unfavorable), the basis for a large-dollar override."
+    },
+    {
+     "title": "AS 2105: Consideration of Materiality in Planning and Performing an Audit",
+     "publisher": "PCAOB",
+     "url": "https://pcaobus.org/oversight/standards/auditing-standards/details/AS2105",
+     "pub_date": "Effective for audits of fiscal years beginning on or after 2010-12-15",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Materiality combines quantitative and qualitative factors (para .03, .07). Analogy only."
+    },
+    {
+     "title": "2026 UNL Livestock Jan-Dec, 400 Head Cow Herd, Northern Panhandle (sample economic budget)",
+     "publisher": "University of Nebraska-Lincoln Center for Agricultural Profitability / Nebraska Extension",
+     "url": "https://cap.unl.edu/sites/unl.edu.ianr.agecon.center-for-ag-profitability/files/media/file/2026%20Northern%20Panhandle%20400%20Head%20Cow%20Herd%20budget.pdf",
+     "pub_date": "undated in PDF (landing page says 'Updated July 2026')",
+     "data_years": "2026 prices",
+     "kind": "extension",
+     "supports": "Category sizes: total feed $320,515 ($801/cow); vet and health $14,000 ($35); fuel and energy $14,000 ($35); repairs and maintenance $15,000 ($38); supplies $8,000 ($20)."
+    },
+    {
+     "title": "What is your cow-calf cost of production?",
+     "publisher": "Beef Magazine (reporting North Dakota Farm Management Education program data)",
+     "url": "https://www.beefmagazine.com/beef/what-your-cow-calf-cost-production",
+     "pub_date": "2021-08-31",
+     "data_years": "2020 production year; 17 herds, 3,755 cows, ND excluding Red River Valley",
+     "kind": "other",
+     "supports": "Actual direct costs per cow: feed and grazing $412, repairs $49.09, veterinary $40.10, fuel $18.73, supplies $13.94; total direct $566.24."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Compare season-to-date actual against a monthly phased plan through the same closed month, not against a straight-line or full-season total.",
+   "decision_supported": "Whether spending is ahead of plan or only ahead of a flat average, e.g., a planned early-season overhaul or winter feed purchases.",
+   "required_inputs": "A budget amount per category per month entered as the ranch expects to spend it (phased); actual per month; books-closed-through month.",
+   "context": "All ranches. Ranch spending is seasonal: winter feeding (SE Wyoming budget Jan 1-Apr 30; NW Wyoming Nov 15-Apr 15), calving (Mar 20-May 20 in SE WY), and fall calf sales for spring-calving herds with Aug-Sep cash pressure.",
+   "classification": "A-supported-general",
+   "evidence": "OBSERVED (budget.materiality.research.mjs S3): the same June actual of $4,300 against a straight-line plan gives 'Repairs budget 1800 actual 4300 cur pct 138.9% -> current: serious', and against a phased plan (4,200 in June) gives 'cur pct 2.4% -> current: -'. EXTERNAL: cash-flow budgets are built in monthly, bi-monthly or quarterly columns and used to monitor actual against plan (OSU AGEC-751; UNL CropWatch 2018: 'a cash flow budget as a monitor and control'). ISU (Edwards): review the cash-flow budget during the year using monthly bank statements. GFOA: compare against seasonality and prior-year actuals. Tennessee Comptroller recommends monthly budget-to-actual reports. Wyoming enterprise budgets' operations calendars show activities concentrated in specific months.",
+   "limitations": "Extension enterprise budgets are annual (UNL 2026 is Jan-Dec; the Wyoming budgets have calendars but no monthly dollars), so the monthly phasing must come from the ranch's own records or prior-year actuals. The committed fictional data uses a flat monthly plan, so phasing cannot be demonstrated on it without a change.",
+   "configurable": "Yes: phasing is data, entered per month; a fallback can phase by prior-year actual shares.",
+   "missing_data_blocks": "If only an annual budget exists, the dashboard should say 'plan not phased; comparison uses straight-line' rather than present the percent as authoritative.",
+   "recommendation": "Treat budget.csv as the phased plan and document that each month's budget is the expected spend in that month. Show a 'plan to date' column. Add an optional prior-year actual column to help phase.",
+   "sources": [
+    {
+     "title": "Developing a Cash Flow Plan (AGEC-751)",
+     "publisher": "Oklahoma State University Extension",
+     "url": "https://extension.okstate.edu/fact-sheets/developing-a-cash-flow-plan",
+     "pub_date": "2020-08",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "'For a monthly cash flow plan, the columns can be used to denote the 12 months'; 'Comparing budgeted flows with those that actually occur is a useful management technique for monitoring performance.'"
+    },
+    {
+     "title": "Cash Flow Budgeting for Farms and Ranches",
+     "publisher": "University of Nebraska-Lincoln CropWatch (Tigner and Duerfeldt)",
+     "url": "https://cropwatch.unl.edu/2018/cash-flow-budgeting-farms-and-ranches",
+     "pub_date": "2018-01-08",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Management can use a cash flow budget 'as a monitor and control' and study variances against the cash flow statement. Budgets can be monthly, bi-monthly or quarterly, and expense timing matters."
+    },
+    {
+     "title": "Twelve steps to cash flow budgeting (excerpt of ISU Ag Decision Maker)",
+     "publisher": "Progressive Dairy / AgProud (author William Edwards, Iowa State University)",
+     "url": "https://agproud.com/articles/29923-twelve-steps-to-cash-flow-budgeting",
+     "pub_date": "2010-11-12",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "'Review your cash-flow budget from time to time during the year'; 'Monthly bank statements and canceled checks are a good source of cash-flow information'; 'You may even need to prepare a revised budget for the remainder of the year.'"
+    },
+    {
+     "title": "Budget Monitoring (best practice)",
+     "publisher": "Government Finance Officers Association (GFOA)",
+     "url": "https://gfoa.org/materials/budget-monitoring",
+     "pub_date": "Board approved 2018-03-31",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Bases of comparison include seasonality, prior-year actuals and averages of prior-year actuals."
+    },
+    {
+     "title": "Steps to a Well-Managed Budget",
+     "publisher": "Tennessee Comptroller of the Treasury, Division of Local Government Finance",
+     "url": "https://comptroller.tn.gov/office-functions/lgf/budgets/municipalities-counties-metros-utilities/general-guidance/steps-to-a-well-managed-budget0.html",
+     "pub_date": "Last modified 2025-01-30",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Recommends a monthly budget-to-actual report and amending the budget throughout the year."
+    },
+    {
+     "title": "Enterprise Budget for Beef Cattle: Cow-Calf Production, 200 Head, Southeastern Wyoming (B-1217)",
+     "publisher": "University of Wyoming Extension",
+     "url": "https://www.wyoextension.org/agpubs/pubs/B1217.pdf",
+     "pub_date": "November 2010 (published June 2011)",
+     "data_years": "2010 budget year",
+     "kind": "extension",
+     "supports": "Operations calendar: calving March 20-May 20; supplemental feeding January to end of April (1.25 tons hay per pair)."
+    },
+    {
+     "title": "Enterprise Budget for a Cow-Calf-Yearling Operation, Northwestern Wyoming (MP-126.1)",
+     "publisher": "University of Wyoming Extension",
+     "url": "https://www.wyoextension.org/agpubs/pubs/MP-126.1.pdf",
+     "pub_date": "2014-08",
+     "data_years": "2010 dollars",
+     "kind": "extension",
+     "supports": "Winter feeding November 15 to April 15. The budget is annual with no monthly dollars, so ranches must supply their own phasing."
+    },
+    {
+     "title": "Finance chores to tackle this fall",
+     "publisher": "Western Livestock Journal (author Scott Clawson, OSU Extension)",
+     "url": "https://www.wlj.net/finance-chores-to-tackle-this-fall",
+     "pub_date": "2024-09-06",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "'The August to September period is a prime time for a spring calving cow-calf operation to experience a cash flow issue'; revenue concentrated in fall calf sales."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Count only closed months (on or before a books-closed-through month) and show a data-completeness row when a closed month has no actual for a category. Never treat a blank as $0 and never let future plan rows dilute the season total.",
+   "decision_supported": "Whether the variance shown is trustworthy enough to act on.",
+   "required_inputs": "meta.books_closed_through (YYYY-MM) or a per-row closed flag; as_of with timezone; the expected category list per month.",
+   "context": "All ranches. Bookkeeping lags: as_of is 2026-09-30T18:00, before September's statements and invoices are complete.",
+   "classification": "A-supported-general",
+   "evidence": "OBSERVED (healthbudget.repro.mjs): BU-04 blank September Fuel actual gives 'Fuel actual=\"8640\" (string) pct=-0.1', so the real 20% overrun disappears. BU-06 future rows give '(no alerts)' for Fuel and Repairs. BU-07 a deleted September Fuel row gives '20% over' with no note that a month is missing. EXTERNAL: ISU (Edwards) uses monthly bank statements as the source for comparing actual to budget, which implies the month must be complete; GFOA requires a defined basis of comparison.",
+   "limitations": "The closing lag is a ranch choice (C). Some months legitimately have no spend in a category; the rule needs an explicit '0 entered' vs 'not entered' distinction.",
+   "configurable": "Yes: closing lag in days, or an explicit closed-through month.",
+   "missing_data_blocks": "Any missing closed-month actual blocks a severity call for that category; show 'actual not entered' instead.",
+   "recommendation": "Add books_closed_through to meta.csv. Filter budgetStatus to closed months. Emit a data-quality row for missing cells. Parse blanks as missing, not as strings or zero.",
+   "sources": [
+    {
+     "title": "Twelve steps to cash flow budgeting (excerpt of ISU Ag Decision Maker)",
+     "publisher": "Progressive Dairy / AgProud (author William Edwards, Iowa State University)",
+     "url": "https://agproud.com/articles/29923-twelve-steps-to-cash-flow-budgeting",
+     "pub_date": "2010-11-12",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Monthly bank statements are the source used to compare actual against budget."
+    },
+    {
+     "title": "Budget Monitoring (best practice)",
+     "publisher": "Government Finance Officers Association (GFOA)",
+     "url": "https://gfoa.org/materials/budget-monitoring",
+     "pub_date": "Board approved 2018-03-31",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Agree on the reporting frequency and the basis of comparison for monitoring."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Zero-budget or unbudgeted spending is judged in dollars only ('$X spent with no budget'), with a configurable dollar trigger. It is never shown as a percent.",
+   "decision_supported": "Whether unplanned spending (e.g., emergency hay or a new category) needs a budget line or a reforecast.",
+   "required_inputs": "Actual by category and month; an explicit budget of 0 vs a missing budget; the unbudgetedUsd threshold.",
+   "context": "All ranches. Common in drought (unplanned feed), after breakdowns, or with new categories.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "OBSERVED: BU-01 'serious | Hay | Infinity% over season to date ($500)'; BU-02 zero/zero gives 'pct=NaN'; budget.materiality.research.mjs S4 'Hay (unplanned) budget 0 actual 1800 cur pct Infinity -> current: serious | proposed ...: warning unbudgeted spend $1800'. EXTERNAL: percent variance is undefined at a zero base (arithmetic). Institutional policies carry a dollar-only alternative trigger (U Alberta '$100,000' OR clause).",
+   "limitations": "Whether unbudgeted spend is a warning or serious depends on the amount and on whether it was authorized. The dashboard cannot know authorization without a reforecast or note field.",
+   "configurable": "Yes (unbudgetedUsd; optionally a serious level).",
+   "missing_data_blocks": "A missing budget cell (vs an explicit 0) should produce 'no budget entered', not an unbudgeted-spend alert.",
+   "recommendation": "Branch on budget <= 0 before computing percent. Alert text shows dollars only. Suggest adding a budget line or reforecast.",
+   "sources": [
+    {
+     "title": "Budget Variance Accountability Procedure",
+     "publisher": "University of Alberta (UAPPOL)",
+     "url": "https://ualberta.ca/en/alfresco/uappol/finance/budget-variance-accountability/procedure/budget-variance-accountability-procedure.pdf",
+     "pub_date": "Approved 2006-07-17; editorial amendments 2025-05-20",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "A dollar-amount trigger that operates regardless of the percentage."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Credits, refunds and rebates (warranty refunds, returned supplies, patronage or fuel-tax credits) are entered as separate signed rows with an entry_type. Net spend is used for variance, but gross spend and credits are shown separately. The period a credit lands in follows the declared accounting basis. Amounts use a plain minus sign ('-300'), not accounting parentheses.",
+   "decision_supported": "Whether an apparent improvement is real savings or a timing artefact of a refund.",
+   "required_inputs": "entry_type (expense | refund | credit | rebate | tax_credit); signed amount; related month (accrual) or received month (cash); basis.",
+   "context": "All ranches. Fuel is a specific case: off-road farm use qualifies for federal fuel tax credits, claimed on an IRS form rather than shown on the supplier invoice.",
+   "classification": "B-context-dependent",
+   "evidence": "OBSERVED: BU-05 '(300)' on a Repairs row gives 'Repairs actual=\"9000(300)\" pct=NaN' and the Repairs alert disappears. budget.materiality.research.mjs S4 'Fuel ... proposed ...: warning 15.0% and $720 over includes $300 of credits'. EXTERNAL: IRS Form 4136 (2024) lists 'Use on a farm for farming purposes' at $.243/gal for undyed diesel (line 3b) and $.183/gal for gasoline (line 1b). Penn State and OSU AGEC-753 describe adjusting cash expenses for timing (payables, prepaid).",
+   "limitations": "Whether to net a tax credit against monthly fuel depends on whether the budget was built net or gross of it. The research did not cover state fuel-tax refund rules for SD, NE or ND. Patronage refunds were not researched with a fetched source.",
+   "configurable": "Yes: netting policy per entry_type.",
+   "missing_data_blocks": "An unparseable amount must block that category's conclusion and show 'unreadable amount', never NaN or silence.",
+   "recommendation": "Add entry_type and validate numeric amounts at load. Show 'includes $X of credits' in the alert. Default to excluding tax credits from monthly fuel unless the budget assumed them.",
+   "sources": [
+    {
+     "title": "Form 4136 Credit for Federal Tax Paid on Fuels (2024)",
+     "publisher": "Internal Revenue Service",
+     "url": "https://irs.gov/pub/irs-prior/f4136--2024.pdf",
+     "pub_date": "Form 4136 (2024)",
+     "data_years": "2024 rates",
+     "kind": "agency",
+     "supports": "Line 1b gasoline on a farm for farming purposes $.183; line 3b undyed diesel on a farm for farming purposes $.243."
+    },
+    {
+     "title": "Instructions for Form 4136",
+     "publisher": "Internal Revenue Service",
+     "url": "https://www.irs.gov/node/40551",
+     "pub_date": "Page last reviewed or updated 2026-04-30",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Farm-use gasoline must have been used 'on a farm for farming purposes' during the period of claim, and the credit is claimed for a period. It is a separate claim, not a supplier credit."
+    },
+    {
+     "title": "Farm Accrual Adjustments to a Cash Basis Income Statement",
+     "publisher": "Penn State Extension (Miguel Antonio Saviroff)",
+     "url": "https://extension.psu.edu/farm-accrual-adjustments-to-a-cash-basis-income-statement",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Cash statements exclude unpaid expenses and mistime prepaid ones. Adjust for changes in accounts payable, prepaid expenses and supplies inventory."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Declare the accounting basis (cash or accrual-adjusted) on the page. For operational monitoring prefer accrual-adjusted actuals (expense in the month the input was received or used), or at minimum flag prepaid and year-end purchases so they are not read as overruns.",
+   "decision_supported": "Whether a variance reflects operations or only payment timing (prepaying feed, paying a quarter's fuel bill late).",
+   "required_inputs": "meta.basis; optional prepaid and payable adjustments per category and month; entry_type for prepayments.",
+   "context": "Most farms file taxes on cash basis. Cash-basis ranches often prepay inputs near year-end, within limits (50% of other deductible farm expenses), which creates spending spikes unrelated to use.",
+   "classification": "B-context-dependent",
+   "evidence": "EXTERNAL: OSU AGEC-753 says FFSC recommends 'accrual adjusted' statements and that cash accounting 'can delay recognition of financial problems'. Penn State lists payables, prepaid and supplies inventory adjustments. ISU CALT says it is 'often beneficial' for cash-method farmers to prepay supplies, with a 50% limit. USU Rural Tax Education (revised Aug 2025) gives the same 50% limit and conditions. NOT OBSERVED in the repo: budget.csv has no basis field (inspected header 'month,category,budget,actual').",
+   "limitations": "Full accrual books are a heavy lift for small ranches. A pragmatic dashboard may stay cash basis with clear labelling and a prepaid flag.",
+   "configurable": "Yes (basis label; netting of prepaid).",
+   "missing_data_blocks": "If the basis is unknown, label the variance 'basis not stated'. If a large prepaid row is present, avoid a serious call on that category until the manager tags it.",
+   "recommendation": "Add a basis field to meta.csv and show it next to the 'Spend vs budget' tile. Add entry_type 'prepaid' so prepayments are reported apart from operating overruns.",
+   "sources": [
+    {
+     "title": "Developing an Income Statement (AGEC-753)",
+     "publisher": "Oklahoma State University Extension",
+     "url": "https://extension.okstate.edu/fact-sheets/developing-an-income-statement",
+     "pub_date": "2021-02",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "FFSC recommends accrual-adjusted statements. Cash accounting is simpler but can delay recognition of problems. Defines prepaid and payable adjustments."
+    },
+    {
+     "title": "Farm Accrual Adjustments to a Cash Basis Income Statement",
+     "publisher": "Penn State Extension",
+     "url": "https://extension.psu.edu/farm-accrual-adjustments-to-a-cash-basis-income-statement",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Explicit expense adjustments for payables, prepaid expenses and supplies inventory."
+    },
+    {
+     "title": "End of Year Tax Planning Considerations for Farmers in 2021",
+     "publisher": "Iowa State University Center for Agricultural Law and Taxation (Kristine A. Tidgren)",
+     "url": "https://www.calt.iastate.edu/post/end-year-tax-planning-considerations-farmers-2021",
+     "pub_date": "2022-01-01 (page date)",
+     "data_years": "tax year 2021",
+     "kind": "extension",
+     "supports": "Cash-method farmers often prepay supplies. 'Prepaid farm expenses cannot exceed 50% of other deductible farm expenses'."
+    },
+    {
+     "title": "Prepaid Farm Expenses",
+     "publisher": "Rural Tax Education (Utah State University; Colorado State; University of Minnesota)",
+     "url": "https://extension.usu.edu/ruraltax/tax-topics/prepaid-farm-expenses-2023",
+     "pub_date": "Revised 2025-08 (page dated 2025-08-18)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "50% limit and the payment-not-deposit, business-purpose and no-material-distortion tests for prepaid feed and supplies."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Split fuel variance into price and volume (gallons x $/gal). If price explains most of the overrun, the action is to reforecast or revisit purchasing. If volume does, check the use drivers (miles, hours, water hauling, feeding).",
+   "decision_supported": "Whether a fuel overrun is something the crew can manage (use) or a market condition to reforecast (price).",
+   "required_inputs": "Gallons purchased or delivered per month by fuel type (dyed diesel, gasoline); actual $/gal from invoices; planned gallons and planned $/gal behind the budget; optional EIA regional reference price.",
+   "context": "Northern and Central Plains ranches buy diesel and gasoline in a volatile market. In 2026 regional diesel rose sharply through the grazing season.",
+   "classification": "B-context-dependent",
+   "evidence": "OBSERVED (WebFetch of EIA monthly series): Midwest (PADD 2) No 2 diesel retail 2026 'Jan 3.444 ... Jun 4.984, Jul 4.825, Aug 5.417, Sep 6.351' vs 2025 'Jun 3.569 ... Sep 3.730'. Rocky Mountain (PADD 4) 2026 'Jun 4.989, Jul 4.790, Aug 5.415, Sep 6.155'. Weekly table: 'Midwest (PADD2) ... 10/12/26 6.259 ... year ago 2.653' (change). OBSERVED (node docs/audit/diagnostics/budget.fuel.pricevolume.research.mjs, hypothetical pricing at Jan-2026 EIA): 'season price variance $4148 volume variance $-2108 sum $2040'. That is a D-class illustration only, because budget.csv has no gallons. EXTERNAL: extension machinery costing estimates fuel as quantity x price (MSU P3543: 0.044 gal/hp-hr x PTO hp x hours x price; ISU Edwards 2013: gal/acre x price). UNL, KSU and OSU budgets carry fuel as its own line (UNL 2026 'Fuel and energy' $35/cow; KSU 'Fuel' $20/cow and 'Utilities' $14/cow; OSU 2026 stocker 'Machinery fuel, lube, repairs' $29.37/head).",
+   "limitations": "EIA prices are on-highway retail including road taxes. Dyed farm diesel is priced differently, so EIA serves as an index, not the ranch's price. A WebFetch summarizer extracted the EIA numbers; a direct curl to eia.gov was refused by the session proxy (403), so the raw files were not independently downloaded.",
+   "configurable": "Yes: optional fields; the reference region (PADD 2 or 4) is selectable.",
+   "missing_data_blocks": "Without gallons the dashboard must not claim a cause. It shows the dollar variance and says 'price vs use unknown: gallons not recorded'.",
+   "recommendation": "Add optional fuel_gallons and fuel_price fields (from delivery tickets). Show a price/volume split in the Fuel tooltip. Change the Fuel action text to 'check whether price or gallons drove it; reforecast if price'.",
+   "sources": [
+    {
+     "title": "Midwest No 2 Diesel Retail Prices (Dollars per Gallon), monthly",
+     "publisher": "U.S. Energy Information Administration",
+     "url": "https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=PET&s=EMD_EPD2D_PTE_R20_DPG&f=M",
+     "pub_date": "undated series page (fetched 2026-10-16)",
+     "data_years": "2025-01 to 2026-09",
+     "kind": "agency",
+     "supports": "Monthly PADD 2 diesel: 2026 Jan 3.444, Jun 4.984, Jul 4.825, Aug 5.417, Sep 6.351; 2025 Jun 3.569, Sep 3.730."
+    },
+    {
+     "title": "Rocky Mountain No 2 Diesel Retail Prices (Dollars per Gallon), monthly",
+     "publisher": "U.S. Energy Information Administration",
+     "url": "https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=PET&s=EMD_EPD2D_PTE_R40_DPG&f=M",
+     "pub_date": "undated series page (fetched 2026-10-16)",
+     "data_years": "2025-01 to 2026-09",
+     "kind": "agency",
+     "supports": "Monthly PADD 4 diesel: 2026 Jan 3.255, Jun 4.989, Jul 4.790, Aug 5.415, Sep 6.155."
+    },
+    {
+     "title": "Gasoline and Diesel Fuel Update",
+     "publisher": "U.S. Energy Information Administration",
+     "url": "https://www.eia.gov/petroleum/gasdiesel/",
+     "pub_date": "Release 2026-10-14 (next 2026-10-20)",
+     "data_years": "weeks of 2026-09-28, 10-05, 10-12",
+     "kind": "agency",
+     "supports": "Weekly on-highway diesel incl. all taxes: Midwest 6.259 and Rocky Mountain 6.302 on 10/12/26, year-ago change +2.653 and +2.644."
+    },
+    {
+     "title": "Diesel fuel price methodology",
+     "publisher": "U.S. Energy Information Administration",
+     "url": "https://www.eia.gov/PETROLEUM/GASDIESEL/diesel_methodology.php",
+     "pub_date": "undated (page shows release 2026-10-14)",
+     "data_years": "sample frame 2021; new sample effective 2022-06-13",
+     "kind": "agency",
+     "supports": "Monday 8 a.m. cash self-serve ULSD price incl. taxes; 590-outlet sample; published by PADD; Alaska and Hawaii excluded."
+    },
+    {
+     "title": "Farm Machinery Cost Calculations (P3543)",
+     "publisher": "Mississippi State University Extension (Jeff Johnson)",
+     "url": "https://extension.msstate.edu/publications/farm-machinery-cost-calculations",
+     "pub_date": "revision code POD-10-23 (no explicit date shown)",
+     "data_years": "example prices only",
+     "kind": "extension",
+     "supports": "Fuel = 0.044 gal/hp-hr x PTO hp x annual hours x fuel price; lube about 15% of fuel; repairs from ASABE factors per 100 hours, or from records when available."
+    },
+    {
+     "title": "Estimating costs for forage production machinery",
+     "publisher": "Progressive Forage / AgProud (author William Edwards, Iowa State University)",
+     "url": "https://agproud.com/articles/34062-estimating-costs-for-forage-production-machinery",
+     "pub_date": "2013-09-30",
+     "data_years": "example prices only",
+     "kind": "extension",
+     "supports": "Fuel per acre from ISU A3-27 x fuel price (windrowing 0.45 gal/acre). Lubrication 10-15% of fuel."
+    },
+    {
+     "title": "2026 UNL Livestock Jan-Dec, 400 Head Cow Herd, Northern Panhandle (sample economic budget)",
+     "publisher": "University of Nebraska-Lincoln Center for Agricultural Profitability / Nebraska Extension",
+     "url": "https://cap.unl.edu/sites/unl.edu.ianr.agecon.center-for-ag-profitability/files/media/file/2026%20Northern%20Panhandle%20400%20Head%20Cow%20Herd%20budget.pdf",
+     "pub_date": "undated in PDF (landing page 'Updated July 2026')",
+     "data_years": "2026 prices",
+     "kind": "extension",
+     "supports": "'Fuel and energy' $14,000 ($35/cow) for a 400-cow herd."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Treat repairs as lumpy. Report large single repair events separately (by asset, with machine hours) from routine repairs. Phase known overhauls into the month they are planned. Judge repairs against the annual repair budget as well as season to date.",
+   "decision_supported": "Whether a repairs overrun is one breakdown (decide repair vs replace; replacement economics belong to the separate ROI project) or a creeping pattern.",
+   "required_inputs": "Repair events with date, asset_id, amount, planned/unplanned flag and hours or miles at repair; annual repair budget; phased plan.",
+   "context": "All ranches with haying, feeding and hauling equipment, fences and water systems.",
+   "classification": "B-context-dependent",
+   "evidence": "OBSERVED (budget.materiality.research.mjs S5): '2026-07 Repairs budget 1800 actual 2520 over $720 (40.0%)' and '2026-09 Repairs budget 1800 actual 2880 over $1080 (60.0%)', while season-to-date shows 25.0%. Spikes are visible only month by month. EXTERNAL: ISU A3-30 says 'repair costs tend to be quite variable from year to year' and that they 'eventually increase as parts wear out'. ISU (Edwards 2013): 'The best data for estimating repair costs are records of past repair expenses' and accumulated repair cost rises with accumulated hours. MSU P3543 uses ASABE repair factors per 100 hours. ND FME 2020 actual repairs $49.09/cow; KSU default $50/cow (2021); UNL 2026 $38/cow.",
+   "limitations": "No source sets a dollar trigger for a 'large' single repair; that is ranch choice. Replacement economics are out of scope here (Ranch Tech ROI project).",
+   "configurable": "Yes: single-event threshold, asset list.",
+   "missing_data_blocks": "Without event-level records the dashboard can show only the monthly total and must not say 'one breakdown' vs 'pattern'.",
+   "recommendation": "Add an optional repairs_events.csv. In the Repairs alert, name the largest event in the period. Keep the category-level combined rule for severity.",
+   "sources": [
+    {
+     "title": "Replacement Strategies for Farm Machinery (Ag Decision Maker A3-30 / PM 1860)",
+     "publisher": "Iowa State University Extension and Outreach (William Edwards), hosted copy on UVM blog",
+     "url": "https://blog.uvm.edu/groundwk/files/2016/05/Replacement-Strategies-for-Farm-Machinery.pdf",
+     "pub_date": "Revised 2015-06",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Repair costs 'tend to be quite variable from year to year' and 'eventually increase as parts wear out'; breakdowns at critical times carry timeliness costs."
+    },
+    {
+     "title": "Estimating costs for forage production machinery",
+     "publisher": "Progressive Forage / AgProud (author William Edwards, Iowa State University)",
+     "url": "https://agproud.com/articles/34062-estimating-costs-for-forage-production-machinery",
+     "pub_date": "2013-09-30",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Past repair records are the best estimate. Accumulated repair cost as a percent of list price rises with accumulated hours (about 2% at 600 hours, about 5% at 900 hours in the windrower example)."
+    },
+    {
+     "title": "Farm Machinery Cost Calculations (P3543)",
+     "publisher": "Mississippi State University Extension",
+     "url": "https://extension.msstate.edu/publications/farm-machinery-cost-calculations",
+     "pub_date": "revision code POD-10-23 (no explicit date shown)",
+     "data_years": "example",
+     "kind": "extension",
+     "supports": "ASABE repair factor as percent of list price per 100 hours. Use actual repair records when available."
+    },
+    {
+     "title": "Detailed Cow/Calf Budget",
+     "publisher": "Kansas State University Department of Agricultural Economics (AgManager.info)",
+     "url": "https://agmanager.info/sites/default/files/pdf/Reid_Document_CowCalf.pdf",
+     "pub_date": "Version 2021-09-01",
+     "data_years": "2021-2022 default prices",
+     "kind": "extension",
+     "supports": "Default 'Machinery, Facility/Equip. Repairs' $50/cow; 'Fuel' $20/cow; 'Utilities' $14/cow (100-cow herd)."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Record reforecasts. Keep the original budget and add a reforecast (revised plan for the remaining months). Alert against the current approved plan, and always show the variance to the original as well.",
+   "decision_supported": "Re-planning the rest of the season after a known shift (price shock, drought feed, breakdown) without hiding the original commitment.",
+   "required_inputs": "reforecast_usd per category per remaining month; reforecast date and author note.",
+   "context": "All ranches; especially after mid-season price or weather shocks.",
+   "classification": "A-supported-general",
+   "evidence": "EXTERNAL: ISU (Edwards): 'You may even need to prepare a revised budget for the remainder of the year.' Tennessee Comptroller: 'It is very important to amend the budget throughout the year.' U Alberta requires a plan 'as an amendment to the budget' when an unfavorable year-end variance is expected. FCSAmerica: 'many producers update cash-flow projections quarterly or even monthly.' GFOA lists projections and forecasts as a basis of comparison. OBSERVED: the current serious action text says 'decide whether to re-forecast', but budget.csv has no column to record one (header 'month,category,budget,actual').",
+   "limitations": "The trigger for when to reforecast (e.g., two consecutive serious months, or a price index move) is ranch choice (C). A reforecast can mask overspending if the original is not shown.",
+   "configurable": "Yes.",
+   "missing_data_blocks": "None. Without a reforecast, compare to the original.",
+   "recommendation": "Add an optional reforecast column, show 'vs original' and 'vs reforecast' in the budget table, and once a reforecast is recorded change the action text to point at it.",
+   "sources": [
+    {
+     "title": "Twelve steps to cash flow budgeting (excerpt of ISU Ag Decision Maker)",
+     "publisher": "Progressive Dairy / AgProud (author William Edwards, Iowa State University)",
+     "url": "https://agproud.com/articles/29923-twelve-steps-to-cash-flow-budgeting",
+     "pub_date": "2010-11-12",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Revise the budget for the remainder of the year when prices, costs or plans change."
+    },
+    {
+     "title": "Steps to a Well-Managed Budget",
+     "publisher": "Tennessee Comptroller of the Treasury",
+     "url": "https://comptroller.tn.gov/office-functions/lgf/budgets/municipalities-counties-metros-utilities/general-guidance/steps-to-a-well-managed-budget0.html",
+     "pub_date": "Last modified 2025-01-30",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Amend the budget throughout the year; review budget-to-actual frequently."
+    },
+    {
+     "title": "Cash-flow Budgeting: About Amount and Timing",
+     "publisher": "Farm Credit Services of America",
+     "url": "https://www.fcsamerica.com/resources/learning-center/cash-flow-budgeting-about-amount-and-timing",
+     "pub_date": "2024-01-10",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Lender guidance (NE/SD/IA/WY lender): 'many producers update cash-flow projections quarterly or even monthly.'"
+    },
+    {
+     "title": "Budget Variance Accountability Procedure",
+     "publisher": "University of Alberta (UAPPOL)",
+     "url": "https://ualberta.ca/en/alfresco/uappol/finance/budget-variance-accountability/procedure/budget-variance-accountability-procedure.pdf",
+     "pub_date": "Approved 2006-07-17; editorial amendments 2025-05-20",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Expected unfavorable variance requires a remedial plan submitted as a budget amendment."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Align budget categories with standard extension and ERS cost categories, and separate operating from capital and cash from non-cash (unpaid family labor, depreciation). The dashboard's 'Water and fencing' should state whether it means repairs and supplies or new construction.",
+   "decision_supported": "Whether the category totals can be compared with extension benchmarks and read by an outside reviewer (lender, owner).",
+   "required_inputs": "Category list with a mapping to standard categories; an operating/capital flag; a cash/non-cash flag.",
+   "context": "All ranches. Benchmarks exist for cow-calf (ERS, UNL, KSU, ISU, SDSU) and stocker (OSU 2026) enterprises.",
+   "classification": "B-context-dependent",
+   "evidence": "EXTERNAL: ERS direct-cost items: 'Purchased feed', 'Veterinary and medicine', 'Bedding and litter', 'Marketing', 'Custom services', 'Fuel, lube, and electric', 'Repairs'. Also unpaid labor, operating interest, capital recovery, overhead, taxes and insurance. UNL 2026: feed lines, 'Veterinary and health', 'Labor, paid' / 'Labor, unpaid', 'Fuel and energy', 'Repairs and maintenance', 'Supplies', 'Marketing', interest, overhead, depreciation, opportunity costs. KSU 2018: 'Utilities, Gas, Fuel, Oil'; 'Machinery, Facility/Equipment Repairs'. ISU 2016: 'Machinery, equipment, fuel and repairs' as one line. OBSERVED: the dashboard uses six categories (Feed and mineral, Fuel, Repairs, Vet and health, Labor, Water and fencing). INFERENCE (not validated): fictional Fuel $9,600 for Jun-Sep over 375 head is about $25.60/head for four months, above whole-year per-cow defaults (KSU $20 fuel, 2021; UNL $35 fuel and energy, 2026; ND FME $18.73 actual, 2020). It is plausible only with haying, hauling and 2026 diesel prices. The data is fictional and remains labelled so.",
+   "limitations": "Extension budgets are annual, per-cow, economic budgets (including non-cash opportunity costs). A monthly cash monitor uses a subset of their categories.",
+   "configurable": "Yes: category mapping table.",
+   "missing_data_blocks": "An unmapped category can still be monitored but should be excluded from benchmark comparisons.",
+   "recommendation": "Add a category-to-standard mapping in README or data. Keep unpaid labor and depreciation out of the monthly cash monitor (or label them). Mark capital purchases so they don't trigger operating overruns. Keep investment/ROI out of scope.",
+   "sources": [
+    {
+     "title": "Commodity Costs and Returns: Documentation",
+     "publisher": "USDA Economic Research Service",
+     "url": "https://www.ers.usda.gov/data-products/commodity-costs-and-returns/documentation",
+     "pub_date": "undated",
+     "data_years": "Cow-calf ARMS survey years 1980, 1985, 1990, 1996, 2008, 2018; indexed between surveys",
+     "kind": "agency",
+     "supports": "Standard livestock cost items including 'Fuel, lube, and electric' and 'Repairs'. The Plains region includes KS, NE, ND, OK, SD, TX."
+    },
+    {
+     "title": "Commodity Costs and Returns",
+     "publisher": "USDA Economic Research Service",
+     "url": "https://www.ers.usda.gov/data-products/commodity-costs-and-returns",
+     "pub_date": "Recent files last updated 2026-10-01; next update 2027-05-03",
+     "data_years": "recent estimates (years not listed on page)",
+     "kind": "agency",
+     "supports": "Cow-calf recent estimates are available as XLSX and CSV."
+    },
+    {
+     "title": "Nebraska Cattle Budgets - Northern Panhandle",
+     "publisher": "University of Nebraska-Lincoln Center for Agricultural Profitability",
+     "url": "https://cap.unl.edu/cattlebudgets/northern-panhandle/",
+     "pub_date": "Updated July 2026",
+     "data_years": "2026 budgets",
+     "kind": "extension",
+     "supports": "Budget includes feed, vet, labor, fuel, marketing, machinery and facility costs (fuel, repairs, depreciation), overhead. About 400 cows."
+    },
+    {
+     "title": "Beef Cattle Budgets",
+     "publisher": "SDSU Extension (Heather Gessner)",
+     "url": "https://extension.sdstate.edu/beef-cattle-budgets",
+     "pub_date": "Updated 2026-05-22",
+     "data_years": "not stated",
+     "kind": "extension",
+     "supports": "South Dakota spreadsheet tool (P-00143-2026.xlsx). Feed is 'The most significant component of every cattle budget'. Items include fuel or trucking, water and electricity overhead, fence and building maintenance, veterinary and breeding. The spreadsheet itself was not opened."
+    },
+    {
+     "title": "KSU Beef Cow-Calf Budget, 2018 Production Year",
+     "publisher": "Kansas State University Department of Agricultural Economics",
+     "url": "https://www.agmanager.info/sites/default/files/pdf/KSU%20Beef%20CowCalf%20Budget.pdf",
+     "pub_date": "Version 2017-12-15",
+     "data_years": "Prices as of 2017-12-04; KFMA data (95 farms, avg 133 cows)",
+     "kind": "extension",
+     "supports": "Categories: 'Utilities, Gas, Fuel, Oil' $28/cow; 'Machinery, Facility/Equipment Repairs' $40/cow; Labor $160; Vet $30, and others."
+    },
+    {
+     "title": "Stocker Enterprise Budget: 100 Steers, 2026 Planning Budget",
+     "publisher": "Oklahoma State University Agricultural Economics",
+     "url": "https://extension.okstate.edu/programs/farm-management-and-finance/budgets/sample-budgets/site-files/docs/2026-sample-budgets/2026-stockers-a.pdf",
+     "pub_date": "File dated 2025-12-02",
+     "data_years": "2026 planning prices",
+     "kind": "extension",
+     "supports": "Stocker categories: pasture, hay, vet services and supplies, marketing, 'Machinery fuel, lube, repairs' $29.37/head, labor, interest. 105-day Nov-Mar season."
+    },
+    {
+     "title": "Livestock Enterprise Budgets for Iowa - 2016 (FM 1815, Ag Decision Maker B1-21)",
+     "publisher": "Iowa State University Extension (Ellis and Schulz), hosted copy at Purdue",
+     "url": "https://www.ansc.purdue.edu/SP/TBC/assets/b1-21-iowa-budgets-edited.pdf",
+     "pub_date": "Revised 2016-06",
+     "data_years": "2016",
+     "kind": "extension",
+     "supports": "Cow-calf variable costs: feed, veterinary and health, 'Machinery, equipment, fuel and repairs', marketing, interest, labor. 'expected costs ... based on past results should be substituted whenever possible.'"
+    },
+    {
+     "title": "Cow-Calf Costs and Returns Update",
+     "publisher": "Farms.com (Will Secor)",
+     "url": "https://www.farms.com/news/cow-calf-costs-and-returns-update-236952.aspx",
+     "pub_date": "2026-01-08",
+     "data_years": "2024 (USDA estimates)",
+     "kind": "other",
+     "supports": "Northern Great Plains had the highest cow-calf operating costs at $952/cow in 2024 (US average $691)."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Show favorable (under-budget) variances informationally when both percent and dollars are large, with a 'timing or saving?' prompt. This gives no severity and no diagnosis.",
+   "decision_supported": "Whether underspending reflects real savings or deferred work (e.g., postponed repairs, or scheduled health work not yet done per the health records).",
+   "required_inputs": "Same as the overrun rule; a link to the health task schedule and repair records for context.",
+   "context": "All ranches. In the fictional data Labor is -$1,741 (-4.8%) and Water and fencing -$343 (-7.1%).",
+   "classification": "C-ranch-management-choice",
+   "evidence": "OBSERVED (budget.fuel.pricevolume.research.mjs): 'Labor over $ -1741 -4.8% of category'; 'Water and fencing over $ -343 -7.1% of category'. The current rule ignores these. EXTERNAL: U Alberta sets favorable-variance thresholds ('exceeds 5% ... or $500,000'). GFOA asks why deviations occurred, in either direction.",
+   "limitations": "No ranch source sets an underspend trigger. Overuse would add noise to the exception table.",
+   "configurable": "Yes.",
+   "missing_data_blocks": "Same as overruns.",
+   "recommendation": "Show underspend in the budget table (already shown as a negative difference) and optionally as an info-level row. Never make it 'serious'.",
+   "sources": [
+    {
+     "title": "Budget Variance Accountability Procedure",
+     "publisher": "University of Alberta (UAPPOL)",
+     "url": "https://ualberta.ca/en/alfresco/uappol/finance/budget-variance-accountability/procedure/budget-variance-accountability-procedure.pdf",
+     "pub_date": "Approved 2006-07-17; editorial amendments 2025-05-20",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Favorable variances also require explanation above a threshold."
+    },
+    {
+     "title": "Budget Monitoring (best practice)",
+     "publisher": "Government Finance Officers Association (GFOA)",
+     "url": "https://gfoa.org/materials/budget-monitoring",
+     "pub_date": "Board approved 2018-03-31",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Analyze why deviations occurred and whether they will continue."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: At equal severity, budget rows sort below animal welfare rows (Water, Health, Grazing, Gain) instead of alphabetically first.",
+   "decision_supported": "What the manager or crew looks at first in the exception table.",
+   "required_inputs": "An area priority order (configurable).",
+   "context": "Daily operations view.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "OBSERVED (healthbudget.repro.mjs BU-13): '1. Budget: Fuel | 2. Budget: Repairs | 3. Gain: Heifers | 4. Grazing: Yearlings in Sand Hills | 5. Health: Yearlings: Booster vaccine | 6. Water: Tank T6 (Cedar Draw)'. Budget sorts first only because the tie-break is area.localeCompare.",
+   "limitations": "The priority order is a management judgement, not research-derived.",
+   "configurable": "Yes.",
+   "missing_data_blocks": "n/a",
+   "recommendation": "Add an AREA_PRIORITY constant to the sort tie-break, or sort by severity then priority. Budget overruns are reviewed at month close and are rarely same-day actions.",
+   "sources": [
+    {
+     "title": "Budget Monitoring (best practice)",
+     "publisher": "Government Finance Officers Association (GFOA)",
+     "url": "https://gfoa.org/materials/budget-monitoring",
+     "pub_date": "Board approved 2018-03-31",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Reporting frequency may vary by program area. This weakly supports budget review on a monthly cadence rather than as a same-day exception."
+    }
+   ]
+  }
+ ],
+ "data_fields": [
+  {
+   "field": "budget.month",
+   "meaning": "Calendar month the planned and actual amounts belong to",
+   "units_valid": "YYYY-MM",
+   "source_type": "ranch records",
+   "update_frequency": "monthly",
+   "required": "required",
+   "missing_behavior": "Row rejected with a data-quality message",
+   "supports": "All budget rules; phasing; closed-month filter",
+   "evidence_url": "https://extension.okstate.edu/fact-sheets/developing-a-cash-flow-plan"
+  },
+  {
+   "field": "budget.category",
+   "meaning": "Spending category, mapped to a standard extension/ERS category",
+   "units_valid": "Controlled list (e.g., Feed and mineral, Fuel, Repairs, Vet and health, Labor, Water and fencing) plus mapping to ERS items such as 'Fuel, lube, and electric' and 'Repairs'",
+   "source_type": "ranch records",
+   "update_frequency": "set at budget time; rarely changes",
+   "required": "required",
+   "missing_behavior": "Row rejected; an unmapped category is monitored but excluded from benchmarks",
+   "supports": "Category totals; benchmark comparison",
+   "evidence_url": "https://www.ers.usda.gov/data-products/commodity-costs-and-returns/documentation"
+  },
+  {
+   "field": "budget.budget_usd (phased plan)",
+   "meaning": "Planned spend in that month (original approved budget), phased to when it is expected",
+   "units_valid": "USD, number >= 0; plain digits with optional minus and decimal (no '(300)', no '$' or thousands separators)",
+   "source_type": "ranch records",
+   "update_frequency": "set before season; monthly columns",
+   "required": "required",
+   "missing_behavior": "Blank = 'no budget entered' data-quality row (not 0). Explicit 0 routes to the unbudgeted-spend rule",
+   "supports": "Combined materiality rule; phasing rule",
+   "evidence_url": "https://cropwatch.unl.edu/2018/cash-flow-budgeting-farms-and-ranches"
+  },
+  {
+   "field": "budget.actual_usd",
+   "meaning": "Net actual spend recognized in that month on the declared basis",
+   "units_valid": "USD, signed number",
+   "source_type": "ranch records",
+   "update_frequency": "monthly at book close",
+   "required": "required for closed months",
+   "missing_behavior": "Blank in a closed month = 'actual not entered' row; no severity for that category",
+   "supports": "All variance rules",
+   "evidence_url": "https://agproud.com/articles/29923-twelve-steps-to-cash-flow-budgeting"
+  },
+  {
+   "field": "budget.reforecast_usd",
+   "meaning": "Revised plan for a remaining month after a reforecast",
+   "units_valid": "USD >= 0",
+   "source_type": "ranch records",
+   "update_frequency": "when reforecast (monthly or quarterly)",
+   "required": "optional",
+   "missing_behavior": "Compare against original budget only",
+   "supports": "Reforecast rule",
+   "evidence_url": "https://www.fcsamerica.com/resources/learning-center/cash-flow-budgeting-about-amount-and-timing"
+  },
+  {
+   "field": "budget.entry_type",
+   "meaning": "Kind of entry: expense, refund, credit, rebate, tax_credit, prepaid, capital",
+   "units_valid": "enum",
+   "source_type": "ranch records",
+   "update_frequency": "per entry",
+   "required": "optional (defaults to expense)",
+   "missing_behavior": "Treated as expense; credits cannot be shown separately",
+   "supports": "Credits/refunds rule; accrual/prepaid rule; operating vs capital",
+   "evidence_url": "https://extension.psu.edu/farm-accrual-adjustments-to-a-cash-basis-income-statement"
+  },
+  {
+   "field": "meta.books_closed_through",
+   "meaning": "Last month whose actuals are complete",
+   "units_valid": "YYYY-MM, <= month of as_of",
+   "source_type": "ranch records",
+   "update_frequency": "monthly",
+   "required": "required",
+   "missing_behavior": "Default to the month before as_of's month and label 'assumed closed through'",
+   "supports": "Closed-month rule; prevents future rows diluting totals (BU-06)",
+   "evidence_url": "https://gfoa.org/materials/budget-monitoring"
+  },
+  {
+   "field": "meta.as_of (with timezone)",
+   "meaning": "Report timestamp",
+   "units_valid": "ISO 8601 with offset, e.g. 2026-09-30T18:00-06:00",
+   "source_type": "ranch records",
+   "update_frequency": "each data refresh",
+   "required": "required",
+   "missing_behavior": "Page shows 'as-of unknown' and no closed-month default",
+   "supports": "Closed-month filter; labels",
+   "evidence_url": "https://gfoa.org/materials/budget-monitoring"
+  },
+  {
+   "field": "meta.accounting_basis",
+   "meaning": "Whether actuals are cash basis or accrual-adjusted",
+   "units_valid": "enum: cash | accrual_adjusted",
+   "source_type": "ranch records",
+   "update_frequency": "set once per season",
+   "required": "required",
+   "missing_behavior": "Label 'basis not stated' beside the spend tile",
+   "supports": "Accrual vs cash rule; credits timing",
+   "evidence_url": "https://extension.okstate.edu/fact-sheets/developing-an-income-statement"
+  },
+  {
+   "field": "rules.budget thresholds (warnPct, seriousPct, warnUsd, seriousUsd, largeUsd, unbudgetedUsd; optional per-category overrides; optional floors as share of total budget)",
+   "meaning": "Ranch-chosen materiality settings",
+   "units_valid": "fractions 0-1 and USD >= 0",
+   "source_type": "assumption",
+   "update_frequency": "once per season or after review",
+   "required": "required (with labelled demo defaults)",
+   "missing_behavior": "Show variances with no severity and a 'thresholds not set' note",
+   "supports": "Combined materiality rule",
+   "evidence_url": "https://finance.uw.edu/maa/node/228"
+  },
+  {
+   "field": "budget.total_season_budget_usd (derived)",
+   "meaning": "Sum of all categories' phased budget to date, used to scale dollar floors",
+   "units_valid": "USD",
+   "source_type": "ranch records",
+   "update_frequency": "derived each refresh",
+   "required": "optional",
+   "missing_behavior": "Use fixed-dollar floors",
+   "supports": "Combined materiality rule (scale-aware floors)",
+   "evidence_url": "https://ualberta.ca/en/alfresco/uappol/finance/budget-variance-accountability/procedure/budget-variance-accountability-procedure.pdf"
+  },
+  {
+   "field": "fuel.gallons",
+   "meaning": "Gallons delivered or purchased in the month by fuel type",
+   "units_valid": "gal >= 0; fuel_type enum dyed_diesel | diesel | gasoline",
+   "source_type": "ranch records",
+   "update_frequency": "per delivery, summed monthly",
+   "required": "optional",
+   "missing_behavior": "No price/volume split; say 'price vs use unknown'",
+   "supports": "Fuel price/volume rule",
+   "evidence_url": "https://extension.msstate.edu/publications/farm-machinery-cost-calculations"
+  },
+  {
+   "field": "fuel.price_usd_per_gal (actual)",
+   "meaning": "Average price paid per gallon from invoices",
+   "units_valid": "USD/gal > 0",
+   "source_type": "ranch records",
+   "update_frequency": "per delivery",
+   "required": "optional",
+   "missing_behavior": "Derive from actual_usd / gallons if both present; else no split",
+   "supports": "Fuel price/volume rule",
+   "evidence_url": "https://agproud.com/articles/34062-estimating-costs-for-forage-production-machinery"
+  },
+  {
+   "field": "fuel.plan_gallons and fuel.plan_price_usd_per_gal",
+   "meaning": "The quantity and price assumptions behind the fuel budget",
+   "units_valid": "gal; USD/gal",
+   "source_type": "ranch records",
+   "update_frequency": "set at budget time; updated on reforecast",
+   "required": "optional",
+   "missing_behavior": "No price/volume split",
+   "supports": "Fuel price/volume rule; reforecast",
+   "evidence_url": "https://cap.unl.edu/sites/unl.edu.ianr.agecon.center-for-ag-profitability/files/media/file/2026%20Northern%20Panhandle%20400%20Head%20Cow%20Herd%20budget.pdf"
+  },
+  {
+   "field": "reference.diesel_price_padd (EIA PADD 2 Midwest or PADD 4 Rocky Mountain)",
+   "meaning": "Public on-highway retail diesel price incl. all taxes, used as a market index",
+   "units_valid": "USD/gal; weekly (Monday) and monthly",
+   "source_type": "public dataset",
+   "update_frequency": "weekly",
+   "required": "optional",
+   "missing_behavior": "Hide the context line; never block budget alerts",
+   "supports": "Fuel reforecast context",
+   "evidence_url": "https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=PET&s=EMD_EPD2D_PTE_R20_DPG&f=M"
+  },
+  {
+   "field": "repairs_event (date, asset_id, amount_usd, planned flag, hours_or_miles)",
+   "meaning": "Individual repair events for lumpy-cost attribution",
+   "units_valid": "ISO date; text id; USD; boolean; hours or miles >= 0",
+   "source_type": "ranch records",
+   "update_frequency": "per event",
+   "required": "optional",
+   "missing_behavior": "Repairs alert shows monthly total only, with no 'one breakdown' attribution",
+   "supports": "Repairs rule",
+   "evidence_url": "https://blog.uvm.edu/groundwk/files/2016/05/Replacement-Strategies-for-Farm-Machinery.pdf"
+  },
+  {
+   "field": "budget.variance_note and owner",
+   "meaning": "Manager's explanation and who is responsible for a serious variance",
+   "units_valid": "free text; name or role",
+   "source_type": "manual observation",
+   "update_frequency": "per serious variance, monthly",
+   "required": "optional",
+   "missing_behavior": "Alert stays open with 'no explanation recorded'",
+   "supports": "Investigation and accountability (GFOA)",
+   "evidence_url": "https://gfoa.org/materials/budget-monitoring"
+  },
+  {
+   "field": "head_count by group and month",
+   "meaning": "Head on hand for per-head context (cost per head vs extension benchmarks)",
+   "units_valid": "integer >= 0",
+   "source_type": "ranch records",
+   "update_frequency": "monthly or on change",
+   "required": "optional",
+   "missing_behavior": "No per-head view",
+   "supports": "Category plausibility vs extension per-cow budgets",
+   "evidence_url": "https://www.beefmagazine.com/beef/what-your-cow-calf-cost-production"
+  },
+  {
+   "field": "budget.annual_budget_usd per category",
+   "meaning": "Full-year budget, so season-to-date can be read against the annual plan (extension budgets are annual)",
+   "units_valid": "USD >= 0",
+   "source_type": "ranch records",
+   "update_frequency": "once per year; on reforecast",
+   "required": "optional",
+   "missing_behavior": "Show season-to-date only",
+   "supports": "Repairs rule; phasing context",
+   "evidence_url": "https://cap.unl.edu/cattlebudgets/northern-panhandle/"
+  }
+ ],
+ "integrations": [
+  {
+   "name": "EIA weekly and monthly retail diesel prices (PADD 2 Midwest, PADD 4 Rocky Mountain)",
+   "provides": "On-highway No 2 / ULSD retail $/gal including all taxes, by PADD. Weekly (Monday 8 a.m. survey of 590 outlets) and monthly series.",
+   "access": "Public web pages and series history pages (fetched via WebFetch). A direct curl to eia.gov from this session was refused by the egress proxy (403). EIA API access and key requirements were not checked in this research.",
+   "cost": "No paywall encountered on the pages fetched",
+   "licensing": "US federal agency data. EIA's reuse terms page was not fetched; verify before redistribution.",
+   "coverage": "Contiguous US by PADD and national; excludes Alaska and Hawaii. Not farm dyed-diesel prices (includes road taxes).",
+   "refresh": "Weekly release (Tuesday, Wednesday after holidays); latest seen release 2026-10-14, next 2026-10-20. Monthly series through 2026-09.",
+   "failure_behavior": "Show the last fetched value with its date and 'reference only'. Never block or change budget severities.",
+   "recommendation": "Optional context for fuel reforecasts only. Ranch invoices remain the primary price source.",
+   "url": "https://www.eia.gov/petroleum/gasdiesel/"
+  },
+  {
+   "name": "USDA ERS Commodity Costs and Returns (cow-calf)",
+   "provides": "Annual per-cow cost and return estimates by item ('Purchased feed', 'Veterinary and medicine', 'Fuel, lube, and electric', 'Repairs', and others) and region",
+   "access": "XLSX and CSV download from the ERS data product page",
+   "cost": "No paywall encountered",
+   "licensing": "US federal agency data; reuse terms not fetched",
+   "coverage": "US and regions. Cow-calf base survey ARMS 2018 (herds of 20 or more beef cows), indexed in non-survey years. Plains region includes KS, NE, ND, OK, SD, TX per documentation.",
+   "refresh": "Recent files last updated 2026-10-01; next update 2027-05-03",
+   "failure_behavior": "Static annual benchmark; if unavailable, omit the benchmark column",
+   "recommendation": "Use for category mapping and an annual per-head sanity check, not for monthly alerts",
+   "url": "https://www.ers.usda.gov/data-products/commodity-costs-and-returns"
+  },
+  {
+   "name": "UNL Center for Agricultural Profitability regional cattle budgets / Agricultural Budget Calculator",
+   "provides": "2026 Nebraska regional cow-herd and heifer budgets with standard categories (feed lines, vet and health, paid and unpaid labor, fuel and energy, repairs and maintenance, supplies, marketing, interest, overhead)",
+   "access": "PDF budgets (fetched). The ABC program at agbudget.unl.edu is mentioned on the page but was not fetched or evaluated.",
+   "cost": "No paywall encountered",
+   "licensing": "Not stated on pages fetched",
+   "coverage": "Five Nebraska regions; about 400-cow Northern Panhandle example",
+   "refresh": "Annual ('Updated July 2026')",
+   "failure_behavior": "Static template",
+   "recommendation": "Use as the starting category list and as an annual per-cow plausibility check for the fictional data",
+   "url": "https://cap.unl.edu/cattlebudgets/northern-panhandle/"
+  },
+  {
+   "name": "SDSU Extension Beef Cattle Budgets spreadsheet (P-00143-2026.xlsx)",
+   "provides": "South Dakota cost and revenue estimates for six beef enterprises",
+   "access": "Spreadsheet download from the SDSU page. The spreadsheet itself was not opened in this research.",
+   "cost": "No paywall encountered",
+   "licensing": "Not stated on page fetched",
+   "coverage": "South Dakota",
+   "refresh": "Page updated 2026-05-22",
+   "failure_behavior": "Static template",
+   "recommendation": "Optional South Dakota category template; verify category labels by opening the workbook before citing them",
+   "url": "https://extension.sdstate.edu/beef-cattle-budgets"
+  },
+  {
+   "name": "Ranch accounting system export (general ledger by account and month)",
+   "provides": "Actual spend by account and month, with refunds and credits",
+   "access": "Not researched; no vendor documentation fetched",
+   "cost": "Unknown",
+   "licensing": "Unknown",
+   "coverage": "Ranch-specific",
+   "refresh": "Monthly at book close",
+   "failure_behavior": "Fall back to manual CSV entry; missing months show 'actual not entered'",
+   "recommendation": "Define a plain CSV contract (month, category, account, amount, entry_type, basis, closed flag) rather than integrating a specific vendor; the portfolio piece should stay vendor-neutral",
+   "url": "https://extension.okstate.edu/fact-sheets/developing-a-cash-flow-plan"
+  },
+  {
+   "name": "Fuel delivery tickets or tank monitoring for gallons",
+   "provides": "Gallons delivered by fuel type, for the price/volume split",
+   "access": "Manual entry from delivery tickets is assumed. No tank-monitor vendor documentation was researched.",
+   "cost": "Manual: staff time only",
+   "licensing": "n/a",
+   "coverage": "Ranch-specific",
+   "refresh": "Per delivery",
+   "failure_behavior": "No price/volume split; dashboard says 'price vs use unknown'",
+   "recommendation": "Start with manual gallons from tickets. Device integration belongs with the ROI project's evaluation.",
+   "url": "https://extension.msstate.edu/publications/farm-machinery-cost-calculations"
+  }
+ ],
+ "feature_notes": "FUEL: EIA monthly Midwest (PADD 2) diesel retail rose from 3.444 (Jan 2026) to 4.984 (Jun), 4.825 (Jul), 5.417 (Aug) and 6.351 (Sep). Rocky Mountain (PADD 4) followed the same path: 3.255 Jan, 6.155 Sep. Weekly Midwest was 6.259 on 10/12/26, +2.653 vs a year ago (as returned by WebFetch; a direct download was refused by the proxy). A budget priced early in 2026 would show large fuel overruns driven by price alone. Without gallons, the dashboard cannot tell price from use. Extension costing models fuel as quantity x price (MSU P3543: 0.044 gal/hp-hr x hp x hours; ISU A3-27 gal/acre). Farm-use fuel tax credits exist (IRS Form 4136 2024: undyed diesel $.243/gal; gasoline $.183/gal), claimed separately from supplier invoices.\nREPAIRS / FENCE AND EQUIPMENT: repair costs are variable year to year and rise with accumulated hours (ISU A3-30, Edwards 2013; ASABE factors per 100 hours per MSU). Past repair records are the best estimator. Monthly spikes are visible only month by month: fictional Sep Repairs is +$1,080 (60%) while season to date shows 25%. NW Wyoming budget assumes repairing about 10.4 miles and replacing 1.0 mile of fence a year (MP-126.1), relevant to what 'Water and fencing' covers.\nFEED / MINERAL INVENTORY: winter feeding concentrates feed spend (SE WY Jan 1-Apr 30; NW WY Nov 15-Apr 15), so a Jun-Sep window under-represents feed and needs phasing. Supplies and feed inventory changes are accrual adjustments (Penn State, OSU AGEC-753). Prepaying feed near year-end is common for cash-basis tax management, limited to 50% of other deductible farm expenses (ISU CALT; USU Rural Tax Education), which creates cash spikes unrelated to use.\nCALVING / BREEDING and cash timing: calving Mar 20-May 20 (SE WY B-1217). Spring-calving herds see Aug-Sep cash pressure before fall calf sales (Clawson, OSU, WLJ 2024).\nCREW / LABOR: extension budgets separate paid and unpaid family labor (UNL 2026: paid $0, unpaid $60,000 for 400 cows). The dashboard's Labor line should say whether it is cash payroll only.\nBENCHMARK SCALE: ND Farm Management Education 2020 actual per cow: feed and grazing $412, repairs $49.09, vet $40.10, fuel $18.73. UNL 2026: fuel and energy $35/cow, repairs $38/cow, vet $35/cow. KSU 2021 defaults: repairs $50, fuel $20, utilities $14 per cow. ERS (via farms.com) 2024: Northern Great Plains operating costs $952/cow, highest of all regions. The fictional Fuel line (~$25.60/head for four months over 375 head) is high against these annual per-cow figures (inference only). Its credibility depends on haying and hauling activity and 2026 prices, and should be noted as fictional.\nDIAGNOSTICS RUN (observed, no repo files modified): node docs/audit/diagnostics/budget.materiality.research.mjs (existing) and node docs/audit/diagnostics/budget.fuel.pricevolume.research.mjs (new, created by this worker at /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/budget.fuel.pricevolume.research.mjs). Also ran docs/audit/diagnostics/healthbudget.repro.mjs (BU-01..BU-13, all MISMATCH as printed). git diff --stat was empty after the work.",
+ "caveats": "1) No peer-reviewed or extension source was found that validates any percent or dollar threshold for ranch budget-category variance. The 5%/10% bands and every dollar figure here are D-class demonstration settings or C-class ranch choices. The combined percent-and-dollar structure is supported by institutional practice (UW: 10% AND $5,000; U Alberta: 5% OR $100,000) and by audit materiality concepts (PCAOB AS 2105), which are analogies, not ranch research.\n2) The session's shared WebSearch budget (200 per turn) ran out partway through. I could not search for peer-reviewed variance-investigation literature (e.g., cost-variance investigation models), NASS prices-paid fuel data, state (SD, NE, ND) fuel-tax refund rules, or IRS Pub 225 on patronage dividends. Those topics are uncovered, and more searching could be done in a follow-up.\n3) All web content was read through WebFetch, which summarizes pages with a smaller model. Numbers were taken from its output. The EIA weekly table was fetched twice with consistent values, but a direct curl to eia.gov was refused by the egress proxy (403), so the raw EIA files were not independently downloaded. The EIA monthly series URLs were fetched successfully but were not first seen in a search result.\n4) Failed or partial fetches: the NDSU library item (library.ndsu.edu) returned a human-verification page; the NDSU BeefTalk bt559 PDF redirected to an unrelated page and was not followed; the farms.com 2025 Iowa estimates article and the ISU store FM1792 page redirected and were not followed. ISU publications were read via third-party hosted copies (Purdue for B1-21 2016, 'edited'; UVM blog for A3-30). The SDSU spreadsheet and the UNL ABC program were not opened.\n5) ERS region naming differs: the ERS documentation page lists a 'Plains' region (KS, NE, ND, OK, SD, TX) for cow-calf, while the farms.com summary of 2024 data cites 'Northern Great Plains'. Recent ERS files likely use different regions than the documentation page described; this was not resolved.\n6) Several sources are older (KSU 2018 budget priced 2017; Wyoming 2010/2014; ISU 2010/2013/2015/2016). They are used for structure and categories, not current price levels.\n7) The fuel price/volume decomposition is a D-class illustration. budget.csv is fictional and has no gallons, and EIA on-highway prices include road taxes that dyed farm diesel does not pay.\n8) All dashboard data is fictional and must stay labelled fictional. Investment and ROI economics (repair-vs-replace, device payback) were left out as instructed. No health treatment or diagnosis content is included; vet-and-health appears only as a spending category and a link to scheduled-task records.\n9) Repo hygiene: no existing repo file was modified, nothing was committed or pushed, and no hearthbot tool was called. One new diagnostic was created at /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/budget.fuel.pricevolume.research.mjs. The pre-existing /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/budget.materiality.research.mjs and healthbudget.repro.mjs were run, not edited."
+}

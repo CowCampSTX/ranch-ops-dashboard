@@ -1,0 +1,118 @@
+{
+ "verdicts": [
+  {
+   "title": "A pasture_id on an open move that is not in pastures.csv blanks the whole dashboard",
+   "verdict": "confirmed",
+   "evidence": "The code under review is unchanged: `git diff cfd77e5 HEAD --stat -- app.js exceptions.js index.html data scripts tests README.md .github` printed nothing. HEAD is now bff0ba9 and the tree is clean, so the auditor's note that the repro file shows as modified is out of date.\n\nMy own script (scratch v1.mjs) feeds edited CSV text through the real parseCSV and findExceptions:\n- \"F1 open \\\"P9\\\" THREW TypeError: Cannot read properties of undefined (reading 'name')\"\n- \"F1 open \\\"p3\\\" THREW ...\"\n- \"F1 open \\\"P3 \\\" THREW ...\"\n\nIn Chromium on a served copy (vb.mjs): \"B1 open P9 errs=[\\\"Cannot read properties of undefined (reading 'name')\\\"] {asof:\\\"\\\",tiles:0,rows:0,water:0,grazing:false,gain:false,budget:false,rules:0}\". My screenshot (b1_openP9.png) shows every card holding only its static heading and subtitle.\n\nThe cited lines are correct: exceptions.js:57-59 (p = byId[...]; p.name) and app.js:222 (top-level findExceptions, before any render). The regression-test numbers also check out: the baseline has 10 alerts, 1 of them grazing.",
+   "corrections": "High is defensible: one typo hides every alert with no error message. The consequence is overstated, though. The as-of line, the tiles, the chips and all charts are blank too, so the page reads as broken or still loading rather than as an all-clear. The chain from a blank page to \"cattle can go without water\" is speculative. Better wording: \"all alerts, including the critical T4 and T2 tanks, are hidden and the page gives no reason\"."
+  },
+  {
+   "title": "A pasture_id not in pastures.csv on any closed move crashes the timeline; the gain chart, budget chart and rules table never render",
+   "verdict": "confirmed",
+   "evidence": "In Node, findExceptions is unaffected: \"F2 closed P9 total=10 :: [serious] Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)\".\n\nIn Chromium: \"B2 closed P9 errs=[\\\"Cannot read properties of undefined (reading 'pasture_id')\\\"] {tiles:5,rows:10,water:8,grazing:false,gain:false,budget:false,rules:0}\".\n\nThe cited lines are correct: app.js:129 (p = names[mv.pasture_id], no fallback), :140 (p.pasture_id) and :225 (renderers run in sequence). The test's expected count holds: the app.js:204-214 list has 11 entries plus a header row, giving 12 tr, and the baseline showed rules:12.",
+   "corrections": ""
+  },
+  {
+   "title": "The current stay is chosen by blank out_date, ignoring as_of: an out_date after as_of, a future move, or an earlier as_of hides or misplaces alerts",
+   "verdict": "partially-confirmed",
+   "evidence": "All three cases reproduce:\n- \"F3a out_date after as_of total=9 :: (no rows)\"\n- \"F3b as_of Aug 20 total=6 :: (no rows)\"\n- \"F3c future move total=9 :: [critical] Tank T2 (Windmill, Yearlings here now)\"\n\nIn the browser:\n- B4: no Yearlings green bar and red=[].\n- B5: the Yearlings' only green bar is {x:558.9,w:1}, past the plot edge at 550; T2 reads \"Tank T2 (Windmill, Yearlings here now)\".\n\nHand checks hold:\n- Cows went into Cedar Draw Jul 31 on an 18-day plan, due Aug 18, so on Aug 20 they are 2 days over.\n- Heifers in Home Trap since Aug 16 are due Aug 26, and Yearlings in Creek Bottom since Aug 11 are due Aug 25. Both are outside the 2-day grace.\n- x(Oct 3) = 74 + 124/121*476 = 561.8, so the bar's right end is 560.8, as reported.",
+   "corrections": "The code follows its documented data contract. The README says \"the current stay has no out date\", and meta.csv as_of is the export time. Two of the three cases are therefore misuse of the data model:\n- G-06 (moving as_of back to replay an earlier date) is not a supported use. It is a design limitation, not a defect.\n- G-05 and G-07 do expose a robustness gap. as_of is available and ignored, and whoIsThere wrongly says \"Yearlings here now\" on the critical T2 alert.\n\nThe strongest, fully valid part is the action text. \"Record a new move date\" has no column to go in, and the only date column, out_date, silences the alert. Keep severity medium on the strength of the action-text trap and the false \"here now\".\n\nMy browser probe did not log the grey bar's coordinates in B4. Its 560.8 end rests on the arithmetic above together with the auditor's output."
+  },
+  {
+   "title": "A group with two open moves gets a false '15 days over' alert, and the timeline contradicts it; a duplicated row doubles the alert",
+   "verdict": "confirmed",
+   "evidence": "In Node:\n- \"F4a stale open P7 total=11 :: [serious] Yearlings in South Divide | Day 36 of a 21-day plan (15 days over) || [serious] Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)\"\n- \"F4b dup Yearlings total=11 :: ...Sand Hills... || ...Sand Hills...\"\n\nIn the browser (B3): \"red:[{x:491,w:58},{x:538.2,w:10.8}] green(Yearlings row): {x:409.4,w:139.6},{x:456.6,w:92.4} over:[\\\"+3d@549\\\",\\\"+3d@549\\\"]\". The Sand Hills green bar (456.6 to 549) is drawn after the 491-549 red segment and covers it, so the chart shows only \"+3d\".\n\nHand checks: Aug 25 + 21 = Sep 15, which is 15 days before Sep 30, and Aug 25 to Sep 30 is 36 days. x(Sep 15) = 74 + 106/121*476 = 491.0.",
+   "corrections": "There is an extra symptom the auditor did not show. A duplicated Heifers open row garbles the critical T4 alert: \"F4c dup Heifers (T4 subject) ... [critical] Tank T4 (Lone Tree, Heifers and Heifers here now)\". Calling an unclosed previous move \"the most common grazing-log slip\" is an unsupported claim; \"a common slip\" is enough."
+  },
+  {
+   "title": "Groups with no usable current stay drop out silently; a blank in_date also blanks the whole timeline",
+   "verdict": "partially-confirmed",
+   "evidence": "In Node:\n- \"F5a closed, no next total=9 :: (no rows)\"\n- \"F5b blank in_date total=9 :: (no rows)\". grazingStatus gives {\"inDate\":\"\",\"days\":null}, i.e. NaN.\n\nIn the browser (B6): \"consoleErr=[\\\"Error: <line> attribute x1: Expected length, \\\\\\\"NaN\\\\\\\".\\\"] finiteBars:0, nBars:23, months:[Jun@NaN, Jul@NaN, Aug@NaN, Sep@NaN]\" with rows:9. The bar count matches the data: 6 + 10 + 7 = 23 rows in moves.csv.",
+   "corrections": "The blank in_date part is confirmed at medium. One blank cell wipes out all 23 bars and silently drops the planted serious alert.\n\nThe \"no open move\" part (G-08, GB-07) is closer to a design limitation. A closed last stay can legitimately mean the group was shipped or put in a drylot, so a blanket \"no current pasture\" warning would raise false alarms after shipping. The real inconsistency is that the Head on grass tile still reports 375 head while grazing knows of only 2 groups. The fix should be a group status or an off-grass flag, not a blanket warning."
+  },
+  {
+   "title": "min_rest_days is never read: current stays started inside the pasture's own minimum rest go unflagged",
+   "verdict": "design-limitation",
+   "evidence": "min_rest_days has no references in exceptions.js or app.js; the auditor's G-14 also reports 0. My independent Python check over data/moves.csv gives:\n- \"P7 Cows 2026-09-12 rest 6 min 60 SHORT\"\n- \"P4 Heifers 2026-09-19 rest 34 min 45 SHORT\"\n- \"P3 Yearlings 2026-09-06 rest 76 min 60 ok\"\n\nThese match the auditor's hand arithmetic: Aug 16 to Sep 19 = 15 + 19 = 34, and Jun 22 to Sep 6 = 8 + 31 + 31 + 6 = 76.",
+   "corrections": "The code does what its documented rules say. Neither the README nor the rules table claims a rest rule; the README only lists \"minimum rest days\" as a column. So this is a gap in the rule set, not a code defect: change the status from confirmed to design-limitation. Medium stays fair for the credibility cost of a column that is shipped but never used."
+  },
+  {
+   "title": "The example season is not credible as a rotation: two pastures held two groups at once, and 13 of 15 re-entries are short of min rest, none planted or reported",
+   "verdict": "partially-confirmed",
+   "evidence": "My independent Python check found the same overlaps: \"overlaps: [('P2','Cows','Yearlings',2026-07-24,2026-07-31,7), ('P4','Heifers','Yearlings',2026-06-25,2026-07-06,11)]\".\n\nFor sequential re-entries, where the previous out_date is on or before the new in_date, it printed \"re-entries 13 short 11\". That includes \"P5 Heifers 2026-08-26 rest 1 min 45 SHORT\", \"P7 Cows 2026-09-12 rest 6\" and \"P6 Cows 2026-07-31 rest 7\".\n\nThe auditor's restBefore (grazing.repro.mjs:260-263) counts back to the last occupied day. The two entries into a pasture that was still occupied therefore count as 0-day rest, which turns 13/11 into 15/13.\n\nmoves() is at scripts/generate_data.py:49-64, not 51-66. It builds each group's plan independently. The Cows' 22-day P6 stay is hard-coded (\"P6\", 22) and is not in PLANTED.",
+   "corrections": "The numbers need restating as: 11 of 13 sequential re-entries are short of minimum rest, plus 2 entries into a pasture another group still occupied (Windmill Jul 24-30, Lone Tree Jun 25-Jul 5). As written, 13 of 15 counts the overlaps twice. The regression test should expect 2 overlaps and 11 short rests today, not 13. Fix the line reference to generate_data.py:49-64. Severity medium is fair for a portfolio piece."
+  },
+  {
+   "title": "The serious grazing action is a blanket line based only on elapsed days: no escalation, no destination, and 'record a new move date' has nowhere to go",
+   "verdict": "design-limitation",
+   "evidence": "\"F8 in 2026-09-08 ... Day 22 of a 21-day plan (1 day over)\"; \"F8 in 2026-08-10 ... Day 51 ... (30 days over)\"; \"F8 in 2026-06-11 ... Day 111 ... (90 days over)\". All three are serious with the same action text (exceptions.js:120-122).\n\nRest as of Sep 30 for the unoccupied pastures, from my Python check: \"free P1 18/45, P2 Windmill 50/45, P5 21/45, P6 39/45, P8 11/30\". Windmill is the only pasture past its minimum rest, and T2 is in P2 at 11.8% (generate_data.py TANKS; baseline table shows \"Tank T2 (Windmill) Down to 11.8% full\").\n\nThe 90-day overrun checks out by hand: due Jul 2, then 29 + 31 + 30 = 90.",
+   "corrections": "The consequence is overstated. The advice never names Windmill, and the T2 critical row sits in the same table, so \"moving the yearlings there as advised\" is not something the dashboard tells anyone to do. The sentence \"Re-grazing a rested pasture instead breaks min rest\" contradicts itself; it should say \"moving to any other free pasture breaks min rest\". Medium is generous for a missing feature: low to medium."
+  },
+  {
+   "title": "Two groups in one pasture are each judged alone against a single per-pasture plan",
+   "verdict": "design-limitation",
+   "evidence": "\"F9 Heifers join Cows in P7 total=10 :: [serious] Yearlings in Sand Hills ...\": no row names South Divide.\n\nThe auditor's G-17 shows \"Cows day 18 of 21, Heifers day 5 of 21\", which matches the arithmetic Sep 12 to Sep 30 = 18 and Sep 25 to Sep 30 = 5.",
+   "corrections": ""
+  },
+  {
+   "title": "Timeline month ticks are hard-coded to Jun-Sep 2026",
+   "verdict": "confirmed",
+   "evidence": "My browser probes:\n- B9 (2025 season): \"months:[Jun@1512.9, Jul@1630.9, Aug@1752.8, Sep@1874.8]\" in a viewBox \"0 0 560 168\".\n- B10 (Apr 15 move added): \"months:[Jun@210.2, Jul@295.2, Aug@383, Sep@470.8]\", with no May.\n- B8 (first stays moved to Jun 15, so the axis starts Jun 11): \"Jun@34.1\", which is inside the group-name column. By hand: 74 - 10/111*476 + 3 = 34.1.\n\nThe auditor's GB-10 and GB-12 numbers also check by hand: 74 - 14/107*476 + 3 = 14.7, and 74 - 20/121*476 + 3 = -1.7.",
+   "corrections": "The render audit already covers this (render.repro.mjs:308, month lines for a season starting 2026-09-15), so report it once across areas."
+  },
+  {
+   "title": "A group in moves.csv but not in groups.csv is alerted but never drawn on the timeline",
+   "verdict": "confirmed",
+   "evidence": "In Chromium (B7): rows:11, with \"Serious Grazing Bulls in Home Trap Day 29 of a 10-day plan (19 days over)\" in the table, while the timeline rowLabels are only Cows, Heifers and Yearlings.\n\nThe arithmetic holds: Sep 1 + 10 = Sep 11, which is 19 days before Sep 30. app.js:115 builds the rows from groups.csv only.",
+   "corrections": ""
+  },
+  {
+   "title": "Wording: 'Day N' counts the arrival day as day 0, and a move due today reads 'Planned move in 0 days'",
+   "verdict": "partially-confirmed",
+   "evidence": "\"F12a in Sep 9 (due today) total=10 :: [warning] Yearlings in Sand Hills | Planned move in 0 days\" (exceptions.js:124). Sep 9 + 21 = Sep 30.\n\nThe baseline reads \"Day 24 of a 21-day plan (3 days over)\".",
+   "corrections": "The \"Planned move in 0 days\" wording is a real low-severity defect.\n\nThe \"Day 24\" complaint is a matter of convention. Day 24 is consistent with \"(3 days over)\" (24 - 21) and with the tooltip's \"(24 days)\". The auditor admits that \"Day 25 ... (3 days over)\" would look inconsistent. \"Most ranch records count the day they went in as day 1\" is unsupported. Treat it as an optional rewording, not a defect."
+  },
+  {
+   "title": "Bad values produce garbled or fractional alert text (blank planned_graze_days, an in_date with a time)",
+   "verdict": "confirmed",
+   "evidence": "With TZ=UTC:\n- \"F13a in_date with time ... Day 23.75 of a 21-day plan (2.75 days over)\"\n- \"F13b blank planned P3 ... Day 24 of a -day plan (24 days over)\"\n\nWith TZ=America/Denver: \"F13a ... Day 23.5 of a 21-day plan (2.5 days over)\". That confirms the result depends on timezone, because exceptions.js:58 compares a raw in_date, parsed as local time, against as_of.slice(0,10), parsed as UTC.",
+   "corrections": "A related, worse case was missed (reported below). If planned_graze_days holds text such as '21 days' rather than a blank, there is no garbled alert at all: over becomes NaN and the planted serious alert silently disappears (total 9)."
+  },
+  {
+   "title": "Past overstays are never marked on the timeline (Cows: 22 days on an 18-day plan in Cedar Draw)",
+   "verdict": "design-limitation",
+   "evidence": "Browser baseline: red:[{x:538.2,w:10.8,y:106}], over:[\"+3d@549\"]. There is only one mark, on the Yearlings row.\n\nPython over-plan check: \"over plan: ('P6','Cows',2026-07-31,2026-08-22) 22 18\", i.e. Jul 31 + 18 = Aug 18 and out Aug 22, 4 days over. In generate_data.py the plan entry is hard-coded (\"P6\", 22) and is not listed in PLANTED.",
+   "corrections": "Arguably this is a mismatch with documentation rather than a pure design limitation. The card note (index.html:90) and the README both say, without qualification, that \"days past the planned move are marked\". Low severity is right."
+  }
+ ],
+ "missed": [
+  {
+   "title": "Text in out_date or planned_graze_days silently removes the grazing alert and the 'here now' context",
+   "area": "Grazing / input validation (grazingStatus, findExceptions, grazingTimeline)",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "exceptions.js:30 (parseCSV keeps non-numeric text as a string); exceptions.js:56 (!m.out_date treats any text as a closed stay); exceptions.js:119-125 (NaN over fails both tests, so no row); app.js:129-131 (end = '-' gives a NaN bar width)",
+   "repro": "Scripts are in /tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/verify-grazing/. Run `TZ=UTC node v2.mjs` and `TZ=UTC node v3.mjs` (committed CSV text edited and passed through the real parseCSV and findExceptions). The browser probe is vb.mjs, cases M1 and M3. Minimal inputs:\n(a) moves.csv open row 'Yearlings,P3,2026-09-06,-' (or TBD, current, n/a).\n(b) open row 'Heifers,P4,2026-09-19,TBD'.\n(c) pastures.csv 'P3,Sand Hills,720,21 days,60'.",
+   "expected": "- (a) The Yearlings overrun is still reported ('(3 days over)': Sep 6 + 21 = Sep 27) or a data-problem row names the bad out_date. Never silence.\n- (b) T4 still reads 'Tank T4 (Lone Tree, Heifers here now)', or a data row flags the value.\n- (c) A row saying the Sand Hills plan is not a number.\n- In every case at least 10 rows, as on the committed data.",
+   "actual": "- (a) \"Yearlings out_date=\\\"-\\\" parsed=\\\"-\\\" total=9 grazing=[]\". TBD, current and n/a give the same.\n- (b) \"Heifers out_date=\\\"TBD\\\" total=10 T4=\\\"Tank T4 (Lone Tree)\\\"\". The Heifers context is gone, so the existing test 'a water alert names the group drinking there' would fail. In the browser, M1 logs \"Error: <rect> attribute width: Expected length, \\\"NaN\\\"\" and the Heifers' current green bar disappears.\n- (c) \"P3 planned=\\\"21 days\\\" total=9 over=NaN grazing=[]\". In the browser, M3 shows over:[] and red:[]: no '+3d'.\n- By contrast, a blank plan gives the garbled but visible \"Day 24 of a -day plan (24 days over)\".",
+   "consequence": "Typing '-', 'TBD' or 'current' into an open stay's out_date is a common spreadsheet habit. So is writing '21 days' in a plan cell. Either one makes the planted serious overrun disappear. The 'Needs attention' count drops from 10 to 9, and nothing on the page explains why, so the board shows fewer problems than exist. On the Heifers' row it also strips 'Heifers here now' from the critical T4 leak alert, so the crew is not told which group is drinking from the leaking tank. The auditor's 39 cases never put text in these fields. Their blank-plan case (G-11) produces visible nonsense, but these inputs produce silence.",
+   "regression_test": "Hand-computed, on the committed data with as_of 2026-09-30T18:00:\n(1) Yearlings open row out_date '-': assert findExceptions(...).length >= 10, and that some Grazing row mentions 'Yearlings' and matches /3 days over|not a date|out_date/i. By hand: Sep 6 + 21 = Sep 27, 3 days before Sep 30.\n(2) P3 planned_graze_days '21 days': assert length >= 10 and that a Grazing row mentions 'Sand Hills' and matches /plan/i. Also assert no row text matches / -day plan/.\n(3) Heifers open row out_date 'TBD': assert the T4 subject includes 'Heifers', or a Grazing data row names the Heifers' out_date.",
+   "proposed_fix": "Validate dates in grazingStatus with /^\\d{4}-\\d{2}-\\d{2}$/ and a parse check. An out_date that is neither blank nor a valid date should produce a Grazing data-problem row (\"Yearlings: out_date '-' isn't a date; leave it blank for the current stay\") instead of being treated as closed. Likewise, require planned_graze_days to be a positive number or emit \"No usable plan for Sand Hills\". In grazingTimeline, skip invalid rows and show a visible note. This shares a root cause with the auditor's blank-in_date and blank-plan findings, so one validation pass in grazingStatus fixes all of them.",
+   "effort": "S"
+  },
+  {
+   "title": "No test covers the grazing rule boundaries: changing the serious or grace thresholds still passes the suite",
+   "area": "Grazing / test coverage",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "tests/exceptions.test.mjs:17 and :57 (the only grazing assertions); exceptions.js:120 (over > 0), :123 (over >= -R.graceDays), :121 and :124 (plurals)",
+   "repro": "Copy exceptions.js, data/ and tests/ into a scratch dir (/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/verify-grazing/mut/repo), apply one mutation at a time to the copy of exceptions.js, then run `node --test repo/tests/exceptions.test.mjs`.",
+   "expected": "At least one test fails for each boundary mutation, as the water rules have in 'water rules at their thresholds'.",
+   "actual": "\"MUTANT: over >= -R.graceDays|over > -R.graceDays  # pass 8 # fail 0\"\n\"MUTANT: if (over > 0)|if (over >= 0)  # pass 8 # fail 0\"\n\"MUTANT: over === -1 ? \\\"\\\" : \\\"s\\\"|\\\"s\\\"  # pass 8 # fail 0\"\n\"MUTANT: over === 1 ? \\\"\\\" : \\\"s\\\"|\\\"s\\\"  # pass 8 # fail 0\"\nThe only mutant caught was the one that widens the grace window by 5 days (\"# pass 7 # fail 1\"), and only through the total-count test.",
+   "consequence": "A change to RULES.graceDays or to the comparison could flag cattle as over plan on the day the move is due, or cut the 2-day heads-up to 1 day, and CI would stay green. The README's claim of 'rule thresholds' tests is true only for water. For a portfolio piece built on 'every threshold is one a manager would act on', the grazing threshold is the one with no test.",
+   "regression_test": "Add 'grazing rules at their thresholds'. Use a single open Sand Hills move (P3, plan 21) with as_of 2026-09-30T18:00 and assert:\n- in_date 2026-09-08: one serious row containing '(1 day over)' (Sep 8 + 21 = Sep 29).\n- 2026-09-09: one warning row, not serious (due Sep 30, the as-of date).\n- 2026-09-10: a warning with 'Planned move in 1 day' (due Oct 1).\n- 2026-09-11: a warning with 'Planned move in 2 days' (due Oct 2).\n- 2026-09-12: no Grazing row (due Oct 3, 3 days away).",
+   "proposed_fix": "Add the threshold test above to tests/exceptions.test.mjs, mirroring the existing water threshold test.",
+   "effort": "S"
+  }
+ ]
+}

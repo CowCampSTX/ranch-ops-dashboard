@@ -1,0 +1,239 @@
+{
+ "checked": [
+  {
+   "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "no",
+   "notes": "I fetched it three times. Every quoted claim was found. Sec 4.4 (pp.46-47): 'To establish immunity, almost all products recommend a second vaccination two (2) to four (4) weeks after the initial vaccination.' p.42 (also p.11): 'Follow all FDA/USDA/EPA guidelines and label directions for each product.' Sec 6.2 (pp.14-15) lists the individual record items, and group treatments record 'Group or lot identification' plus the same items. p.15: 'Keep records for a minimum of two years or longer as required by laws/regulations'. Ch.2 Temperature Conditions (pp.26-27): 'work them before the temperature humidity index (THI) reaches 84', 'Avoid handling cattle when the risk of heat stress is high', and 'Work cattle more prone to heat stress first, earlier in the day'. p.48: 'A VCPR cannot exist based solely on phone, video, or other telemedical interactions.' p.45: vaccines 'have either a 21 or 60 day withdrawal time'. p.42: VFD records are kept two years. Sec 4.3: 'Booster vaccinations as indicated in the herd health plan', 'Always read and follow label directions' and 'Keep records of all products administered including date, animal identification, product used, serial number, amount administered, route...'. Sec 4.5 (titled 'Judicious Use of Antimicrobials', not VCPR): protocols 'define when to quit treating and seek professional help'. Small drifts: the processing map (Sec 1.7.2, p.10) records 'where each injection was given', which is not 'how much'. The research cites the field guide for the withdrawal and sale point, but the manual gives stronger support: 'Verify withdrawal on any animals being sold' and 'Employ strict adherence to pre-harvest withdrawal periods'. METADATA PROBLEM: the PDF names no publisher. It shows only 'Funded by Beef Farmers and Ranchers'. NCBA's own release confirms that NCBA is a contractor to the Beef Checkoff. Its newest data are the 2016 NBQA, a 2018 'Unpublished' footnote and data for '1998 to 2017', which points to an edition from about 2019. NCBA announced an updated manual on 2024-12-19. The research's 2025-01-06 date is that of the trade-press reprints. bqa.org/resources/manuals now links bqa-national-manual-2026.pdf and does NOT link bqa_manual_final.pdf. The cited file is therefore very likely a superseded edition. My two fetches of the 2026 manual both failed with CLIENT_ERROR, so I could not confirm that the 2-4 week, THI 84, record-item, retention and VCPR wording is still in the current edition."
+  },
+  {
+   "url": "https://vetext.vetmed.ucdavis.edu/sites/g/files/dgvnsk5616/files/local_resources/pdfs/pdfs_beef/cca0810-booster-vaccines.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Booster Vaccines' by John Maas, DVM (UC Davis Extension Veterinarian), UCD Vet Views column in California Cattlemen's Magazine, October 2008. All three phrases appear verbatim: USDA 'will determine if the data meets their approval requirements. This will include the need for booster doses if appropriate'; 'The need for booster doses will therefore, be on the label and should be followed'; 'the vaccine will probably not stimulate an effective immune response'; and 'The best source of vaccine information is from your cattle veterinarian.'"
+  },
+  {
+   "url": "https://extension.sdstate.edu/springtime-vaccines-tools-healthy-summer-calves",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "By Russ Daly, SDSU Extension Veterinarian. The page states no publication date and shows 'Updated June 10, 2020', which matches the research. Verbatim: 'Some vaccines, especially killed vaccines, require booster doses.' Pay attention to the label. Bringing calves off pasture for a booster is hard for many producers. Branding or turnout is a logical time to work calves. Discuss changes to a vaccine program with the local veterinarian first."
+  },
+  {
+   "url": "https://www.ag.ndsu.edu/news/newsreleases/2025/july/summer-brings-raised-pinkeye-concerns-in-cowherds",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Dated July 2, 2025, NDSU Agriculture Communication. Galbreath and Quail are the quoted sources, not bylined authors. Verbatim: 'closely checking cattle in pasture and dry lot environments'; 'The first signs of pinkeye occur 12 to 72 hours after exposure.'; 'This progression can take place over just a few days'; irritants include 'blowing dust, ultraviolet light and physical trauma from grazing coarse forages or tail switching when crowded'; medications and dosing chosen 'in consultation with their veterinarian'; 'Records of affected cattle should be kept so that any potential retained breeding stock can be evaluated.' Early signs are watery eyes or face staining, then squinting, then a cloudy spot. This supports in-pasture observation. It does not describe gathering cattle for the check."
+  },
+  {
+   "url": "https://www.ag.ndsu.edu/news/newsreleases/2020/july-6-2020/consider-pregnancy-testing-beef-cattle-early",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "By Block, Hoppe and Stokka, NDSU Ag Communication. The URL and breadcrumb give July 6, 2020 and the dateline gives July 9, 2020, as the research says. Verbatim: 'as early as 30 to 45 days after the end of the breeding season'. Ultrasound about 30 d post-breeding, palpation 1-2 weeks later, blood tests 25-30 d post-breeding and 60-90 d post-calving. 'Producers should consult their veterinarian' on method. 'producers should minimize handling, transportation and heat stress' (the source has no comma before 'and'). An additional pregnancy check before winter feeding programs begin."
+  },
+  {
+   "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_field-_guide.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "no",
+   "notes": "Verbatim: 'Always follow label directions, including either 21- or 60-day withdrawal assigned to all USDA approved vaccines.'; 'Booster all vaccines when label requires it.'; 'Keep all records for at least two years from the date of transfer or sale of cattle.'; 'Record all treatments: date, animal ID, serial/lot number, dose given, route of administration,' plus person and withdrawal time; 'consult pharmaceutical, veterinary, or screening test experts to determine status of animal before it is offered for sale.' The only year in the document is the NRC 1996 table credit, which is correct. METADATA PROBLEM: this file is not linked on bqa.org/resources/manuals, which now carries bqa-field-guide-2026.pdf, so it is very likely superseded. A partial fetch of the 2026 field guide words these points differently. Retention: 'The BQA program recommends keeping records for a minimum of two years, or longer as required by laws/regulations'. Withdrawal: '21 days for non-oil adjuvant or water-based and 60 days for oil adjuvant'. The line 'Booster all vaccines when label requires it' was not in the visible (truncated) text."
+  },
+  {
+   "url": "https://vet.ucalgary.ca/sites/default/files/teams/9/BCRC%20Vaccine%20Project%20-%20Clostridial%20Vaccination%20Guidelines.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "unverifiable",
+   "notes": "Verbatim: 'Vaccines should always be given according to label instructions.' and 'Specific recommendations for your operation should be discussed with your veterinarian.' The document says nothing about a missed or exceeded booster interval, which matches the research. It also gives the booster series as 2 doses 'at least 3 weeks apart' (cows/bulls) or '3 weeks apart' (stockers, replacement heifers). The research does not cite this, but it supports the window concept. The document has no title, publisher or date in its text and is headed only 'CLOSTRIDIAL BACTERIA'. The BCRC/UCalgary attribution comes from the filename and host only, as the research disclosed."
+  },
+  {
+   "url": "https://extension.okstate.edu/fact-sheets/pinkeye",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "VTMD-9128, October 2016. The byline spells 'Bioleau' and the bio spells 'Boileau'. The co-authors are Lalman and Whitworth. Verbatim: 'excessive tearing and squinting are the initial clinical signs' and 'Pinkeye rarely affects just one animal, but spreads throughout the herd.' Incubation is usually 2-3 days (up to 3 weeks in experimental trials). Keep current health records to 'identify cattle that repeatedly become infected'. Paraphrase drift: the source says infection 'can range from a few cases up to 80 percent of the herd', with cases usually peaking in the 3rd-4th week of an outbreak. It does not say 80% of the herd is affected 'at the peak of an outbreak'."
+  },
+  {
+   "url": "https://beef.unl.edu/beefwatch/2021/do-not-let-pinkeye-decrease-efficiencies-summer-grazing",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "By Connor Biehler, August 1, 2021. Verbatim: 'address symptoms (tearing, squinting, and blinking) immediately'; 'The occurrence of pinkeye increases in the spring and peaks in the summer months before decreasing in the fall.' On tags, the optimal time 'usually falls after vaccinating and de-horning', and that work typically happens about 60 days before fly season. Vaccine timing 'should be discussed well in advance with your veterinarian.'"
+  },
+  {
+   "url": "https://beef.unl.edu/beefwatch/2023/face-flies-pastured-cattle",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "By Dave Boxler, June 1, 2023. Verbatim: 'populations usually peak in late July, August, and early September'; once 'day length falls below 12.5 hours, both sexes aggregate on sunny sides'; 'serious ocular lesions that mimic the symptoms of bovine pinkeye' (from 1-5 face flies per eye per day)."
+  },
+  {
+   "url": "https://www.ag.ndsu.edu/news/newsreleases/2024/may/controlling-flies-on-cattle-requires-proper-timing",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "May 22, 2024, with Stokka, Tobin and Hoppe as sources. Supported: horn and face flies 'typically are not present at pasture turnout'. Tags go in near the economic threshold, typically mid-June to July. 'When fly counts reach 200 flies per animal, the economic threshold has been reached.' Remove tags 'when they no longer provide effective fly control'. Scout and monitor. Face flies 'tend to peak in late summer'. Over-specified: the data_fields entry fly_count_per_animal says 'horn flies per animal', but the article names no species for the 200 figure."
+  },
+  {
+   "url": "https://www.ag.ndsu.edu/news/newsreleases/2017/sept-25-2017/pinkeye-infecting-some-n-d-cattle",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "The URL and breadcrumb give Sept. 25, 2017 and the footer gives Sept. 27, 2017. Sources are Stokka, Webb and Dyer. Verbatim: 'pinkeye has been infecting cattle in some herds'; 'Symptoms of pinkeye include teary eyes', 'squinting and aversion to bright light'; 'Producers should contact their veterinarian or the VDL'."
+  },
+  {
+   "url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "The Processing/Treatment Map has these fields: 'DATE:', 'TIME:', 'No. of Head :', 'ID: Right Ear or Left Ear/ Group Number:', 'Product', 'Lot or Serial # Supplier', 'Route of Admin', 'Dose', 'Withdrawal Time (WD)', 'Crew Initials', 'Owner Signature', and 'Veterinarians Signature:' with Phone. There is no date. KLA is not named in the text, which refers to 'KS-BQA' and 'the Kansas Beef Quality Assurance program'. The research disclosed 'per URL'. The data_fields reuse of this form is a stretch in two places. 'Crew Initials' records who did the work, not who owns an upcoming task (field 'responsible'). 'No. of Head' is the head processed, not the head planned (field 'head_planned')."
+  },
+  {
+   "url": "https://extension.okstate.edu:443/programs/beef-extension/oklahoma-beef-quality-assurance/site-files/documents/health-treatment-record.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Column headings as extracted: 'ID/Group Description', 'Date of Treatment', 'Comments/Symptoms/Temperature', 'Product Used', 'Serial/Lot Numbers', 'Route and Location', 'Administration & Dosage', 'Date of Withdrawal', 'Person Giving Treatment'. The research's 'Product Used Lot Numbers, Serial/Route and Location' is a line-split garble, but its substance is right. No publisher or date appears, and the form is captioned 'Figure 22 - Example of a treatment record for cattle', so it is an excerpt from a larger manual. The form also says 'Keep This Record for 3 Years', longer than the 2-year BQA minimum. The research did not mention this. It is relevant to the retention rule."
+  },
+  {
+   "url": "https://www.uaex.uada.edu/farm-ranch/animals-forages/beef-cattle/Beef%20Herd%20Health%20Record_V2.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Treatment record columns: 'Group and(or) Individual', Date, ID(1), ID(2), Purpose, Product Name, Lot, Expiration, Dose, Withdrawal. The header has 'BQA Number' and 'Premise ID'. The publisher is inferred only from the University of Arkansas System Division of Agriculture nondiscrimination notice. The form is undated."
+  },
+  {
+   "url": "https://bovine-ojs-tamu.tdl.org/AABP/article/view/8283",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'FARAD: How we respond to withdrawal inquiries' by Maunsell, Baynes, Foster, Riviere, Davis, Jaberi-Douraki and Tell. AABP 2021 Annual Conference Proceedings, pp. 9-11, published 2021-10-09. FARAD gives WDI advice 'following extralabel drug (ELDU) administration to food animals by veterinarians'. 'In some circumstances, such as ELDU specifically prohibited by FDA, FARAD is unable to provide a WDI.' 'Professional FARAD staff at 3 call centers respond to WDI requests.' Cost is not mentioned, which matches the integration entry's 'Not stated'."
+  },
+  {
+   "url": "https://www.fda.gov/animal-veterinary/product-safety-information/veterinarian-client-patient-relationships-prescribingdispensing-animal-drugs-and-telemedicine",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Content current as of: 09/04/2024'. The title has no comma before 'and Telemedicine', a trivial difference. Verbatim: 'A veterinarian must have an established VCPR to prescribe the extralabel use of approved animal or human drugs'. 'For a VFD drug, a veterinarian must issue the VFD in the context of a VCPR as defined by the State', so the VFD VCPR can be state-defined. 'for the purposes of the federal definition, a valid VCPR cannot be established solely through telemedicine'. 'States may have additional requirements.'"
+  },
+  {
+   "url": "https://newsroom.unl.edu/announce/beef/8200/47172",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Heat Stress: Handling Cattle Through High Heat Humidity Indexes' by Rob Eirich and Mariah Woolsoncroft, BeefWatch Aug 1, 2018. The page is marked archived. Verbatim: 'Plan to handle cattle before 8:00 a.m. and never after 10:00 a.m. during summer months.' Core temperature peaks about 2 h after the environmental peak and takes 4-6 h to return to normal. Holding should not last much longer than 30 minutes, with smaller groups. It also says evening handling will not reduce heat-stress risk, which contradicts the 2016 piece."
+  },
+  {
+   "url": "https://ianrnews.unl.edu/extension-educator-offers-tips-handling-cattle-hot-weather",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Originally published May 31, 2016 (IANR News / Nebraska Today). No writer is named. Rob Eirich is quoted, so '(R. Eirich)' identifies the source, not the author. Verbatim: 'Plan to handle cattle before 8 a.m. and never during daylight hours after 10 a.m.' and 'Work cattle slowly and use low-stress handling techniques.' Hold cattle about 30 minutes or less and work them in small groups. It also says 'Handling cattle in the early morning and evening will reduce the risk of heat stress', which confirms the conflict with 2018 that the research noted."
+  },
+  {
+   "url": "https://www.ars.usda.gov/plains-area/clay-center-ne/marc/documents/heat-stress/forecastingheatstress/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Last modified 8/12/2016. Uses 7-day NWS forecasts of temperature, humidity, wind speed and cloud cover. Categories: Normal <90 bpm, Alert 90-110, Danger 110-130, Emergency >130, with the equation stated for temperatures above 80F. The model estimates breathing rate for 'cattle in a feedlot' and 'cannot predict individual animal stress levels'. The model papers are Brown-Brandl et al. 2005 and Eigenberg et al. 2005. The sample solar data are from Clay Center, 5 July 2001. The page describes no public feed or API and shows a 'Website Update in Progress' banner. Coverage is not defined. All of this matches the research."
+  },
+  {
+   "url": "https://livestock.extension.wisc.edu/articles/cattle-handling-and-stockmanship-influence-on-animal-performance",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "By Bill Halfman, UW-Madison Extension, 'originally published in the Wisconsin Agriculturist'. No article date is given, as the research said. Reinhardt, Busby & Corah 2009, JAS 87:3030-3042: 'over 20,000 head' in the Tri-County Steer Futurity, 2002-2006. More excitable cattle had lower gain, HCW, quality grade and marbling. Steer ADG was 3.6/3.5/3.3 lb/d by disposition score. Dewell et al. 2019, Bov Pract 53(1):71-80: abruptly weaned feeder cattle gained '2.92 lb/day vs 2.70 lb/day (P=0.01)' from day 19 to 95. Woiwode 2016 is given with no numbers, and the reference list spells it 'Woide'. All of this is feedlot or feeder data, as the research's limitation says."
+  },
+  {
+   "url": "https://beef-cattle.extension.org/what-is-causing-my-cattle-to-die-suddenly",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Verbatim: 'it is very important that any time an animal dies a necropsy is performed' and 'Meanwhile, more animals may die.' A veterinarian uses 'the necropsy findings along with history' to diagnose. No author, publisher or date appears in the content. The eXtension attribution comes from the domain only."
+  },
+  {
+   "url": "https://beef.unl.edu/beefwatch/2023/investigating-cause-cattle-abortions-when-involve-your-veterinarian-and-what-happens/",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "By Hille and Steffen, November 1, 2023. Verbatim: 'we suggest a 2-2.5% rate of mid to late term abortions to be expected for the average herd in Nebraska'; thresholds 'range widely from ~2% - 8%'; 'You will need to develop a threshold for concern based on past experiences'; 'If in doubt, call and discuss the situation with your veterinarian'; record 'breeding dates, pregnancy dates, and birth dates'. Paraphrase drift: the source says 'Keep the carcass cool until it can be examined by your veterinarian or shipped to the diagnostic lab' and to obtain the placenta when possible. It does not explicitly say to keep the placenta cool."
+  },
+  {
+   "url": "https://regulations.justia.com/states/south-dakota/title-12/article-12-68/chapter-12-68-03/section-12-68-03-09",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Current through Register Vol. 51, page 149, June 23, 2025'. Reports are made by 'licensed accredited veterinarians and by all diagnostic laboratories who diagnose diseases on this list', 'immediately by telephone, fax, or writing'. 'The board shall publish a list of reportable and quarantinable diseases each year on July 1.' The section places no duty on producers."
+  },
+  {
+   "url": "https://aib.sd.gov/veterinarians.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Links 'List of Reportable Diseases' (PDF). Gives State Veterinarian Mendel Miller, DVM, (605) 772-3321, with after-hours numbers. Describes no reporting procedure for producers. The page has no overall date, only dated attachments such as 'Nov 2024' and 'SD 2025'."
+  },
+  {
+   "url": "https://www.law.cornell.edu/cfr/text/21/530.3",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Paragraph (i) conditions are confirmed. (1) The veterinarian 'has assumed the responsibility for making medical judgments regarding the health of (an) animal(s)' and the need for treatment. (2) 'sufficient knowledge ... to initiate at least a general or preliminary diagnosis'. (3) Readily available for follow-up. The relationship 'can exist only when the veterinarian has recently seen and is personally acquainted with the keeping and care' of the animals, through examination and/or 'medically appropriate and timely visits to the premises'. The page is undated. Note that 530.3 is the definitions section for Part 530 (extralabel drug use), which matters for the wording-rule classification below."
+  },
+  {
+   "url": "https://atwork.avma.org/resources-tools/pet-owners/petcare/veterinarian-client-patient-relationship-vcpr",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Lists 'The veterinarian is readily available for follow-up evaluation' and 'Patient records are maintained'. The Model Act definition 'is now different from that embodied in federal regulation 21 CFR 530.3(i)'. 'individual states may wish to more clearly define specific terms', with 'timely' as the example. The Section 5 commentary was added in 2003 and subsections were revised in 2012. The page names no publisher and no date, as disclosed."
+  },
+  {
+   "url": "https://www.aphis.usda.gov/sites/default/files/beef-2017-part2.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Beef Cow-calf Health and Management Practices in the United States, 2017' (Report 2), USDA APHIS VS CEAH NAHMS. Cover May 2021, suggested citation year 2020, 24 states, data year 2017 (questionnaire Jan-May 2018). 'Overall, 80.7 percent of operations used the services of a veterinarian for their cattle in 2017', and 98.4% for large operations (I.D.4). 74.5% vaccinated any cattle (I.B.1.a). 20.8% vaccinated against pinkeye (the table label returned as 'B.1.c'). The fetch also returned a sample of 262 operations. I did not cross-check that figure and the rules do not use it."
+  },
+  {
+   "url": "https://www.govinfo.gov/content/pkg/FR-2024-05-09/html/2024-09717.htm",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Use of Electronic Identification Eartags as Official Identification in Cattle and Bison', APHIS, 89 FR 39540 (May 9, 2024), effective November 5, 2024. Eartags applied on or after that date must be 'both visually and electronically readable'. The rule does not change which classes are covered. It lists the existing ones: 'all sexually intact cattle and bison 18 months of age or over', dairy cattle, rodeo/recreational animals, and show/exhibition animals. Beef feeders under 18 months and direct-to-slaughter cattle are exempt. '840 is the country code for the United States.' I read only the first 100k of 132k characters."
+  },
+  {
+   "url": "https://www.weather.gov/documentation/services-web-API",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "These integration claims are supported verbatim: 'intended to be open data, free to use for any purpose'; 'A User Agent is required to identify your application'; it 'will be replaced with an API key in the future'; 'The rate limit is not public information', retry 'typically within 5 seconds'; 'cache-friendly approach'; /points/{lat},{lon} gives forecastHourly and forecastGridData over seven days; gridX/gridY 'and even the office ... may occasionally change'. Not supported: the data_fields entry forecast_thi_hourly cites this page for 'update_frequency: several times daily (NWS forecast)', but the page states no forecast update frequency. The integration entry itself correctly says 'not stated'. The page does not state coverage beyond NWS Weather Forecast Office grids (about 2.5 km)."
+  },
+  {
+   "url": "https://help.cattlemax.com/article/546-herd-health-preset-treatments-booster-and-withdrawal",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Herd Health, Preset Treatments, Booster and Withdrawal', last updated September 17, 2025 (the research gives no date). Verbatim: the 'booster date calculated and the animals and their boosters will be added to the Booster tab'; 'put the number of days in the withdrawal box'; animals within withdrawal are 'shown on the Withdrawal tab'; dates are 'automatically calculated when the Update button is clicked'. The article does not mention CSV export, an API or cost, as the research said."
+  },
+  {
+   "url": "https://icalendar.org/iCalendar-RFC-5545/3-6-2-to-do-component.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "This is RFC 5545 section 3.6.2, To-Do Component, an HTML conversion of the IETF text. VTODO allows dtstart, completed and status (each at most once) and due. 'due' and 'duration' MUST NOT both occur. This supports the mapping window_start to DTSTART and window_end to DUE. I did not check the value-type rules for COMPLETED here."
+  }
+ ],
+ "classification_disputes": [
+  "The PROPOSED wording rule ('Never state a diagnosis, cause, drug, dose or treatment') is classified A-supported-general, which is too generous. 21 CFR 530.3(i) is the definitions section for Part 530, which covers extralabel drug use. It defines when a VCPR exists. It does not govern what a producer or a ranch tool may say about a condition. The fetched extension sources teach producers to recognize pinkeye: OSU VTMD-9128, NDSU 2017 'Symptoms of pinkeye include teary eyes' and NDSU 2025. NDSU 2025 has producers choose medications 'in consultation with their veterinarian'. Only the narrow sub-rule is A: prescription, extralabel and VFD decisions need a VCPR. 'Never name a condition or cause' is a product-scope and liability choice for this dashboard, so it should be C.",
+  "The PROPOSED rule 'append-only completion history, retain at least 2 years' is classified A. The 2-year minimum retention is A, supported by the BQA manual p.15 and the field guide. The Oklahoma BQA form says 'Keep This Record for 3 Years', which fits 'at least'. 'Append-only' and 'do not overwrite last_done' are data-model design choices that no source mentions, so that part should be C. The retention quote also comes from a BQA edition that is likely superseded (see below).",
+  "The PROPOSED BQA-style completion record ('can be marked done only with...') is classified A, which is partly too generous. The BQA product-record items are A (manual Sec 6.2). Three parts are not BQA guidance: (a) head_done comes from the KS-BQA form, not the BQA manual's required list; (b) blocking 'done' until the record is complete is a dashboard design choice; (c) the minimum record for observation-only tasks (date, observer, findings) is not sourced. Those parts are C. BQA is also a voluntary certification program, so 'required' means required by BQA practice, not by law. VFD and extralabel records are the legal exceptions.",
+  "The PROPOSED escalate-to-vet triggers are classified B. Trigger (c), 'signs recorded in more than one animal of a group', has no source that sets it as a call-the-vet threshold. OSU and NDSU only say pinkeye spreads through a herd. That trigger is C. Trigger (a), necropsy on every death, is supported by eXtension, and trigger (b), an abortion baseline, by UNL 2023, so both stay B.",
+  "The PROPOSED fly-season observation rule is classified B. Its default trigger, 'any head with eye signs gives Call your veterinarian', is a ranch or vet choice. The sources say to act immediately (UNL 2021) and to treat 'in consultation with their veterinarian' (NDSU 2025). None says to call the veterinarian whenever one animal has watery eyes, and OSU notes some cattle seem more tolerant. The N-day interval is also C, which the research already concedes. The supporting data field calls the NDSU 200-fly threshold 'horn flies per animal', but the article names no species.",
+  "The PROPOSED label/vet window rule is classified B. The window idea is supported: BQA's 2-4 weeks and BCRC's 'at least 3 weeks apart'. The severity choice, serious with an escalate-to-vet action when window_end has passed, is not sourced. No fetched source defines a label 'window_end' or what to do after a missed booster, which the research admits. The escalation wording is a reasonable design choice (C) that rests on UC Davis 'best source ... is your cattle veterinarian', not on B-level guidance.",
+  "The CURRENT rule 'blank next_due or non-exact status skipped silently' is classified C-ranch-management-choice. This is not too generous, but it is mis-framed. Silently dropping open tasks is a data-integrity defect, not a ranch management choice, and the research itself says 'Configurable: No for the visibility principle'. The cited BQA record-keeping text does not address dropped tasks either.",
+  "This is an evidence-currency issue that affects every rule that leans on BQA (the window, completion record, withdrawal, heat check and retention rules). The cited bqa_manual_final.pdf and bqa_field-_guide.pdf are no longer linked from bqa.org/resources/manuals, which now carries 2026 editions. NCBA announced an updated manual on 2024-12-19. The cited manual's newest data are the 2016 NBQA and a 2018 footnote. The current 2026 manual could not be fetched, so none of these A or B classifications is verified against the current edition. The 2026 field guide, read in part, still has the 2-year retention and words the 21/60-day vaccine withdrawals by adjuvant type."
+ ],
+ "summary": "I fetched all 32 unique URLs with WebFetch and every one was reachable. None was blocked. I also fetched the NCBA release and bqa.org/resources/manuals to check the edition of the BQA manual. The research is accurate on the whole. Nearly every quoted phrase and number was found in its source: BQA 2-4 weeks, THI 84, 2-year retention, the record items and the VCPR telemedicine sentence; UC Davis on boosters; NDSU 12-72 h and 200 flies per animal; UNL 12.5 h day length, 2-2.5% abortions with a 2-8% range, and the 8/10 a.m. handling times; NAHMS 80.7%, 98.4%, 74.5% and 20.8%; Reinhardt (over 20,000 head, 2002-2006); Dewell 2.92 vs 2.70 lb/d; FARAD's 3 call centers; SD ARSD reporting immediately with a list each July 1; and the EID rule effective 2024-11-05.\n\nProblems found:\n(1) Both BQA PDFs cited are very likely superseded editions. Neither is linked on bqa.org/resources/manuals, which now lists bqa-national-manual-2026.pdf and bqa-field-guide-2026.pdf. NCBA announced the updated manual on 2024-12-19; 2025-01-06 is the date of the trade-press reprints. The cited manual's newest data are the 2016 NBQA and a 2018 footnote. Both of my fetches of the 2026 manual failed with CLIENT_ERROR, so the BQA-based claims are not verified against the current edition. A partial read of the 2026 field guide still has the 2-year retention and words the 21/60-day withdrawal by adjuvant type.\n(2) There are small paraphrase drifts. OSU's '80% at the peak' is really 'up to 80 percent of the herd' with cases peaking in the 3rd-4th week. UNL 2023 says to keep the carcass cool, not the placenta. NDSU's 200-fly threshold names no species, but a data field calls it horn flies. The BQA processing map records where injections went, not 'how much'.\n(3) Some data_fields evidence_url links do not support the field. weather.gov states no forecast update frequency, yet the field cites it for 'several times daily'. The KS-BQA form's 'Crew Initials' and 'No. of Head' record who did the work and how many head were worked, not task ownership or planned head. BQA is also cited for task_id and status vocabularies, and 21 CFR 530.3 for the task label and vet contact fields. Those sources do not address these fields.\n(4) There are minor metadata points. UNL IANR 2016 names no writer (Eirich is quoted). The Calgary/BCRC PDF has no title or publisher in its text. CattleMax was last updated 2025-09-17. The Oklahoma BQA form says 'Keep This Record for 3 Years', which the research omitted.\n\nClassification disputes:\n- The wording rule (A) should be C. 21 CFR 530.3 is a definition for extralabel drug use, not a rule about dashboard wording.\n- Append-only retention and the completion-record gate are A only for the BQA items. The data-model and gating choices are C.\n- Escalation trigger (c) and the fly-season 'call vet on any head' default are C.\n- The window rule's escalation severity is not sourced.\n\nI modified no repo files and wrote nothing outside the checked fields. I created only the empty scratch directory /tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/cite-health. The permission classifier denied my Bash call to the proxy status endpoint, so I used no curl. All quotes come from WebFetch's model summaries."
+}

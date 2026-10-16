@@ -1,0 +1,770 @@
+{
+ "topic": "Grazing rotation rules for Northern/Central Great Plains rangeland (SD, NE, ND, WY, KS): an evaluation of the dashboard's day-count grazing rules and the unused min_rest_days, against NRCS CPS 528 and extension and peer-reviewed guidance. Researcher label: research-grazing.",
+ "rules": [
+  {
+   "rule": "CURRENT: Serious when an open stay's days in pasture (as_of date minus in_date) is more than the pasture's planned_graze_days (exceptions.js, grazing block of findExceptions: over = g.days - g.planned; over > 0 gives 'serious'). The threshold is hard-coded; RULES has no setting for it.",
+   "decision_supported": "Move the group now, or check the grass and record a new move date.",
+   "required_inputs": "moves.csv (group, pasture_id, in_date, empty out_date), pastures.csv planned_graze_days, meta.csv as_of. No forage, residual, growth-stage, herd-size or water input is used.",
+   "context": "Any rotational system with a written plan. A planned day count is a legitimate scheduling tool. It is a weak proxy for plant impact because the forage a group removes depends on herd size and animal size (AU), production that year (driven mostly by April to June rain), and growth rate (fast vs slow).",
+   "classification": "C-ranch-management-choice",
+   "evidence": "OBSERVED (ran `node docs/audit/diagnostics/grazing.rest.research.mjs` and `node docs/audit/diagnostics/grazing.forage.research.mjs`): on the committed data the rule raises exactly one grazing row: \"[serious] Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)\". The plan is per pasture, not per stay or herd: \"P4 Lone Tree: one planned 14-d stay = Heifers 22 AUM, Yearlings 48 AUM (x2.2)\" and \"P2 Windmill: one planned 18-d stay = Cows 123 AUM, Yearlings 62 AUM (x2.0)\" (AUE values assumed from NDSU R1810). Closed stays also deviate without being recorded as a problem: \"Cows (180 hd) in P6 Cedar Draw 2026-07-31..2026-08-22: 22 d vs plan 18 d (+4)\". GUIDANCE: NRCS SD Range Tech Note 9 (Apr 2017) p.4: \"Livestock movements should be based on plant growth and utilization and not calendar dates.\" and \"Calendar dates may be used as a guide when developing grazing schedules.\" SDSU MC-04340: \"movement to the next pasture should follow plant growth \u2013 not the calendar.\" UNL G1908: move livestock when a predetermined criterion such as a stubble height is reached. CARM (Augustine et al. 2020) used a maximum days-in-pasture limit only alongside minimum-biomass thresholds and cattle-behaviour checks; the limit was dropped in 2015 and set to 14\u201321 days by 2018. CPS 528 (June 2025) asks for monitoring that 'documents decisions based upon ecological triggers and thresholds'.",
+   "limitations": "Elapsed days do not measure the plants. The same 14-day plan removes about 2.2x more forage with 150 yearlings than with 45 heifers. A dry year gives less forage for the same days (TR 1734-3: light use in a drought year can look like heavy use in a wet year). During fast growth, a long stay lets cattle regraze regrowth before the plant recovers (SD TN9 p.3). One day over is rated 'serious' no matter what the forage looks like, which overstates urgency when forage is ample and misses overuse when the pasture runs short before the planned date. Moves are dates with no time of day, so a move on the morning of the planned day still counts that day.",
+   "configurable": "Partly. planned_graze_days is editable per pasture in pastures.csv. The 'any day over is serious' threshold is hard-coded in findExceptions and is not in RULES, so a ranch cannot tune it without code changes.",
+   "missing_data_blocks": "With no residual or stubble, utilization or forage-condition observation, the dashboard can say 'past the planned date' but must not imply overgrazing or 'grass is fine'. When a group's head count or average weight changed after the plan was written (for example, groups combined), the planned days are no longer comparable.",
+   "recommendation": "Keep it as a plan-deviation check, but: (1) store a planned_out_date on each stay in moves.csv instead of using a per-pasture day count, so plans can differ by herd size. (2) Make the default severity 'warning: past planned move date; check key-species stubble and water'. Escalate to serious only with corroborating observations, such as stubble below the pasture's target, utilization above the target, the water source failing, or no forage check during the stay. (3) Put the escalation thresholds in RULES. (4) Show one row per stay listing every reason (days, stubble, rest, water), in line with the README's no-noise principle. (5) In the README and rules table, describe it as a ranch planning choice, not an agronomic standard.",
+   "sources": [
+    {
+     "title": "Prescribed Grazing, Range Technical Note No. 9 (South Dakota Technical Guide, Section I, Notice SD-424)",
+     "publisher": "USDA NRCS South Dakota",
+     "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+     "pub_date": "April 2017",
+     "data_years": "n/a (guidance)",
+     "kind": "agency",
+     "supports": "p.4: 'Livestock movements should be based on plant growth and utilization and not calendar dates.' Calendar dates may be used as a guide when developing schedules. p.3: keep grazing periods as short as practical to minimise grazing of regrowth before recovery."
+    },
+    {
+     "title": "Designing a Grazing Plan That Guides Decisions (MC-04340)",
+     "publisher": "SDSU Extension (Krista Ehlert)",
+     "url": "https://extension.sdstate.edu/sites/default/files/2026-07/MC-04340.pdf",
+     "pub_date": "undated (URL folder 2026-07; page shows (c) 2026 South Dakota Board of Regents)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "p.1 s.4: 'movement to the next pasture should follow plant growth \u2013 not the calendar.' Example 4 gives trigger points: green needlegrass 6-8 in by June 10; rainfall 30% below average by May 15 starts 15% destocking."
+    },
+    {
+     "title": "Adaptive, Multipaddock Rotational Grazing Management: A Ranch-Scale Assessment of Effects on Vegetation and Livestock Performance in Semiarid Rangeland. Rangeland Ecology & Management 73:796-810, doi:10.1016/j.rama.2020.07.005",
+     "publisher": "Elsevier / Society for Range Management (author PDF hosted by USDA ARS)",
+     "url": "https://www.ars.usda.gov/ARSUserFiles/51815/67. 2020 REM - CARM - adaptive multipaddock rotational grazing - vegetation and livestock responses.pdf",
+     "pub_date": "2020",
+     "data_years": "2013 pretreatment; 2014-2018 treatment; Central Plains Experimental Range, Nunn CO",
+     "kind": "peer-reviewed",
+     "supports": "Move timing used forage biomass thresholds (e.g. 300 lb/ac loamy in 2014, 450 lb/ac 2016-18), cattle behaviour checks 3 days/week, and a max-days cap (dropped 2015, 14-21 d by 2018). Adaptive rotation gave 12-16% lower cattle gain than continuous grazing at the same stocking rate, with little vegetation benefit."
+    },
+    {
+     "title": "Switchgrass, Big Bluestem, and Indiangrass for Grazing and Hay (NebGuide G1908)",
+     "publisher": "University of Nebraska-Lincoln Extension",
+     "url": "https://extensionpubs.unl.edu/publication/g1908/na/pdf/view",
+     "pub_date": "December 2008",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Move livestock when a predetermined criterion such as recommended stubble height or readiness of another pasture is reached. Big bluestem/indiangrass: stubble of half the original height or 4-6 in. Note: this covers warm-season tame pasture, not native range."
+    },
+    {
+     "title": "Grazing Management (Code 528) Conservation Practice Standard, 528-CPS-1",
+     "publisher": "USDA NRCS",
+     "url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf",
+     "pub_date": "June 2025 (header/footer 'NRCS, NHCP June 2025')",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "General Criteria: 'Develop and implement a monitoring strategy that supports adaptive management and documents decisions based upon ecological triggers and thresholds...'; 'Manage livestock numbers and grazing periods to adjust the intensity, frequency, timing, duration, and distribution'."
+    }
+   ]
+  },
+  {
+   "rule": "CURRENT: Warning when a planned move is 2 days away or less (RULES.graceDays = 2; over >= -2).",
+   "decision_supported": "Line up the move (crew, gates, trailer or horseback, water at the next pasture).",
+   "required_inputs": "Same as the over-plan rule: in_date, planned_graze_days, as_of.",
+   "context": "Logistics lead time for moving cattle. It depends on crew size, distance, terrain and how the move is done. It is not an agronomic threshold.",
+   "classification": "D-synthetic-demo",
+   "evidence": "OBSERVED: on the committed data the rule fires on no stay. Cows are on day 18 of 21 in P7 and Heifers on day 11 of 14 in P4 (3 days left each), so neither is within 2 days (diagnostic section B). I found no extension or NRCS source that sets a lead time for move reminders. CARM staff checked cattle and forage 3 days a week (Augustine et al. 2020), which shows how often monitoring was done, not how much warning a move needs.",
+   "limitations": "It does not check that the destination is ready: whether it has had its minimum rest, whether its tank level and sensor are OK, or whether the key species is at grazing height. A move that is 'due' into an unrested pasture produces no signal. As an exception row it competes with real problems, even though it is a routine scheduled task.",
+   "configurable": "Yes, through RULES.graceDays, but the value is a demonstration setting with no source behind it.",
+   "missing_data_blocks": "Without a planned destination pasture on the stay, the dashboard cannot check readiness and should say 'destination not planned' rather than 'ready'.",
+   "recommendation": "Move this from the exception list to an 'upcoming moves' panel or task list. Add a planned_next_pasture field and show destination readiness: rest days elapsed vs that pasture's minimum, current tank level and sensor status, and the latest key-species height. Keep it as a warning exception only when the destination fails a readiness check (see the rest and water rules). Label graceDays as a ranch preference.",
+   "sources": [
+    {
+     "title": "Adaptive, Multipaddock Rotational Grazing Management ... Rangeland Ecology & Management 73:796-810",
+     "publisher": "Elsevier / SRM (USDA ARS-hosted PDF)",
+     "url": "https://www.ars.usda.gov/ARSUserFiles/51815/67. 2020 REM - CARM - adaptive multipaddock rotational grazing - vegetation and livestock responses.pdf",
+     "pub_date": "2020",
+     "data_years": "2013-2018",
+     "kind": "peer-reviewed",
+     "supports": "Monitoring cadence in a working adaptive rotation: staff checked herd distribution and attempts to leave the pasture 3 days/week. It says nothing about move lead time."
+    },
+    {
+     "title": "Grazing Management (Code 528) Conservation Practice Standard",
+     "publisher": "USDA NRCS",
+     "url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf",
+     "pub_date": "June 2025",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "'Provide adequate quantity, quality, and distribution of drinking water for animals during periods of occupancy' supports checking destination water before a move."
+    }
+   ]
+  },
+  {
+   "rule": "UNUSED DATA -> PROPOSED: Rest/recovery check. pastures.csv carries min_rest_days (30-60 d), but no shipped code reads it. Proposed check: rest = days between the last out_date by ANY group and the next in_date in the same pasture, counting growing-season days only, compared with a recovery minimum that depends on growth rate (fast/slow) and region.",
+   "decision_supported": "Before a move: don't send cattle into a pasture that has not recovered, or record why you are doing it anyway. After the fact: record and review re-entries made short of the plan.",
+   "required_inputs": "Stays per pasture across all groups (in/out dates). A per-pasture recovery minimum for fast and for slow growth (min_rest_fast_days, min_rest_slow_days). A growth-stage observation, or a date-based proxy marked as an assumption. Growing-season start and end dates. Optional: temporal utilization, drought status, and an override reason recorded by the manager.",
+   "context": "Applies when paddocks are grazed 2+ times per growing season. For once-over use, SD TN9 sets a separate minimum of 45 consecutive days' rest during the growing season on rangeland. Recovery minimums differ by region (West vs East River SD; western vs eastern ND), growth rate (vegetative pre-boot is fast; boot onward is slow), utilization level, and drought (90+ d). Rest during dormancy does not count as recovery.",
+   "classification": "B-context-dependent",
+   "evidence": "OBSERVED: `grazing.rest.research.mjs` prints 'exceptions.js: occurrences of \"min_rest_days\" = 0' and 'app.js: occurrences of \"min_rest_days\" = 0', and 'total re-entries shorter than min_rest_days or overlapping: 13'. `grazing.forage.research.mjs` prints 're-entries: 15', 'short under data min_rest_days (synthetic): 13 of 15', 'short under NDSU R1780 western ND range: 14 of 15', 'short under SD TN9 West River range 20-30%: 13 of 15'. For current stays: 'Cows in P7 South Divide since 2026-09-12 ... entered after 6 d rest (previous: Yearlings out 2026-09-06); pasture min_rest_days=60 -> 54 d SHORT ... dashboard grazing rows for this stay: none' and 'Heifers in P4 Lone Tree since 2026-09-19 ... entered after 34 d rest ... min_rest_days=45 -> 11 d SHORT ... dashboard grazing rows for this stay: none'. GUIDANCE: SD TN9 Table 1 (range, 20-30% temporal use, the level it recommends for multiple grazings): West River 40 d fast / 60 d slow; East River 35 / 55. At 40-50% use: West 50/70, East 45/65. Drought: 'may need to be extended to 90 days or longer'. Each pasture grazed 2+ times is deferred at least 90 days during the growing season. NDSU R1780 (rev. Oct 2024), rangeland: fast growth (May/June) 45 d western ND / 30 d eastern; slow growth (July/Aug) 65 / 45. CPS 528: 'Provide desired plants sufficient recovery time from grazing/browsing to meet planned objectives' and 'Implement longer rest periods before perennial forage dormant seasons to extend root growth.'",
+   "limitations": "Published minimums are planning guides for one state or sub-region, not validated universal thresholds. They depend on utilization level, which the data do not record. The script's fast/slow split by calendar month is an assumption; SD TN9 defines it by growth stage. A September re-entry may be a deliberate late-season or dormant-season plan (dormant-season grazing has its own 60% utilization limit in SD TN9). The fictional generator plans each group independently, so 13 of 15 historical re-entries break the data's own minimums and 2 stays overlap. That is a generator artefact, not a planted problem.",
+   "configurable": "Must be. The minimums should be per pasture and per growth rate, with region-appropriate defaults (state NRCS FOTG technical notes), and editable. The override reason should be a recorded field.",
+   "missing_data_blocks": "No growth-stage observation: label the minimum used as a 'calendar proxy'. No out_date for the previous stay, or an overlapping stay: report a data problem, not a rest violation. Outside the growing season: do not count the days as recovery and do not flag. Never report 'rested' when records for a pasture are incomplete.",
+   "recommendation": "Add it in two parts. (a) PROSPECTIVE (most useful): warning when a group's planned next pasture will not have reached its recovery minimum by the planned entry date. The action: pick another pasture, or record why the re-entry is planned. (b) RETROSPECTIVE: one warning per stay that began short of the minimum, giving rest days vs minimum and the growth period. Suppress it when an override reason is recorded (planned dormant-season use, targeted grazing of invasive cool-season grass, drought herd consolidation). Escalate to serious only when the short rest happened during fast growth AND a key-species stubble or utilization reading breaks its target, not on days alone. Replace the single min_rest_days with min_rest_fast_days and min_rest_slow_days. Before shipping, change the fictional generator so the planned rotation honours rest (or plants exactly one violation); otherwise the README's 'exactly the 10 problems that were planted' claim and its test will fail on data the project generated itself.",
+   "sources": [
+    {
+     "title": "Prescribed Grazing, Range Technical Note No. 9",
+     "publisher": "USDA NRCS South Dakota",
+     "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+     "pub_date": "April 2017",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "p.3: once-over rangeland >= 45 consecutive days rest in the growing season (pasture 30). 90-day growing-season deferral for 2+ grazings. p.4 Table 1: recovery minimums by utilization, West/East River, fast/slow. 'Fast growth usually refers to grasses in a vegetative, pre-boot stage'. Drought: 90+ days."
+    },
+    {
+     "title": "The North Dakota Grazing Monitoring Stick: A Way to Measure Range and Pasture Utilization (R1780)",
+     "publisher": "NDSU Extension (Meehan, Sedivec, Printz)",
+     "url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf",
+     "pub_date": "Revised October 2024 (original date not shown)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Rangeland recovery: fast growth (May/June) 45 d western ND, 30 d eastern; slow growth (July/August) 65 d western, 45 d eastern. Introduced pasture 25/15 fast, 35/25 slow."
+    },
+    {
+     "title": "Grazing Management (Code 528) Conservation Practice Standard",
+     "publisher": "USDA NRCS",
+     "url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf",
+     "pub_date": "June 2025",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "'Provide desired plants sufficient recovery time from grazing/browsing to meet planned objectives.' 'Deferment or rest should be planned for critical periods of plant or animal needs.' 'Implement longer rest periods before perennial forage dormant seasons to extend root growth.'"
+    },
+    {
+     "title": "Grazing Management (Code 528) Conservation Practice Standard - landing page",
+     "publisher": "USDA NRCS",
+     "url": "https://www.nrcs.usda.gov/resources/guides-and-instructions/grazing-management-code-528-conservation-practice-standard",
+     "pub_date": "Page text: 'Updated in 2026, the next review of this national conservation practice standard is expected to begin October 2030.'",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Shows the current national 528 is titled 'Grazing Management' and links the June 2025 CPS PDF. That it was renamed from 'Prescribed Grazing' is my inference from older state documents titled 'Prescribed Grazing'; the page does not say so."
+    },
+    {
+     "title": "Grazing Management for Rangeland",
+     "publisher": "NDSU Dickinson Research Extension Center (L. Manske)",
+     "url": "https://ndsu.edu/agriculture/sites/default/files/2022-10/Grazing_Mgmt_for_Rangeland.pdf",
+     "pub_date": "undated (the page links 1999 research reports; date not confirmed)",
+     "data_years": "not stated in fetched text",
+     "kind": "extension",
+     "supports": "Twice-over rotation in western ND: first rotation June 1-July 15, 15 d per pasture (3 pastures); second rotation 30 d per pasture to mid-October. My inference: this gives about 30 d between a pasture's first and second use. An example of fixed calendars used deliberately within a growth-stage rationale (3rd leaf to flowering)."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Concurrent-occupancy check. Flag when two groups have overlapping stays in the same pasture.",
+   "decision_supported": "Confirm whether herds were deliberately combined, which changes the stocking density and the planned days, or whether the move record is wrong.",
+   "required_inputs": "moves.csv in/out dates for all groups, group head counts, and an optional 'combined_with' or note field.",
+   "context": "All operations. Combining herds can be deliberate (SD TN9 drought Phase III recommends combining herds into one), so this is a records check, not an automatic violation.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "OBSERVED (`grazing.rest.research.mjs` section 7): 'P2 Windmill: Cows + Yearlings together 2026-07-24..2026-07-31 (7 d), 330 head combined' and 'P4 Lone Tree: Heifers + Yearlings together 2026-06-25..2026-07-06 (11 d), 195 head combined'. The dashboard raises no row for either. Both stays are closed, so the open-stay rule never sees them. whoIsThere() in exceptions.js joins the group names for water alerts, so the code tolerates co-occupancy but never checks it.",
+   "limitations": "Overlap can be legitimate. The fictional overlaps come from the generator planning each group independently, not from a planted scenario.",
+   "configurable": "Yes. Treat a recorded 'combined' flag as an override.",
+   "missing_data_blocks": "If either stay lacks dates, report a records gap.",
+   "recommendation": "Add a data-check row: 'Two groups recorded in <pasture> <dates>: confirm combined or fix the record'. When groups are combined, compute planned days on combined AU. Low priority compared with the rest and stubble rules, but it protects record credibility.",
+   "sources": [
+    {
+     "title": "Prescribed Grazing, Range Technical Note No. 9 (Appendix B drought contingency)",
+     "publisher": "USDA NRCS South Dakota",
+     "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+     "pub_date": "April 2017",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Appendix B Phase III (pp.15-16): measure remaining forage, combine herds into one, remove 30% or more of the herd. Combining herds can be intentional."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Key-species residual (stubble height) check during and at the end of each stay. Warning when the latest mean stubble on the pasture's key species is near the ranch's target. Serious when it is below target with cattle still in the pasture.",
+   "decision_supported": "Move now, or not yet. This replaces elapsed days as the main move trigger.",
+   "required_inputs": "Per pasture: key species and a target residual height (inches). Observations: date, pasture, species, mean height, number of readings (NDSU recommends at least 30 per key species), observer, and optionally the ungrazed reference height.",
+   "context": "Northern mixed-grass and tallgrass range and tame pasture. The targets are species-specific: SD TN9 Table 3 minimum stubble at end of grazing is western wheatgrass 4 in, crested wheatgrass 3, switchgrass 8, big and sand bluestem 6, Kentucky bluegrass 2, sideoats grama 2. Riparian residual is commonly 4-8 in.",
+   "classification": "B-context-dependent",
+   "evidence": "SD TN9 Table 3 (stubble minimums and start heights, e.g. begin western wheatgrass at 6-10 in). NDSU R1780: measure before turnout, during the grazing period 'to prevent overuse', and within 3 days of livestock removal; at least 30 measurements per key species; avoid water, salt and gates; percent removal = [1 - grazed/ungrazed height] x 100; height-weight table, e.g. 75% height removal on western wheatgrass is about 58% by weight. UNL G1908 moves on a stubble target. Interagency TR 1734-3: residual measurement 'may be preferable' to utilization because remaining plant material drives regrowth. Derner et al. 2022: CARM moves on residual-biomass thresholds (visual obstruction) read before entry, weekly, and at exit. OBSERVED: the repo has no stubble, residual or forage observation field at all.",
+   "limitations": "The targets are site-, species- and season-specific, and some are pasture rather than range values. A reading is only as good as the sampling (key areas, enough readings). Stubble says nothing about weight removed without species height-weight curves.",
+   "configurable": "Yes. Key species and target height must be per pasture and set by the ranch, with defaults from the state NRCS FOTG.",
+   "missing_data_blocks": "No reading during an occupied stay: do not say 'OK'. Show 'no forage check since <date>' (see the stale-observation rule). Fewer readings than the ranch's minimum: show the value as low confidence and do not escalate to serious.",
+   "recommendation": "Add forage_obs.csv and per-pasture key_species and target_stubble_in. This should become the main grazing trigger. Keep the day-count rule as a secondary 'past planned date' reason. Put the margin (e.g. within 1 in of target) in RULES as a ranch setting.",
+   "sources": [
+    {
+     "title": "Prescribed Grazing, Range Technical Note No. 9 (Table 3)",
+     "publisher": "USDA NRCS South Dakota",
+     "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+     "pub_date": "April 2017",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Minimum stubble heights at end of grazing by species, and start-grazing heights. Riparian residual 4-8 in (Section IV)."
+    },
+    {
+     "title": "The North Dakota Grazing Monitoring Stick (R1780)",
+     "publisher": "NDSU Extension",
+     "url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf",
+     "pub_date": "Revised October 2024",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Field protocol (timing, at least 30 readings per key species, avoid water/salt/gates), percent-removal formula, height-weight tables by species, start/end heights for introduced species."
+    },
+    {
+     "title": "Utilization Studies and Residual Measurements, Interagency Technical Reference 1734-3",
+     "publisher": "BLM, USDA Forest Service, USDA NRCS Grazing Land Technology Institute, Cooperative Extension Service (copy hosted by University of Arizona Extension)",
+     "url": "https://extension.arizona.edu/sites/extension.arizona.edu/files/attachment/utilstudies.pdf",
+     "pub_date": "1996, revised 1997 and 1999",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Definitions of utilization, residual measurement, key species and key area; residual may be preferable to utilization; utilization data should not be used alone; seasonal utilization cannot simply be summed; weather changes interpretation."
+    },
+    {
+     "title": "Adaptive grazing management in semiarid rangelands: An outcome-driven focus. Rangelands 44(1):111-118, doi:10.1016/j.rala.2021.02.004",
+     "publisher": "Elsevier / Society for Range Management (USDA ARS-hosted PDF)",
+     "url": "https://www.ars.usda.gov/ARSUserFiles/30123025/Publications/2022/Derner%20et%20al%202022%20Rangelands%20-%20adaptive%20grazing%20management%20for%20outcome-driven%20focus.pdf",
+     "pub_date": "2022",
+     "data_years": "case studies (CARM, Rancho Largo, Red Canyon); years not summarised",
+     "kind": "peer-reviewed",
+     "supports": "Residual-biomass thresholds (visual obstruction) read before entry, weekly, and at exit as move triggers. Red Canyon uses stubble height for riparian removal. 'Short-term observations and monitoring procedures should be simple, quick, and based on consistent methods'."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Utilization (% of current-year growth removed by weight) per grazing period and per season, as an alternative or companion to stubble height.",
+   "decision_supported": "Whether a stay or a season's use stayed within the plan, and whether the stocking rate needs adjusting next season.",
+   "required_inputs": "Utilization estimate per pasture and key species, with the method (grazing stick height-weight, ocular, paired plot), date, and whether it is temporal (one period) or seasonal.",
+   "context": "SD TN9: seasonal use on desirable rangeland grasses should not exceed 50% by weight of current-year growth. Temporal use (per grazing period) should not exceed 30%. Browse up to 65%. Dormant-season grazing of grasses up to 60%. NDSU R1780 degree-of-use classes: slight-moderate <40%, full 40-60%, close 60-80%, severe >80%.",
+   "classification": "B-context-dependent",
+   "evidence": "SD TN9 p.4 quotes: seasonal '...should not remove more than 50 percent by weight of the total current year's growth.' Temporal '...should not remove more than 30 percent by weight...'. NDSU R1810: 'Harvest efficiency includes the \"take half, leave half\" concept of forage disappearance within the pasture' (25% harvest efficiency for season-long native range). SD Grassland Coalition Range 101 (May 2021): 50% utilization under continuous season-long use gave about 25% harvest efficiency, with 29% lost to trampling, wildlife, insects and senescence. TR 1734-3: seasonal values 'cannot simply be added together' because of regrowth; utilization should not be used alone to set stocking rates.",
+   "limitations": "'Take half, leave half' is a rule of thumb for season-long native range, not a per-stay target. For multiple grazings the temporal ceiling is lower (30%). Ocular estimates vary between observers. Utilization measured mid-season is confounded by regrowth.",
+   "configurable": "Yes. Temporal and seasonal ceilings per pasture.",
+   "missing_data_blocks": "No utilization or stubble data: the dashboard must not report 'within take-half-leave-half'.",
+   "recommendation": "Offer utilization as an optional field next to stubble (one or the other per pasture, set by the ranch). Default warning when temporal use is above 30% or seasonal above 50%, marked as context-dependent defaults from SD TN9. Show the method used next to the value.",
+   "sources": [
+    {
+     "title": "Prescribed Grazing, Range Technical Note No. 9",
+     "publisher": "USDA NRCS South Dakota",
+     "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+     "pub_date": "April 2017",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "p.4 utilization limits: 50% seasonal, 30% temporal, 65% browse, 60% dormant-season grasses."
+    },
+    {
+     "title": "Determining Carrying Capacity and Stocking Rates for Range and Pasture in North Dakota (R1810)",
+     "publisher": "NDSU Extension (Meehan, Sedivec, Printz, Brummer)",
+     "url": "https://www.ndsu.edu/agriculture/ag-hub/publications/determining-carrying-capacity-and-stocking-rates-range-and-pasture-north-dakota",
+     "pub_date": "November 2018; reviewed April 2024 (page modified January 16, 2025)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Harvest efficiency 25% for season-long native range, 12.5% wet meadow, 30% tame; harvest efficiency includes 'take half, leave half'."
+    },
+    {
+     "title": "Range 101: Efficiencies of Rotational Grazing",
+     "publisher": "South Dakota Grassland Coalition (Sandy Smart)",
+     "url": "https://sdgrass.org/range-101-efficiencies-of-rotational-grazing/",
+     "pub_date": "May 2021 (byline); page timestamp October 26, 2023",
+     "data_years": "cites an NDSU long-term comparison and a 1986 Nebraska report; years not given",
+     "kind": "other",
+     "supports": "50% utilization under continuous grazing is about 25% harvest efficiency; planning assumptions of 30% (simple rotation) and 35-40% (intensive) harvest efficiency."
+    },
+    {
+     "title": "The North Dakota Grazing Monitoring Stick (R1780)",
+     "publisher": "NDSU Extension",
+     "url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf",
+     "pub_date": "Revised October 2024",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Degree-of-use classes and the about-50%-by-weight general rule for key species."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Derive planned graze days from forage demand (AU-days) instead of a fixed per-pasture day count: planned days = (acres x usable forage lb/ac x harvest efficiency) / (head x AUE x daily forage per AU).",
+   "decision_supported": "Writing the move plan, and re-planning when herd size, animal weight or forage estimates change.",
+   "required_inputs": "Acres; a forage production or standing-crop estimate (lb/ac, from ecological site description, clipping, or RAP/Grass-Cast as context); harvest efficiency; group head and average weight or class to get AUE; forage per AUM.",
+   "context": "General stocking-rate method used by NRCS and extension. Every input value is site- and year-specific.",
+   "classification": "A-supported-general",
+   "evidence": "NDSU R1810: AU = 1,000-lb cow with calf up to 6 months; 913 lb air-dry forage per AUM; AUE table (1,000-lb cow+calf 1.00, 1,100 lb 1.07, 1,200 lb 1.15, yearling 600-800 lb 0.70, mature bull 1.40); worked example 100 cows x 1.15 x 5.5 months = 632.5 AUM. UNL EC127: 1 AUM about 780 lb air-dry forage; common Sandhills rate 0.75 AUM/ac; harvest efficiency about 25% continuous, 30-35% properly managed rotation. The two sources use different forage-per-AUM figures (913 vs 780 lb), which shows the constants are conventions. OBSERVED (`grazing.forage.research.mjs`, assumed AUE): 'season to as_of: 1433 AUM on 4300 ac = 0.33 AUM/ac'. One planned 14-d stay in P4 means 22 AUM for Heifers vs 48 AUM for Yearlings (x2.2).",
+   "limitations": "The data hold no forage production, so the dashboard cannot compute this today. AUE values are class averages; yearlings averaged 847 lb by Sep 15, above the 600-800 lb band, so 0.70 understates late-season demand. 0.33 AUM/ac falls between the two published context figures I saw (0.25 AUM/ac western ND SCS 1983 figure in an NDSU report; 0.75 Sandhills). That validates nothing; carrying capacity depends on the ecological site and the year.",
+   "configurable": "Yes. Every constant (AUE, lb/AUM, harvest efficiency) should be a visible setting, because published values differ (913 vs 780 lb/AUM).",
+   "missing_data_blocks": "Without a forage estimate, show planned days as 'manager plan' and do not claim they match carrying capacity.",
+   "recommendation": "Short term: store planned_out_date per stay and group head/average weight, and show AU-days per stay next to the plan so differences between herds are visible. Longer term: optional forage-budget inputs. In a portfolio piece, being explicit about this is more credible than implying the per-pasture day count is agronomically derived.",
+   "sources": [
+    {
+     "title": "Determining Carrying Capacity and Stocking Rates for Range and Pasture in North Dakota (R1810)",
+     "publisher": "NDSU Extension",
+     "url": "https://www.ndsu.edu/agriculture/ag-hub/publications/determining-carrying-capacity-and-stocking-rates-range-and-pasture-north-dakota",
+     "pub_date": "November 2018; reviewed April 2024",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "AU and AUM definitions, 913 lb/AUM, AUE table, harvest efficiencies, worked stocking-rate example, early stocking adjustment in drought."
+    },
+    {
+     "title": "Grazing Systems for Nebraska Sandhills Rangeland (EC127)",
+     "publisher": "University of Nebraska-Lincoln Extension (Schacht, Volesky, Bauer, Stephenson)",
+     "url": "https://extensionpubs.unl.edu/publication/ec127/na/pdf/view",
+     "pub_date": "(c) 2011",
+     "data_years": "Barta Brothers Ranch 1999-2008",
+     "kind": "extension",
+     "supports": "0.75 AUM/ac Sandhills; 1 AUM about 780 lb; harvest efficiency 25% continuous vs 30-35% rotation; deferred-rotation grazing periods 30-45 d; short-duration 3-10 d; 8-pasture short-duration gave no vegetation or animal-performance advantage over 4-pasture deferred rotation."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Water availability during occupancy and at the destination as a grazing constraint. Link the existing tank exceptions to grazing: a critical or silent tank in the occupied pasture, or a low or silent tank in the planned destination, is a reason on the grazing row.",
+   "decision_supported": "Whether to move early (water failure), or delay or redirect a planned move (destination water not ready).",
+   "required_inputs": "Tank-to-pasture mapping (water.csv already has pasture_id), latest level and sensor status, the stay's planned destination.",
+   "context": "All pastures with stock water. Distance to water also affects distribution: SD TN9 treats more than 1 mile to water as a 'very large field' needing herding or water relocation.",
+   "classification": "A-supported-general",
+   "evidence": "CPS 528 (June 2025) General Criteria: 'Provide adequate quantity, quality, and distribution of drinking water for animals during periods of occupancy.' SD TN9 p.16: 'Monitor grazing lands frequently and ensure animals have access to dependable water.' SD TN9 p.3: water more than one mile away needs herding or water relocation. OBSERVED: exceptions.js already names the group present in a water alert (whoIsThere). Grazing rows never mention water, and no check looks at the destination's water.",
+   "limitations": "Tank level thresholds are covered by the water topic (separate researcher). This rule only links them. Pastures with several water sources need all of them mapped.",
+   "configurable": "Yes. Which water severities block a move is a ranch choice.",
+   "missing_data_blocks": "A silent sensor at the destination should read 'water unknown: check by eye before moving', never 'ready'.",
+   "recommendation": "Add destination water status to the upcoming-moves view. Add a water reason to the grazing row when the occupied pasture's tank is critical or silent, without duplicating the water exception row (cross-reference only).",
+   "sources": [
+    {
+     "title": "Grazing Management (Code 528) Conservation Practice Standard",
+     "publisher": "USDA NRCS",
+     "url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf",
+     "pub_date": "June 2025",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Drinking-water quantity, quality and distribution during occupancy."
+    },
+    {
+     "title": "Prescribed Grazing, Range Technical Note No. 9",
+     "publisher": "USDA NRCS South Dakota",
+     "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+     "pub_date": "April 2017",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Dependable water access; more than 1 mile to water defines very large fields needing herding or water relocation; supplements away from water."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Seasonal forage and drought context: a context banner plus ranch-set drought triggers (e.g. spring rainfall % of normal by a date, USDM category for the county, Grass-Cast outlook). It feeds the plan review; it does not create move exceptions.",
+   "decision_supported": "Lengthen recovery periods, slow the rotation, destock in stages, or bring feed in early.",
+   "required_inputs": "Ranch rain gauge totals vs normal; USDM category for the county (weekly); Grass-Cast % change in production for the grid cell (about every 2 weeks during its season); optional RAP production history; ranch-defined trigger dates and actions.",
+   "context": "Northern and Central Great Plains: April-June precipitation largely drives annual production. Grass-Cast is validated for the Great Plains only. Drought guidance extends recovery to 90+ days and removes animals in stages.",
+   "classification": "B-context-dependent",
+   "evidence": "SDSU 'Reading the Range' (updated Apr 13, 2022): April, May and June precipitation strongly predicts annual forage production in the central and northern Great Plains. SD TN9 App. B phases: Phase I remove 10% of the herd in the first month if drought is impending; Phase II 20-40%; Phase III 30%+, combine herds. SDSU MC-04340 example trigger: 'If rainfall totals fall 30% below average by May 15, initiate a 15% destocking plan.' Grass-Cast (Hartman et al. 2020, Ecosphere): agreed with the MODIS category 69% of the time; confidence 'increased substantially by late May or early June'; 'does not differentiate between desirable forage species and undesirable species'; does not account for prior-year grazing. The Grass-Cast site warns not to use it as the sole basis for stocking, turnout or permit decisions. The Grass-Cast home page says: 'As of August 31, 2026, all relevant precipitation data have been observed for the 2026 Grass-Cast season.' UNL BeefWatch (Aug 1, 2026): 'windshield green is not the same as cow days'; slow the rotation and extend recovery when regrowth is limited.",
+   "limitations": "These are coarse (10-km grid or county), lagged and model-based. They cannot say whether a given pasture is ready. Trigger values are ranch choices.",
+   "configurable": "Yes. Triggers and actions are ranch-defined.",
+   "missing_data_blocks": "A stale feed (e.g. Grass-Cast off-season, USDM not updated) should be shown with its valid date and never read as 'normal'.",
+   "recommendation": "Show as a context strip with source, valid date and caveat. Let the ranch configure a few drought triggers that create a 'review the grazing plan' task. Do not let regional products directly raise or lower pasture-level move severity.",
+   "sources": [
+    {
+     "title": "Seasonal grassland productivity forecast for the U.S. Great Plains using Grass-Cast. Ecosphere 11(11): e03280, doi:10.1002/ecs2.3280",
+     "publisher": "Ecological Society of America / Wiley (USDA ARS-hosted PDF)",
+     "url": "https://ars.usda.gov/ARSUserFiles/52548/207. Hartman et al 2020 Ecoshpere - seasonal grassland productivity forcast for Great Plains using Grass-Cast.pdf",
+     "pub_date": "2020",
+     "data_years": "Daymet 1980-2016; GIMMS NDVI 1982-2015; MODIS evaluation 2000-2018; forecasts 2017-2018",
+     "kind": "peer-reviewed",
+     "supports": "Method, skill (same category as MODIS 69% of the time), when it becomes reliable (late May/early June), and its limits (total production not forage; no management effects)."
+    },
+    {
+     "title": "Grass-Cast: About Our Maps",
+     "publisher": "National Drought Mitigation Center (UNL), with CSU, USDA and the University of Arizona",
+     "url": "https://grasscast.unl.edu/Outlook/About.aspx",
+     "pub_date": "undated (example maps dated April 29, 2019; footer (c) 2026)",
+     "data_years": "about 38-40 years of historical weather and vegetation data",
+     "kind": "agency",
+     "supports": "10 x 10 km grid; updated every two weeks in the growing season; not species-specific; does not include local management; should not be the sole basis for stocking or turnout decisions."
+    },
+    {
+     "title": "Grass-Cast home page",
+     "publisher": "National Drought Mitigation Center (UNL)",
+     "url": "https://grasscast.unl.edu/",
+     "pub_date": "undated; states 'As of August 31, 2026, all relevant precipitation data have been observed for the 2026 Grass-Cast season.'",
+     "data_years": "2026 season",
+     "kind": "agency",
+     "supports": "The service ran in 2026; the season is final by end of August; estimates are Total Production, not Grazeable Production; 'Data CSV' download links are offered (not tested)."
+    },
+    {
+     "title": "Reading the Range: Range readiness, grazing timing and drought considerations",
+     "publisher": "SDSU Extension (Krista Ehlert; originally Jessalyn Bachler)",
+     "url": "https://extension.sdstate.edu/reading-range-range-readiness-grazing-timing-and-drought-considerations",
+     "pub_date": "Updated April 13, 2022",
+     "data_years": "cites Smart et al. 2020/2021",
+     "kind": "extension",
+     "supports": "April-June precipitation predicts annual production; drought delays turnout; heavily overgrazed pastures may need up to a year to recover."
+    },
+    {
+     "title": "Green Is Not Always Growth: Nebraska Pasture Conditions After Late Rains",
+     "publisher": "Nebraska Extension / UNL BeefWatch (Beckman, Benjamin, Stephenson)",
+     "url": "https://beef.unl.edu/green-not-always-growth-nebraska-pasture-conditions-after-late-rains/",
+     "pub_date": "August 1, 2026",
+     "data_years": "USDA NASS condition ratings, week ending July 20, 2026",
+     "kind": "extension",
+     "supports": "Green colour is not forage; walk pastures for height, leaf area, residual and regrowth; slow rotations and extend recovery when regrowth is limited; NE pasture and range 35% very poor and 33% poor on July 20, 2026."
+    },
+    {
+     "title": "Prescribed Grazing, Range Technical Note No. 9 (Appendix B)",
+     "publisher": "USDA NRCS South Dakota",
+     "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+     "pub_date": "April 2017",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Drought-phase triggers and staged herd reductions; weekly monitoring of soil moisture and plant growth in Phase II."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Cattle behaviour and performance as a move signal (manual note: herd walking fence, bunching at gates or water, selecting less-preferred plants; plus a gain trend), giving a 'check forage now' warning.",
+   "decision_supported": "Check the pasture or move early; link a low-gain exception to the forage situation.",
+   "required_inputs": "Dated behaviour observation (categorical) per group; the existing gain data (weights.csv).",
+   "context": "Used as a formal move benchmark in CARM (shortgrass steppe, yearling steers). For Flint Hills stockers, K-State uses a gain threshold for season removal.",
+   "classification": "B-context-dependent",
+   "evidence": "Augustine et al. 2020: CARM staff checked herd distribution and attempts to leave the pasture 3 days/week as a move criterion. Derner et al. 2022: selection of less-desirable plants signals unmet nutritional needs; weight gain indicates whether forage quality is adequate. K-State MF3232 (Feb 2016): remove stockers when gains fall below 1 lb/head/day; moving stockers within the season to rested areas can cut gain by 'as much as 30 to 40 pounds per animal'.",
+   "limitations": "Behaviour is subjective and confounded by weather, flies and water. The K-State thresholds apply to Flint Hills stocker systems and do not transfer to cow-calf herds or northern mixed-grass.",
+   "configurable": "Yes. Categories and the escalation rule are ranch choices.",
+   "missing_data_blocks": "An absent behaviour note means unknown, not normal.",
+   "recommendation": "Optional quick-entry field (one tap, few categories). Use it only to add a 'check forage' reason to an existing grazing row or to raise a warning, never a serious, on its own.",
+   "sources": [
+    {
+     "title": "Summer Grazing Strategies for Stocker Cattle in the Kansas Flint Hills (MF3232)",
+     "publisher": "Kansas State University Agricultural Experiment Station and Cooperative Extension Service (Owensby, Fick)",
+     "url": "https://bookstore.ksre.ksu.edu/download/summer-grazing-strategies-for-stocker-cattle-in-the-kansas-flint-hills_MF3232",
+     "pub_date": "February 2016",
+     "data_years": "multi-year trials (10-year and 8-year tables; calendar years not captured in my fetch)",
+     "kind": "extension",
+     "supports": "Remove stockers when gains fall below 1 lb/head/day; about 4 acres/steer is the moderate season-long rate; in-season rotation to rested areas reduces stocker gains; continuous grazing called the most economically efficient system in the Flint Hills."
+    },
+    {
+     "title": "Adaptive grazing management in semiarid rangelands: An outcome-driven focus",
+     "publisher": "Elsevier / SRM (USDA ARS-hosted PDF)",
+     "url": "https://www.ars.usda.gov/ARSUserFiles/30123025/Publications/2022/Derner%20et%20al%202022%20Rangelands%20-%20adaptive%20grazing%20management%20for%20outcome-driven%20focus.pdf",
+     "pub_date": "2022",
+     "data_years": "case studies",
+     "kind": "peer-reviewed",
+     "supports": "Cattle behaviour and weight gain as benchmarks within adaptive management."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Stale grazing observation. Warning when an occupied pasture has had no forage check (stubble, utilization or condition) within N days, set by the ranch.",
+   "decision_supported": "Schedule a pasture walk so that the move decision rests on an observation.",
+   "required_inputs": "Date of the latest forage observation per pasture; occupancy from moves.csv; N in RULES.",
+   "context": "Any operation that moves on forage triggers. It mirrors the existing 'sensor silent' water rule: missing data is surfaced, not judged.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "SDSU MC-04340: 'Monitor regularly. Short, consistent checks outperform occasional, detailed assessments.' Derner et al. 2022: CARM read residual before entry, weekly during occupancy, and at exit. NDSU R1780: measure during the grazing period and within 3 days of removal. N itself has no universal value.",
+   "limitations": "Adds a data-entry burden; N is a ranch choice.",
+   "configurable": "Yes (RULES).",
+   "missing_data_blocks": "This rule IS the missing-data behaviour. The dashboard must not show an occupied pasture as fine when there is no observation.",
+   "recommendation": "Add it together with the stubble rule. Suggested demo setting: N = 7 days, labelled as a synthetic setting.",
+   "sources": [
+    {
+     "title": "Designing a Grazing Plan That Guides Decisions (MC-04340)",
+     "publisher": "SDSU Extension",
+     "url": "https://extension.sdstate.edu/sites/default/files/2026-07/MC-04340.pdf",
+     "pub_date": "undated ((c) 2026; URL folder 2026-07)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Short, consistent monitoring; records of rotation dates, cattle behaviour, forage conditions and rainfall."
+    },
+    {
+     "title": "The North Dakota Grazing Monitoring Stick (R1780)",
+     "publisher": "NDSU Extension",
+     "url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf",
+     "pub_date": "Revised October 2024",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "When to measure: before turnout, during grazing, within 3 days of removal."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED (season start): Range readiness. Warning when a planned first entry into a native pasture comes before its key cool-season species reaches about the 3.5-leaf stage (tame cool-season: 3-leaf), or before the ranch's height trigger.",
+   "decision_supported": "Delay turnout or start on tame pasture first.",
+   "required_inputs": "Per pasture: key species and native/tame; planned turn-in date; leaf-stage or height observation; optional growing degree days.",
+   "context": "Northern Great Plains spring turnout. In NW South Dakota native range is generally ready around end of May/early June and tame grass in early May (SDSU). At SDSU Cottonwood, green needlegrass readiness averaged May 29 (earliest May 15). It does not apply to the demo's September as_of, but it belongs in a season-long tool.",
+   "classification": "B-context-dependent",
+   "evidence": "SDSU 'Reading the Range' (Apr 13, 2022): native cool-season grasses such as western wheatgrass and green needlegrass 'should not be grazed until they reach the 3.5-leaf stage'; tame at 3-leaf. SDSU Grazing Readiness Map (updated Apr 8, 2022; page timestamp Oct 4, 2024): growing degree days to 3.5-leaf are crested wheatgrass 516, western wheatgrass 1,170, green needlegrass 1,209, blue grama 1,296 (USDA-ARS Mandan; PRISM 40-yr); keep yearly turn-in records by pasture. NDSU R1780: native cool-season 3.5-leaf stage mid-late May or early June.",
+   "limitations": "GDD-based dates are averages; turnout varies by about a month between years.",
+   "configurable": "Yes.",
+   "missing_data_blocks": "Without a readiness observation, show the planned date as unverified.",
+   "recommendation": "Lower priority for this demo (the data start June 1). Mention it in the README roadmap.",
+   "sources": [
+    {
+     "title": "South Dakota Grazing Readiness Spring Turnout Map",
+     "publisher": "SDSU Extension (Brennan, Menendez, Ehlert)",
+     "url": "https://extension.sdstate.edu/south-dakota-grazing-readiness-spring-turnout-map",
+     "pub_date": "Updated April 8, 2022 (page metadata October 4, 2024)",
+     "data_years": "PRISM 40-year climate normals",
+     "kind": "extension",
+     "supports": "GDD thresholds for 3- and 3.5-leaf stages; Cottonwood average readiness May 29; keep turn-in records."
+    },
+    {
+     "title": "Reading the Range: Range readiness, grazing timing and drought considerations",
+     "publisher": "SDSU Extension",
+     "url": "https://extension.sdstate.edu/reading-range-range-readiness-grazing-timing-and-drought-considerations",
+     "pub_date": "Updated April 13, 2022",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "3.5-leaf rule for native cool-season; calendar dates are rules of thumb."
+    }
+   ]
+  }
+ ],
+ "data_fields": [
+  {
+   "field": "moves.planned_out_date",
+   "meaning": "Planned move-out date for this stay (replaces the per-pasture planned_graze_days as the plan of record)",
+   "units_valid": "ISO date YYYY-MM-DD, on or after in_date",
+   "source_type": "ranch records",
+   "update_frequency": "When the plan is written or revised",
+   "required": "required (for plan-deviation rule)",
+   "missing_behavior": "Fall back to in_date + pasture planned_graze_days and label it 'default plan'",
+   "supports": "Past-planned-date warning; upcoming-moves list",
+   "evidence_url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf"
+  },
+  {
+   "field": "moves.planned_next_pasture",
+   "meaning": "Destination pasture for the next move",
+   "units_valid": "pasture_id in pastures.csv",
+   "source_type": "ranch records",
+   "update_frequency": "Per stay",
+   "required": "optional",
+   "missing_behavior": "Show 'destination not planned'; skip the destination readiness check (do not report ready)",
+   "supports": "Prospective rest check; destination water check",
+   "evidence_url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf"
+  },
+  {
+   "field": "moves.head_in / group average weight",
+   "meaning": "Head count and average weight (or AUE) of the group on this stay",
+   "units_valid": "integer head > 0; lb (or AUE 0.5-1.5)",
+   "source_type": "ranch records",
+   "update_frequency": "At each move and weigh-in",
+   "required": "optional (needed for AU-days)",
+   "missing_behavior": "Use groups.csv head and a class-default AUE labelled as an assumption",
+   "supports": "AU-days per stay; comparing plans across herds; combined-herd density",
+   "evidence_url": "https://www.ndsu.edu/agriculture/ag-hub/publications/determining-carrying-capacity-and-stocking-rates-range-and-pasture-north-dakota"
+  },
+  {
+   "field": "moves.override_reason",
+   "meaning": "Recorded reason for an intentional deviation (early re-entry, combined herds, dormant-season use, targeted grazing, drought)",
+   "units_valid": "free text or enumerated code",
+   "source_type": "ranch records",
+   "update_frequency": "When a deviation is decided",
+   "required": "optional",
+   "missing_behavior": "The deviation is reported as a warning",
+   "supports": "Suppressing rest and overlap flags that were documented; NRCS 528 asks that adaptive decisions be documented",
+   "evidence_url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf"
+  },
+  {
+   "field": "pastures.min_rest_fast_days / min_rest_slow_days",
+   "meaning": "Recovery minimum before re-grazing during fast (vegetative, pre-boot) and slow (boot onward) growth",
+   "units_valid": "integer days, roughly 25-90; defaults from the state NRCS FOTG (e.g. SD TN9 West River range 40/60 at 20-30% use; NDSU western ND range 45/65)",
+   "source_type": "assumption (ranch-set from state guidance)",
+   "update_frequency": "Annually, or in drought (extend to 90+)",
+   "required": "required for the rest rule",
+   "missing_behavior": "Use the existing single min_rest_days and label it 'not growth-adjusted'",
+   "supports": "Rest/recovery check",
+   "evidence_url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf"
+  },
+  {
+   "field": "pastures.growing_season_start / end",
+   "meaning": "Window in which rest counts as recovery",
+   "units_valid": "month-day",
+   "source_type": "assumption",
+   "update_frequency": "Annually",
+   "required": "optional",
+   "missing_behavior": "Count all calendar days and label the rest figure 'calendar days'",
+   "supports": "Rest rule (dormant days do not count)",
+   "evidence_url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf"
+  },
+  {
+   "field": "pastures.key_species and target_stubble_in",
+   "meaning": "Species monitored in the pasture's key area and its minimum residual height at end of grazing",
+   "units_valid": "species name; inches (e.g. western wheatgrass 4, big bluestem 6, Kentucky bluegrass 2 per SD TN9 Table 3)",
+   "source_type": "ranch records (from NRCS ecological site and FOTG)",
+   "update_frequency": "Set once and reviewed annually",
+   "required": "required for the stubble rule",
+   "missing_behavior": "Stubble rule disabled for the pasture; show 'no target set'",
+   "supports": "Stubble/residual move trigger",
+   "evidence_url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf"
+  },
+  {
+   "field": "forage_obs.stubble_in (with n_readings, ungrazed_ref_in, species, date, observer)",
+   "meaning": "Mean grazed height of the key species in the key area",
+   "units_valid": "inches >= 0; n_readings integer (NDSU suggests at least 30 per key species)",
+   "source_type": "manual observation",
+   "update_frequency": "Before entry, about weekly during occupancy, within 3 days of exit",
+   "required": "optional (core of the proposed trigger)",
+   "missing_behavior": "Stale-observation warning; never 'OK'",
+   "supports": "Move now / not yet; end-of-stay record",
+   "evidence_url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf"
+  },
+  {
+   "field": "forage_obs.utilization_pct (with method and scope temporal|seasonal)",
+   "meaning": "Percent of current-year growth removed by weight",
+   "units_valid": "0-100; method in {grazing-stick height-weight, ocular, paired-plot}",
+   "source_type": "manual observation",
+   "update_frequency": "End of each stay (temporal); end of season (seasonal)",
+   "required": "optional (alternative to stubble)",
+   "missing_behavior": "Do not report compliance with take-half-leave-half",
+   "supports": "Utilization ceilings (SD TN9 30% temporal / 50% seasonal defaults)",
+   "evidence_url": "https://extension.arizona.edu/sites/extension.arizona.edu/files/attachment/utilstudies.pdf"
+  },
+  {
+   "field": "forage_obs.growth_stage",
+   "meaning": "Phenology of the key species (vegetative/pre-boot = fast; boot, heading, seed = slow; dormant)",
+   "units_valid": "enum",
+   "source_type": "manual observation",
+   "update_frequency": "Every 1-2 weeks in season",
+   "required": "optional",
+   "missing_behavior": "Use a month proxy (May/Jun fast, Jul/Aug slow) labelled as an assumption",
+   "supports": "Picking the fast or slow recovery minimum",
+   "evidence_url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf"
+  },
+  {
+   "field": "forage_obs.condition_score",
+   "meaning": "Quick ranch-defined condition/readiness score for the pasture. NRCS's 10-indicator 1-5 Pasture Condition Score applies to tame pasture, not rangeland.",
+   "units_valid": "ordinal 1-5 (ranch rubric) or NRCS PCS total for tame pasture",
+   "source_type": "manual observation",
+   "update_frequency": "Before grazing (NRCS PCS: best just before a pasture is grazed) and at critical periods",
+   "required": "optional",
+   "missing_behavior": "Not shown",
+   "supports": "Context on grazing rows; destination readiness",
+   "evidence_url": "https://www.nrcs.usda.gov/sites/default/files/2023-06/Guide_To_Pasture_Condition_Scoring_JAN2020.pdf"
+  },
+  {
+   "field": "forage_obs.behavior_note",
+   "meaning": "Herd behaviour that signals forage shortfall (walking fence, bunching at gate/water, selecting less-preferred plants)",
+   "units_valid": "enum + free text",
+   "source_type": "manual observation",
+   "update_frequency": "Each check",
+   "required": "optional",
+   "missing_behavior": "Treat as unknown, not normal",
+   "supports": "'Check forage' reason on a grazing row",
+   "evidence_url": "https://www.ars.usda.gov/ARSUserFiles/51815/67. 2020 REM - CARM - adaptive multipaddock rotational grazing - vegetation and livestock responses.pdf"
+  },
+  {
+   "field": "pastures.forage_lb_ac (standing crop or expected production) and harvest_efficiency",
+   "meaning": "Forage available for planning graze days",
+   "units_valid": "lb/ac air-dry; harvest efficiency 0.125-0.40 (NDSU: 25% season-long native, 30% tame)",
+   "source_type": "manual observation / public dataset (RAP or Grass-Cast as context) / assumption",
+   "update_frequency": "Start of season; mid-season revision",
+   "required": "optional",
+   "missing_behavior": "Label planned days 'manager plan, not forage-derived'",
+   "supports": "Forage-demand graze-day planning (AU-days)",
+   "evidence_url": "https://www.ndsu.edu/agriculture/ag-hub/publications/determining-carrying-capacity-and-stocking-rates-range-and-pasture-north-dakota"
+  },
+  {
+   "field": "water status of occupied and destination pasture",
+   "meaning": "Latest tank level and sensor freshness, already computed by waterStatus()",
+   "units_valid": "% full; hours since last reading",
+   "source_type": "device",
+   "update_frequency": "Every 6 h in demo data",
+   "required": "required (already present)",
+   "missing_behavior": "Silent sensor gives 'water unknown: check by eye before moving'",
+   "supports": "Water reason on grazing rows; move readiness",
+   "evidence_url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf"
+  },
+  {
+   "field": "rain_gauge_in (ranch) and pct_of_normal",
+   "meaning": "Precipitation since a reference date vs normal",
+   "units_valid": "inches; %",
+   "source_type": "manual observation",
+   "update_frequency": "After each event / weekly",
+   "required": "optional",
+   "missing_behavior": "Drought triggers show 'no rainfall data'",
+   "supports": "Ranch drought triggers (e.g. SDSU example: 30% below average by May 15)",
+   "evidence_url": "https://extension.sdstate.edu/sites/default/files/2026-07/MC-04340.pdf"
+  },
+  {
+   "field": "usdm_category (county)",
+   "meaning": "U.S. Drought Monitor category D0-D4 for the ranch county",
+   "units_valid": "None, D0-D4 with valid date",
+   "source_type": "public dataset",
+   "update_frequency": "Weekly",
+   "required": "optional",
+   "missing_behavior": "Show the last valid date; never assume 'no drought'",
+   "supports": "Drought context and plan-review triggers",
+   "evidence_url": "https://droughtmonitor.unl.edu/DmData/DataDownload/WebServiceInfo.aspx"
+  },
+  {
+   "field": "grasscast_pct_change",
+   "meaning": "Forecast % change in total grassland production vs the grid cell's long-term average",
+   "units_valid": "% (below/near/above normal) for a 10 x 10 km cell, with forecast date",
+   "source_type": "public dataset",
+   "update_frequency": "About every 2 weeks during its season; final by about end of August",
+   "required": "optional",
+   "missing_behavior": "Off-season or gray cell gives 'no forecast'",
+   "supports": "Seasonal forage outlook context only",
+   "evidence_url": "https://grasscast.unl.edu/Outlook/About.aspx"
+  },
+  {
+   "field": "rap_production_lb_ac",
+   "meaning": "Modelled herbaceous production per pasture polygon (annual; 16-day provisional for current year)",
+   "units_valid": "lb/ac, 1986-present",
+   "source_type": "public dataset",
+   "update_frequency": "16-day provisional in season; recalculated at year end",
+   "required": "optional",
+   "missing_behavior": "Not shown",
+   "supports": "Year-over-year context for stocking plans",
+   "evidence_url": "https://rangelands.app/products"
+  }
+ ],
+ "integrations": [
+  {
+   "name": "Grass-Cast (Grassland Productivity Forecast)",
+   "provides": "Forecast % change in total aboveground production vs about 38-yr average per 10 x 10 km cell (county level in 2017-18), as below, near or above-normal scenarios",
+   "access": "Web maps at grasscast.unl.edu. The home page shows 'Download Maps' and 'Data CSV' links (seen, not tested). No API documentation seen.",
+   "cost": "No fee seen on the pages fetched",
+   "licensing": "Not stated on the pages fetched. Produced by NDMC (UNL), Colorado State University, USDA (ARS, NRCS, Northern Plains Climate Hub) and the University of Arizona.",
+   "coverage": "Great Plains and Southwest; validated only in the Great Plains (Hartman et al. 2020)",
+   "refresh": "About every 2 weeks during the growing season (paper: April-July). The 2026 season was final with observed precipitation as of August 31, 2026.",
+   "failure_behavior": "Gray or white cells have no forecast. Off-season there is no update. Total production includes undesirable species. Does not account for prior grazing.",
+   "recommendation": "Optional context strip with valid date and caveat. Never a trigger for pasture-level exceptions. Useful in a portfolio README as an example of public-data integration with stated limits.",
+   "url": "https://grasscast.unl.edu/Outlook/About.aspx"
+  },
+  {
+   "name": "Rangeland Analysis Platform (RAP)",
+   "provides": "Annual cover (30 m, 1986-present; 10 m western US 2018-present) and herbaceous production in lb/ac (annual and provisional 16-day)",
+   "access": "Free web app and Production Explorer; Google Earth Engine collections; GeoTIFF/COG; rapr R package; API docs listed (not examined)",
+   "cost": "Free",
+   "licensing": "'freely available for use by the public'; ARS/US Government place no restrictions on use or reproduction; no warranty of accuracy",
+   "coverage": "US rangelands; production is primarily intended for rangelands, not cropland",
+   "refresh": "Current-year 16-day production is provisional and recalculated at year end; no general schedule stated",
+   "failure_behavior": "Production comes from a process model with no RMSE published. Cover MAE ranges from 2.6% (tree) to 10.2% (perennial forb and grass).",
+   "recommendation": "Optional per-pasture historical production context for setting stocking plans. Not for daily move decisions.",
+   "url": "https://rangelands.app/products"
+  },
+  {
+   "name": "U.S. Drought Monitor data services",
+   "provides": "Weekly drought category statistics (area or population, categorical or cumulative) by county FIPS, state, HUC, climate hub, etc.",
+   "access": "REST at usdmdataservices.unl.edu/api/CountyStatistics/... with aoi=<5-digit FIPS>, startdate, enddate (M/D/YYYY), statisticsType. CSV by default; JSON/XML via the Accept header. No API key mentioned. Not called in this audit.",
+   "cost": "No fee seen",
+   "licensing": "Not stated on the pages fetched; the page has a 'Permission' link (not followed). Partnership of NDMC, USDA, NOAA, NASA.",
+   "coverage": "United States",
+   "refresh": "Weekly (the release-day/valid-day convention was not confirmed on the pages fetched)",
+   "failure_behavior": "The documentation page has inconsistencies in endpoint names (e.g. RegionStatistics vs RegionalClimateCenterStatistics), so endpoints should be checked before relying on them",
+   "recommendation": "Optional county drought chip with valid date, used to prompt plan review together with ranch drought triggers",
+   "url": "https://droughtmonitor.unl.edu/DmData/DataDownload/WebServiceInfo.aspx"
+  },
+  {
+   "name": "NRCS eFOTG state technical notes (e.g. SD Range Technical Note No. 9)",
+   "provides": "State- and region-specific recovery periods, utilization limits, stubble heights and drought phases used as defaults",
+   "access": "PDF documents on efotg.sc.egov.usda.gov. Manual lookup; no data API evaluated.",
+   "cost": "Free",
+   "licensing": "US Government publication",
+   "coverage": "Per state (SD note covers West River and East River)",
+   "refresh": "Irregular (SD TN9 dated April 2017)",
+   "failure_behavior": "Values may lag the national 528 revision (June 2025). Whether SD, NE, ND, WY or KS have adopted the 2025 national standard was not verified.",
+   "recommendation": "Use as the documented source of configurable defaults, and cite the exact document and date in the rules table",
+   "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf"
+  },
+  {
+   "name": "NDSU Grazing Monitoring Stick protocol (method, not software)",
+   "provides": "Field protocol and height-weight tables to turn stubble readings into utilization %",
+   "access": "Printed or PDF publication R1780; manual readings entered into forage_obs.csv",
+   "cost": "Free publication",
+   "licensing": "Extension publication",
+   "coverage": "North Dakota species; broadly applicable to northern mixed-grass",
+   "refresh": "Revised October 2024",
+   "failure_behavior": "Observer variability; needs an ungrazed reference",
+   "recommendation": "Recommended manual observation protocol for the stubble/utilization fields",
+   "url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf"
+  }
+ ],
+ "feature_notes": "FORAGE OBSERVATIONS: the repo has no forage, stubble, utilization, growth-stage or condition field (pastures.csv: acres, planned_graze_days, min_rest_days; moves.csv: group, pasture_id, in_date, out_date). Every grazing judgement today is elapsed days against a per-pasture plan. Northern Plains extension sources say to move on plant growth and utilization, not calendar dates: SD TN9 (2017) p.4; SDSU MC-04340; UNL G1908. CPS 528 (June 2025) asks for monitoring with 'ecological triggers and thresholds' and documented adaptive decisions.\n\nREST: min_rest_days is unused (0 occurrences in exceptions.js and app.js; observed). On the committed fictional data, 13 of 15 re-entries are shorter than the data's own min_rest_days, and 2 stays overlap. The two current stays not flagged are Cows in P7 South Divide (entered after 6 d rest vs 60) and Heifers in P4 Lone Tree (34 d vs 45). The dashboard raises one grazing row (Yearlings day 24 of 21). These violations come from the generator planning each group independently, not from planted problems. Adding a rest rule without fixing the generator would add about 2 current and 13 historical flags and break the README's 'exactly the 10 problems that were planted' claim and its test.\n\nPLAN VS DEMAND: planned_graze_days is per pasture, so the same 14-day plan in P4 is 22 AUM for 45 heifers vs 48 AUM for 150 yearlings (assumed AUE, NDSU R1810). Whole-ranch season stocking computes to about 0.33 AUM/ac on 4,300 ac (assumed AUE), between published context figures (0.25 western ND; 0.75 Sandhills). That is plausible for the region but validates nothing.\n\nWATER: water exceptions name the group present, but grazing rows ignore water and destination readiness. CPS 528 and SD TN9 make water during occupancy a core criterion.\n\nDROUGHT/HEAT: no rainfall or drought input. Public context sources exist (Grass-Cast, USDM, RAP), with stated limits. SD TN9 Appendix B gives staged drought phases; SDSU MC-04340 gives an example rainfall trigger.\n\nCREW TASKS: the 2-day move warning is a logistics reminder better shown as an 'upcoming moves' list with destination readiness (rest elapsed, water, key-species height).\n\nEVIDENCE ON ROTATION ITSELF (portfolio credibility): rotation should not be presented as inherently better. Briske et al. 2008 (REM 61:3-17): plant production equal or greater under continuous than rotational grazing in 87% (20/23) of experiments, and animal production per head in 92% (35/38). CARM (Augustine et al. 2020, CO, 2014-2018): 12-16% lower cattle gain under adaptive multipaddock rotation at the same stocking rate, with little vegetation benefit. UNL EC127 (Barta Brothers 1999-2008): 8-pasture short-duration showed no vegetation or animal advantage over 4-pasture deferred rotation. K-State MF3232: in-season rotation can reduce Flint Hills stocker gains. The dashboard's value is record-keeping, plan adherence and observation-driven triggers, not a claim that rotation itself improves outcomes.\n\nDIAGNOSTICS RUN: `node docs/audit/diagnostics/grazing.rest.research.mjs` (existing, committed in bff0ba9) and the new `node docs/audit/diagnostics/grazing.forage.research.mjs` (created this pass, exit 0) at /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/grazing.forage.research.mjs. No repo files were modified.",
+ "caveats": "1) Fetch method: curl to nrcs.usda.gov and efotg.sc.egov.usda.gov failed with 'curl: (56) CONNECT tunnel failed, response 403', so I could not extract PDF text locally. All document content came from WebFetch, which returns model-summarised text and quotes capped at 125 characters. Numbers from SD TN9 Table 1 were consistent across two separate fetches, but they have not been checked against the PDF by eye.\n2) CPS 528: the national standard fetched is titled 'Grazing Management', Code 528, with header/footer 'NRCS, NHCP June 2025'. The landing page says 'Updated in 2026, the next review ... expected to begin October 2030.' That it was renamed from 'Prescribed Grazing' is my inference from older state documents (search results titled '528 ... CPS Prescribed Grazing 2017/2018/2021'); the page does not say so. I did not verify which version SD, NE, ND, WY or KS currently use in their FOTGs. The SD numbers come from SD Range Technical Note No. 9 (April 2017), which predates the 2025 national revision.\n3) Two fetched sources did not give what their titles suggested: the NDSU 'Pasture Management for Western North Dakota' PDF was a 1980s complementary-rotation report, and the NDSU 2020 growth-pattern report covered only introduced species. I used neither for thresholds. The Manske twice-over source is undated; the 1999 date is not confirmed.\n4) The diagnostic's fast/slow split by calendar month, the AUE values for each group (no cow weights exist; yearlings exceed the 600-800 lb band by September), and 913 lb/AUM are labelled assumptions. UNL EC127 uses 780 lb/AUM instead.\n5) None of the recovery, utilization or stubble numbers is universally validated. They are regional planning guides that depend on ecological site, utilization level, growth stage and drought. The fictional ranch has no stated location, so no single set applies. Every current threshold (any day over plan is serious; graceDays = 2; min_rest_days 30-60) is a ranch choice or a synthetic demo setting, not a validated standard.\n6) I did not call the USDM, Grass-Cast or RAP APIs or downloads; the access details are from documentation pages only. GPS collars, virtual fencing and other vendor devices were not evaluated.\n7) Dates marked 'undated' had no publication date on the page; dates were not guessed. The Briske et al. citation is 2008, REM 61(1):3-17, per the MSU archive page; the Jornada archive page listed it as 2007 (ARIS log)."
+}
