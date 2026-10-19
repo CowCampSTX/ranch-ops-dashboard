@@ -88,7 +88,11 @@ MISMATCH in both modes. 3 of 10 rows match, 2 rows are unexpected, 8 of 10 absen
 
 TIME-01, TIME-02, GRZ-01, GAIN-03, BUD-01, UI-06; RULE-WF-14, RULE-GRZ-02, RULE-BUD-03, RULE-BUD-05.
 
-## Open decision (unresolved)
+## Open decision (settled for Phase 1)
+
+Settled by 05-roadmap.md decisions D1, D2 and D16. Phase 1 reads `books_closed_through` from meta.csv and the generator
+writes 2026-09, so the committed Repairs row stays serious on Sep 30. This folder keeps no `books_closed_through`, so it
+tests the default (the month before as_of, labelled "assumed"), and Repairs stays a warning here. The original note:
 
 **Repairs is a warning here only because of RULE-BUD-03's $1,000 serious line.** The same Jun-Aug arithmetic applies
 to the committed data on Sep 30 if `books_closed_through` defaults to the month before as_of (RULE-BUD-05,

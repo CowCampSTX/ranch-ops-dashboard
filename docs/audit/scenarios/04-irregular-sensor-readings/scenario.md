@@ -47,7 +47,7 @@ Must not appear: any T1 alert, any T5 alert, any T7 alert.
 
 | Tile | Expected |
 |---|---|
-| Water | at most 3 of 8 OK. T3, T6 and T8 are never OK, and T1's 24-hour change is unknown. |
+| Water | 2 of 8 OK (T5, T7); 6 need a look: T2, T3 and T4 critical; T1 (24-hour change unknown), T6 (silent) and T8 ('ERR') can't tell. |
 
 ## Arithmetic, by hand
 

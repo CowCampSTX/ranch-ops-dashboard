@@ -1,8 +1,20 @@
 # 09. Exact rule boundaries
 
-**The case.** Every threshold is hit exactly, and also one step either side of it. This pins down whether each rule
-uses "under" or "at or under", and whether floating-point arithmetic moves a value across a line. A manager needs a
-tank at 25.0%, or a group at exactly 80% of target, to get the same answer every time.
+**The case.** The demonstration thresholds are hit exactly, most of them with a neighbour on one or both sides. This
+pins down whether each rule uses "under" or "at or under", and whether floating-point arithmetic moves a value across a
+line. Coverage, from the table below:
+
+- **Hit exactly, with a neighbour:** tank level 25 (24.9, 25.0, 25.1) and 40 (39.9, 40.0); 24-hour drop 30 (29.9,
+  30.0); silence 24 h (23.9, 24.0); the planned move (1 day over, due today); the animal ADG line (0.982, 1.000); due
+  within 7 days (7, 8) and overdue (1 day over, due today); the 5% and 10% budget lines (5.0%; 10.0% and 10.5%).
+- **Hit exactly, without a neighbour:** the 2-day grace (2 days left only; no 1 or 3) and the group ADG lines (both
+  groups at exactly 0.8 x target; no group just under).
+- **Not at a boundary in any folder:** the $500 budget line (only $480, below it), the $1,000 serious line, the
+  $2,500 large-dollar line, the $250 unbudgeted line (only $200 and $500, in scenario 07), the 45-day weigh-in age
+  (only 72 days), the 21-day interval (only 49 and 57 days) and the 50% session share (only 3 of 45 and 10 of 150).
+  The unit tests of 06-phase1-spec.md section 11.1 must cover these.
+
+A manager needs a tank at 25.0%, or a group at exactly 80% of target, to get the same answer every time.
 
 All data is fictional (Example Ranch). **These thresholds are demonstration settings, not validated values.** The
 scenario tests that the code applies the settings as written. It does not test whether the settings are right for a
@@ -48,7 +60,7 @@ ranch (RULE-WF-21).
 | Budget warning: 5% and $500 | Labor | 5.0%, $1,800 | **warning** (5% inclusive) |
 | | Fuel | 5.0%, $480 | none ($480 is under $500) |
 | | Water and fencing | 4.9%, $235 | none |
-| Budget serious: over 10% and $1,000 | Feed and mineral | **10.0%, $2,480** | **warning**. 10.0% is not over 10%, and $2,480 is under $2,500. See open decision 1. |
+| Budget serious: over 10% and $1,000 | Feed and mineral | **10.0%, $2,480** | **warning**. 10.0% is not over 10% (open decision 1, settled by 05-roadmap.md D2). The $2,500 large-dollar line cannot change this row (it only gives a warning); it is not tested here. |
 | | Repairs | 10.0%, $720 | warning |
 | | Vet and health | 10.5%, $630 | **warning**: over 10%, but $630 is under $1,000 |
 
@@ -110,14 +122,16 @@ WAT-08, GAIN-11, GAIN-12, BUD-04, BUD-05, BUD-06, UI-06, TEST-01, TEST-02; RULE-
 RULE-WAT-04, RULE-GRZ-01, RULE-GRZ-02, RULE-GAIN-01, RULE-GAIN-02, RULE-HLTH-01, RULE-HLTH-02, RULE-BUD-02,
 RULE-BUD-03.
 
-## Open decisions (unresolved)
+## Open decisions (settled for Phase 1)
 
-1. **Exactly 10.0% with $1,000 or more.** Feed (10.0%, $2,480) is a warning under the current rule text and BUD-05
-   ("serious above 10%"). RULE-BUD-03's formula ("serious if p >= seriousPct AND V >= seriousUsd") makes it serious.
-   Pick one, and update the FEED row in `expected.json` if RULE-BUD-03's version is chosen.
-2. **Drop window edge.** The 80.1 reading sits exactly at last - 24 h and is inside the window here ([last - 24 h,
-   last], WAT-03's fix). RULE-WAT-03's phase note ("the reading about 24 h before the latest, within one reporting
-   interval") gives the same 30.0 for this series. The two definitions differ on other series (02-findings.md 7.2
-   item 6).
-3. **Rounding before comparing.** The fixture expects the drop to be rounded to 0.1 before the comparison (WAT-08's
-   fix). Comparing in integer tenths would give the same results.
+All three are settled in 05-roadmap.md and 06-phase1-spec.md; the expected rows were already written that way.
+
+1. **Exactly 10.0% with $1,000 or more.** Settled by 05-roadmap.md decision D2: serious needs more than 10%, so Feed
+   (10.0%, $2,480) stays a warning, as the current rule text and BUD-05 ("serious above 10%") say. RULE-BUD-03's
+   formula ("serious if p >= seriousPct AND V >= seriousUsd") would have made it serious.
+2. **Drop window edge.** Settled by 05-roadmap.md decision D5 (the maximum drawdown inside [last - 24 h, last], both
+   ends included), which also gives 30.0 here. The 80.1 reading sits exactly at last - 24 h and is inside the window.
+   RULE-WAT-03's phase note ("the reading about 24 h before the latest, within one reporting interval") gives the same
+   30.0 for this series. The definitions differ on other series (02-findings.md 7.2 item 6).
+3. **Rounding before comparing.** Adopted in 06-phase1-spec.md section 5.2: the drop is rounded to 0.1 before the
+   comparison (WAT-08's fix), as this fixture expects. Comparing in integer tenths would give the same results.

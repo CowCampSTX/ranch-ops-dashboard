@@ -2,7 +2,7 @@
  "scenario": "09-exact-rule-boundaries",
  "title": "Exact rule boundaries",
  "fictional": "All data is fictional (Example Ranch). Every threshold is a demonstration setting.",
- "purpose": "Every threshold hit exactly, and one step either side, so the comparison direction (< vs <=, > vs >=) and floating point are pinned down.",
+ "purpose": "Pins the comparison direction (< vs <=, > vs >=) and floating point at the demonstration thresholds. Hit exactly with a neighbour: tank level 25 (24.9, 25.0, 25.1) and 40 (39.9, 40.0); 24-hour drop 30 (29.9, 30.0); silence 24 h (23.9, 24.0); the planned move (1 day over, due today); the animal ADG line (0.982, 1.000); due within 7 days (7, 8) and overdue (1 day over, due today); the 5% and 10% budget lines (5.0%, 10.0%, 10.5%). Hit exactly without a neighbour: the 2-day grace (2 days left only) and the group ADG lines (exactly 0.8 x target, no group just under). Not at a boundary in any folder: the $500 line (only $480, below it), the $1,000 serious line, the $2,500 large-dollar line, the $250 unbudgeted line, the 45-day age limit, the 21-day interval and the 50% session share; the unit tests of 06-phase1-spec.md section 11.1 must cover them.",
  "as_of": "2026-09-30T18:00 America/Chicago",
  "files": {
   "pastures": "copied unchanged",
@@ -306,7 +306,7 @@
     "RULE-BUD-02",
     "RULE-BUD-03"
    ],
-   "arithmetic": "27,280 vs 24,800: $2,480, 2,480 / 24,800 = 10.0%; 10.0% is not more than 10% (rule text), so warning; >= 5% and >= $500. $2,480 is just under the $2,500 large-dollar line."
+   "arithmetic": "27,280 vs 24,800: $2,480, 2,480 / 24,800 = 10.0%; 10.0% is not more than 10% (rule text), so warning; >= 5% and >= $500. The $2,500 large-dollar line cannot change this row (it only gives a warning); it is not tested in this folder."
   },
   {
    "id": "LABOR",
@@ -471,8 +471,8 @@
   }
  ],
  "open_decisions": [
-  "Feed and mineral is exactly 10.0% over with $2,480. Under the current rule text and BUD-05 ('serious above 10%') it is a warning. RULE-BUD-03's formula ('serious if p >= seriousPct AND V >= seriousUsd') makes it serious. Pick one and update this expected row if it is RULE-BUD-03's.",
-  "The 80.1 reading at exactly last - 24 h is inside the window here ([last - 24 h, last], WAT-03's fix). RULE-WAT-03's phase note ('the reading about 24 h before the latest, within one reporting interval') gives the same 30.0 for this series."
+  "Feed and mineral is exactly 10.0% over with $2,480. Under the current rule text and BUD-05 ('serious above 10%') it is a warning. RULE-BUD-03's formula ('serious if p >= seriousPct AND V >= seriousUsd') makes it serious. Pick one and update this expected row if it is RULE-BUD-03's. Settled by 05-roadmap.md decision D2: serious needs more than 10%, so this row stays a warning.",
+  "The 80.1 reading at exactly last - 24 h is inside the window here ([last - 24 h, last], WAT-03's fix). RULE-WAT-03's phase note ('the reading about 24 h before the latest, within one reporting interval') gives the same 30.0 for this series. Settled by 05-roadmap.md decision D5: Phase 1 uses the maximum drawdown inside [last - 24 h, last], which also gives 30.0 here."
  ],
  "computed": {
   "heifers": {

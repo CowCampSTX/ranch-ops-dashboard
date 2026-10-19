@@ -438,9 +438,10 @@
  "tile_expectations": [
   {
    "tile": "water",
-   "ok_at_most": 3,
+   "ok": 2,
    "of": 8,
-   "note": "T3, T6 and T8 are never OK; T1's 24-hour change is unknown."
+   "need_look": 6,
+   "note": "OK: T5, T7. Need a look: T2, T3, T4 (critical); T1 (24-hour change unknown), T6 (silent) and T8 ('ERR') can't tell."
   }
  ],
  "findings": [

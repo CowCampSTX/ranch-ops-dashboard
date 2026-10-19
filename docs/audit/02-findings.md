@@ -275,6 +275,12 @@ From findings.json `policies.phase_1_acceptance`: "The 10 planted problems are s
 with no new false alarms on the committed data. Data issue rows and CAN'T TELL states are new row types; on the
 committed data none should appear after HLTH-03's generator fix."
 
+**One stated exception ([05-roadmap.md decision D7](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees)).** The silent T6 tank becomes a CAN'T TELL row with the
+same serious severity and the same "No reading for 42 hours; last level 98.5%" text. It is the only CAN'T TELL row on
+the committed data after Phase 1; there is still no data issue and no other CAN'T TELL row
+([05-roadmap.md section 3.1](05-roadmap.md#31-phase-1-acceptance-bar)). The registry's policy text quoted above has not
+been changed; the exception is flagged for the registry's owner in `data/registry-changelog.md` ("Review fixes").
+
 The 10 rows the committed data gives today (`01-baseline.md`, section 4.5, from the baseline browser run):
 
 | Severity | Area | What | Problem |
@@ -861,6 +867,8 @@ Hand values re-checked by `findings.handvalues.py` (each printed MATCH): months 
 
 **Proposed fix (recommendation).** Add a season start to meta.csv; normalise month to YYYY-MM in the data contract; pass as_of into budgetStatus and count only closed months in [season start, last month closed on or before as_of]; treat a blank actual as 'not entered' (data issue) and check each category has every month in range. Show the months covered in the tile and rules copy. A month counts as closed when the ranch-zone as-of date is on or after its last day, so as_of 2026-09-30T18:00 closes September (an assumption, listed in unresolved_assumptions). If the ranch prefers 'closed once the last day has ended', September drops out on Sep 30 and the committed rows read Fuel 20.0% over (\$1,440: 8,640 vs 7,200) and Repairs 13.3% over (\$720: 6,120 vs 5,400), both still serious.
 
+*Note added in review.* "Both still serious" holds only under today's percent-only rule. Under [05-roadmap.md decision D2](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees) (serious needs more than 10% **and** at least \$1,000 over), Repairs at \$720 over becomes a warning; Fuel (20.0%, \$1,440) stays serious. That is why [decision D1](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees) has the generator write `books_closed_through` = 2026-09, so the planted severities do not depend on this choice. The registry text above is unchanged and flagged for its owner.
+
 **Files affected.** `data/meta.csv` (season start) via `scripts/generate_data.py` (data files are generated; CI checks they match); `exceptions.js` (`budgetStatus`: month, as_of, closed months); `app.js` (tile, rules copy); `README.md` (line 28); `tests/exceptions.test.mjs`.
 
 **Related findings.** [TIME-01](#time-01), [BUD-02](#bud-02), [CSV-04](#csv-04)
@@ -1087,7 +1095,9 @@ Severity **medium** · Status **confirmed** · Phase 1 (Fix now) · Effort **S**
 
 Hand values re-checked by `findings.handvalues.py` (each printed MATCH): worst 24-hour drawdown per tank (WAT-03 no-new-alarm check) = `{'T1': 16.1, 'T2': 15.3, 'T3': 16.2, 'T4': 46.0, 'T5': 14.5, 'T6': 12.4, 'T7': 17.1, 'T8': 18.2}`.
 
-**Proposed fix (recommendation).** Use only readings in [last.time - 24 h, last.time] in the same pasture placement; drop = max level in that window minus the last level (or the max drawdown inside it); state the real span in hours; when the window holds only the last reading, say the 24-hour change can't be judged rather than reporting 0. The 30-point line stays a demo setting.
+**Proposed fix (recommendation).** Use only readings in [last.time - 24 h, last.time] in the same pasture placement; drop = the largest fall from an earlier to a later reading inside that window (the maximum drawdown; [05-roadmap.md decision D5](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees)); state the real span in hours; when the window holds only the last reading, say the 24-hour change can't be judged rather than reporting 0. The 30-point line stays a demo setting.
+
+*Note added in review.* The registry's `proposed_fix` also offers "max level in that window minus the last level". That form gives 90 - 86 = 4 points for W-03 and fails the regression test above (40 points), so it is not an option; only the maximum drawdown sees a fall that refilled inside the window. The registry wording is flagged for its owner.
 
 **Files affected.** `exceptions.js` (bounded window); `app.js` (rules text, line 204); `README.md` (rule text); `tests/exceptions.test.mjs`.
 
@@ -1442,6 +1452,8 @@ Severity **medium** · Status **confirmed** · Phase 1 (Fix now) · Effort **M**
 - How it was verified: confirmed (verify_healthbudget F3, verify_render F5). Evidence: BU-01 'serious | Hay | Infinity% over season to date (\$500)'; AB-01 chart bars 'NaN/NaN' x7, 36 NaN/Infinity attributes; BU-02 'pct=NaN; (no alerts)'; AB-02 label '−NaN%'. Correction applied: the alert and the budget table do show the dollars ('Hay \$0 \$500 +\$500'), so the harm is the broken-looking 'Infinity%' and the blank chart. Medium kept. Registrar re-ran AB-01/AB-02 on 2026-10-16: same.
 
 **Expected behaviour.** Spending with no budget line is shown in dollars as unbudgeted spending ('\$500 spent with no budget line'), never 'Infinity%'. A 0/0 placeholder gives no alert. The six real categories keep finite bars (Repairs +25%, Fuel +21%).
+
+*Note added in review.* The Phase 1 on-screen wording is "\$500 spent with no budget, season to date through 2026-09" ([06-phase1-spec.md section 5.6](06-phase1-spec.md#56-budget); 05-roadmap.md P1-12 uses the same string). The test above checks only for '\$500' and the absence of Infinity and NaN, so it is unaffected.
 
 **Operational consequence.** A new unbudgeted line (hay bought in a dry year) or an empty placeholder category blanks the whole spending chart, and the alert text looks broken.
 
@@ -3294,6 +3306,10 @@ Quoted from findings.json `unresolved_assumptions`:
 - How common reused tag numbers across groups ([GAIN-06](#gain-06)), per-pasture tank names ([WAT-04](#wat-04)) and comma-formatted weight exports ([CSV-01](#csv-01)) are in real ranch data is inferred, not measured.
 - Whether a budget month counts as closed on its last calendar day ([BUD-01](#bud-01) assumes yes, so as_of 2026-09-30T18:00 includes September) or only after that day has ended is a ranch bookkeeping choice; the committed severities are the same either way ([BUD-01](#bud-01)).
 
+*Note added in review on the last item.* "The same either way" holds only under today's percent-only budget rule. Under
+[05-roadmap.md decision D2](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees), leaving September out makes Repairs \$720 over (13.3%), under the \$1,000 serious
+line, so Repairs becomes a warning. [Decision D1](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees) avoids this by writing `books_closed_through` = 2026-09.
+
 ### 7.2 Where the findings and rules registries disagree
 
 These were found while cross-reading the two registries for this document. Each needs one decision before the fix and
@@ -3303,34 +3319,43 @@ its test are written. None changes a finding's severity.
    2026-09-30T18:00 includes September (Fuel 21% over, \$2,040; Repairs 25% over, \$1,800). RULE-BUD-05's phase note
    defaults `books_closed_through` to "the month before as_of's month, labelled 'assumed'", which would leave September
    out. On the committed data that gives Fuel 20.0% over (\$1,440) and Repairs 13.3% over (\$720), both still serious
-   (`findings.handvalues.py`: "Jun-Aug only ... (('Fuel', 20.0, 1440), ('Repairs', 13.3, 720))", MATCH). This is a ranch
-   bookkeeping choice and is already listed in 7.1.
+   under today's percent-only rule (`findings.handvalues.py`: "Jun-Aug only ... (('Fuel', 20.0, 1440), ('Repairs', 13.3,
+   720))", MATCH). Under the combined rule of [05-roadmap.md decision D2](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees), Repairs (\$720, under the \$1,000
+   serious line) becomes a warning. This is a ranch bookkeeping choice and is already listed in 7.1. *Decided in
+   [05-roadmap.md decision D1](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees):* `meta.csv` carries `books_closed_through` and the generator writes 2026-09.
 2. **The dollar lines in the combined budget rule.** RULE-BUD-03 uses demo values of warning at 5% and \$500, serious
    at 10% and \$1,000 (both conditions), a large-dollar warning at \$2,500, and \$250 for unbudgeted spending.
    [BUD-04](#bud-04)'s regression test states different demo values: no row under \$500 over; warning at 5% or more, or \$2,500 or
    more; serious above 10%, or \$5,000 or more. Applying each set as stated, the two rate [BUD-04](#bud-04)'s Feed case (\$9,500
    over, 9.5%) differently: serious under [BUD-04](#bud-04)'s values, a warning under RULE-BUD-03's (9.5% is under its 10% serious
-   line). Choose one set, label it as demo settings, then write the test.
+   line). Choose one set, label it as demo settings, then write the test. *Decided in
+   [05-roadmap.md decision D2](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees):* RULE-BUD-03's values with BUD-05's boundaries.
 3. **Whether a large under-spend is a warning.** [BUD-07](#bud-07) proposes a Phase 2 under-budget warning; RULE-BUD-13 proposes
-   showing large favourable variances as information only, with no severity, and defers it.
+   showing large favourable variances as information only, with no severity, and defers it. *Decided in
+   [05-roadmap.md decision D12](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees):* an information line in Phase 2.
 4. **How many re-entries are short of minimum rest.** RULE-GRZ-03's phase note says "13 of 15 short re-entries". The
    grazing skeptic corrected this in [GRZ-05](#grz-05) to 11 of 13 sequential re-entries short of minimum rest, plus 2 entries into a
    pasture another group still occupied. `findings.handvalues.py` agrees with the corrected figures: sequential
    re-entries and short ones "(13, 11)", and two shared pastures (P2 Cows and Yearlings for 7 days; P4 Heifers and
-   Yearlings for 11 days). Use the findings registry's figures.
+   Yearlings for 11 days). Use the findings registry's figures (*[05-roadmap.md decision D13](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees)*).
 5. **The minimum interval for individual gain.** RULE-GAIN-07 recommends a 70-day individual default. Its phase note
    says that default "is met only by a method that uses all three weigh-ins; an ADG from the last 57-day interval alone
    falls under it (not tested in this audit)", and asks for a check that the planted heifer and six-yearling problems
    remain. [GAIN-03](#gain-03) proposes a group minimum interval (demo value, for example 21 days). The individual and group
    minimums are separate settings; the individual one must be chosen and tested against the planted problems before
-   it is adopted.
+   it is adopted. *Decided in [05-roadmap.md decision D6](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees):* 21 days for the group and 42 days for individual
+   animals (demo settings).
 6. **How the 24-hour drop window is bounded.** RULE-WAT-03's phase note compares the latest reading with "the reading
-   about 24 h before the latest, within one reporting interval". [WAT-03](#wat-03)'s fix uses the highest level inside
-   [last − 24 h, last] minus the last level. Both keep the committed result (T4 at 46 points; every healthy tank at or
-   under 18.2 by either measure in `findings.handvalues.py`), but only the second sees a fall that refilled inside the
-   window (W-03). Choose one and test it.
-7. **Where the completeness critic's edits are described.** `registry-changelog.md` covers only the citation critic's
-   pass on `rules.json` and `sources.json`. The completeness critic's edits to `findings.json` (for example [GAIN-08](#gain-08) moved
+   about 24 h before the latest, within one reporting interval". [WAT-03](#wat-03)'s fix bounds the window to
+   [last − 24 h, last] and offers two measures inside it: the highest level minus the last level, or the maximum
+   drawdown (the largest fall from an earlier to a later reading). All keep the committed result (T4 at 46 points;
+   every healthy tank at or under 18.2 in `findings.handvalues.py`). Only the maximum drawdown catches a fall that was
+   then refilled: for W-03 (90 to 50, then back to 86) it gives 40 points, while "highest minus last" gives 90 - 86 = 4
+   and RULE-WAT-03's comparison also misses it. *Decided in [05-roadmap.md decision D5](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees):* the maximum drawdown
+   inside [last − 24 h, last], which WAT-03's regression test (40 points) requires.
+7. **Where the completeness critic's edits are described.** `registry-changelog.md` covers the citation critic's pass
+   on `rules.json` and `sources.json`, and the 2026-10-19 review fixes to the audit documents (which left the registries
+   unchanged). The completeness critic's edits to `findings.json` (for example [GAIN-08](#gain-08) moved
    to Phase 1, and the [CSV-05](#csv-05) / [HLTH-01](#hlth-01) split) are recorded in each entry's `status_note`, in findings.json `revisions`
    and `spot_checks`, and in `findings-map.json`, but the changelog has no section for them.
 
@@ -3347,7 +3372,8 @@ its test are written. None changes a finding's severity.
   spot checks, context notes and unresolved assumptions. The compact index is `findings-index.json`; the raw-to-registry
   map is `findings-map.json`.
 - `docs/audit/data/rules.json` (rules, classifications, sources and checker results) and `rules-index.json`.
-- `docs/audit/data/registry-changelog.md`: the citation critic's pass.
+- `docs/audit/data/registry-changelog.md`: the citation critic's pass and the review fixes (including the registry
+  wording flagged for its owner).
 - `docs/audit/evidence/baseline.json`: the unit-test result and the blocked checks.
 - `docs/audit/01-baseline.md`, section 4.5: the 10 rows on the committed data.
 - `docs/audit/diagnostics/findings.handvalues.py`: the independent hand-value check, written on 2026-10-16 (72 checks),

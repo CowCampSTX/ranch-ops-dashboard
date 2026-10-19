@@ -84,7 +84,10 @@ None." (`registry-changelog.md`).
 
 Names such as W-02, GN-07, CSV-35, TIME-18 or GB-09 are test-case IDs from the audit's diagnostics scripts
 (`docs/audit/diagnostics/*.mjs`), quoted in the findings' evidence. They are not finding IDs. Finding IDs always link to
-[02-findings.md](02-findings.md), and rule IDs always start with RULE-.
+[02-findings.md](02-findings.md), and rule IDs always start with RULE-. Where a test-case label is also a finding ID
+(CSV-07), is used by two scripts (B-03, GB-09) or looks like a finding ID (TIME-18, TIME-D1), the acceptance criteria
+write it with its script, for example `water.repro:B-03` or `grazing.repro:GB-09`
+([06 section 12](06-phase1-spec.md#12-acceptance-criteria-per-p1-item)).
 
 ### Numbers in this roadmap
 
@@ -183,7 +186,9 @@ or Phase 3 feature, and no "every change must" rule below requires a later-phase
 2. **Blank means missing.** No rule treats a blank cell as 0 or as text; IDs, tags, names and dates stay strings.
 3. **Three states.** Every rule added or changed in any phase returns OK, needs attention or CAN'T TELL; missing,
    stale, invalid or insufficient inputs give CAN'T TELL with a reason and a first step, never an all-clear
-   ([RULE-WF-09](03-research-and-data.md#rule-wf-09) phase note: "CAN'T TELL rows also need a first step").
+   ([RULE-WF-09](03-research-and-data.md#rule-wf-09) phase note: "CAN'T TELL rows also need a first step"). One
+   documented exception until P2-08: a group with no current stay gets only an information note, because without
+   GRZ-07's group status a shipped or drylotted group cannot be told from a missing record (P1-08).
 4. **Visible data issues.** Any value the contract rejects becomes a data issue with file, row, column, value, code,
    message and severity. Nothing is dropped silently.
 5. **One as-of policy.** Every rule uses the same as-of instant and ranch calendar date; rows dated after it are left
@@ -447,7 +452,9 @@ after the input update of decision D16.
 - **Acceptance criteria (headline):** 'T1 ... 80' then 'T1 ... ERR' gives exactly one serious T1 row containing 'ERR'
   and '80%'; T2's newest row set to ERR still gives a T2 row naming "last good level 14.8%"; -999 and 140 give no
   'Dropped' row; with every T6 row removed the tile reads "5 of 8" and "3 need a look" and T6 says "No readings";
-  W-01 gives no Water row; W-02 gives one critical row with '45 points' and '18 hours'; W-03 reports 40 points;
+  on inline T1 rows with `tanks.csv` listing T1 only (06 section 11.2), W-01 gives no Water row for T1, W-02 gives one
+  critical row with '45 points' and '18 hours', and W-03 reports 40 points (the maximum drawdown); W-11 with T9 listed
+  in P3 gives no Water row for T9 and a pasture-mismatch data issue;
   80.1 to 50.1 gives "Dropped 30 points"; both orders of 78 and 20 give "now 20%" plus a data issue; scenario 04's T1
   (no reading between 2026-09-27T18:00 and 2026-09-30T18:00) gives a CAN'T TELL row and no "Dropped"; the committed data
   gives exactly 3 Water rows and T4 at 46 points. Full list: [06 section 12, P1-07](06-phase1-spec.md#p1-07).
@@ -464,8 +471,10 @@ after the input update of decision D16.
   blank or after it. An optional `planned_out_date` column (decision D11) holds a new move date without closing the
   stay, and the serious action names it. When a group has two open stays, the latest is judged and the extra one is a
   data issue (decision D8). Bad dates or plans are data issues naming the group, pasture and value; the group's
-  grazing is CAN'T TELL when its current stay cannot be judged. On the due day the warning reads "Move planned for
-  today". The chart uses the same predicate and clips bars at the as-of date.
+  grazing is CAN'T TELL when its current stay cannot be judged. A group with no current stay is not judged in Phase 1
+  and gets only an information note, a known exception to the three-state rule until GRZ-07's group status (P2-08) can
+  tell a shipped group from a missing record ([06 section 5.3](06-phase1-spec.md#53-grazing)). On the due day the
+  warning reads "Move planned for today". The chart uses the same predicate and clips bars at the as-of date.
 - **Files and data:** `exceptions.js` (grazing); `app.js` (rotation chart); optional `moves.csv` column.
 - **Dependencies:** P1-02, P1-03, P1-04, P1-06.
 - **Effort:** M.
@@ -562,7 +571,8 @@ after the input update of decision D16.
 - **Proposed behaviour:** months are YYYY-MM; only closed months from `season_start` through `books_closed_through`
   count (decision D1). Amounts are read by a strict money parser (decision D3) and summed in whole cents. A closed
   month with no row or a blank actual makes that category CAN'T TELL. A zero budget with spending is judged in dollars
-  only ("\$500 spent with no budget line"). Severity uses percent and dollars together (decision D2), with stated
+  only ("\$500 spent with no budget, season to date through 2026-09", the wording of
+  [06 section 5.6](06-phase1-spec.md#56-budget)). Severity uses percent and dollars together (decision D2), with stated
   boundaries: serious when more than 10.0% over and at least \$1,000 over; warning when at least 5.0% over and at least
   \$500 over (this includes more than 10.0% over with less than \$1,000, as scenario 09's "Vet and health" 10.5% and
   \$630 shows), or at least \$2,500 over at any percent; \$250 for unbudgeted spending. Every value is a demo setting (D)
@@ -571,7 +581,8 @@ after the input update of decision D16.
 - **Dependencies:** P1-02, P1-03, P1-05, P1-06.
 - **Effort:** M.
 - **Acceptance criteria (headline):** committed budget plus Oct and Nov plan rows still gives exactly the Fuel and
-  Repairs serious rows with \$2,040 and \$1,800, and the tile "+1.0%" "\$89,303 of \$88,400"; 'Repairs,0,(300)' in
+  Repairs serious rows with \$2,040 and \$1,800, and the tile "+1.0%" "\$89,303 of \$88,400"; a blank actual leaves
+  that month's budget out of the tile, so scenario folder 03 reads "+1.0%" "\$87,783 of \$86,900", never under budget; 'Repairs,0,(300)' in
   2026-09 gives Repairs serious 20.8% (\$1,500) and a warning that two rows were added together; Hay 0 / 500 gives one row with '\$500' and no 'Infinity' or 'NaN', and
   0 / 0 gives no row; Ear tags 230 / 200 gives no row, Feed 109,500 / 100,000 gives a warning, Hay 104,000 / 100,000 a
   warning; on a 10,000 base, 10,500 is a warning "5.0%", 11,000 a warning "10.0%", 11,040 serious "10.4%"; budget
@@ -589,8 +600,10 @@ after the input update of decision D16.
 - **Dependencies:** none; it can land first.
 - **Effort:** S.
 - **Acceptance criteria (headline):** a pasture named '<b>x</b>' appears as '&lt;b&gt;x&lt;/b&gt;' in #exceptions and
-  the T2 heading; a tag '<i>t</i>' appears escaped in the tooltip; 'Lone Tree <A' gives the T4 subject in full; the
-  audit's render.repro.mjs cases R01-R04 flip to MATCH. Full list: [06 section 12, P1-13](06-phase1-spec.md#p1-13).
+  the T2 heading; a tag '<i>t</i>' appears escaped in the tooltip; markup in a tank, pasture, group or category name
+  shows as text in each of the water, grazing, gain and budget tooltips (the water tooltip, `app.js:104`, writes
+  `innerHTML` directly); 'Lone Tree <A' gives the T4 subject in full; the audit's render.repro.mjs cases R01-R04 flip
+  to MATCH. Full list: [06 section 12, P1-13](06-phase1-spec.md#p1-13).
 
 #### P1-14: Tiles and charts built from structured results
 
@@ -609,8 +622,9 @@ after the input update of decision D16.
 - **Effort:** M.
 - **Acceptance criteria (headline):** Yearlings renamed Steers gives 10 data rows and no page error; Yearlings shipped
   (removed from every file) gives 7 rows; T6 filtered to readings on or before 2026-09-22T12:00 gives no page error, 8
-  tank charts, all other charts and "No reading for 198 hours"; the B-03 data gives "Sensors normal 5 of 8" and "3 need
-  a look"; month labels for GB-09 to GB-12 and TB-04 equal the hand-worked sets inside x 74..550. Full list:
+  tank charts, all other charts and "No reading for 198 hours"; the water.repro:B-03 data (T2 and T4 renamed "Well 2"
+  and "Well 4" in water.csv and tanks.csv) gives "Sensors normal 5 of 8" and "3 need a look"; month labels for
+  grazing.repro:GB-09 to GB-12 and time.browser:TB-04 equal the hand-worked sets inside x 74..550. Full list:
   [06 section 12, P1-14](06-phase1-spec.md#p1-14).
 
 #### P1-15: Wording and number formatting
@@ -1122,8 +1136,10 @@ read like the existing ones, and any public data is fetched at build time and co
   USDM county category mix for a named stand-in county is chosen by **release time** on or before the as-of time and
   labelled "valid <Tue>, released <Thu>" (RULE-CTX-01). It is marked stale when the as-of time is more than about 9.1
   days after the valid date (RULE-CTX-02). Weeks at D2 or worse are information only, with a link to FSA and no
-  eligibility claim (RULE-CTX-03). A ranch rain-gauge record and drought-plan trigger dates create a "review the grazing
-  plan" prompt, never a move exception (RULE-CTX-10). Everything is labelled "Public data: <County>, <State>; ranch data
+  eligibility claim (RULE-CTX-03). Optional, and later than the snapshot itself: a ranch rain-gauge record and
+  drought-plan trigger dates that create a "review the grazing plan" prompt, never a move exception (RULE-CTX-10). They
+  are not needed for the dated snapshot and do not count as a separate addition; if they are not built, P3-03 is still
+  complete. Everything is labelled "Public data: <County>, <State>; ranch data
   fictional" (RULE-CTX-15). No SD Mesonet data is committed (RULE-CTX-16). A missing or failed fetch shows
   "unavailable", never "no drought".
 - **Files and data:** new workflow file under `.github/workflows/`; `data/context.csv`; `app.js`.
@@ -1132,8 +1148,8 @@ read like the existing ones, and any public data is fetched at build time and co
 - **Acceptance criteria:** for as_of 2026-09-30T18:00 America/Chicago, the selection picks the map valid 2026-09-22,
   not the one valid 2026-09-29 (RULE-CTX-01 phase note: "A naive lookup picks the 2026-09-29 map, released after as_of;
   the correct one is valid 2026-09-22"); an as-of 10 days after the valid date shows "stale"; an empty `context.csv`
-  shows "unavailable"; the page makes no network request at load (checked in the browser smoke test); the test workflow
-  does not run the refresh.
+  shows "unavailable"; the page makes no request to any other origin at load (it still fetches its own CSV files;
+  checked in the browser smoke test); the test workflow does not run the refresh.
 
 ### 5.1 Coverage: Phase 3 findings
 
@@ -1152,7 +1168,7 @@ read like the existing ones, and any public data is fetched at build time and co
 | [RULE-CTX-01](03-research-and-data.md#rule-ctx-01) | A | proposed | Choose public context by when it was released, not by the week it covers | P3-03 |
 | [RULE-CTX-02](03-research-and-data.md#rule-ctx-02) | C | proposed | Mark the drought context stale when (as_of minus USDM valid date) is more than about 9.1 days, meaning a weekly release was missed or the fetch failed | P3-03 |
 | [RULE-CTX-03](03-research-and-data.md#rule-ctx-03) | B | proposed | Show the county USDM category mix and a count of weeks at D2 or worse in the last 8 weeks as information only, with a link to FSA | P3-03 |
-| [RULE-CTX-10](03-research-and-data.md#rule-ctx-10) | C | proposed | drought-plan review prompts | P3-03 |
+| [RULE-CTX-10](03-research-and-data.md#rule-ctx-10) | C | proposed | drought-plan review prompts | P3-03 (optional, later part) |
 | [RULE-CTX-15](03-research-and-data.md#rule-ctx-15) | D | proposed (demo setting) | Any real public context shown next to the fictional ranch must be (a) pinned to the fictional as_of, not today's live data; (b) for a named real count... | P3-03 |
 | [RULE-CTX-16](03-research-and-data.md#rule-ctx-16) | A | proposed (data-source rule) | Do not commit or redistribute SD Mesonet data in a public repository or site | P3-03 |
 

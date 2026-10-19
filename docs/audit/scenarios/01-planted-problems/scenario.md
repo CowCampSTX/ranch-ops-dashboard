@@ -89,7 +89,10 @@ The 10 rows are the ones listed in `01-baseline.md` 4.5 and `02-findings.md` ("T
 
 ## Preconditions and open decisions
 
-These are recommendations and unresolved assumptions, not verified findings.
+These are recommendations and unresolved assumptions, not verified findings. For Phase 1, 05-roadmap.md settles all
+three: item 1 by decision D16 (rebuild this folder from the regenerated `data/`), item 2 by D1 and D2 (the generator
+writes `books_closed_through` = 2026-09, so Repairs stays serious) and item 3 by D6 (21 days for the group, 42 days for
+individual animals).
 
 1. **A time zone is required first.** data-fields.json (meta.csv `timezone`) says that without an offset or a time
    zone, the time-based rules are CAN'T TELL. Phase-1 code that does this would not give these 10 rows on this folder.

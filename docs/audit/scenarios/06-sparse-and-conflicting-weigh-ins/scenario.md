@@ -60,13 +60,14 @@ Must not appear:
 
 ## Arithmetic, by hand
 
-- **Heifer coverage:** on Sep 15, 3 heifers (H001-H003) of 45 were weighed: 3 / 45 = 6.7%. That is below the
-  scenario's 50% minimum, and below any minimum above 7%, so Sep 15 is not a heifer session. The last full heifer
-  session is Jul 20, which is 72 days before Sep 30, more than the 45-day limit. Either way, CAN'T TELL.
+- **Heifer coverage:** on Sep 15, 3 heifers (H001-H003) of 45 were weighed: 3 / 45 = 6.7%. A session needs at least
+  half the head (`weighSessionShare` 0.5: ceil(0.5 x 45) = 23 heifers), so Sep 15 is not a heifer session. The last
+  heifer session is Jul 20, which is 72 days before Sep 30, more than the 45-day limit, so CAN'T TELL on age. The
+  coverage minimum (`gainMinCoverage`) is never reached, so the result is the same at any coverage minimum.
 - **Yearlings:** sessions are the dates on which at least half the head was weighed. Sep 15 qualifies (150 of 150).
-  Sep 22 (10 of 150) does not. Over Jul 20 to Sep 15 the yearling figures are the committed ones: 16,608 / 8,550 =
-  1.94246. If Y001's 853 is kept instead of 851: 16,610 / 8,550 = 1.94269. Both show as 1.94, so the duplicate changes
-  no verdict and is reported, not guessed at.
+  Sep 22 (10 of 150) does not. Phase 1 averages Y001's two Sep 15 weights (851 and 853 give 852; 06-phase1-spec.md
+  section 3.5, decision D15): 16,609 / 8,550 = 1.94257. Keeping 851 gives the committed 16,608 / 8,550 = 1.94246, and
+  keeping 853 gives 16,610 / 8,550 = 1.94269. All show as 1.94, so the duplicate changes no verdict; it is reported.
 - **Y003-Y012:** a 7-day interval is under the 21-day minimum, so the re-weigh is not used. If it were, each animal
   would show 3 / 7 = 0.43 lb/day and be flagged under 1.0. That would be a false alarm from scale noise (GAIN-03).
 - **Y151:** one weight, so no interval. Left out and listed.
@@ -88,11 +89,15 @@ GAIN-01, GAIN-02, GAIN-03, GAIN-06, GAIN-07, GAIN-08, GAIN-14, DATA-03; RULE-GAI
 
 ## Assumptions (unresolved)
 
-- **Coverage minimum.** `gainMinCoverage` = 0.5 is a scenario assumption. RULE-GAIN-10 and GAIN-07 call for a
-  labelled minimum but give no number. The 3-of-45 case was chosen so that any minimum above 7% gives the same answer.
+- **Coverage minimum.** `gainMinCoverage` = 0.5 is a scenario assumption (Phase 1 uses 0.8, a demo setting). RULE-GAIN-10
+  and GAIN-07 call for a labelled minimum but give no number. In this folder the heifers fail the session rule and then
+  the age limit before coverage is checked, so no folder tests `gainMinCoverage`; the unit tests of 06-phase1-spec.md
+  section 11.1 must.
 - **Session rule.** A weigh session is a date on which at least half the group was weighed (`weighSessionShare`, a
   scenario assumption based on GAIN-03's "dates when most of the group crossed the scale").
 - **Minimum interval.** These fixtures use one 21-day minimum (GAIN-03's example demo value). RULE-GAIN-07's 70-day
-  individual default is not adopted. See scenario 01, open decision 3.
-- How a same-day duplicate is resolved (keep both and flag, keep the later one, or average) is not decided. The
-  fixture is built so that the verdict is the same whichever is kept.
+  individual default is not adopted. See scenario 01, open decision 3, now settled by 05-roadmap.md decision D6 (21 days
+  for the group, 42 days for individual animals; every judged pair here is 57 days apart, so nothing changes).
+- How a same-day duplicate is resolved: Phase 1 averages the two weights and reports the conflict (05-roadmap.md
+  decision D15; 06-phase1-spec.md section 3.5). The fixture is built so that the verdict is the same whichever value is
+  kept or averaged.

@@ -349,8 +349,10 @@
   },
   {
    "tile": "budget",
-   "sane": true,
-   "note": "No NaN, Infinity or e+ and |percent| under 100; the tile names the incomplete category or shows CAN'T TELL (manual check)."
+   "pct": 1.0161,
+   "actual_usd": 87783,
+   "budget_usd": 86900,
+   "note": "Every valid actual ($87,783) against the budgets of the months whose actual is entered ($86,900): Vet and health's September budget ($1,500) is left out with its blank actual, so the missing amount cannot make spending look under budget (06-phase1-spec.md section 5.6). The tile also says 1 category can't tell. Counting that budget anyway would read $87,783 of $88,400, under budget."
   }
  ],
  "findings": [

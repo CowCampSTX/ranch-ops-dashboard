@@ -49,29 +49,37 @@ SETTINGS = {
     "note": ("Demonstration settings used to write the expected Phase-1 results. None is a validated operating value; "
              "each is to be tuned per ranch. Class D = synthetic demonstration setting, C = ranch-specific management "
              "choice (docs/audit/data/rules-index.json legend). 'scenario assumption' marks a value the registries do not "
-             "give; it was chosen here only so a fixture has one expected answer."),
+             "give; it was chosen here only so a fixture has one expected answer. These are the settings the folders were built "
+             "with, before Phase 1. Where docs/audit/06-phase1-spec.md section 9 differs (24-hour drop formula, coverage minimum, "
+             "individual gain interval, closed months), the setting carries a phase_1 note; 06 section 11.2 shows that none of "
+             "these differences changes an expected row once decision D16's inputs are added."),
     "settings": [
         {"name": "waterCriticalPct", "value": 25, "comparison": "critical when the latest valid level < 25", "class": "C", "basis": "RULE-WAT-01 (current value, demo setting)"},
         {"name": "waterLowPct", "value": 40, "comparison": "warning when the latest valid level < 40", "class": "C", "basis": "RULE-WAT-02"},
-        {"name": "waterDropPts", "value": 30, "comparison": "critical when (highest level in [last - 24 h, last]) - last level, rounded to 0.1, >= 30", "class": "D", "basis": "RULE-WAT-03; window per WAT-03's proposed fix (02-findings.md 7.2 item 6 records the alternative); rounding per WAT-08"},
+        {"name": "waterDropPts", "value": 30, "comparison": "critical when (highest level in [last - 24 h, last]) - last level, rounded to 0.1, >= 30", "class": "D", "basis": "RULE-WAT-03; window per WAT-03's proposed fix (02-findings.md 7.2 item 6 records the alternative); rounding per WAT-08",
+         "phase_1": "Phase 1 uses the maximum drawdown inside the same window (the largest fall from an earlier to a later reading; 05-roadmap.md decision D5, 06-phase1-spec.md section 5.2). Only the drawdown sees a fall that refilled inside the window (W-03: 40 points, where this formula gives 90 - 86 = 4). On these folders both give the same verdict for every tank (06 section 11.2)."},
         {"name": "dropWindowMinReadings", "value": 2, "comparison": "fewer than 2 valid readings in [last - 24 h, last]: the 24-hour change is CAN'T TELL ('not enough recent history'), the level is still judged", "class": "D", "basis": "WAT-03 proposed fix; lead default 'bounded 24-hour drop window'"},
         {"name": "sensorSilentHours", "value": 24, "comparison": "serious when as_of - last reading >= 24 h; level and drop not judged", "class": "C", "basis": "RULE-WAT-04 (measured against as_of)"},
         {"name": "graceDays", "value": 2, "comparison": "serious when days in pasture - planned_graze_days > 0; warning when it is between -2 and 0 inclusive ('due today' at 0)", "class": "D", "basis": "RULE-GRZ-01, RULE-GRZ-02, UI-06"},
-        {"name": "plannedGrazeDays", "value": "per pasture (pastures.csv)", "comparison": "", "class": "D", "basis": "RULE-GRZ-01"},
+        {"name": "plannedGrazeDays", "value": "per pasture (pastures.csv)", "comparison": "", "class": "C", "basis": "RULE-GRZ-01 (the ranch's plan; class as in 06-phase1-spec.md section 9)"},
         {"name": "adgSerious", "value": 0.8, "comparison": "serious when pooled group ADG < 0.8 x target (strict)", "class": "C", "basis": "RULE-GAIN-01; pooled sum(lbs)/sum(days) per GAIN-03 and GAIN-12"},
         {"name": "animalShare", "value": 0.5, "comparison": "warning when an animal's ADG < 0.5 x target (strict), only if the group is not already serious", "class": "C", "basis": "RULE-GAIN-02, RULE-WF-19"},
         {"name": "targetAdgLbs", "value": "Heifers 1.0, Yearlings 2.0, Cows 0.0 (not judged)", "comparison": "", "class": "D", "basis": "RULE-GAIN-03, RULE-GAIN-04, RULE-GAIN-05, GAIN-13"},
-        {"name": "gainMinIntervalDays", "value": 21, "comparison": "the two weigh sessions compared must be at least 21 days apart; used for the group and, in these fixtures, for the individual rule too", "class": "D", "basis": "GAIN-03's example demo value. RULE-GAIN-07 recommends a separate 70-day individual default that the committed 57-day interval does not meet (02-findings.md 7.2 item 5); these fixtures do not adopt it"},
+        {"name": "gainMinIntervalDays", "value": 21, "comparison": "the two weigh sessions compared must be at least 21 days apart; used for the group and, in these fixtures, for the individual rule too", "class": "D", "basis": "GAIN-03's example demo value. RULE-GAIN-07 recommends a separate 70-day individual default that the committed 57-day interval does not meet (02-findings.md 7.2 item 5); these fixtures do not adopt it",
+         "phase_1": "Settled by 05-roadmap.md decision D6: 21 days for the group, 42 days for individual animals (both demo settings, D). No change here: every judged pair in these folders is 57 days apart."},
         {"name": "weighSessionShare", "value": 0.5, "comparison": "a weigh session is a date on which at least half of the group's head (groups.csv) crossed the scale", "class": "D", "basis": "scenario assumption, from GAIN-03's 'dates when most of the group crossed the scale'"},
         {"name": "gainMaxAgeDays", "value": 45, "comparison": "CAN'T TELL when the group's latest weigh session is more than 45 days before the as-of date", "class": "D", "basis": "GAIN-08 (demo limit)"},
-        {"name": "gainMinCoverage", "value": 0.5, "comparison": "CAN'T TELL when animals weighed at both sessions / head < 0.5", "class": "D", "basis": "scenario assumption; RULE-GAIN-10 and GAIN-07 call for a labelled minimum but give no number. Scenario 06 uses 3 of 45, which any minimum above 7% treats the same way"},
+        {"name": "gainMinCoverage", "value": 0.5, "comparison": "CAN'T TELL when animals weighed at both sessions / head < 0.5", "class": "D", "basis": "scenario assumption; RULE-GAIN-10 and GAIN-07 call for a labelled minimum but give no number. In scenario 06 only 3 of 45 heifers (6.67%) were weighed on Sep 15, below the 23-head session minimum (weighSessionShare 0.5), so Sep 15 is not a heifer session and the heifers are CAN'T TELL on age (Jul 20 to Sep 30 = 72 > 45 days) at any coverage minimum. No folder tests gainMinCoverage",
+         "phase_1": "Phase 1 uses 0.8 (06-phase1-spec.md section 9, demo setting D). No folder changes: wherever a group is judged, every animal is matched (45 of 45, 150 of 150)."},
         {"name": "dueSoonDays", "value": 7, "comparison": "warning when 0 <= days to next_due <= 7 ('due today' at 0); serious when next_due is before the as-of date", "class": "D", "basis": "RULE-HLTH-01, RULE-HLTH-02, UI-06"},
         {"name": "healthStatuses", "value": "open, done, cancelled (trimmed, lower case)", "comparison": "any other value is a data issue and is treated as open", "class": "C", "basis": "HLTH-01, RULE-HLTH-03"},
         {"name": "budgetWarn", "value": "5% and $500", "comparison": "warning when percent over >= 5% and dollars over >= $500", "class": "D", "basis": "RULE-BUD-03 demo values; BUD-05 inclusive 5% bound"},
-        {"name": "budgetSerious", "value": "more than 10% and $1,000", "comparison": "serious when percent over > 10% (strict, as the rules table says 'more than 10%') and dollars over >= $1,000", "class": "D", "basis": "RULE-BUD-03 dollar line; BUD-05 and the current rule text for the strict 10% bound. RULE-BUD-03's own formula says p >= 10%: an open decision, see scenario 09"},
+        {"name": "budgetSerious", "value": "more than 10% and $1,000", "comparison": "serious when percent over > 10% (strict, as the rules table says 'more than 10%') and dollars over >= $1,000", "class": "D", "basis": "RULE-BUD-03 dollar line; BUD-05 and the current rule text for the strict 10% bound. RULE-BUD-03's own formula says p >= 10%",
+         "phase_1": "Settled by 05-roadmap.md decision D2: serious needs more than 10% (strict) and at least $1,000, as here; scenario 09's Feed and mineral (exactly 10.0%) stays a warning."},
         {"name": "budgetLargeUsd", "value": 2500, "comparison": "warning when dollars over >= $2,500 whatever the percent", "class": "D", "basis": "RULE-BUD-03"},
-        {"name": "unbudgetedUsd", "value": 250, "comparison": "a category with a zero budget and spending >= $250 gives a warning in dollars, never a percent", "class": "C", "basis": "RULE-BUD-06; severity 'warning' as in budget.materiality.research.mjs S4 (quoted in rules.json RULE-BUD-06 evidence)"},
-        {"name": "monthClosed", "value": "a month counts when the ranch as-of date is on or after its last day", "comparison": "as_of 2026-09-30T18:00 closes September", "class": "C", "basis": "BUD-01 (assumption listed in findings.json unresolved_assumptions). RULE-BUD-05 and data-fields.json default books_closed_through to the month before as_of: an open decision, see scenario 08"},
+        {"name": "unbudgetedUsd", "value": 250, "comparison": "a category with a zero budget and spending >= $250 gives a warning in dollars, never a percent", "class": "D", "basis": "RULE-BUD-06 (the dollars-only structure is a ranch choice, C; the $250 value is a demo setting, D, as in 06-phase1-spec.md section 9); severity 'warning' as in budget.materiality.research.mjs S4 (quoted in rules.json RULE-BUD-06 evidence)"},
+        {"name": "monthClosed", "value": "a month counts when the ranch as-of date is on or after its last day", "comparison": "as_of 2026-09-30T18:00 closes September", "class": "C", "basis": "BUD-01 (assumption listed in findings.json unresolved_assumptions). RULE-BUD-05 and data-fields.json default books_closed_through to the month before as_of",
+         "phase_1": "Settled by 05-roadmap.md decisions D1 and D16: Phase 1 reads meta.csv books_closed_through (default: the month before as_of, labelled 'assumed'). D16 adds books_closed_through = 2026-09 to every folder dated 2026-09-30, which gives the same months as this convention; folder 08 (as of 2026-09-27) keeps none and so tests the default."},
         {"name": "ranchTimeZone", "value": RANCH_TZ, "comparison": "meta.csv timezone for every new fixture; readings are ranch wall-clock time", "class": "D", "basis": "TIME-02 (example zone); data-fields.json meta.timezone"},
     ],
 }
@@ -365,8 +373,8 @@ def sweep(folder):
                 add("Water", "tank", tid, "needs-attention", "critical", level_pct=float(lvl))
             elif lvl < 40:
                 add("Water", "tank", tid, "needs-attention", "warning", level_pct=float(lvl))
-            else:
-                tile_ok += 1
+            elif drop is not None:
+                tile_ok += 1                # a tank with a 'not enough recent history' row is not OK (06 section 5.2 tile)
         if exact_dups:
             add("Water", "file", "water.csv", "data-issue", topic="duplicates", count=exact_dups)
         facts["water_tile"] = {"ok": tile_ok, "of": tile_n}
@@ -486,6 +494,7 @@ def sweep(folder):
             return nxt - timedelta(days=1)
 
         cats = defaultdict(lambda: {"b": 0, "a": 0, "blank": [], "months": []})
+        tile_b = tile_a = 0         # tile rule, 06-phase1-spec.md section 5.6
         keys = Counter()
         future_months = set()
         for _, r in f["budget"]["rows"]:
@@ -502,6 +511,10 @@ def sweep(folder):
             b, a = parse_money_cents(r["budget"]), parse_money_cents(r["actual"])
             c = cats[r["category"]]
             c["months"].append(ym)
+            if isinstance(a, int):
+                tile_a += a
+                if isinstance(b, int):
+                    tile_b += b
             if a == "blank":
                 c["blank"].append(ym)
                 continue
@@ -532,8 +545,9 @@ def sweep(folder):
                 add("Budget", "category", cat, "needs-attention", "serious", **nums)
             elif (p >= F(1, 20) and v >= 50000) or v >= 250000:
                 add("Budget", "category", cat, "needs-attention", "warning", **nums)
-        facts["budget_tile"] = {"budget_usd": tb / 100, "actual_usd": ta / 100,
-                                "pct": float(F(ta - tb, tb) * 100) if tb else None, "incomplete": incomplete,
+        facts["budget_tile"] = {"budget_usd": tile_b / 100, "actual_usd": tile_a / 100,
+                                "pct": float(F(tile_a - tile_b, tile_b) * 100) if tile_b else None, "incomplete": incomplete,
+                                "complete_categories_only": {"budget_usd": tb / 100, "actual_usd": ta / 100},
                                 "months": sorted({m for c in cats.values() for m in c["months"]})}
     else:
         areas_cant.add("Budget")
@@ -599,6 +613,20 @@ def budget_sums(folder, months):
             out[r["category"]][0] += b if isinstance(b, int) else 0
             out[r["category"]][1] += a if isinstance(a, int) else 0
     return {k: (v[0] // 100, v[1] // 100) for k, v in out.items()}
+
+
+def tile_sums(folder, months):
+    """Budget tile sums (06-phase1-spec.md section 5.6): every valid actual in the months, and each month's budget only
+    when that month's actual is valid, so a missing amount never makes spending look better. Whole dollars."""
+    tb = ta = 0
+    for _, r in load_folder(folder)["budget"]["rows"]:
+        if r["month"][:7] in months:
+            b, a = parse_money_cents(r["budget"]), parse_money_cents(r["actual"])
+            if isinstance(a, int):
+                ta += a
+                if isinstance(b, int):
+                    tb += b
+    return tb // 100, ta // 100
 
 
 def r1(x):
@@ -885,6 +913,7 @@ def s03():
         t7_h = (datetime.fromisoformat(AS_OF) - datetime.fromisoformat(t7[0])).total_seconds() / 3600
         age = (date(2026, 9, 30) - date(2026, 7, 20)).days
         rows = [ten[k] for k in ["T2", "T4", "T6", "GRZ", "GAIN-Y", "FUEL", "REPAIRS"]]
+        tb3, ta3 = tile_sums(folder, {"2026-06", "2026-07", "2026-08", "2026-09"})
         rows += [
             R("T7", "Water", "tank", "T7", "needs-attention", "serious", alt=["cant-tell"],
               nums={"silent_hours": t7_h, "level_pct": float(F(t7[1]))}, rules=["RULE-WAT-04"],
@@ -915,7 +944,11 @@ def s03():
             "area_states": {"Water": "needs-attention", "Grazing": "needs-attention", "Gain": "needs-attention", "Health": "cant-tell", "Budget": "needs-attention"},
             "tile_expectations": [
                 tile("water", ok=3, of=8, need_look=5, note="OK: T1, T3, T5. Need a look or can't tell: T2, T4, T6, T7, T8."),
-                tile("budget", sane=True, note="No NaN, Infinity or e+ and |percent| under 100; the tile names the incomplete category or shows CAN'T TELL (manual check)."),
+                tile("budget", pct=round(float(F(ta3 - tb3, tb3) * 100), 4), actual_usd=ta3, budget_usd=tb3,
+                     note=(f"Every valid actual (${ta3:,}) against the budgets of the months whose actual is entered (${tb3:,}): "
+                           f"Vet and health's September budget ($1,500) is left out with its blank actual, so the missing amount "
+                           f"cannot make spending look under budget (06-phase1-spec.md section 5.6). The tile also says 1 category "
+                           f"can't tell. Counting that budget anyway would read ${ta3:,} of ${tb3 + 1500:,}, under budget.")),
             ],
             "findings": ["LOAD-01", "GAIN-08", "WAT-02", "BUD-01", "BUD-02"], "rules": ["RULE-WF-14", "RULE-WAT-04", "RULE-GAIN-10"],
         }
@@ -993,7 +1026,8 @@ def s04():
                                 A("Water", "tank", "T7", "row order changes nothing; T7 is healthy", ["DATA-02"])],
             "allowed_extra_rows": [],
             "area_states": {"Water": "needs-attention", "Grazing": "needs-attention", "Gain": "needs-attention", "Health": "needs-attention", "Budget": "needs-attention"},
-            "tile_expectations": [tile("water", ok_at_most=3, of=8, note="T3, T6 and T8 are never OK; T1's 24-hour change is unknown.")],
+            "tile_expectations": [tile("water", ok=2, of=8, need_look=6,
+                                       note="OK: T5, T7. Need a look: T2, T3, T4 (critical); T1 (24-hour change unknown), T6 (silent) and T8 ('ERR') can't tell.")],
             "findings": ["WAT-01", "WAT-03", "WAT-07", "DATA-03", "TIME-01"], "rules": ["RULE-WAT-03", "RULE-WAT-04"],
         }
     return name, files, ch, exp
@@ -1074,17 +1108,25 @@ def s06():
         ten = committed_ten(folder)
         yk = pooled(folder, "Yearlings", "2026-07-20", "2026-09-15")
         y_hi = (yk["lbs"] + 2) / F(yk["animal_days"])
+        y_mean = (yk["lbs"] + 1) / F(yk["animal_days"])
+        gain_y = dict(ten["GAIN-Y"])
+        gain_y["arithmetic"] = (f"Yearlings pooled {yk['lbs'] + 1} / {yk['animal_days']} = {float(y_mean):.5f} lb/day (Y001's 851 and 853 on "
+                                f"2026-09-15 averaged to 852, 06-phase1-spec.md section 3.5), not under 0.8 x 2.0 = 1.6, so no group row. "
+                                + gain_y["arithmetic"][gain_y["arithmetic"].index("Animals under"):])
+        ten = {**ten, "GAIN-Y": gain_y}
         rows = [ten[k] for k in ["T2", "T4", "T6", "GRZ", "GAIN-Y", "BOOST", "PINK", "FUEL", "REPAIRS"]]
         rows += [
             R("HEIFERS-CT", "Gain", "group", "Heifers", "cant-tell", None,
               text_any=["3 of 45", "2026-07-20", "Jul 20"], findings=["GAIN-07", "GAIN-08", "GAIN-03"], rules=["RULE-GAIN-10"],
-              arithmetic=("Only H001, H002 and H003 crossed the scale as heifers on 2026-09-15: 3 of 45 = 6.7%, below any sensible "
-                          "minimum coverage. If Sep 15 is not counted as a session, the last full session is Jul 20, 72 days before "
-                          "Sep 30 (> 45). Either way the heifers' gain can't be judged.")),
+              arithmetic=("Only H001, H002 and H003 crossed the scale as heifers on 2026-09-15: 3 of 45 = 6.7%, below the 23-head "
+                          "session minimum (weighSessionShare 0.5, ceil(0.5 x 45) = 23), so Sep 15 is not a heifer session. The last "
+                          "session is Jul 20, 72 days before Sep 30 (> 45), so the heifers' gain can't be judged on age, at any "
+                          "coverage minimum.")),
             R("Y001-DUP", "Gain", "record", "Y001", "data-issue", None, topic="same-day-duplicate", dates=["2026-09-15"],
               findings=["GAIN-02", "DATA-03"],
               arithmetic=(f"Y001 has 851 and 853 on 2026-09-15. Keeping either: yearlings {yk['lbs']}/{yk['animal_days']} = "
-                          f"{float(yk['adg']):.5f} or {yk['lbs'] + 2}/{yk['animal_days']} = {float(y_hi):.5f}; both 1.94.")),
+                          f"{float(yk['adg']):.5f} or {yk['lbs'] + 2}/{yk['animal_days']} = {float(y_hi):.5f}; the mean 852 "
+                          f"(06-phase1-spec.md section 3.5): {yk['lbs'] + 1}/{yk['animal_days']} = {float(y_mean):.5f}; all 1.94.")),
             R("Y151", "Gain", "record", "Y151", "cant-tell", None, alt=["data-issue"], topic="first-weigh-in",
               text_any=["Y151"], findings=["GAIN-01"],
               arithmetic="Y151 has one weigh-in (2026-09-15, 820 lbs): no gain yet; left out of the yearlings' figures."),
@@ -1100,7 +1142,7 @@ def s06():
             "expected_rows": rows,
             "expected_absent": [A("Gain", "group", "Heifers", "coverage too low or data too old for a verdict", ["GAIN-07", "GAIN-08"]),
                                 A("Gain", "animals", "Heifers", "no individual verdicts from a 3-animal session or from the June-July period", ["GAIN-07", "GAIN-08"]),
-                                A("Gain", "group", "Yearlings", f"pooled {float(yk['adg']):.4f} >= 1.6")],
+                                A("Gain", "group", "Yearlings", f"pooled {float(y_mean):.4f} >= 1.6")],
             "allowed_extra_rows": [
                 R("X-H004", "Gain", "record", "H004", "data-issue", None, topic="group-change", findings=["GAIN-14", "GAIN-06"],
                   note="GAIN-14 (phase 2) wants 'H004 moved to Cows on Sep 15'; Phase 1 may or may not name it."),
@@ -1241,7 +1283,9 @@ def s08():
                 ("Repairs is a warning here only because of RULE-BUD-03's $1,000 serious line. The same Jun-Aug arithmetic is what the "
                  "committed data gives on Sep 30 if books_closed_through defaults to the month before as_of (RULE-BUD-05, data-fields.json): "
                  "Repairs would then drop from serious to warning on the committed data and break the Phase 1 acceptance bar. "
-                 "Decide the closed-month convention (BUD-01: a month closes on its last day) before adopting both rules.")],
+                 "Decide the closed-month convention (BUD-01: a month closes on its last day) before adopting both rules. "
+                 "Settled by 05-roadmap.md decisions D1, D2 and D16: the generator writes books_closed_through = 2026-09, so the committed "
+                 "Repairs row stays serious; this folder keeps no books_closed_through and tests the default, so Repairs stays a warning here.")],
             "findings": ["TIME-01", "TIME-02", "GRZ-01", "BUD-01", "UI-06"], "rules": ["RULE-WF-14", "RULE-BUD-03", "RULE-BUD-05"],
         }
     return name, files, ch, exp
@@ -1329,7 +1373,7 @@ def s09():
             R("PINK", "Health", "task", "Cows: Pinkeye check", "needs-attention", "warning", nums={"due_in_days": 7}, dates=["2026-10-07"],
               rules=["RULE-HLTH-02"], arithmetic="Due Oct 7; Sep 30 to Oct 7 = 7 days, within 7 (inclusive)."),
         ]
-        for rid, cat, extra in [("FEED", "Feed and mineral", "10.0% is not more than 10% (rule text), so warning; >= 5% and >= $500. $2,480 is just under the $2,500 large-dollar line."),
+        for rid, cat, extra in [("FEED", "Feed and mineral", "10.0% is not more than 10% (rule text), so warning; >= 5% and >= $500. The $2,500 large-dollar line cannot change this row (it only gives a warning); it is not tested in this folder."),
                                 ("LABOR", "Labor", "exactly 5.0% and >= $500: warning (5% inclusive)."),
                                 ("REPAIRS", "Repairs", "10.0% and $720: >= 5% and >= $500, warning; not serious (needs more than 10% and >= $1,000)."),
                                 ("VET", "Vet and health", "10.5% is more than 10%, but $630 < $1,000: not serious; >= 5% and >= $500: warning.")]:
@@ -1339,7 +1383,14 @@ def s09():
         fuel_n, fuel_a = b("Fuel"); wf_n, wf_a = b("Water and fencing")
         return {
             "title": "Exact rule boundaries",
-            "purpose": "Every threshold hit exactly, and one step either side, so the comparison direction (< vs <=, > vs >=) and floating point are pinned down.",
+            "purpose": ("Pins the comparison direction (< vs <=, > vs >=) and floating point at the demonstration thresholds. Hit exactly "
+                        "with a neighbour: tank level 25 (24.9, 25.0, 25.1) and 40 (39.9, 40.0); 24-hour drop 30 (29.9, 30.0); silence "
+                        "24 h (23.9, 24.0); the planned move (1 day over, due today); the animal ADG line (0.982, 1.000); due within 7 "
+                        "days (7, 8) and overdue (1 day over, due today); the 5% and 10% budget lines (5.0%, 10.0%, 10.5%). Hit exactly "
+                        "without a neighbour: the 2-day grace (2 days left only) and the group ADG lines (exactly 0.8 x target, no group "
+                        "just under). Not at a boundary in any folder: the $500 line (only $480, below it), the $1,000 serious line, the "
+                        "$2,500 large-dollar line, the $250 unbudgeted line, the 45-day age limit, the 21-day interval and the 50% "
+                        "session share; the unit tests of 06-phase1-spec.md section 11.1 must cover them."),
             "as_of": f"{AS_OF} {RANCH_TZ}",
             "alerts_exact": True,
             "expected_rows": rows,
@@ -1358,9 +1409,12 @@ def s09():
             "open_decisions": [
                 ("Feed and mineral is exactly 10.0% over with $2,480. Under the current rule text and BUD-05 ('serious above 10%') it is a "
                  "warning. RULE-BUD-03's formula ('serious if p >= seriousPct AND V >= seriousUsd') makes it serious. Pick one and update "
-                 "this expected row if it is RULE-BUD-03's."),
+                 "this expected row if it is RULE-BUD-03's. Settled by 05-roadmap.md decision D2: serious needs more than 10%, so this "
+                 "row stays a warning."),
                 ("The 80.1 reading at exactly last - 24 h is inside the window here ([last - 24 h, last], WAT-03's fix). RULE-WAT-03's phase "
-                 "note ('the reading about 24 h before the latest, within one reporting interval') gives the same 30.0 for this series.")],
+                 "note ('the reading about 24 h before the latest, within one reporting interval') gives the same 30.0 for this series. "
+                 "Settled by 05-roadmap.md decision D5: Phase 1 uses the maximum drawdown inside [last - 24 h, last], which also gives "
+                 "30.0 here.")],
             "computed": {"heifers": {k: hf[k] for k in ("lbs", "n", "animal_days")}, "heifers_adg": float(hf["adg"]),
                          "yearlings": {k: yf[k] for k in ("lbs", "n", "animal_days")}, "yearlings_adg": float(yf["adg"]), "budget_totals": [tb, ta]},
             "findings": ["WAT-08", "GAIN-11", "GAIN-12", "BUD-04", "BUD-05", "BUD-06", "UI-06", "TEST-01", "TEST-02"], "rules": ["RULE-WAT-01", "RULE-WAT-02", "RULE-WAT-03", "RULE-WAT-04", "RULE-GRZ-01", "RULE-GRZ-02", "RULE-GAIN-01", "RULE-GAIN-02", "RULE-HLTH-01", "RULE-HLTH-02", "RULE-BUD-02", "RULE-BUD-03"],

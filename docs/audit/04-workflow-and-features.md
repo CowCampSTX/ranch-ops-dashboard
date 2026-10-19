@@ -258,7 +258,7 @@ each wireframe. They are design sketches, not tested layouts.
 |              Cows: no gain target, not judged                                              |
 |     Health   4 open tasks, all with a due date                                             |
 |     Budget   months closed through Sep                                                     |
-|     [?] Can't tell: 0 areas        [i] Data issues: 0                                      |
+|     [?] Can't tell: 0 areas, 1 row (T6)        [i] Data issues: 0                          |
 +--------------------------------------------------------------------------------------------+
 | (3) [#] 2 TODAY    [^] 6 THIS WEEK    [o] 2 PLAN                                           |
 |     New since your last review (this device only): history unavailable on first visit      |
@@ -276,8 +276,9 @@ each wireframe. They are design sketches, not tested layouts.
 |               Down to 11.8% full (reading at Sep 30 18:00)                                 |
 |               First step: Check the float and the supply line today                        |
 |     THIS WEEK                                                                              |
-| [^] Serious   Water   Tank T6, Cedar Draw - no reading for 42 hours; last 98.5% at Sep 29  |
-|               00:00. First step: Check the tank by eye today, then the sensor battery      |
+| [^] Serious   Water   Tank T6, Cedar Draw - [?] Can't tell: no reading for 42 hours; last  |
+|               98.5% at Sep 29 00:00. First step: Check the tank by eye today, then the     |
+|               sensor battery and signal                                                    |
 | [^] Serious   Health  Yearlings: Booster vaccine - overdue by 15 days (due Sep 15)         |
 | [^] Serious   Grazing Yearlings in Sand Hills - day 24 of a 21-day plan (3 days over)     |
 | [^] Serious   Gain    Heifers - 0.44 lb/day from Jul 20 to Sep 15 vs 1.0 target;           |
@@ -308,8 +309,10 @@ The values in the strip: "7 of 8 tanks reported in the last 24 h" and "weigh-in 
 "Cows@P7, Heifers@P4, Yearlings@P3"; the 4 open health tasks and the 45-head heifer count are read from the committed
 `data/health.csv` and `data/groups.csv`. "Months closed through Sep" assumes the proposed `books_closed_through` field
 counts September as closed at the Sep 30 18:00 as-of; the registry lists that as a ranch bookkeeping choice
-(findings.json `unresolved_assumptions`). On the committed data the CAN'T TELL and data-issue counts are 0, which is the
-Phase 1 acceptance bar (findings.json `policies.phase_1_acceptance`). Showing "0" rather than nothing is what tells the
+(findings.json `unresolved_assumptions`). On the committed data the data-issue count is 0 and no area is CAN'T TELL;
+the one CAN'T TELL row is T6, kept that way with its serious severity by
+[05-roadmap.md decision D7](05-roadmap.md#14-decisions-this-roadmap-makes-where-the-evidence-disagrees). That is the
+Phase 1 acceptance bar (findings.json `policies.phase_1_acceptance`, with D7's stated exception). Showing "0" rather than nothing is what tells the
 manager that every area had data to judge.
 
 ### 1.4b "Why this row?" panels
@@ -741,8 +744,8 @@ section 2.3; they are recommendations, not measurements.
   Time". The NDMC ranch drought plan recommends "Setting dates on the calendar when specific conditions warrant action"
   but "gives no numeric thresholds", so triggers are ranch choices (C).
 - **Inputs: Partly.** USDM county statistics are free, with "no API key mentioned", but browser CORS is unverified, so
-  the integration entry recommends a build-time fetch that commits a dated CSV with provenance. A ranch rain gauge is a
-  manual record. The fictional ranch has no location: the context diagnostic printed "ABSENT ranch location (lat/lon,
+  the integration entry recommends a build-time fetch that commits a dated CSV with provenance. A ranch rain gauge (an
+  optional, later part of this addition) is a manual record. The fictional ranch has no location: the context diagnostic printed "ABSENT ranch location (lat/lon,
   county FIPS, or state)" (`RULE-CTX-15` evidence), so a real county must be named as a labelled stand-in.
 - **Maintenance: Medium.** A weekly snapshot, refreshed by a separate manual or scheduled workflow, never by the test
   workflow (`RULE-CTX-15`).
@@ -886,10 +889,11 @@ Northern and Central Plains reviewer expects, and the sources that make it safe 
   labelled "valid <Tue>, released <Thu>" (`RULE-CTX-01`). Show its age; mark it stale past a configurable limit with a
   holiday allowance (`RULE-CTX-02`).
 - Weeks at D2 or worse as information only, with a link to FSA, never an eligibility claim (`RULE-CTX-03`).
-- A ranch rain gauge record and drought-plan trigger dates that create a "review the grazing plan" prompt, never a move
-  exception (`RULE-CTX-10`). Gauge gaps block a percent-of-normal figure ("do not treat missing days as zero rain"). A
-  public precipitation normal (PRISM) only if its terms fit, with the retrieval time stored, because daily values are
-  "updated 'eight times before becoming stable'".
+- Optional, and later than the snapshot itself: a ranch rain gauge record and drought-plan trigger dates that create a
+  "review the grazing plan" prompt, never a move exception (`RULE-CTX-10`). They are not needed for the dated snapshot
+  and are not a fourth addition; addition 3 is complete without them. Gauge gaps block a percent-of-normal figure ("do
+  not treat missing days as zero rain"). A public precipitation normal (PRISM) only if its terms fit, with the
+  retrieval time stored, because daily values are "updated 'eight times before becoming stable'".
 - Pinned to the fictional as-of and labelled "Public data: <County>, <State>; ranch data fictional" (`RULE-CTX-15`).
   No SD Mesonet data is committed or redistributed: its request page says "Redistribution of these data is not
   allowed" (`RULE-CTX-16`).

@@ -373,7 +373,7 @@
   }
  ],
  "open_decisions": [
-  "Repairs is a warning here only because of RULE-BUD-03's $1,000 serious line. The same Jun-Aug arithmetic is what the committed data gives on Sep 30 if books_closed_through defaults to the month before as_of (RULE-BUD-05, data-fields.json): Repairs would then drop from serious to warning on the committed data and break the Phase 1 acceptance bar. Decide the closed-month convention (BUD-01: a month closes on its last day) before adopting both rules."
+  "Repairs is a warning here only because of RULE-BUD-03's $1,000 serious line. The same Jun-Aug arithmetic is what the committed data gives on Sep 30 if books_closed_through defaults to the month before as_of (RULE-BUD-05, data-fields.json): Repairs would then drop from serious to warning on the committed data and break the Phase 1 acceptance bar. Decide the closed-month convention (BUD-01: a month closes on its last day) before adopting both rules. Settled by 05-roadmap.md decisions D1, D2 and D16: the generator writes books_closed_through = 2026-09, so the committed Repairs row stays serious; this folder keeps no books_closed_through and tests the default, so Repairs stays a warning here."
  ],
  "findings": [
   "TIME-01",

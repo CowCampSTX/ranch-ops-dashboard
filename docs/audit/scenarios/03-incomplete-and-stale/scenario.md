@@ -57,7 +57,7 @@ Must not appear:
 | Tile | Expected |
 |---|---|
 | Water | 3 of 8 OK (T1, T3, T5); 5 need a look or can't be judged (T2, T4, T6, T7, T8) |
-| Spend vs budget | A sane figure: no `NaN`, `Infinity` or `e+`, and a percent under 100. The tile names the incomplete category or says CAN'T TELL (checked by hand). |
+| Spend vs budget | **+1.0%**: $87,783 of $86,900, plus "1 category can't tell". Every valid actual counts; Vet and health's September budget ($1,500) is left out with its blank actual, so a missing amount cannot make spending look under budget (06-phase1-spec.md section 5.6). Counting that budget anyway would read $87,783 of $88,400 (-0.7%), under budget. |
 
 ## Arithmetic, by hand
 
@@ -70,6 +70,8 @@ Must not appear:
   11,640 vs 9,600; Repairs 9,000 vs 7,200).
 - **Vet and health:** Jun to Aug actuals 1,555 + 1,476 + 1,394 = 4,425, with September blank. The season to date
   cannot be totalled, so no percent is shown.
+- **Spend tile:** every valid actual: 89,303 - 1,520 (the committed September Vet and health actual, now blank) =
+  87,783. Budgets of the months whose actual is valid: 88,400 - 1,500 = 86,900. 883 / 86,900 = 1.016%, shown "+1.0%".
 
 ## Current result (verified in this step by `scenarios.run.mjs`)
 

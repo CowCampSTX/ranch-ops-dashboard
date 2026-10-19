@@ -160,7 +160,7 @@ as_of 2026-09-30T18:00 America/Chicago
   MATCH    Budget   expected needs-attention, current needs-attention
   tiles:
   MISMATCH tile water           expected ok=3 of=8 need_look=5; current 3 of 7 | 4 need a look  <- of 7, expected 8; need a look 4, expected 5
-  MISMATCH tile budget          expected sane=true; current +505005006043558.9% | $446,424,425,342,594,400 of $88,400, season to date  <- percent not sane
+  MISMATCH tile budget          expected pct=1.0161 actual_usd=87783 budget_usd=86900; current +505005006043558.9% | $446,424,425,342,594,400 of $88,400, season to date  <- percent +505005006043558.9%, expected 1.0%; dollars differ
   must_not_appear_anywhere: MATCH
 
 ==============================================================================================================
@@ -222,7 +222,7 @@ as_of 2026-09-30T18:00 America/Chicago
   MATCH    Health   expected needs-attention, current needs-attention
   MATCH    Budget   expected needs-attention, current needs-attention
   tiles:
-  MISMATCH tile water           expected ok_at_most=3 of=8; current 5 of 8 | 3 need a look  <- ok 5, expected at most 3
+  MISMATCH tile water           expected ok=2 of=8 need_look=6; current 5 of 8 | 3 need a look  <- ok 5, expected 2; need a look 3, expected 6
   must_not_appear_anywhere: MATCH
 
 ==============================================================================================================
@@ -307,7 +307,7 @@ as_of 2026-09-30T18:00 America/Chicago
   expected absent (no alert row for these):
   N/A      Gain/group 'Heifers' (coverage too low or data too old for a verdict)  <- not checkable: the current code produced no rows
   N/A      Gain/animals 'Heifers' (no individual verdicts from a 3-animal session or from the June-July period)  <- not checkable: the current code produced no rows
-  N/A      Gain/group 'Yearlings' (pooled 1.9425 >= 1.6)  <- not checkable: the current code produced no rows
+  N/A      Gain/group 'Yearlings' (pooled 1.9426 >= 1.6)  <- not checkable: the current code produced no rows
   area states:
   MISMATCH Water    expected needs-attention, current error (no rows)
   MISMATCH Grazing  expected needs-attention, current error (no rows)
@@ -732,7 +732,7 @@ as_of 2026-09-30T18:00 America/Chicago
   MATCH    Budget   expected needs-attention, current needs-attention
   tiles:
   MISMATCH tile water           expected ok=3 of=8 need_look=5; current 3 of 7 | 4 need a look  <- of 7, expected 8; need a look 4, expected 5
-  MISMATCH tile budget          expected sane=true; current +505005006043558.9% | $446,424,425,342,594,400 of $88,400, season to date  <- percent not sane
+  MISMATCH tile budget          expected pct=1.0161 actual_usd=87783 budget_usd=86900; current +505005006043558.9% | $446,424,425,342,594,400 of $88,400, season to date  <- percent +505005006043558.9%, expected 1.0%; dollars differ
   must_not_appear_anywhere: MATCH
 
 ==============================================================================================================
@@ -794,7 +794,7 @@ as_of 2026-09-30T18:00 America/Chicago
   MATCH    Health   expected needs-attention, current needs-attention
   MATCH    Budget   expected needs-attention, current needs-attention
   tiles:
-  MISMATCH tile water           expected ok_at_most=3 of=8; current 5 of 8 | 3 need a look  <- ok 5, expected at most 3
+  MISMATCH tile water           expected ok=2 of=8 need_look=6; current 5 of 8 | 3 need a look  <- ok 5, expected 2; need a look 3, expected 6
   must_not_appear_anywhere: MATCH
 
 ==============================================================================================================
@@ -881,7 +881,7 @@ as_of 2026-09-30T18:00 America/Chicago
   expected absent (no alert row for these):
   N/A      Gain/group 'Heifers' (coverage too low or data too old for a verdict)  <- not checkable: the current code produced no rows
   N/A      Gain/animals 'Heifers' (no individual verdicts from a 3-animal session or from the June-July period)  <- not checkable: the current code produced no rows
-  N/A      Gain/group 'Yearlings' (pooled 1.9425 >= 1.6)  <- not checkable: the current code produced no rows
+  N/A      Gain/group 'Yearlings' (pooled 1.9426 >= 1.6)  <- not checkable: the current code produced no rows
   area states:
   MISMATCH Water    expected needs-attention, current error (no rows)
   MISMATCH Grazing  expected needs-attention, current error (no rows)
