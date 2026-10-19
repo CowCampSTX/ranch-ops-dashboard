@@ -1,0 +1,835 @@
+{
+ "note": "Compact index of findings.json; read full entries from findings.json by id.",
+ "findings": [
+  {
+   "id": "LOAD-01",
+   "title": "Missing, unreadable or empty data files read as 'nothing needs attention' for that area",
+   "area": "Data loading",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "app.js:221 (no res.ok check; any body goes to parseCSV); exceptions.js:22-34 (any text parses); exceptions.js:141 (rows without status 'open' are skipped); exceptions.js:82-89 and app.js:57 (budget NaN); app.js:46-55 (tile '0 of 0'); app.js:69 (empty message)"
+  },
+  {
+   "id": "LOAD-02",
+   "title": "A failed or slow load leaves a blank page: no loading state, no error message, no isolation between sections",
+   "area": "Data loading",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "app.js:221-225 (top-level await fetch with no res.ok and no try/catch; sections rendered in sequence); index.html:72-112 (empty containers, no loading text); exceptions.js:43, :58, :69, :95 (where empty inputs throw)"
+  },
+  {
+   "id": "LOAD-03",
+   "title": "The hard-coded 'Yearlings' tile throws before the exception table is drawn (group renamed or shipped, not yet weighed, or a bad target)",
+   "area": "Data loading",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "S",
+   "location": "app.js:48 (.find((g) => g.group === \"Yearlings\")), app.js:54 (g.group.toLowerCase()), app.js:56 (gain.adg, gain.target.toFixed), app.js:225 (tiles() runs before exceptionsTable())"
+  },
+  {
+   "id": "LOAD-04",
+   "title": "A tank with no reading in the last 7 days crashes the water charts and every section drawn after them",
+   "area": "Data loading",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "app.js:90-93 (rows filtered to the 7-day window, then rows[rows.length-1].time), app.js:103 (reduce with no initial value), app.js:225 (no isolation between sections)"
+  },
+  {
+   "id": "LOAD-05",
+   "title": "No data-age check: an old export is shown as the current report, and the as-of line has no time zone",
+   "area": "Data loading",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "app.js:223 (the as-of line is the only freshness signal); exceptions.js:95 (every rule is relative to meta.as_of); data/meta.csv (as_of typed by hand in the generator)"
+  },
+  {
+   "id": "CSV-01",
+   "title": "The CSV reader is not RFC 4180: quoted commas shift columns, quotes stay in the text, and CR-only or doubled-CR line endings break whole files",
+   "area": "CSV reading",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:22-34 (line 23 split(/\\r?\\n/); line 24 header split with no trim; line 26 line.split(\",\")); scripts/generate_data.py:42-46 (csv.writer quotes such fields); README.md:74 ('replace the CSVs with exports in the same columns')"
+  },
+  {
+   "id": "CSV-02",
+   "title": "Blank, whitespace-only, ',,,' and repeated-header rows are read as records: false critical alerts or a blank page",
+   "area": "CSV reading",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:25 (filter(Boolean) keeps ',,,' and '   '), :30 ('   ' becomes 0), :57-59, :69-70; app.js:49 (budget tile reduce), :90-93; app.js:221-225 (no error message)"
+  },
+  {
+   "id": "CSV-03",
+   "title": "No column checks: a renamed, misspelled or space-padded header, or a vendor title line above the header, silently turns a rule off",
+   "area": "CSV reading",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:24 (header split, no trim, no validation); consumers read r.level_pct, h.status and d.meta[0].as_of directly (exceptions.js:47, :141, :95)"
+  },
+  {
+   "id": "CSV-04",
+   "title": "Blank cells are kept as '' instead of 'missing', so they act as 0 or join as text: a blank weight hides the heifer alert or flags a healthy animal, and blank head or acres cells give absurd headline numbers",
+   "area": "CSV reading",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:29-30 ('' kept as a string), :49 and :109-115 ('' < 25 is true), :58 and :119 (a blank plan acts as 0), :70 (blank weight), :86 (+= joins strings); app.js:49-50 and :223 (tile and acres sums)"
+  },
+  {
+   "id": "CSV-05",
+   "title": "Cells and keys are not trimmed: a stray space in a pasture ID ('P3 ') blanks the page, 'T4, P4' drops which group drinks at the leaking tank, and 'open ' hides every health task",
+   "area": "CSV reading",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:26-30 (cells never trimmed), :57, :97, :103 (lookups by raw text), :141 (status !== 'open')"
+  },
+  {
+   "id": "CSV-06",
+   "title": "Number-looking IDs, tags, group names and dates are turned into numbers: tags merge, pastures collide, and a digits-only group name blanks the page",
+   "area": "CSV reading",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:30 (blanket +v coercion), :66, :74, :135 (g.group.toLowerCase()); app.js:54; tests/exceptions.test.mjs:64-66 (a test asserts the blanket coercion)"
+  },
+  {
+   "id": "CSV-07",
+   "title": "A CSV saved as Windows-1252 ('CSV (Comma delimited)') shows garbled names",
+   "area": "CSV reading",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "app.js:221 (Response.text() always decodes as UTF-8)"
+  },
+  {
+   "id": "DATA-01",
+   "title": "Unknown pasture, tank or group references crash the page or silently drop data",
+   "area": "Data contract",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:57-59 (p = byId[m.pasture_id]; p.name), :97 and :103 (pName undefined), :73-75 (weights groups not in groups.csv never matched); app.js:82 and :104 (names[t.pasture]), :115 (timeline rows from groups.csv only), :129, :140, :143 (p.pasture_id, p.name), :222"
+  },
+  {
+   "id": "DATA-02",
+   "title": "Dates and times are never validated or parsed once: day-first, impossible, numeric, space-separated or M/D/YYYY values silently drop alerts, invent alerts or crash",
+   "area": "Data contract",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:36 (days() uses new Date on raw strings), :43 and :68 (string localeCompare sort), :48, :58, :95, :142; exceptions.js:30 (number-looking dates become Numbers); app.js:113, :223"
+  },
+  {
+   "id": "DATA-03",
+   "title": "Duplicate and contradictory records are not detected: re-exported budget rows, a pasture listed twice, repeated health tasks or groups double or distort alerts",
+   "area": "Data contract",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:55 (the last duplicate pasture wins), :84-87 (budget rows summed blindly), :97, :140-147 (each health row judged), :56 (several open moves per group allowed)"
+  },
+  {
+   "id": "TIME-01",
+   "title": "Rows dated after as_of are used as current: a later reading hides a silent sensor, a back-dated report shows problems that had not happened yet, and later weigh-ins change the gain period",
+   "area": "Time and as-of",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:43-48 (water: last row with no cutoff; silentHours can be negative), :64-70 (gainStatus takes no asOf), :82-89 (budget, see BUD-01), :56 (grazing, see GRZ-01); app.js:76 and :90-93 (a later point is drawn past the plot edge)"
+  },
+  {
+   "id": "TIME-02",
+   "title": "No time-zone contract: a date-only as_of, UTC-stamped readings and daylight-saving days make silent hours, the 24-hour drop and the header depend on the viewer's zone",
+   "area": "Time and as-of",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:36, :45, :48 (elapsed time from local-time parsing); app.js:223 (header in the viewer's zone, no zone shown); app.js:73 (water window)"
+  },
+  {
+   "id": "TIME-03",
+   "title": "A UTC-stamped as_of shifts every calendar-day count by one day for evening exports, the same way for every viewer",
+   "area": "Time and as-of",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:58 and :142 (asOf.slice(0, 10)); app.js:113 (grazing chart end = as_of.slice(0,10)); app.js:223 (header shows the local date)"
+  },
+  {
+   "id": "WAT-01",
+   "title": "Tank levels are never validated: a fault code ('ERR', 'NaN', '11.8%') hides a critical tank as fine, and a blank, -999 or 140 reading raises a false critical leak",
+   "area": "Water",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:30 (non-numbers stay strings; 'Infinity' becomes Infinity), :47-49 (level and drop from the last row, unchecked), :109-115 (comparisons against a string or NaN); app.js:47, :55, :82, :91, :93 (tile, heading and SVG from the raw value)"
+  },
+  {
+   "id": "WAT-02",
+   "title": "There is no tanks master list: a tank with no readings in the export, or an empty water file, disappears and the page reports water as fine",
+   "area": "Water",
+   "status": "design-limitation",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:39-52 (the tank list is built from water rows only); app.js:46, :55, :78 (tile and charts); scripts/generate_data.py:39 (TANKS defined, never written)"
+  },
+  {
+   "id": "WAT-03",
+   "title": "The 24-hour drop is not a 24-hour window: after a reading gap a multi-day change is reported as 'in 24 hours', a new sensor's fast drop is missed, and a fall that refills before the last reading is not seen",
+   "area": "Water",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:45 (dayAgo = latest row at least 1 day before the last, any age), :49 (endpoint difference only), :110 (hard-coded 'in 24 hours'); app.js:204 and README.md (rule text)"
+  },
+  {
+   "id": "WAT-04",
+   "title": "Readings are grouped by tank_id alone: two tanks sharing an ID in different pastures merge (a low tank is hidden), and a moved portable trough raises a false leak",
+   "area": "Water",
+   "status": "design-limitation",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:41 (series keyed by tank_id only), :45 (baseline can come from another pasture), :47 (pasture taken from the last row)"
+  },
+  {
+   "id": "WAT-05",
+   "title": "A tank whose sensor stopped less than 24 hours ago is judged on its old reading and counted OK, with no sign of how old the shown level is",
+   "area": "Water",
+   "status": "design-limitation",
+   "severity": "medium",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:104-115 (silence flagged only at 24 h or more; the level and drop rules treat the last reading as current and never state its age); app.js:82 (heading prints the old level); app.js:47, :55 (tile counts the tank OK)"
+  },
+  {
+   "id": "WAT-06",
+   "title": "Water severity uses level percent alone: it ignores stock on the pasture, tank capacity and use, and ties are broken by file order, so an empty-pasture tank outranks a leaking tank 45 heifers drink from",
+   "area": "Water",
+   "status": "design-limitation",
+   "severity": "medium",
+   "phase": "3",
+   "effort": "M",
+   "location": "exceptions.js:109-115 (level and drop thresholds only); exceptions.js:158 (within a severity, order is file order); no capacity or head data in water.csv"
+  },
+  {
+   "id": "WAT-07",
+   "title": "Two different readings at the same timestamp: the alert depends on which line comes last in the file",
+   "area": "Water",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:43-44 (stable sort; the last of equal times wins)"
+  },
+  {
+   "id": "WAT-08",
+   "title": "An exact 30.0-point drop is missed because of floating-point subtraction",
+   "area": "Water",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:49 and :109 (raw float subtraction compared with >= 30)"
+  },
+  {
+   "id": "WAT-09",
+   "title": "A silent tank last seen nearly empty and falling is only 'serious', ranked below every critical row",
+   "area": "Water",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:104-108 (silence always gives serious; the last level and trend are discarded by continue at :107)"
+  },
+  {
+   "id": "WAT-10",
+   "title": "A sensor that keeps sending the same frozen value is treated as a healthy tank",
+   "area": "Water",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:104 (sensor health judged only by the time of the last row); exceptions.js:109-115"
+  },
+  {
+   "id": "GRZ-01",
+   "title": "The current grazing stay is chosen by a blank out_date, not by as_of: a planned or early-entered out_date hides an overstay, and the alert's advice to 'record a new move date' has nowhere to go but the column that silences it",
+   "area": "Grazing",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:56 (moves.filter((m) => !m.out_date)), :119-122 (action text); app.js:129 (cur = !mv.out_date; end = mv.out_date || asOf)"
+  },
+  {
+   "id": "GRZ-02",
+   "title": "A group with two open moves gets a false '15 days over' alert and the timeline contradicts it; a duplicated row doubles the alert and garbles the T4 subject",
+   "area": "Grazing",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:56 (no one-current-stay-per-group rule), :118-125; app.js:124 (current keyed by group, last wins), :129-138"
+  },
+  {
+   "id": "GRZ-03",
+   "title": "Text or blanks in move and plan cells ('-', 'TBD', '21 days', a blank in_date or plan) silently remove the grazing alert, strip 'here now' from the T4 leak, or blank the whole rotation chart",
+   "area": "Grazing",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:30 (text kept as a string), :56 (!m.out_date treats any text as a closed stay), :58 (raw in_date vs as_of date), :119-125 (NaN fails both tests, so no row; a blank plan acts as 0); app.js:113 (start = '' when an in_date is blank), :117-118, :129-131 (NaN bar width)"
+  },
+  {
+   "id": "GRZ-04",
+   "title": "min_rest_days is never read: stays that start inside a pasture's own minimum rest go unflagged",
+   "area": "Grazing",
+   "status": "design-limitation",
+   "severity": "medium",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:54-61 and :118-125 (no rest logic); data/pastures.csv column min_rest_days; README.md (pastures.csv 'minimum rest days')"
+  },
+  {
+   "id": "GRZ-05",
+   "title": "The example season is not credible as a rotation: two pastures held two groups at once and 11 of 13 sequential re-entries are short of the file's own minimum rest",
+   "area": "Grazing",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "2",
+   "effort": "M",
+   "location": "scripts/generate_data.py:49-64 (moves(): each group's plan built independently, no shared pasture calendar); tests/exceptions.test.mjs:26-28 ('nothing else' asserts 10)"
+  },
+  {
+   "id": "GRZ-06",
+   "title": "Past overstays are never marked on the rotation chart although the card note says days past plan are marked",
+   "area": "Grazing",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "app.js:132-138 (overrun marks only inside if (cur)); index.html:90 (card note)"
+  },
+  {
+   "id": "GRZ-07",
+   "title": "A group with no current stay drops out of grazing silently while the 'Head on grass' tile still counts it",
+   "area": "Grazing",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:56-60 (only open moves considered); app.js:50 (head tile sums groups.csv), :54"
+  },
+  {
+   "id": "GRZ-08",
+   "title": "The serious grazing action is one blanket line based only on elapsed days: no escalation and no destination",
+   "area": "Grazing",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "2",
+   "effort": "M",
+   "location": "exceptions.js:119-122"
+  },
+  {
+   "id": "GRZ-09",
+   "title": "Two groups in one pasture are each judged alone against a single per-pasture plan",
+   "area": "Grazing",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "defer",
+   "effort": "L",
+   "location": "exceptions.js:54-61, :118-125 (planned_graze_days per pasture, no head or stocking term)"
+  },
+  {
+   "id": "GAIN-01",
+   "title": "An animal with only one weigh-in crashes the rules and the page shows no alerts at all",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:69-70 (const [a, b] = rows.slice(-2); ... b.date); app.js:222 (findExceptions at module top level)"
+  },
+  {
+   "id": "GAIN-02",
+   "title": "A same-day duplicate weigh-in (scale re-check or EID double read) gives +-Infinity or NaN gain: the group alert is lost or garbled and the page can hang",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:36 and :70 (division by days(a.date, b.date) = 0), :77 (mean absorbs NaN or Infinity); app.js:152-158 (axis from Math.min/Math.max of the ADGs; gridline loop with no bound at :156)"
+  },
+  {
+   "id": "GAIN-03",
+   "title": "Group gain is not computed over one consistent pair of weigh-in sessions: a short re-weigh, animals that missed the last weigh-in, and the first animal's dates distort the verdict and the 'since' date",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:67-70 (per-animal last two rows, whatever the gap), :76 (from/to taken from mine[0]), :77 (unweighted mean of per-animal ADG)"
+  },
+  {
+   "id": "GAIN-04",
+   "title": "No plausibility check on weights or daily gain: one keying slip masks the heifer alert and wrecks the gain chart's scale",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:70 and :77; app.js:152-158 (axis spans every ADG)"
+  },
+  {
+   "id": "GAIN-05",
+   "title": "A non-numeric target ('2.O') silently turns off a group's gain alerts, and on the Yearlings row blanks the report",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:128-133 ('2.O' * 0.8 = NaN, so every comparison is false); app.js:56 and :173 (target.toFixed)"
+  },
+  {
+   "id": "GAIN-06",
+   "title": "Animals are keyed by tag alone, so the same tag number in two groups merges into one 'animal'",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:65-66 (byTag keyed on r.tag only), :70 (group from row a)"
+  },
+  {
+   "id": "GAIN-07",
+   "title": "No coverage disclosure: a group verdict can rest on a handful of animals and the page does not say how many were weighed",
+   "area": "Gain",
+   "status": "design-limitation",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:76 (head: mine.length, the number weighed, never compared with groups.csv head), :129-131 (no count in the text); app.js:56 (tile has no count)"
+  },
+  {
+   "id": "GAIN-08",
+   "title": "Old weigh-ins are presented as current: no age check, so a skipped weigh-in gives an all-clear on 72-day-old data",
+   "area": "Gain",
+   "status": "design-limitation",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:127-138 (no comparison with as_of); app.js:56 (tile shows only the start date)"
+  },
+  {
+   "id": "GAIN-09",
+   "title": "An individual animal losing weight is never named while its whole group is flagged",
+   "area": "Gain",
+   "status": "design-limitation",
+   "severity": "medium",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:134 (if (slow.length && !groupLow)); README 'No noise' design choice"
+  },
+  {
+   "id": "GAIN-10",
+   "title": "Weigh conditions (shrink and gut fill) are not recorded, and an ordinary few-percent difference is larger than the serious rule's margin",
+   "area": "Gain",
+   "status": "design-limitation",
+   "severity": "medium",
+   "phase": "defer",
+   "effort": "L",
+   "location": "data/weights.csv schema (tag, group, date, weight_lbs only); exceptions.js:129 (0.8 x target margin)"
+  },
+  {
+   "id": "GAIN-11",
+   "title": "Gain wording: 'since <date>' hides that the period ended at the last weigh-in, '1 yearlings', and toFixed(1) shows thresholds that differ from the ones applied",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:131 (g.target.toFixed(1)), :135-136 (plural; (g.target * R.animalShare).toFixed(1)); app.js:56, :173, :209; index.html:94 ('Daily gain since the last weigh-in')"
+  },
+  {
+   "id": "GAIN-12",
+   "title": "A group exactly at 80% of target is flagged serious or not depending on row order (floating-point mean)",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:77 (mean of per-animal ADG via reduce), :129 (strict <)"
+  },
+  {
+   "id": "GAIN-13",
+   "title": "Groups with a 0.0 target (the cows) are skipped silently in the report and the chart",
+   "area": "Gain",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:128 (if (!g.target) continue); app.js:150 (.filter((g) => g.target)); app.js:209-210 and the README rules table"
+  },
+  {
+   "id": "GAIN-14",
+   "title": "An animal that changes group between weigh-ins is counted in its earlier group without saying so",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:70 (group: a.group)"
+  },
+  {
+   "id": "HLTH-01",
+   "title": "A health task is shown only when its status is exactly 'open': 'Open', 'OPEN' or an unlisted status such as 'in progress' silently drops an overdue vaccination",
+   "area": "Health",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:141 (if (h.status !== \"open\" || !h.next_due) continue)"
+  },
+  {
+   "id": "HLTH-02",
+   "title": "An open health task with a blank or unreadable due date is never shown anywhere",
+   "area": "Health",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:141 (|| !h.next_due -> continue), :142-146 (a NaN 'left' falls through both branches)"
+  },
+  {
+   "id": "HLTH-03",
+   "title": "The example 'Fly tag check' row (done, last done Jun 5, next due Sep 1) contradicts itself and the meaning of next_due on a done row is undefined",
+   "area": "Health",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "scripts/generate_data.py:114; data/health.csv; exceptions.js:140-147 (last_done never read)"
+  },
+  {
+   "id": "HLTH-04",
+   "title": "An open task whose last_done is after its next_due is reported as overdue with 'Schedule it this week'",
+   "area": "Health",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:140-147 (last_done unused)"
+  },
+  {
+   "id": "BUD-01",
+   "title": "Budget 'season to date' ignores the month column and as_of: future plan rows hide both real overspends, a blank or lagging month changes the total, and a mid-month as_of compares part of a month with a full month's budget",
+   "area": "Budget",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:82-89 (budgetStatus never reads r.month or as_of), :149-156; app.js:49, :57 (tile totals); README.md:28"
+  },
+  {
+   "id": "BUD-02",
+   "title": "Budget amounts are not read as money: a blank, '(300)' or '$3000' cell turns totals into joined text, erases real overspend alerts and puts $884,000, e+22% or NaN on the headline tile",
+   "area": "Budget",
+   "status": "confirmed",
+   "severity": "high",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:30 (non-numeric cells stay strings), :86 (c.budget += r.budget; c.actual += r.actual); app.js:49 (tile reduce), :57"
+  },
+  {
+   "id": "BUD-03",
+   "title": "A zero-budget category prints 'Infinity% over' and a 0/0 row gives NaN; either one blanks the budget chart",
+   "area": "Budget",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "M",
+   "location": "exceptions.js:88 (pct = variance / budget), :150-152; app.js:181 (lim = Math.max(0.3, ...|pct|)), :182, :191-193"
+  },
+  {
+   "id": "BUD-04",
+   "title": "Budget severity is percent only: $30 over on $200 is serious, $9,500 over on $100,000 is a warning, and $4,000 over is ignored",
+   "area": "Budget",
+   "status": "design-limitation",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:14-15 (RULES.budgetWarn / budgetSerious), :149-156"
+  },
+  {
+   "id": "BUD-05",
+   "title": "Budget boundaries are inconsistent: exactly 5.0% gets no row though the rules say '5-10%', 9.6% and 10.4% both print '10% over' at different severities, and summed cents can tip an exact 10.00% into serious",
+   "area": "Budget",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:86-88 (float sums), :150 (Math.round(pct*100)), :151 (> budgetSerious), :154 (> budgetWarn); app.js:213-214; README.md:28"
+  },
+  {
+   "id": "BUD-06",
+   "title": "Budget money formatting: raw toLocaleString gives '$104.5', warning rows carry no dollars, and a non-US browser locale shows '$2.040' and '$89.303 of $88.400'",
+   "area": "Budget",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:152 ($${b.variance.toLocaleString()}), :155 (no dollars); app.js:21 (money uses toLocaleString()), :50, :54, :223 (head and acres)"
+  },
+  {
+   "id": "BUD-07",
+   "title": "A large under-spend is never surfaced: a category 50% under budget gets no row",
+   "area": "Budget",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:149-156 (only pct above the warn and serious lines is checked); README.md:28"
+  },
+  {
+   "id": "SEC-01",
+   "title": "CSV text is written into the page with innerHTML at 9 places: markup in a pasture, tag or group name runs script, can empty the alert table, and plain '<' text silently deletes alert context",
+   "area": "Security and safe rendering",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "1",
+   "effort": "S",
+   "location": "app.js:28 (hover), :54 (tile group names), :68 (exception subject and problem), :82 (water heading), :104 (water tooltip), :143 (grazing tooltip), :170 (gain tooltip), :194 (budget tooltip), :198 (budget table)"
+  },
+  {
+   "id": "UI-01",
+   "title": "Chart details can only be opened with a mouse hover: a tap on a phone shows nothing, gain dots are 3.9 px targets, and keyboard or screen-reader users cannot reach any chart detail",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "2",
+   "effort": "M",
+   "location": "app.js:26-33 (hover() listens only for pointermove and pointerleave), :100-107 (water hit rect, same pattern), :169 (dot r 3.5 in a 560-wide viewBox), :83, :119, :155, :183 (role=img only, no focusable marks); index.html:59, :95 ('Hover a dot for the tag.'); README.md:52 ('Every chart has hover details ... works on a phone')"
+  },
+  {
+   "id": "UI-02",
+   "title": "On a phone the 'Problem' and 'First step' columns are off-screen and budget differences are cut mid-number, with no cue that the table scrolls",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "2",
+   "effort": "M",
+   "location": "index.html:45 (.scroll { overflow-x: auto }); app.js:66-69 (5-column exceptions table); app.js:203-205 (budget table)"
+  },
+  {
+   "id": "UI-03",
+   "title": "Chart text renders at about 7 px on a phone",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "medium",
+   "phase": "2",
+   "effort": "M",
+   "location": "index.html:50 (svg.chart text 12px in viewBox units); app.js:79 (W=260), :115, :151, :179 (W=560) scaled by width:100%"
+  },
+  {
+   "id": "UI-04",
+   "title": "The 'Water tanks OK' tile re-reads tank IDs from the alert text and undercounts when tank names share a first word ('Well 2', 'Well 4')",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "app.js:47 (e.subject.split(\" \")[1]), :55"
+  },
+  {
+   "id": "UI-05",
+   "title": "Grazing timeline month ticks are hard-coded to June-September 2026",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "app.js:120 (for (const mo of [\"2026-06-01\", \"2026-07-01\", \"2026-08-01\", \"2026-09-01\"]))"
+  },
+  {
+   "id": "UI-06",
+   "title": "On the due day the text says 'Due in 0 days' and 'Planned move in 0 days'",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "exceptions.js:124 (Planned move in ${-over} day...), :145-146 (Due in ${left} day...)"
+  },
+  {
+   "id": "UI-07",
+   "title": "Empty and zero wording: 'Nothing in all needs attention.', and '\u22120.0%', '\u22120%' and 'Under by $0' when exactly on budget",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "app.js:69 (empty message), :57 (tile sign; divides by tb), :193 (label sign), :194 (tooltip Over/Under)"
+  },
+  {
+   "id": "UI-08",
+   "title": "The rules table prints floating-point noise when a threshold is changed (0.07 shows as '7.000000000000001-10%')",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "app.js:213-214 (R.budgetSerious * 100, R.budgetWarn * 100); the gain rows use the same pattern"
+  },
+  {
+   "id": "UI-09",
+   "title": "Rows with the same severity are ordered A-Z by area name, so the Budget overruns head the serious block above an overdue vaccination and a silent water sensor",
+   "area": "Interface",
+   "status": "design-limitation",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:158 (SEVERITY, then a.area.localeCompare(b.area)); README.md ('Worst first')"
+  },
+  {
+   "id": "UI-10",
+   "title": "Keyboard focus is lost after activating a filter chip",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "app.js:62-65 (chips rebuilt with innerHTML on every click), :224"
+  },
+  {
+   "id": "UI-11",
+   "title": "Tooltips near the right or bottom edge are squeezed or open off-screen",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "app.js:29-30 (hover() clamps only the left edge), :105 (water tooltip clamps nothing)"
+  },
+  {
+   "id": "UI-12",
+   "title": "Small chart label collisions: the '3.0' tick overlaps 'lbs per day', and the T6 heading wraps on a phone",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "app.js:158-160 (axis title under the last tick label); index.html:55 (.mini h4 flex with no nowrap)"
+  },
+  {
+   "id": "UI-13",
+   "title": "Exception text shows raw ISO dates ('2026-07-20') while the rest of the page uses 'Jul 20'",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "exceptions.js:131, :144, :146"
+  },
+  {
+   "id": "UI-14",
+   "title": "Long group or budget category names overflow their fixed label space: they overlap the bars and dots, or are cut off at the card edge",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "app.js:116 and :127 (grazing m.l = 74), :151 and :165 (gain m.l = 74), :180 and :190 (budget m.l = 140, label end-anchored at x=130)"
+  },
+  {
+   "id": "UI-15",
+   "title": "The water chart draws a straight line across sensor outages inside the 7-day window",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "app.js:90-91 (one path through every row in the window, no break at gaps), :94-97 (the 'no data' wash is drawn only after the last reading)"
+  },
+  {
+   "id": "UI-16",
+   "title": "The gain chart does not mark the animals the report flags, or the 50% and 80% lines",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "app.js:167-173 (every circle gets the same fill, opacity and radius; 'Under half of target' exists only in the hover text at :170); index.html:95"
+  },
+  {
+   "id": "UI-17",
+   "title": "Budget chart extremes: a category well under budget draws its value label over its name, and one large percentage overrun squashes the chart and stacks every axis label",
+   "area": "Interface",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "app.js:180-193 (m.l = 140; value label at a - 6, end-anchored; lim = max(0.3, |pct|); fixed ticks [-0.2, -0.1, 0, 0.1, 0.2]), :184"
+  },
+  {
+   "id": "UI-18",
+   "title": "'Head on grass 375' counts 180 cow-calf pairs as 180 head",
+   "area": "Interface",
+   "status": "plausible",
+   "severity": "low",
+   "phase": "2",
+   "effort": "S",
+   "location": "app.js:50 (head = sum of groups.head), :54 (tile text); data/groups.csv ('Cows,cow-calf pairs,180')"
+  },
+  {
+   "id": "TEST-01",
+   "title": "The water tests cannot catch a broken rule: removing the 'don't judge a silent tank' line and moving every threshold boundary still pass",
+   "area": "Tests",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "tests/exceptions.test.mjs:34-36 (the silent-sensor test uses T6 at 98.5%, which no level rule could flag), :42-52 (one point per rule, no boundaries); exceptions.js:107"
+  },
+  {
+   "id": "TEST-02",
+   "title": "No test covers the grazing rule boundaries: changing the over-plan or grace comparisons, or the plural wording, still passes the suite",
+   "area": "Tests",
+   "status": "confirmed",
+   "severity": "low",
+   "phase": "1",
+   "effort": "S",
+   "location": "tests/exceptions.test.mjs:17 and :57 (the only grazing assertions); exceptions.js:120 (over > 0), :123 (over >= -R.graceDays), :121 and :124 (plurals)"
+  }
+ ]
+}

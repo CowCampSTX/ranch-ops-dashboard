@@ -1,0 +1,1148 @@
+[
+ {
+  "name": "NWS API (api.weather.gov)",
+  "provides": "Point-to-grid lookup; 7-day 12-hour and hourly forecasts on about a 2.5 km grid; gridded data; alerts; station observations.",
+  "access": "HTTPS GET, GeoJSON default; 'A User Agent is required'; no key now, 'will be replaced with an API key in the future'",
+  "cost": "free (limits apply, unpublished)",
+  "licensing": "'intended to be open data, free to use for any purpose'",
+  "coverage": "US, ~2.5 km grids",
+  "refresh": "Forecasts updated by forecast offices; cadence not stated on the documentation page.",
+  "latency": "Observations may be delayed up to 20 minutes (documentation). Forecast issuance lag not stated.",
+  "failure_behavior": "Rate-limit errors, retry after ~5 s. Outages announced via NCEP admin messages. The API host was robots-blocked to WebFetch; CORS and browser User-Agent handling UNVERIFIED",
+  "browser_cors_or_key_issues": "A User-Agent header identifying the application is required, and an API key is planned. Browsers may not let page scripts set User-Agent; CORS and browser handling were not verified (the API host was robots-blocked to the research tool). Fetch at build time (for example a scheduled GitHub Action writing a dated CSV with provenance) so browser CORS and keys never reach the page; the test workflow stays offline.",
+  "recommendation": "Defer (live integrations are deferred). If a heat panel is built (RULE-CTX-07), take a dated build-time snapshot; never call it live from the static demo, because a live forecast does not match the fictional as_of.",
+  "url": "https://www.weather.gov/documentation/services-web-API",
+  "verification": "partly",
+  "verification_note": "[cite_context.json checked[27], claim yes] Page says 'A User Agent is required to identify your application', which 'will be replaced with an API key in the future'. The API is 'intended to be open data, free to use for any purpose'. Rate-limited requests 'may be retried after the limit clears (typically within 5 seconds)'. forecastHourly covers 'the next seven days'. 'Observations may be delayed up to 20 minutes'. Known Issues 'Updated 3/24/2026'. CORS is not mentioned. The '~2.5 km grids' claim was not confirmed in this fetch. || [cite_water.json checked[43], claim yes] Confirmed: 'open data, free to use for any purpose'; 'A User Agent is required'; the /points endpoint; 'about 2.5km x 2.5km'; caching the grid; retry 'typically within 5 seconds'; observations 'delayed up to 20 minutes'; gridX/gridY 'may occasionally change'. Small mislabel: the 'Known Issues' section says 'No significant known issues'. The null 24h max/min 'for stations outside the central time zone' is listed under Upstream Issues/Changes as a MADIS ingest bug, and it affects station observations endpoints, not forecasts. || [cite_health.json checked[29], claim partly] These integration claims are supported verbatim: 'intended to be open data, free to use for any purpose'; 'A User Agent is required to identify your application'; it 'will be replaced with an API key in the future'; 'The rate limit is not public information', retry 'typically within 5 seconds'; 'cache-friendly approach'; /points/{lat},{lon} gives forecastHourly and forecastGridData over seven days; gridX/gridY 'and even the office ... may occasionally change'. Not supported: the data_fields entry forecast_thi_hourly cites this page for 'update_frequency: several times daily (NWS forecast)', but the page states no forecast update frequency. The integration entry itself correctly says 'not stated'. The page does not state coverage beyond NWS Weather Forecast Office grids (about 2.5 km).",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-CTX-07",
+   "RULE-WAT-06"
+  ],
+  "research_refs": [
+   "research_context.json integrations[3]",
+   "research_water.json integrations[0]",
+   "research_health.json integrations[0]"
+  ],
+  "merged_research_notes": "[water integration 0] provides: 7-day 12-hour and hourly forecasts on a 2.5 km grid; station observations; failure: Rate-limit errors (retry after about 5 s). Grid points can change, so re-check /points. Known issue: 24 h max/min null outside Central time. The Great Plains ranch would be in Central or Mountain time. | [health integration 0] provides: 7-day hourly point forecasts (forecastHourly, forecastGridData) used to compute THI for planned handling days; failure: Show 'no forecast available' and leave the day unclassified. A static portfolio demo must not call it live; use a labelled synthetic forecast file."
+ },
+ {
+  "name": "South Dakota Mesonet (SDSU)",
+  "provides": "100+ stations (126 listed on the request form) updating every five minutes (per the SD Mesonet weather page); daily CSV of precip, temp, RH, wind, solar, soil moisture/temp",
+  "access": "Web form CSV request; custom services by contact; no API described",
+  "cost": "Not stated on the checked pages",
+  "licensing": "'Redistribution of these data is not allowed.' 'Commercial use of these data is not allowed.' Provisional, not QC'd",
+  "coverage": "South Dakota",
+  "refresh": "5-minute real-time; daily archive from 2015 via form",
+  "latency": "Real-time stations update every 5 minutes; daily archive by web-form request.",
+  "failure_behavior": "Manual process",
+  "browser_cors_or_key_issues": "No API described; data come from a web form as CSV. Redistribution and commercial use are not allowed.",
+  "recommendation": "Exclude from repository data (RULE-CTX-16). Link to the Mesonet pages only.",
+  "url": "https://climate.sdstate.edu/request/daily/",
+  "verification": "partly",
+  "verification_note": "[cite_context.json checked[46], claim partly] Supported: 'Redistribution of these data is not allowed.'; 'Commercial use of these data is not allowed.'; 'Data from the automated data request system are provisional.'; not QC'd and not for legal or research use until expert review; 'All use of SDSU Mesonet data must be credited'; years 2015-2026; CSV. NOT on this page: the integration's 'updating every 5 min' (no update frequency stated) and 'Small non-QC requests free; custom services priced on request' (no cost statements). The station dropdown lists 126 stations, which is consistent with '100+'. || [cite_water.json checked[44], claim yes] SD Mesonet. '150+ stations', but the page also says 'Over 150 new or upgraded stations will be installed', so part of the count is planned. 'Nearly every South Dakotan within 20 miles of a station'. 'updated every five minutes'. Has a 'Livestock Stress' tool. Daily and Custom Data Request forms; no download formats stated. Terms of Use linked; no licence; cost not stated.",
+  "recommended_phase": "exclude (link only)",
+  "used_by_rules": [
+   "RULE-CTX-16",
+   "RULE-CTX-10"
+  ],
+  "research_refs": [
+   "research_context.json integrations[7]",
+   "research_water.json integrations[1]"
+  ],
+  "other_urls": [
+   "https://climate.sdstate.edu/weather"
+  ],
+  "merged_research_notes": "[water integration 1] provides: Observed temperature, humidity, wind, solar radiation, precipitation, soil moisture; a livestock stress tool; failure: Not stated"
+ },
+ {
+  "name": "USDA-ARS USMARC cattle heat-stress forecast maps",
+  "provides": "7-day regional maps of predicted peak heat-stress category (breathing-rate model from NWS inputs)",
+  "access": "Web pages and PNG images; 'downloadable map data' link not examined",
+  "cost": "free",
+  "licensing": "US Government work (no terms read)",
+  "coverage": "CONUS in 6 regions",
+  "refresh": "Not stated on the ARS pages; Drovers calls them 'weekly forecasts' and Farm Progress gives no frequency. Region page last modified 2017-07-26 (forecasting page 2016-08-12); current forecast date only in an image",
+  "latency": "Not stated; the forecast date appears only inside an image.",
+  "failure_behavior": "Status in 2026 UNVERIFIED. forecastDate.png robots-blocked; curl to www.marc.ars.usda.gov got 'CONNECT tunnel failed, response 403'; site banner says features may be temporarily unavailable",
+  "browser_cors_or_key_issues": "No data feed or API documented ('Download Map Data' link not examined); images only. Site status in 2026 unverified.",
+  "recommendation": "Link from help text only; do not integrate. The model estimates breathing rate for feedlot cattle. If a heat panel is wanted, reuse the published equation on a forecast snapshot (RULE-CTX-07).",
+  "url": "https://www.ars.usda.gov/plains-area/clay-center-ne/marc/documents/heat-stress/indexregion",
+  "verification": "partly",
+  "verification_note": "[cite_context.json checked[24], claim partly] Six regional maps plus ConUS; 'Click on a region for the 7 day forecast'; the forecast date appears only as an image; Last Modified July 26, 2017; banner 'Some updates may be temporarily unavailable'; a 'Download Map Data' link exists. NOT supported: the integration's 'Daily intent per press (2020)'. Farm Progress states no update frequency, and Drovers says 'The weekly forecasts are produced as a partnership of the USDA-ARS'. || [cite_water.json checked[26], claim yes] USDA ARS MARC, Last Modified 8/12/2016. Uses NWS seven-day forecasts of temperature, humidity, wind and cloud cover. Breathing rates: <90 normal, 90-110 alert, 110-130 danger, >130 emergency. The model is 'the predicted breathing rate of cattle in a feedlot'. The maps are 'an estimate of general trends'. No coverage area and no data download stated. || [cite_health.json checked[19], claim yes] Last modified 8/12/2016. Uses 7-day NWS forecasts of temperature, humidity, wind speed and cloud cover. Categories: Normal <90 bpm, Alert 90-110, Danger 110-130, Emergency >130, with the equation stated for temperatures above 80F. The model estimates breathing rate for 'cattle in a feedlot' and 'cannot predict individual animal stress levels'. The model papers are Brown-Brandl et al. 2005 and Eigenberg et al. 2005. The sample solar data are from Clay Center, 5 July 2001. The page describes no public feed or API and shows a 'Website Update in Progress' banner. Coverage is not defined. All of this matches the research.",
+  "recommended_phase": "defer (link only)",
+  "used_by_rules": [
+   "RULE-CTX-07"
+  ],
+  "research_refs": [
+   "research_context.json integrations[4]",
+   "research_water.json integrations[2]",
+   "research_health.json integrations[1]"
+  ],
+  "other_urls": [
+   "https://www.ars.usda.gov/plains-area/clay-center-ne/marc/documents/heat-stress/forecastingheatstress/"
+  ],
+  "merged_research_notes": "[water integration 2] provides: Colour-coded 7-day cattle heat-stress category maps (breathing-rate model); failure: Not stated | [health integration 1] provides: Daily maps of predicted peak heat-stress category (Normal / Alert / Danger / Emergency by breathing rate) from NWS 7-day forecasts; failure: Not applicable (link only)"
+ },
+ {
+  "name": "U.S. Drought Monitor data services (REST statistics)",
+  "provides": "Weekly % area (or area, population, DSCI) by USDM category for US/state/county/HUC/climate division; consecutive-weeks endpoints",
+  "access": "HTTPS GET, CSV default, JSON/XML via Accept header; no API key mentioned",
+  "cost": "free",
+  "licensing": "No license text on the service page. Attribution wording on the Permission page: 'Map courtesy of NDMC'",
+  "coverage": "US incl. county level (observed Hughes Co. SD)",
+  "refresh": "Weekly. Valid Tuesday (12:00 UTC cutoff), released Thursday 08:30 ET. Observed latest MapDate 20261013 on 2026-10-16",
+  "latency": "Research: maps are valid Tuesday (12:00 UTC cutoff) and released Thursday 08:30 ET, about 2 days later; the checked pages do not state the release day.",
+  "failure_behavior": "Unknown; no status page seen. Treat a missing week as unavailable, not as 'no drought'. CORS UNVERIFIED (sandbox blocked all direct probes)",
+  "browser_cors_or_key_issues": "No API key mentioned. CORS unverified (direct probes were blocked in the research sandbox). Fetch at build time (for example a scheduled GitHub Action writing a dated CSV with provenance) so browser CORS and keys never reach the page; the test workflow stays offline.",
+  "recommendation": "Best fit for the phase-3 drought snapshot. Fetch at build time for a labelled stand-in county around as_of, select by release time (RULE-CTX-01), and commit a CSV with provenance. Treat a missing week as unavailable, never as 'no drought'.",
+  "url": "https://droughtmonitor.unl.edu/DmData/DataDownload/WebServiceInfo.aspx",
+  "verification": "partly",
+  "verification_note": "[cite_context.json checked[7], claim partly] Supported: County, State and HUC statistics endpoints; statistics types Area, Percent of Area, Population, Percent of Population and DSCI. 'By default the data are output in CSV format'; XML, CSV or JSON via the ACCEPT header; no API key mentioned; ConsecutiveNonConsecutiveStatistics endpoints exist (aoi takes state abbreviations); '\u00a92026'. NOT supported: the data_field claim 'CSV values may contain thousands separators in area mode' appears nowhere on this page. || [cite_grazing.json checked[21], claim partly] 'Web Service Information | U.S. Drought Monitor' (NDMC/UNL with USDA, NOAA, NASA). Template 'https://usdmdataservices.unl.edu/api/[area]/[statistics type]?aoi=[aoi]'. Area 'CountyStatistics' is listed, with aoi as a 5-digit FIPS. Date format 'M/D/YYYY'. 'By default the data are output in CSV format'; JSON/XML via the Accept header. No API key mentioned. Inconsistencies confirmed: RegionalClimateCenterStatistics vs RegionStatistics, HucStatistics vs HUCStatistics, and GetBasicStatisticsByAreaPercent missing from its table. PARTLY: the page has no statement of update or release frequency. 'Weekly' (data field update_frequency and integration refresh) comes only from statistics being given 'for each week' and is not stated as a release schedule. The research's integration entry hedges this, but the data_fields row states 'Weekly' flatly. || [cite_gain.json checked[35], claim partly] The page offers County (and County by State), State, Climate Division and HUC scales; Percent Area / Total Area / Percent Population / Total Population; Cumulative or Categorical; CSV, XML and JSON; and links 'USDM REST services'. It caps queries at one year. NOT stated on this page: weekly update frequency, release day, the None/D0-D4 category names, or licence terms (it links a 'Permission' page that was not read). The 'weekly' claims are not supported by the cited page. || [cite_water.json checked[45], claim yes] GIS 'shapefiles, kmz, wms and more' for 'each week'. Weekly is implied, not stated outright. Tabular data, statistics download (DSCI), and a 'Web Service Info' link. Partnership of NDMC-UNL with USDA, NOAA and NASA logos. A separate Permission page is linked; no licence on this page.",
+  "recommended_phase": "3",
+  "used_by_rules": [
+   "RULE-CTX-01",
+   "RULE-CTX-02",
+   "RULE-CTX-03",
+   "RULE-CTX-10"
+  ],
+  "research_refs": [
+   "research_context.json integrations[0]",
+   "research_grazing.json integrations[2]",
+   "research_gain.json integrations[5]",
+   "research_water.json integrations[3]"
+  ],
+  "other_urls": [
+   "https://droughtmonitor.unl.edu/Data.aspx",
+   "https://droughtmonitor.unl.edu/DmData/DataDownload/ComprehensiveStatistics.aspx"
+  ],
+  "merged_research_notes": "[grazing integration 2] provides: Weekly drought category statistics (area or population, categorical or cumulative) by county FIPS, state, HUC, climate hub, etc.; failure: The documentation page has inconsistencies in endpoint names (e.g. RegionStatistics vs RegionalClimateCenterStatistics), so endpoints should be checked before relying on them | [gain integration 5] provides: Weekly drought category % by county; failure: Context only; omit on failure | [water integration 3] provides: Weekly drought category maps, GIS (shapefile, KMZ, WMS), tabular statistics, DSCI; failure: Not stated"
+ },
+ {
+  "name": "USDM current (ArcGIS Online FeatureServer)",
+  "provides": "Current USDM polygons with DM, MapDate, ReleaseDate, ValidStart, ValidEnd",
+  "access": "ArcGIS REST query, JSON/GeoJSON/PBF; maxRecordCount 2000",
+  "cost": "free",
+  "licensing": "Credits NDMC/USDA/NOAA; 'Map courtesy of NDMC'",
+  "coverage": "US polygons (current week only; separate archive service exists)",
+  "refresh": "Weekly. Features showed MapDate 2026-10-13 while the layer page's 'Last Edit Date' read 10/1/2026",
+  "latency": "Weekly; layer metadata ('Last Edit Date') is not a freshness signal.",
+  "failure_behavior": "Timestamps convert to odd times (07:30Z), so treat them as dates. Metadata last-edit is not a freshness signal. CORS unverified",
+  "browser_cors_or_key_issues": "ArcGIS REST query (JSON/GeoJSON/PBF); CORS unverified.",
+  "recommendation": "Use only if polygons or maps are needed; prefer the statistics service for a table.",
+  "url": "https://services5.arcgis.com/0OTVzJS4K09zlixn/ArcGIS/rest/services/USDM_current/FeatureServer/0",
+  "verification": "verified",
+  "verification_note": "[cite_context.json checked[4], claim yes] Layer page: 'Last Edit Date: 10/1/2026 12:32:12 PM'. Fields include MapDate, ReleaseDate, ValidStart and ValidEnd; maxRecordCount 2000; formats JSON, geoJSON, PBF; credit 'Map courtesy of NDMC.' The layer time extent reads 5/18/2021-8/9/2021, which further shows the metadata is stale. A /query fetch returned MapDate 1791876600000, ReleaseDate 1792049400000 and ValidEnd 1792411200000. I converted these with node: 2026-10-13T07:30Z, 2026-10-15T07:30Z (3:30 AM ET) and 2026-10-19T12:00Z. This confirms the 07:30 UTC claim.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-CTX-01"
+  ],
+  "research_refs": [
+   "research_context.json integrations[1]"
+  ]
+ },
+ {
+  "name": "Iowa Environmental Mesonet JSON services",
+  "provides": "USDM GeoJSON, PRISM point JSON, NWS VTEC/alerts, COOP obs, climodat",
+  "access": "HTTPS GET JSON/GeoJSON",
+  "cost": "free",
+  "licensing": "'You are free to use these services for any lawful purpose'; 'provided as-is' and without warranty",
+  "coverage": "US",
+  "refresh": "Mirrors upstream; USDM response showed date 2026-10-13 on 2026-10-16",
+  "latency": "Mirrors upstream products (the USDM response showed the current week).",
+  "failure_behavior": "University-run aggregator; 'bugs happen'. The prism.py help fetch failed (CLIENT_ERROR). CORS not stated on the page",
+  "browser_cors_or_key_issues": "CORS not stated on the page; free for any lawful purpose, as-is.",
+  "recommendation": "Optional fallback mirror for the phase-3 snapshot; do not depend on it as the only source.",
+  "url": "https://mesonet.agron.iastate.edu/json/",
+  "verification": "verified",
+  "verification_note": "[cite_context.json checked[5], claim yes] Disclaimer: 'All of these services are provided as-is and without warranty', 'You are free to use these services for any lawful purpose', 'bugs happen'. The page lists 'US Drought Monitor' (geojson/usdm.py?help) and 'PRISM' (json/prism.py?help). Footer: 'Copyright \u00a9 2001-2026'. I separately fetched geojson/usdm.py and the features carry \"date\": \"2026-10-13\", which matches the research. The page says nothing about CORS.",
+  "recommended_phase": "3 (optional fallback)",
+  "used_by_rules": [
+   "RULE-CTX-01",
+   "RULE-CTX-10"
+  ],
+  "research_refs": [
+   "research_context.json integrations[2]"
+  ]
+ },
+ {
+  "name": "Ranchbot / Farmbot remote tank monitors (vendor)",
+  "provides": "Tank level (in, gal, %), projected values, Delay/No Data/Error statuses, battery, alerts by SMS and email",
+  "access": "Vendor apps (MyRanchbot, MyFarmbot). The help centres list an 'Integrations' collection, but I did not verify any public export or API.",
+  "cost": "Subscription; figures not found on official pages. A South Australian agency comparison (undated) lists Farmbot at AUD 1,209 plus 342 per year, likely vendor-supplied.",
+  "licensing": "Vendor terms (not reviewed)",
+  "coverage": "Satellite or cellular; needs a clear sky view and panel care",
+  "refresh": "'Irregular intervals' (vendor)",
+  "latency": "'Irregular intervals' (vendor); Delay status means stale values.",
+  "failure_behavior": "Delay status = stale values; inspect if more than 3-4 days. A battery lasts 3-5 days of cloud. Pump automation pauses when a linked monitor is in Delay (Farmbot).",
+  "browser_cors_or_key_issues": "Vendor apps; no public export or API verified.",
+  "recommendation": "Vendor specification only. Import a CSV export if one exists, carrying status and battery. Treat accuracy and reliability claims as unverified and keep vendor projections apart from measurements.",
+  "url": "https://intercom.help/farmbot-helpcentre/en/articles/5666871-what-does-device-status-delay-mean",
+  "verification": "verified",
+  "verification_note": "[cite_water.json checked[8], claim yes] April 13, 2026 (Jen Duff). Same Delay definition, 'irregular intervals', 'maximum transmission time period', and 'longer than 3-4 days' manual inspection. Cloud cover 'for a few days'. Pump automation: 'automation will be paused if it is enabled' when a linked monitor is in Delay. It groups causes differently from Ranchbot ('Transmission Missed', 'Transmission Failure', other), so 'same guidance' is accurate in substance only. I did not verify the help centre's 'Integrations' collection.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-WAT-04",
+   "RULE-WAT-07",
+   "RULE-CTX-13"
+  ],
+  "research_refs": [
+   "research_water.json integrations[4]"
+  ]
+ },
+ {
+  "name": "LoneStar Tracking water tank monitor (vendor)",
+  "provides": "Hydrostatic level; low-water SMS and email alerts and back-to-normal notices",
+  "access": "Vendor website; no API seen",
+  "cost": "USD 250 device; first year included, then USD 99 per year (vendor page)",
+  "licensing": "Vendor terms (not reviewed)",
+  "coverage": "Satellite (Myriota) or LTE Cat-M1",
+  "refresh": "4/day satellite, 24/day cellular (the page also says 'once every 1 hour', which conflicts)",
+  "latency": "4 readings/day by satellite or 24/day by cellular (vendor page; it also says 'once every 1 hour', which conflicts).",
+  "failure_behavior": "Not stated on the page",
+  "browser_cors_or_key_issues": "Vendor website; no API seen.",
+  "recommendation": "Vendor specification only: an example of reporting cadence and an accuracy claim (about 10%). Use it to set an expected interval per device, not to validate thresholds.",
+  "url": "https://www.lonestartracking.com/?p=60249",
+  "verification": "verified",
+  "verification_note": "[cite_water.json checked[2], claim yes] Title 'Water Tank Level Monitoring System 2026 - LoneStar Tracking', footer (c) 2026. 'The LST Vita water level sensors are accurate to about 10%'. Listed factors: 'water temperature, changes in barometric pressure and sediment in the bottom of the tank'. Sensor wire 15 ft. Cellular '24 / day', satellite '4 / day', and also 'once every 1 hour' (a conflict). Battery claims conflict: 5 years, '10 years on 2 D cells', and 2-3 years in the table. Price $250.00 plus subscription, $99/yr after the first year. Sends SMS/email low alerts and a 'returned to normal' notice. Has a hydrostatic pressure sensor. Minor: cellular is named 'Global 4G Cat M1'. Myriota is not named on this page (it appears on the Myriota partner page). No API or export is mentioned. The page metadata lists price 100 USD, which conflicts with the visible $250.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-WAT-07",
+   "RULE-WAT-14"
+  ],
+  "research_refs": [
+   "research_water.json integrations[5]"
+  ]
+ },
+ {
+  "name": "Gallagher Satellite Liquid Monitoring (vendor)",
+  "provides": "Tank, trough and dam level via micro-satellite; alerts",
+  "access": "Vendor app; no specifications for reading frequency, battery or accuracy on the official page",
+  "cost": "Subscription; no figures given",
+  "licensing": "Vendor terms",
+  "coverage": "Areas without cell or Wi-Fi",
+  "refresh": "'a quick daily check-in or near-instant alerts' (plan-dependent; vendor page)",
+  "latency": "Plan-dependent: 'a quick daily check-in or near-instant alerts' (vendor page).",
+  "failure_behavior": "Not stated",
+  "browser_cors_or_key_issues": "Vendor app; no specifications for reading frequency, battery or accuracy.",
+  "recommendation": "Vendor specification only; not enough official detail to rely on.",
+  "url": "https://am.gallagher.com/Products/liquid-level-monitoring",
+  "verification": "partly",
+  "verification_note": "[cite_water.json checked[46], claim partly] 'Satellite Liquid Monitoring | Gallagher United States'. Micro-satellite; tanks, troughs and dams. No reading-frequency, battery or accuracy specs, and a subscription with no figures. Both confirmed. The quoted refresh text 'Daily check-in option or near-instant alerts' is not verbatim. The page says 'Whether you need a quick daily check-in or near-instant alerts the moment something changes.'",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-WAT-14"
+  ],
+  "research_refs": [
+   "research_water.json integrations[6]"
+  ]
+ },
+ {
+  "name": "PIR SA water monitoring comparison (Australia)",
+  "provides": "Side-by-side table of Agbot, Alpha Group, Farmbot, Farmo Water Rat, Goanna Go Tank and OneTemp HOBO kits: power, connectivity, cost",
+  "access": "PDF",
+  "cost": "Free",
+  "licensing": "Not stated",
+  "coverage": "Australian products and prices (ex GST)",
+  "refresh": "Undated",
+  "latency": "n/a (undated document).",
+  "failure_behavior": "n/a",
+  "browser_cors_or_key_issues": "PDF only.",
+  "recommendation": "Background only. Not independent testing; the source of the figures is not stated.",
+  "url": "https://pir.sa.gov.au/__data/assets/pdf_file/0009/440559/water-monitoring-comparison.pdf",
+  "verification": "verified",
+  "verification_note": "[cite_water.json checked[47], claim yes] 'Water monitoring comparison', undated. The PDF does not name its publisher; the domain is PIRSA. Products: Agbot, Alpha Group Consulting, Farmbot, Farmo Water Rat, Goanna Ag Go Tank, OneTemp HOBO. Prices are ex GST. Farmbot: installation $1,209 and subscription $342/yr, with the currency shown only as '$'. The figures' source is not stated, so 'likely vendor-supplied' is the researcher's inference.",
+  "recommended_phase": "reference only",
+  "used_by_rules": [
+   "RULE-WAT-14"
+  ],
+  "research_refs": [
+   "research_water.json integrations[7]"
+  ]
+ },
+ {
+  "name": "Water testing labs (NDSU Veterinary Diagnostic Lab and others)",
+  "provides": "TDS, sulfate, nitrate, cyanotoxin analyses",
+  "access": "Sample submission; enter results by hand",
+  "cost": "Not researched",
+  "licensing": "n/a",
+  "coverage": "ND, SD, NE",
+  "refresh": "Per sample",
+  "latency": "Lab turnaround per sample (not researched).",
+  "failure_behavior": "Turnaround delays; the dashboard should show 'sample pending'",
+  "browser_cors_or_key_issues": "Manual sample submission; results entered by hand.",
+  "recommendation": "Manual entry into a water-quality log; no automated integration. The cited AS1764 names only the NDSU Veterinary Diagnostic Lab.",
+  "url": "https://info.ext.nodak.edu/agriculture/sites/default/files/2026-01/as1764%20%281%29.pdf",
+  "verification": "partly",
+  "verification_note": "[cite_water.json checked[29], claim partly] AS1764 'Livestock Water Quality', Meehan, Galbreath and Mostrom, 'Revised January 2026'. TDS table: <3,000 'Usually satisfactory for most livestock'; 3,000-5,000 young stock may be affected; 5,000-7,000 'Should not be consumed by pregnant or lactating females'; 7,000-10,000 'Do not use for pregnant or lactating ruminants or horses' (and swine); >10,000 'May cause brain damage or death'. Lab trigger: 'If TDS levels exceed 4,500 ppm and/or sulfates levels exceed 800 ppm'. Screening with an 'EC or TDS meter and sulfate test strips'; calibration per WQ1923. 'salts in surface water become more concentrated as water levels decline'. Table 2: sulfate <600 ppm on >85% concentrate (diet S 0.3%) and <2,500 ppm on >40% forage (diet S 0.5%). Table 3: 'Nitrate 100', 'Nitrite 33', 'Sulfate 500 to 1,000'. Nitrate is not labelled NO3 vs NO3-N, so 'nitrate-N 100' is not explicit here. Not supported: the labs integration names NDSU VDL, SDSU testing and Midwest Laboratories, but this document names only the 'NDSU Veterinary Diagnostic Lab' (it does mention 'algal toxin determination').",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-WAT-11",
+   "RULE-WAT-12",
+   "RULE-WAT-13"
+  ],
+  "research_refs": [
+   "research_water.json integrations[8]"
+  ]
+ },
+ {
+  "name": "Grass-Cast grassland productivity forecast",
+  "provides": "Biweekly seasonal % change in grassland production vs ~38-yr average under 3 precipitation scenarios; 10 km cells",
+  "access": "Web maps (images); historical CSV/XLSX/shapefile downloads; no API",
+  "cost": "free",
+  "licensing": "Download page states none. A related research database is CC BY 4.0 (data 1939-2018) per its Data.gov page (see the 'Grass-Cast database on Data.gov' integration), not this download page",
+  "coverage": "Great Plains and Southwest rangeland (excludes cropland, shrubland, forest)",
+  "refresh": "Every two weeks from ~late April; 2026 season final as of Aug 31",
+  "latency": "Updated about every two weeks in season (from about late April); the 2026 season was final as of August 31.",
+  "failure_behavior": "Seasonal gaps; accuracy improves through the season; developer-reported 60-80% accuracy (not independently verified here)",
+  "browser_cors_or_key_issues": "Web map images and historical downloads; no API. Licence not stated on the download page (the CC BY 4.0 licence belongs to the related data.gov research database).",
+  "recommendation": "Optional manual snapshot with its map date; context only, never a trigger for pasture exceptions.",
+  "url": "https://grasscast.unl.edu/Data.aspx",
+  "verification": "partly",
+  "verification_note": "[cite_context.json checked[15], claim partly] Downloads: Great Plains annual grid 1982-2019 (XLSX), historical average grid 1981-2018 (CSV), county 1981-2018 (CSV), Southwest sets 1982-2019, a 10 km grid shapefile, and a link to the model data on the USDA data portal. No current forecast data and no API. No license statement, only '\u00a92026'. The rule says 'Downloadable CSVs ... annual grid 1982-2019', but the annual grid file is XLSX. The integration's claim that a 'related research database on data.gov is CC BY 4.0 (data 1939-2018)' is not on this page and is unverified. || [cite_grazing.json checked[14], claim yes] 'About Our Maps | Grassland Productivity Forecast'. Partners: CSU, USDA, NDMC, University of Arizona. Example maps 'produced on April 29, 2019'; footer '(c)2026'. '10 km x 10km'. 'Grass-Cast is updated every two weeks to incorporate newly observed weather data'; the page itself does not limit this to the growing season. 'almost 40 years of historical data' and a '38-year average'. 'cannot tell the difference between desirable forage species and undesirable species'. 'does not directly account for local management practices'. 'Producers should not rely on Grass-Cast as a sole source for making management decisions'. Public land managers should not use it 'as a sole source of information for setting stocking rates, determining turnout dates, or other aspects of lease agreements, allotments or permits', which supports the 'stocking, turnout or permit' wording. Gray or white cells: 'no forecast is available due to insufficient data or weak statistical relationships'. || [cite_gain.json checked[24], claim yes] Verbatim: 'is updated every two weeks'. Cell size is '10 km x 10km'. 'This new experimental grassland forecast'. 'Producers should not rely on Grass-Cast as a sole source for making management decisions'. It 'does not directly account for local management practices' and 'cannot tell the difference between desirable forage species and undesirable species'. Forecasts are percent change vs the cell's '38-year average' under three MJJA precipitation scenarios. White or gray cells mean no forecast. Partners: CSU, USDA, NDMC (UNL), Univ. of Arizona. The page is undated.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-CTX-05",
+   "RULE-GAIN-08",
+   "RULE-CTX-10"
+  ],
+  "research_refs": [
+   "research_context.json integrations[12]",
+   "research_grazing.json integrations[0]",
+   "research_gain.json integrations[3]"
+  ],
+  "other_urls": [
+   "https://grasscast.unl.edu/Outlook/About.aspx"
+  ],
+  "merged_research_notes": "[grazing integration 0] provides: Forecast % change in total aboveground production vs about 38-yr average per 10 x 10 km cell (county level in 2017-18), as below, near or above-normal scenarios; failure: Gray or white cells have no forecast. Off-season there is no update. Total production includes undesirable species. Does not account for prior grazing. | [gain integration 3] provides: Forecast % change in rangeland production vs the long-term average, three precipitation scenarios; failure: Experimental. Gray or white cells have no forecast. Not to be used as the sole decision source. If unavailable, show no context; never block or raise a flag."
+ },
+ {
+  "name": "Grass-Cast database on Data.gov (ANPP, NDVI, cattle weight gains)",
+  "provides": "Long-term cattle weight gain, ANPP and NDVI records for benchmarking year-to-year variability",
+  "access": "Data.gov / figshare download",
+  "cost": "free",
+  "licensing": "CC BY 4.0",
+  "coverage": "12 sites at about 32.5-43.9 N in western U.S. rangelands (at least one in Idaho, so not all Great Plains); 1939-2018.",
+  "refresh": "static (modified 2025-11-21)",
+  "latency": "Static dataset (modified 2025-11-21).",
+  "failure_behavior": "Download FAILED in this session: curl to ndownloader.figshare.com returned 'CONNECT tunnel failed, response 403', and the WebFetch redirect URL exceeded the proxy length limit. Contents not inspected.",
+  "browser_cors_or_key_issues": "Data.gov / figshare download; the download failed in the research session (proxy).",
+  "recommendation": "Worth inspecting offline to calibrate period expectations; contents not inspected.",
+  "url": "https://catalog.data.gov/dataset/grass-cast-database-data-on-aboveground-net-primary-productivity-anpp-climate-data-ndvi-an",
+  "verification": "partly",
+  "verification_note": "[cite_gain.json checked[37], claim partly] The title says it covers 'Western U.S. rangelands' (USDA-ARS), modified Nov 21, 2025, CC BY 4.0, temporal coverage 1939-2018. Resources include 'Cattle_weight_gains.xlsx' (figshare 44528687), confirmed. Incorrect in the research: '12 Great Plains sites'. The dataset lists 12 points at 32.49-43.93 N, but at least one is near -116.76 longitude (Idaho), so not all are Great Plains. Download not attempted here; curl to all hosts was refused by the proxy in this session.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-GAIN-08"
+  ],
+  "research_refs": [
+   "research_gain.json integrations[4]"
+  ]
+ },
+ {
+  "name": "Rangeland Analysis Platform (RAP)",
+  "provides": "Annual and 16-day herbaceous production (lbs/acre), fractional cover, partitioned NPP",
+  "access": "POST GeoJSON to Cloud Functions endpoints; PNG tiles on storage.googleapis.com; GEE; COGs; rapr R package",
+  "cost": "free",
+  "licensing": "'freely available for use by the public' (products page); TOS (2024-09-11) AS IS, no warranty",
+  "coverage": "CONUS rangelands (not for cropland); 30 m since 1986, 10 m West since 2018",
+  "refresh": "Annual through the previous year via API; current-year 16-day is provisional in GEE",
+  "latency": "Annual products through the previous year; current-year 16-day production is provisional and recalculated at year end.",
+  "failure_behavior": "Model estimates without RMSE for production. CORS for the POST endpoints unverified",
+  "browser_cors_or_key_issues": "POST GeoJSON to cloud-function endpoints; CORS for the POST endpoints unverified. The rapr R package README was reachable (contrary to the research).",
+  "recommendation": "Defer: needs real pasture polygons, which the fictional ranch lacks.",
+  "url": "https://rangelands.app/support/71-api-documentation",
+  "verification": "verified",
+  "verification_note": "[cite_context.json checked[19], claim yes] Endpoint https://us-central1-rap-data-365417.cloudfunctions.net/productionV3, POST with the GeoJSON in the body. The actual wording is 'Valid years are 1986 through the previous year'; the research's quote 'Valid years run from...' is not verbatim but has the same meaning. 'Endpoints return a weighted mean derived from the fraction of each pixel covered'; units 'lbs/acre'; a 'mask' property excludes cropland, development and water; tile URLs listed. No date. The integration's quote 'freely available for use by the public' is on the /products page, not this one. || [cite_grazing.json checked[22], claim yes] Rangeland Analysis Platform (NRCS, BLM, Univ. of Montana; ARS footer). 30 m cover from 1986 to present; 10 m western US 2018 to present. Production in 'lbs/acre', annual and 16-day; '16-day production estimates for the current year are provisional and will be recalculated at the end of the year.' Access: web map, GEE, GeoTIFF/COG, rapr; API docs are linked only. 'freely available for use by the public'; 'have not placed any restriction on its use or reproduction'; no warranty. Production is 'primarily intended for rangeland ecosystems' and 'not to be used in agricultural lands, i.e., croplands'. Cover MAE ranges from 2.6% (tree) to 10.2% (perennial forb and grass). For production, 'traditional error metrics (e.g., MSE, RMSE) are not available', with r=0.63 against NRI plots. All match the research. || [cite_gain.json checked[38], claim yes] The research said this was not fetched or evaluated. I fetched it. {rapr} is 'a simple R interface to Rangeland Analysis Platform (RAP) products'. get_rap_table() with product 'production' (annual) and 'production16day' returns herbaceous (HER) production in lbs/acre. Gridded products date from 1986. Version 1.1.3. The page states no licence and no update cadence, so the 'not reviewed' and 'not verified' entries remain accurate.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-CTX-06",
+   "RULE-GRZ-07"
+  ],
+  "research_refs": [
+   "research_context.json integrations[13]",
+   "research_grazing.json integrations[1]",
+   "research_gain.json integrations[7]"
+  ],
+  "other_urls": [
+   "https://rangelands.app/products",
+   "https://ftp.fau.de/cran/web/packages/rapr/readme/README.html"
+  ],
+  "merged_research_notes": "[grazing integration 1] provides: Annual cover (30 m, 1986-present; 10 m western US 2018-present) and herbaceous production in lb/ac (annual and provisional 16-day); failure: Production comes from a process model with no RMSE published. Cover MAE ranges from 2.6% (tree) to 10.2% (perennial forb and grass). | [gain integration 7] provides: Annual and 16-day herbaceous production estimates; failure: not evaluated"
+ },
+ {
+  "name": "NRCS eFOTG state technical notes (e.g. SD Range Technical Note No. 9)",
+  "provides": "State- and region-specific recovery periods, utilization limits, stubble heights and drought phases used as defaults",
+  "access": "PDF documents on efotg.sc.egov.usda.gov. Manual lookup; no data API evaluated.",
+  "cost": "Free",
+  "licensing": "US Government publication",
+  "coverage": "Per state (SD note covers West River and East River)",
+  "refresh": "Irregular (SD TN9 dated April 2017)",
+  "latency": "Irregular revisions (SD TN9 dated April 2017).",
+  "failure_behavior": "Values may lag the national 528 revision (June 2025). Whether SD, NE, ND, WY or KS have adopted the 2025 national standard was not verified.",
+  "browser_cors_or_key_issues": "PDF documents; manual lookup.",
+  "recommendation": "Use as the documented source of configurable defaults (rest periods, use limits, stubble heights), citing the exact document and date.",
+  "url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+  "verification": "partly",
+  "verification_note": "[cite_grazing.json checked[0], claim partly] Fetched with WebFetch; curl gave 'CONNECT tunnel failed, response 403'. Metadata is correct: 'Prescribed Grazing', Range Technical Note No. 9, April 2017, running header 'SOUTH DAKOTA TECHNICAL GUIDE NOTICE SD-424'. VERIFIED: p.4 'Livestock movements should be based on plant growth and utilization and not calendar dates.' and 'Calendar dates may be used as a guide when developing grazing schedules.' p.3 'Keeping the grazing periods as short as practical, especially during periods of fast plant growth, will minimize the opportunity ... to graze plant regrowth prior to plant recovery.' p.3, once-over use ('When two or more pastures are planned to be grazed only one time'): rangeland 'minimum of 45 consecutive days of rest during the growing season', pasture 30. p.3, 2+ grazings ('When two or more pastures are planned to be grazed two or more times during a growing season'): 'Each pasture will be deferred for a minimum of 90 days during the growing season.' The p.4 Table 1 range values match the research: 20-30%* West fast 40, slow 60; East 35/55. 40-50%: West 50/70, East 45/65. Footnote: 'Fast growth usually refers to grasses in a vegetative, pre-boot stage.' Note: 'Under drought conditions, recovery periods may need to be extended to 90 days or longer'. Utilization limits match: 50% seasonal and 30% temporal (p.4), 65% browse and 60% dormant season (p.6). Table 3 (p.6, titled 'Minimum Height of Pasture Species') gives end stubble WWG 4, CWG 3, switchgrass 8, big & sand bluestem 6, KBG 2, sideoats 2, and begin heights WWG 6-10 etc., all as cited. Riparian 'residual heights of 4 to 8 inches is commonly cited as adequate' (Section IV, p.7). App. B p.16: 'Monitor grazing lands frequently and ensure animals have access to dependable water.' Phase I removes 10% in the first month; Phase II removes 20-40% and says 'Routinely monitor conditions such as soil moisture and plant growth on a weekly basis'; Phase III says 'measure remaining forage in all pastures', 'combine remaining herds into one herd', with 30%+ removal on p.16. All verified. MISREAD: the research says '>1 mile to water = very large field needing herding or water relocation'. The source says 'A very large field would roughly be where the distance to water is greater than one mile' ('could be considerably larger on smooth terrain'). Its point is that continuous season-long use gives adequate recovery only on very large fields where livestock are herded or redistributed by changing water. It does not say every field over 1 mile needs herding. The page number for this passage came back inconsistently from two fetches (p.2 and p.3).",
+  "recommended_phase": "2 (reference for defaults)",
+  "used_by_rules": [
+   "RULE-GRZ-03",
+   "RULE-GRZ-06"
+  ],
+  "research_refs": [
+   "research_grazing.json integrations[3]"
+  ]
+ },
+ {
+  "name": "NDSU Grazing Monitoring Stick protocol (R1780)",
+  "provides": "Field protocol and height-weight tables to turn stubble readings into utilization %",
+  "access": "Printed or PDF publication R1780; manual readings entered into forage_obs.csv",
+  "cost": "Free publication",
+  "licensing": "Extension publication",
+  "coverage": "North Dakota species; broadly applicable to northern mixed-grass",
+  "refresh": "Revised October 2024",
+  "latency": "n/a (field method).",
+  "failure_behavior": "Observer variability; needs an ungrazed reference",
+  "browser_cors_or_key_issues": "Printed or PDF protocol; readings entered by hand.",
+  "recommendation": "Recommended manual observation protocol for the phase-3 forage observations.",
+  "url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf",
+  "verification": "verified",
+  "verification_note": "[cite_grazing.json checked[5], claim yes] R1780, Meehan, Sedivec, Printz. 'Revised October 2024'; no original date shown, so the research is correct. Table 1 recovery (min days): rangeland fast (May/June) 45 western ND / 30 eastern; slow (July/August) 65 / 45. Introduced pasture 25/15 fast, 35/25 slow. All match. Measure before turnout and during grazing to prevent overuse; 'Final utilization levels should be evaluated within three days of livestock removal.' 'You should take a minimum of 30 measurements for each key species across a pasture.' Avoid water sources, salt sites and gates. Removal % = (1 - grazed/ungrazed) x 100. WWG: 75% height removal is about 58% by weight (Table 3). Table 5 classes: slight-moderate <40, full 40-60, close 60-80, severe >80. Rule of thumb about 50% by weight. Native cool-season reaches 3.5-leaf mid-late May or early June. One extra point the research did not use: the document also suggests targeting about 50% weight use per grazing period, which is looser than SD TN9's 30% temporal limit. The two sources disagree on the per-stay ceiling.",
+  "recommended_phase": "3",
+  "used_by_rules": [
+   "RULE-GRZ-05",
+   "RULE-GRZ-06"
+  ],
+  "research_refs": [
+   "research_grazing.json integrations[4]"
+  ]
+ },
+ {
+  "name": "Chute scale indicator with EID reader (e.g. Tru-Test S3/ID5000/XR5000; vendor)",
+  "provides": "Per-animal weights matched to EID, with date and time; cloud upload",
+  "access": "Vendor app/cloud and device export. The CSV format was not confirmed in the fetched info sheet.",
+  "cost": "not verified",
+  "licensing": "proprietary vendor software",
+  "coverage": "any weigh session at the working facility",
+  "refresh": "per weigh session",
+  "latency": "Per weigh session.",
+  "failure_behavior": "Ingest only the raw weights. If the export is missing, accept manual CSV. Never trust a vendor-computed ADG without the underlying weights. Vendor 'Superdamp' stable-weight claims are not independently verified.",
+  "browser_cors_or_key_issues": "Vendor app and cloud; the CSV export format was not confirmed.",
+  "recommendation": "Vendor specification only. Define a minimal CSV contract (tag, eid, date, time, weight_lbs, session) and ingest raw weights, never vendor-computed ADG.",
+  "url": "https://www.agproud.com/ext/resources/directories/files/Datamars/Tru-Test_WeighIndicators_InfoSheet.pdf",
+  "verification": "partly",
+  "verification_note": "[cite_gain.json checked[34], claim partly] Actual title 'Livestock Weight Management Solutions' (Tru-Test/Datamars), REV 12192023, (c) 2024. Models compared: S3, EziWeigh7i, ID5000, XR5000. Cloud: 'data automatically uploads to our Cloud-based software' via the Data Link app. EID: only 'Bluetooth for EID Readers'. 'All indicators feature Superdamp technology'. No numeric accuracy is given. NOT in the source: a 15-digit RFID format, any claim that EID reduces tag-entry errors (cited for weights.eid), or any CSV/export format (the research correctly says CSV is unconfirmed). It is a vendor document only.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-GAIN-06",
+   "RULE-GAIN-02"
+  ],
+  "research_refs": [
+   "research_gain.json integrations[0]"
+  ]
+ },
+ {
+  "name": "Gallagher load bars / weigh scale (vendor)",
+  "provides": "Weights (load bar manual only reviewed)",
+  "access": "device",
+  "cost": "not verified",
+  "licensing": "proprietary",
+  "coverage": "working facility",
+  "refresh": "per session",
+  "latency": "Per weigh session.",
+  "failure_behavior": "The manual states 'not certified for trade use' and that uneven mounting causes errors (vendor statement)",
+  "browser_cors_or_key_issues": "Device only.",
+  "recommendation": "Vendor specification only ('not certified for trade use'). Same CSV contract; record scale checks per session.",
+  "url": "https://www.valleyvet.com/library/lib_19258_-Manual1.pdf",
+  "verification": "verified",
+  "verification_note": "[cite_gain.json checked[33], claim yes] Gallagher 'Load Bar User Manual', 3E1045 Edition 12, March 2014. 'Gallagher WeighScale and Loadbars are not certified for trade use.' 'Mounting the load bars on an uneven surface or failing to adequately secure the platform may result in weighing errors.' There is no accuracy specification.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-GAIN-11"
+  ],
+  "research_refs": [
+   "research_gain.json integrations[1]"
+  ]
+ },
+ {
+  "name": "In-pasture walk-over scales",
+  "provides": "Near-daily weights at water points",
+  "access": "vendor platform",
+  "cost": "not verified",
+  "licensing": "proprietary",
+  "coverage": "animals that visit the instrumented water point",
+  "refresh": "daily",
+  "latency": "Near-daily weights at instrumented water points.",
+  "failure_behavior": "Independent studies needed outlier cleaning (Brennan et al., Cottonwood SD, removed 1.6% of weights; 2-3 day rolling means). In an Australian walk-over study, weights read high by 10 kg (calves) and 21 kg (cows), RMSPE was 5.1-5.5%, and averaging 5 or more records improved accuracy (Simanungkalit et al. 2020).",
+  "browser_cors_or_key_issues": "Vendor platforms.",
+  "recommendation": "Not needed for this dashboard. Independent studies show bias and the need for outlier cleaning and rolling means.",
+  "url": "https://cambridge.org/core/journals/animal/article/evaluation-of-remote-monitoring-units-for-estimating-body-weight-and-supplement-intake-of-grazing-cattle/C4A9621209F16D437CCE3202DF41B118",
+  "verification": "verified",
+  "verification_note": "[cite_gain.json checked[36], claim yes] Simanungkalit, Hegarty, Cowley & McPhee, animal 14(S2):s332-s340 (2020), doi 10.1017/S1751731120000282. Predicted BW of calves and cows averaged 10 and 21 kg heavier than actual. RMSPE was 5.1% (calves) and 5.5% (cows). 'A rolling average across five or more consecutive BW measures improved the accuracy'. The authors are at the University of New England, NSW; the site is described only as a 32.5 ha paddock. The device is a walk-over unit, not a C-Lock SmartScale, which the research names only as an example product.",
+  "recommended_phase": "exclude",
+  "used_by_rules": [
+   "RULE-GAIN-06"
+  ],
+  "research_refs": [
+   "research_gain.json integrations[2]"
+  ]
+ },
+ {
+  "name": "USDA-ARS CPER foraging behaviour and ADG dataset",
+  "provides": "Individual yearling steer ADG with behaviour metrics, 2019-2020",
+  "access": "Data.gov CSV files",
+  "cost": "free",
+  "licensing": "public domain (usa.gov label)",
+  "coverage": "Central Plains Experimental Range, CO",
+  "refresh": "static",
+  "latency": "Static (2019-2020 data).",
+  "failure_behavior": "n/a",
+  "browser_cors_or_key_issues": "Data.gov CSV download.",
+  "recommendation": "Optional reference for realistic within-herd ADG spread in the fictional generator; not inspected.",
+  "url": "https://catalog.data.gov/dataset/data-from-can-measurements-of-foraging-behaviour-predict-variation-in-weight-gains-of-free",
+  "verification": "partly",
+  "verification_note": "[cite_gain.json checked[30], claim partly] USDA-ARS dataset, modified Nov 21, 2025, coverage Aug 1, 2019-Oct 1, 2020, USA.gov public-domain label. It holds four CSVs (Moo2019-20_*), including 'dailymetrics_w_ADG_by_studyperiod'. The description says 'Average daily weight gains of steers are included'. The page does not mention animal IDs, so the 'individual-steer ADG' claim is unverifiable from the page. The dictionary CSV (ndownloader.figshare.com/files/44531615) returned a 302 to a signed S3 URL that was not followed. As the evidence_url for groups.head (coverage gate) it gives NO support, because it says nothing about inventory or coverage. The research's own rule-level caveat ('Not downloaded or inspected') is accurate.",
+  "recommended_phase": "reference only",
+  "used_by_rules": [
+   "RULE-GAIN-02"
+  ],
+  "research_refs": [
+   "research_gain.json integrations[6]"
+  ]
+ },
+ {
+  "name": "FARAD (Food Animal Residue Avoidance Databank)",
+  "provides": "Withdrawal-interval advice after extralabel drug use, answered to veterinarians",
+  "access": "Veterinarian requests to FARAD call centers (per AABP 2021 proceedings)",
+  "cost": "Not stated in fetched source",
+  "licensing": "n/a",
+  "coverage": "US food animals",
+  "refresh": "Per inquiry",
+  "latency": "Per veterinarian inquiry.",
+  "failure_behavior": "n/a",
+  "browser_cors_or_key_issues": "Veterinarian requests only.",
+  "recommendation": "Do not integrate. Record the withdrawal clear date the veterinarian provides; the dashboard never computes extralabel withdrawal.",
+  "url": "https://bovine-ojs-tamu.tdl.org/AABP/article/view/8283",
+  "verification": "verified",
+  "verification_note": "[cite_health.json checked[15], claim yes] 'FARAD: How we respond to withdrawal inquiries' by Maunsell, Baynes, Foster, Riviere, Davis, Jaberi-Douraki and Tell. AABP 2021 Annual Conference Proceedings, pp. 9-11, published 2021-10-09. FARAD gives WDI advice 'following extralabel drug (ELDU) administration to food animals by veterinarians'. 'In some circumstances, such as ELDU specifically prohibited by FDA, FARAD is unable to provide a WDI.' 'Professional FARAD staff at 3 call centers respond to WDI requests.' Cost is not mentioned, which matches the integration entry's 'Not stated'.",
+  "recommended_phase": "exclude",
+  "used_by_rules": [
+   "RULE-HLTH-08"
+  ],
+  "research_refs": [
+   "research_health.json integrations[2]"
+  ]
+ },
+ {
+  "name": "CattleMax herd software (vendor)",
+  "provides": "Per the vendor help article, group treatments compute booster dates (Booster tab) and withdrawal periods (Withdrawal tab) from entered day counts",
+  "access": "Vendor SaaS. The fetched article does not mention CSV export or an API.",
+  "cost": "Not stated in fetched article",
+  "licensing": "Proprietary",
+  "coverage": "Vendor customers",
+  "refresh": "User-entered",
+  "latency": "User-entered.",
+  "failure_behavior": "Unknown",
+  "browser_cors_or_key_issues": "Vendor SaaS; no export or API documented in the fetched article.",
+  "recommendation": "Vendor specification only. Evidence that commercial tools model boosters and withdrawals as day counts; consider CSV import only if export is documented.",
+  "url": "https://help.cattlemax.com/article/546-herd-health-preset-treatments-booster-and-withdrawal",
+  "verification": "verified",
+  "verification_note": "[cite_health.json checked[30], claim yes] 'Herd Health, Preset Treatments, Booster and Withdrawal', last updated September 17, 2025 (the research gives no date). Verbatim: the 'booster date calculated and the animals and their boosters will be added to the Booster tab'; 'put the number of days in the withdrawal box'; animals within withdrawal are 'shown on the Withdrawal tab'; dates are 'automatically calculated when the Update button is clicked'. The article does not mention CSV export, an API or cost, as the research said.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-HLTH-04",
+   "RULE-HLTH-08"
+  ],
+  "research_refs": [
+   "research_health.json integrations[3]"
+  ]
+ },
+ {
+  "name": "iCalendar RFC 5545 VTODO export",
+  "provides": "Standard to-do items with DTSTART, DUE, COMPLETED and STATUS that crew phones and calendars can subscribe to",
+  "access": "Generate a .ics file from health.csv (window_start maps to DTSTART, window_end to DUE, done_date to COMPLETED)",
+  "cost": "Free",
+  "licensing": "IETF standard",
+  "coverage": "Any calendar client",
+  "refresh": "Regenerated with the data",
+  "latency": "Regenerated with the data.",
+  "failure_behavior": "Static file; no runtime failure",
+  "browser_cors_or_key_issues": "Static .ics file; no runtime calls.",
+  "recommendation": "Optional low-cost way to put the schedule on crew phones; not needed now.",
+  "url": "https://icalendar.org/iCalendar-RFC-5545/3-6-2-to-do-component.html",
+  "verification": "verified",
+  "verification_note": "[cite_health.json checked[31], claim yes] This is RFC 5545 section 3.6.2, To-Do Component, an HTML conversion of the IETF text. VTODO allows dtstart, completed and status (each at most once) and due. 'due' and 'duration' MUST NOT both occur. This supports the mapping window_start to DTSTART and window_end to DUE. I did not check the value-type rules for COMPLETED here.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-HLTH-04"
+  ],
+  "research_refs": [
+   "research_health.json integrations[4]"
+  ]
+ },
+ {
+  "name": "USDA APHIS Animal Disease Traceability EID rule",
+  "provides": "Official ID requirement: visually and electronically readable eartags for covered cattle moving interstate (effective 2024-11-05)",
+  "access": "Federal Register rule text",
+  "cost": "Free",
+  "licensing": "US government",
+  "coverage": "US interstate movement; sexually intact cattle 18 months or older, dairy, rodeo and exhibition",
+  "refresh": "Rule changes only",
+  "latency": "Rule changes only.",
+  "failure_behavior": "n/a",
+  "browser_cors_or_key_issues": "Federal Register text.",
+  "recommendation": "No live integration. Let animal_ids accept official IDs.",
+  "url": "https://www.govinfo.gov/content/pkg/FR-2024-05-09/html/2024-09717.htm",
+  "verification": "verified",
+  "verification_note": "[cite_health.json checked[28], claim yes] 'Use of Electronic Identification Eartags as Official Identification in Cattle and Bison', APHIS, 89 FR 39540 (May 9, 2024), effective November 5, 2024. Eartags applied on or after that date must be 'both visually and electronically readable'. The rule does not change which classes are covered. It lists the existing ones: 'all sexually intact cattle and bison 18 months of age or over', dairy cattle, rodeo/recreational animals, and show/exhibition animals. Beef feeders under 18 months and direct-to-slaughter cattle are exempt. '840 is the country code for the United States.' I read only the first 100k of 132k characters.",
+  "recommended_phase": "reference only",
+  "used_by_rules": [
+   "RULE-HLTH-06"
+  ],
+  "research_refs": [
+   "research_health.json integrations[5]"
+  ]
+ },
+ {
+  "name": "South Dakota Animal Industry Board (reportable diseases, state veterinarian)",
+  "provides": "Annual reportable-disease list and state veterinarian contacts. Veterinarians and labs report immediately.",
+  "access": "PDF linked from aib.sd.gov/veterinarians.html",
+  "cost": "Free",
+  "licensing": "State government",
+  "coverage": "South Dakota",
+  "refresh": "Published each July 1 (per ARSD 12:68:03:09)",
+  "latency": "List published yearly.",
+  "failure_behavior": "n/a",
+  "browser_cors_or_key_issues": "Web page and PDF.",
+  "recommendation": "Reference in help text only. The dashboard's escalation is 'call your veterinarian', who handles any state reporting.",
+  "url": "https://aib.sd.gov/veterinarians.html",
+  "verification": "verified",
+  "verification_note": "[cite_health.json checked[24], claim yes] Links 'List of Reportable Diseases' (PDF). Gives State Veterinarian Mendel Miller, DVM, (605) 772-3321, with after-hours numbers. Describes no reporting procedure for producers. The page has no overall date, only dated attachments such as 'Nov 2024' and 'SD 2025'.",
+  "recommended_phase": "reference only",
+  "used_by_rules": [
+   "RULE-HLTH-10"
+  ],
+  "research_refs": [
+   "research_health.json integrations[6]"
+  ]
+ },
+ {
+  "name": "BQA record forms and templates (KS-BQA, Oklahoma BQA, Arkansas; BQA templates page)",
+  "provides": "Field lists for processing, treatment and herd-health records",
+  "access": "PDF forms",
+  "cost": "Free",
+  "licensing": "Not stated",
+  "coverage": "US BQA programs",
+  "refresh": "Undated",
+  "latency": "n/a.",
+  "failure_behavior": "n/a",
+  "browser_cors_or_key_issues": "PDF forms.",
+  "recommendation": "Reference from a records section; use them to shape record columns. Do not reimplement treatment or inventory logs in this dashboard.",
+  "url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf",
+  "verification": "verified",
+  "verification_note": "[cite_health.json checked[12], claim yes] The Processing/Treatment Map has these fields: 'DATE:', 'TIME:', 'No. of Head :', 'ID: Right Ear or Left Ear/ Group Number:', 'Product', 'Lot or Serial # Supplier', 'Route of Admin', 'Dose', 'Withdrawal Time (WD)', 'Crew Initials', 'Owner Signature', and 'Veterinarians Signature:' with Phone. There is no date. KLA is not named in the text, which refers to 'KS-BQA' and 'the Kansas Beef Quality Assurance program'. The research disclosed 'per URL'. The data_fields reuse of this form is a stretch in two places. 'Crew Initials' records who did the work, not who owns an upcoming task (field 'responsible'). 'No. of Head' is the head processed, not the head planned (field 'head_planned'). || [cite_workflow.json checked[37], claim yes] All of these are PDFs: ANIMAL HEALTH PRODUCT INVENTORY LOG (2022; Spanish 2026), ANIMAL HEALTH PRODUCT TEMPERATURE LOG (2022), VCPR form (2025), BQA CATTLE CARE TOOL KIT (2023), plus the cow-calf (fy26) and feedyard (2026) assessments. The years come from filenames only; some Spanish files carry no year. 'Files dated 2022-2026' is consistent with this.",
+  "recommended_phase": "reference only",
+  "used_by_rules": [
+   "RULE-HLTH-06",
+   "RULE-WF-16"
+  ],
+  "research_refs": [
+   "research_health.json integrations[7]",
+   "research_workflow.json integrations[5]"
+  ],
+  "other_urls": [
+   "https://www.bqa.org/resources/templates-assessments"
+  ],
+  "merged_research_notes": "[workflow integration 5] provides: Paper record templates relevant to BQA assessments; failure: n/a"
+ },
+ {
+  "name": "EIA retail diesel prices (PADD 2 Midwest, PADD 4 Rocky Mountain)",
+  "provides": "On-highway No 2 / ULSD retail $/gal including all taxes, by PADD. Weekly (Monday 8 a.m. survey of 590 outlets) and monthly series.",
+  "access": "Public web pages and series history pages (fetched via WebFetch). A direct curl to eia.gov from this session was refused by the egress proxy (403). EIA API access and key requirements were not checked in this research.",
+  "cost": "No paywall encountered on the pages fetched",
+  "licensing": "US federal agency data. EIA's reuse terms page was not fetched; verify before redistribution.",
+  "coverage": "Contiguous US by PADD and national; excludes Alaska and Hawaii. Not farm dyed-diesel prices (includes road taxes).",
+  "refresh": "Weekly release (Tuesday, Wednesday after holidays); latest seen release 2026-10-14, next 2026-10-20. Monthly series through 2026-09.",
+  "latency": "Weekly survey on Monday, released Tuesday (Wednesday after holidays); monthly series.",
+  "failure_behavior": "Show the last fetched value with its date and 'reference only'. Never block or change budget severities.",
+  "browser_cors_or_key_issues": "Public pages; EIA API and key requirements were not checked; a direct request was refused by the research proxy.",
+  "recommendation": "Optional context for fuel reforecasts only; ranch invoices stay the price source. Never changes budget severities.",
+  "url": "https://www.eia.gov/petroleum/gasdiesel/",
+  "verification": "verified",
+  "verification_note": "[cite_budget.json checked[25], claim yes] Release 2026-10-14, next 2026-10-20. On-highway diesel including taxes, for 09/28/26, 10/05/26 and 10/12/26: Midwest (PADD 2) 6.526, 6.286, 6.259, week change -0.027, year change 2.653. Rocky Mountain (PADD 4) 6.407, 6.267, 6.302, +0.035, 2.644. These match the research.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-BUD-09"
+  ],
+  "research_refs": [
+   "research_budget.json integrations[0]"
+  ]
+ },
+ {
+  "name": "USDA ERS Commodity Costs and Returns (cow-calf)",
+  "provides": "Annual per-cow cost and return estimates by item ('Purchased feed', 'Veterinary and medicine', 'Fuel, lube, and electric', 'Repairs', and others) and region",
+  "access": "XLSX and CSV download from the ERS data product page",
+  "cost": "No paywall encountered",
+  "licensing": "US federal agency data; reuse terms not fetched",
+  "coverage": "US and regions. Cow-calf base survey ARMS 2018 (herds of 20 or more beef cows), indexed in non-survey years. Plains region includes KS, NE, ND, OK, SD, TX per documentation.",
+  "refresh": "Recent files last updated 2026-10-01; next update 2027-05-03",
+  "latency": "Annual (last updated 2026-10-01; next 2027-05-03).",
+  "failure_behavior": "Static annual benchmark; if unavailable, omit the benchmark column",
+  "browser_cors_or_key_issues": "XLSX/CSV download.",
+  "recommendation": "Use for category mapping and an annual per-head sanity check, not for monthly alerts.",
+  "url": "https://www.ers.usda.gov/data-products/commodity-costs-and-returns",
+  "verification": "verified",
+  "verification_note": "[cite_budget.json checked[33], claim yes] Cow-Calf Recent Cost and Returns last updated 10/1/2026, next update 5/3/2027. XLSX and CSV are both available. The page does not state which years the recent estimates cover, consistent with the research's 'years not listed on page'.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-BUD-12"
+  ],
+  "research_refs": [
+   "research_budget.json integrations[1]"
+  ]
+ },
+ {
+  "name": "UNL Center for Agricultural Profitability regional cattle budgets",
+  "provides": "2026 Nebraska regional cow-herd and heifer budgets with standard categories (feed lines, vet and health, paid and unpaid labor, fuel and energy, repairs and maintenance, supplies, marketing, interest, overhead)",
+  "access": "PDF budgets (fetched). The ABC program at agbudget.unl.edu is mentioned on the page but was not fetched or evaluated.",
+  "cost": "No paywall encountered",
+  "licensing": "Not stated on pages fetched",
+  "coverage": "Five Nebraska regions; about 400-cow Northern Panhandle example",
+  "refresh": "Annual ('Updated July 2026')",
+  "latency": "Annual ('Updated July 2026').",
+  "failure_behavior": "Static template",
+  "browser_cors_or_key_issues": "PDF budgets.",
+  "recommendation": "Reference for a starting category list and an annual plausibility check of the fictional data.",
+  "url": "https://cap.unl.edu/cattlebudgets/northern-panhandle/",
+  "verification": "verified",
+  "verification_note": "[cite_budget.json checked[34], claim yes] 'Nebraska Cattle Budgets - Northern Panhandle', Updated July 2026. It lists a 400 Head Cow Herd Budget and a Grow 75 Replacement Heifers Budget. Categories: feed and forage; vet, medical, labor, fuel, marketing; machinery and facilities (with fuel, repairs, depreciation and opportunity costs); livestock depreciation and interest; overhead. It says the budgets were made with the Ag Budget Calculator at agbudget.unl.edu. No license is stated (only 'Copyright 2026'). This supports the annual_budget_usd field only in that extension budgets are annual.",
+  "recommended_phase": "reference only",
+  "used_by_rules": [
+   "RULE-BUD-12",
+   "RULE-BUD-04"
+  ],
+  "research_refs": [
+   "research_budget.json integrations[2]"
+  ]
+ },
+ {
+  "name": "SDSU Extension Beef Cattle Budgets spreadsheet",
+  "provides": "South Dakota cost and revenue estimates for six beef enterprises",
+  "access": "Spreadsheet download from the SDSU page. The spreadsheet itself was not opened in this research.",
+  "cost": "No paywall encountered",
+  "licensing": "Not stated on page fetched",
+  "coverage": "South Dakota",
+  "refresh": "Page updated 2026-05-22",
+  "latency": "Page updated 2026-05-22.",
+  "failure_behavior": "Static template",
+  "browser_cors_or_key_issues": "Spreadsheet download (not opened in the research).",
+  "recommendation": "Optional South Dakota category template; open the workbook before citing its labels.",
+  "url": "https://extension.sdstate.edu/beef-cattle-budgets",
+  "verification": "verified",
+  "verification_note": "[cite_budget.json checked[35], claim yes] 'Beef Cattle Budgets', Heather Gessner, updated 2026-05-22. Verbatim: 'The most significant component of every cattle budget is feed.' Items: fuel or trucking rates, water and electricity overhead, fence and building maintenance, veterinary and medication, breeding fees. Links P-00143-2026.xlsx and covers six enterprises. I did not open the workbook either.",
+  "recommended_phase": "reference only",
+  "used_by_rules": [
+   "RULE-BUD-12"
+  ],
+  "research_refs": [
+   "research_budget.json integrations[3]"
+  ]
+ },
+ {
+  "name": "Ranch accounting system export (general ledger by account and month)",
+  "provides": "Actual spend by account and month, with refunds and credits",
+  "access": "Not researched; no vendor documentation fetched",
+  "cost": "Unknown",
+  "licensing": "Unknown",
+  "coverage": "Ranch-specific",
+  "refresh": "Monthly at book close",
+  "latency": "Monthly at book close.",
+  "failure_behavior": "Fall back to manual CSV entry; missing months show 'actual not entered'",
+  "browser_cors_or_key_issues": "Not researched; no vendor documentation fetched.",
+  "recommendation": "Define a plain CSV contract (month, category, account, amount, entry_type, basis, closed flag) rather than integrating a vendor; keep it vendor-neutral.",
+  "url": null,
+  "verification": "failed",
+  "verification_note": "The research's URL (OSU AGEC-751 'Developing a Cash Flow Plan') was rejected by the checker as a placeholder: it says nothing about general-ledger exports, accounting software, closed flags or CSV contracts. No source documents this integration. || [cite_budget.json checked[10], claim no] This entry covers its use as the integration url for 'Ranch accounting system export (general ledger by account and month)'. The fact sheet covers building a cash flow plan. It says nothing about general-ledger exports, accounting software, closed flags or CSV contracts, so it is a placeholder, not evidence. The integration row itself admits 'Not researched'.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-BUD-05",
+   "RULE-BUD-07"
+  ],
+  "research_refs": [
+   "research_budget.json integrations[4]"
+  ]
+ },
+ {
+  "name": "Fuel delivery tickets (gallons)",
+  "provides": "Gallons delivered by fuel type, for the price/volume split",
+  "access": "Manual entry from delivery tickets is assumed. No tank-monitor vendor documentation was researched.",
+  "cost": "Manual: staff time only",
+  "licensing": "n/a",
+  "coverage": "Ranch-specific",
+  "refresh": "Per delivery",
+  "latency": "Per delivery.",
+  "failure_behavior": "No price/volume split; dashboard says 'price vs use unknown'",
+  "browser_cors_or_key_issues": "Manual entry.",
+  "recommendation": "Start with manual gallons from tickets. Device integration is deferred.",
+  "url": "https://extension.msstate.edu/publications/farm-machinery-cost-calculations",
+  "verification": "partly",
+  "verification_note": "[cite_budget.json checked[27], claim partly] P3543, revision code POD-10-23 with no explicit date. Written by Jeff Johnson (retired), reviewed by Brian Mills. Supported: fuel = 0.044 gal/hp-hr x PTO hp x hours x price (example 130 hp x 0.044 x 400 h x $1.50 = $3,432); lubrication and filters 15% of fuel; ASABE repair factor as a percent of list price per 100 hours, with equipment records preferred when available. Partly: as the evidence_url for fuel.gallons and as the integration url for 'Fuel delivery tickets or tank monitoring', it supports only modeling fuel as quantity x price for machinery cost estimates. It says nothing about delivery tickets, tank monitoring or price/volume variance.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-BUD-09"
+  ],
+  "research_refs": [
+   "research_budget.json integrations[5]"
+  ]
+ },
+ {
+  "name": "NWS HeatRisk",
+  "provides": "0-4 colour/number human heat-risk index, 7 days",
+  "access": "Web maps; an ArcGIS ImageServer was seen in search results (not fetched)",
+  "cost": "free",
+  "licensing": "NOAA",
+  "coverage": "CONUS since 2024",
+  "refresh": "Daily (cadence not stated); experimental, 'no guarantee of timely availability'",
+  "latency": "Daily (cadence not stated); experimental.",
+  "failure_behavior": "Experimental product",
+  "browser_cors_or_key_issues": "Web maps.",
+  "recommendation": "Do not use for cattle; it is a human heat-health index (RULE-CTX-08).",
+  "url": "https://www.wpc.ncep.noaa.gov/heatrisk/overview.html",
+  "verification": "verified",
+  "verification_note": "[cite_context.json checked[28], claim yes] HeatRisk 'provides a forecast of the potential level of risk for heat-related impacts to occur over a 24-hour period'. It is aimed at heat-sensitive people (elderly, very young, homeless, outdoor workers, those without cooling); horizon is today plus 7 days. 'available in the Western United States since 2014', CONUS from 2024. No mention of livestock or animals. The 0-4 scale is not stated on this page.",
+  "recommended_phase": "exclude",
+  "used_by_rules": [
+   "RULE-CTX-08"
+  ],
+  "research_refs": [
+   "research_context.json integrations[5]"
+  ]
+ },
+ {
+  "name": "NDAWN (including Cattle Comfort Index)",
+  "provides": "Weather station network (the research's 245 stations, incl. 6 in Montana, and 12 rain-gauge sites are not on the cited CCI page and are unverified); CCI adult/newborn current and forecast maps",
+  "access": "Web pages; downloadable station data mentioned; no API documented",
+  "cost": "free",
+  "licensing": "Copyright NDSU; data-use terms not verified (ndawn.ndsu.nodak.edu robots-blocked)",
+  "coverage": "North Dakota and NW Minnesota maps on the cited page (Montana sites unverified)",
+  "refresh": "Current conditions; CCI today/tomorrow",
+  "latency": "Current conditions; CCI today and tomorrow.",
+  "failure_behavior": "Unknown",
+  "browser_cors_or_key_issues": "Web pages; no API documented; data-use terms not verified.",
+  "recommendation": "Link out for North Dakota ranches; use its CCI bands as reference; do not ingest.",
+  "url": "https://ndawn.info/agriculture_cci.html",
+  "verification": "partly",
+  "verification_note": "[cite_context.json checked[31], claim partly] Supported: CCI 'is calculated by adjusting the air temperature using relative humidity, wind speed, and solar radiation'; it 'does not take into account precipitation' and 'is not designed to predict apparent temperature for animals with wet hair coats'; 'Non-acclimated or sick animals should be evaluated using the Newborn CCI'. Bands: Adult Cold Moderate -4 to 13 F; Newborn Cold Moderate 23 to 31 F. Cites Mader et al. 2010, J Anim Sci 88(6):2153-2165; Today/Tomorrow forecast maps; no download or API; \u00a92026 NDSU. NOT on this page: the integration's '245 stations (181 ND, 58 MN, 6 MT) plus 12 rain-gauge sites' and the rule's '6 MT stations exist'. The page has only NDAWN and Minnesota map tabs and no mention of Montana.",
+  "recommended_phase": "defer (link only)",
+  "used_by_rules": [
+   "RULE-CTX-09"
+  ],
+  "research_refs": [
+   "research_context.json integrations[6]"
+  ]
+ },
+ {
+  "name": "Nebraska Mesonet",
+  "provides": "74 automated stations (Dec 2024 article), updating every minute (a figure of 63 from an uncited NSCO page is unverifiable)",
+  "access": "Website; the article mentions a planned 'robust data access tool'; a data access page reads 'Coming Soon' (nemesonet.unl.edu/coming-soon, not the cited article); 'Request Data' by contact is unverified",
+  "cost": "not stated",
+  "licensing": "not stated",
+  "coverage": "Nebraska",
+  "refresh": "1-minute real-time",
+  "latency": "1-minute real-time updates.",
+  "failure_behavior": "No public API yet",
+  "browser_cors_or_key_issues": "No public data access tool yet.",
+  "recommendation": "Not usable for a static site today; revisit when a data access tool ships.",
+  "url": "https://research.unl.edu/blog/nebraska-mesonet-launches-improved-real-time-weather-data/",
+  "verification": "partly",
+  "verification_note": "[cite_context.json checked[48], claim partly] 'Nebraska Mesonet launches improved, real-time weather data' by Cara Pesek, Dec 16, 2024. Supported: '74 automated weather monitoring stations' and updates 'every minute'; it also mentions a planned 'robust data access tool'. NOT on this page: \"'Request Data' by contact\" and \"Data Access page 'Coming Soon'\" (the latter is on nemesonet.unl.edu/coming-soon). The 'NSCO page says 63' has no cited URL and is unverifiable.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-CTX-10"
+  ],
+  "research_refs": [
+   "research_context.json integrations[8]"
+  ]
+ },
+ {
+  "name": "PRISM gridded climate web service",
+  "provides": "Daily/monthly/annual gridded ppt, tmin, tmax, tmean, tdmean, vpd at 4 km and 800 m",
+  "access": "HTTPS GET of one zipped grid per request (COG default; nc/asc/bil)",
+  "cost": "Not stated in the cited PDF; the research reports 800 m free since March 2025 on the PRISM /orders page (not checked)",
+  "licensing": "PRISM terms; 'commercial use is strictly prohibited unless you have made special arrangements in advance' (quoted by the research from the /orders page; not in the cited PDF and not checked)",
+  "coverage": "CONUS; daily from 1981",
+  "refresh": "Daily grids revised 8 times over 6 months before stable",
+  "latency": "Daily grids are revised up to 8 times over about 6 months before they are stable.",
+  "failure_behavior": "'if a file is downloaded twice in a 24-hour period, no more downloads of that file will be allowed'; IP blocking at their discretion",
+  "browser_cors_or_key_issues": "One zipped grid per request; repeat downloads of a file within 24 h are refused and IP blocking is possible. Commercial use is reported (not checked) to be prohibited without arrangement, which would matter for a working ranch.",
+  "recommendation": "Optional build-time source for precipitation normals in the phase-3 snapshot, only if its terms fit; store retrieved_at because values change.",
+  "url": "https://www.prism.oregonstate.edu/documents/PRISM_downloads_web_service.pdf",
+  "verification": "partly",
+  "verification_note": "[Citation critic (critic-rules, 2026-10-16)] Set to partly: the cost and commercial-use terms are not in the cited PDF. || [cite_context.json checked[36], claim yes] 'document last updated 26 Mar 2025'. Daily grids are updated 'eight times, before becoming stable'; 'Data older than six months are considered stable'; 'if a file is downloaded twice in a 24-hour period, no more downloads of that file will be allowed'; IP blocking 'at our discretion'. COG default (nc, asc, bil optional); 400m (not yet implemented), 800m and 4km; daily from 19810101, monthly from 189501. The commercial-use prohibition and '800 m free since March 2025' (integration entry) are NOT in this PDF; they are on the /orders page.",
+  "recommended_phase": "3 (optional; check terms)",
+  "used_by_rules": [
+   "RULE-CTX-10"
+  ],
+  "research_refs": [
+   "research_context.json integrations[9]"
+  ]
+ },
+ {
+  "name": "NOAA NCEI Climate Data Online web services",
+  "provides": "API v2 (search/access datasets and stations), Data Service API (CSV/JSON/PDF)",
+  "access": "HTTPS JSON/CSV",
+  "cost": "free",
+  "licensing": "NOAA",
+  "coverage": "US/global station data",
+  "refresh": "varies",
+  "latency": "Varies by dataset.",
+  "failure_behavior": "Token requirement and limits NOT shown on the fetched page; not verified",
+  "browser_cors_or_key_issues": "Token requirement and limits not shown on the fetched page.",
+  "recommendation": "Not recommended for this project.",
+  "url": "https://www.ncei.noaa.gov/cdo-web/webservices",
+  "verification": "verified",
+  "verification_note": "[cite_context.json checked[49], claim yes] Lists API v2 (JSON), the Search Service API (JSON) and the Data Service API (CSV, JSON, PDF). The research names only two of the three. Nothing about tokens, rate limits or terms appears on the page, which is consistent with the research saying these were not verified.",
+  "recommended_phase": "exclude",
+  "used_by_rules": [
+   "RULE-CTX-10"
+  ],
+  "research_refs": [
+   "research_context.json integrations[10]"
+  ]
+ },
+ {
+  "name": "RCC ACIS web services",
+  "provides": "Station and gridded climate data (StnData, GridData, etc.)",
+  "access": "HTTPS JSON (per secondary references)",
+  "cost": "free (not verified)",
+  "licensing": "not verified",
+  "coverage": "US",
+  "refresh": "daily",
+  "latency": "Not stated in the evidence.",
+  "failure_behavior": "Documentation page rendered empty in WebFetch; nothing verified",
+  "browser_cors_or_key_issues": "Documentation page rendered empty; nothing verified.",
+  "recommendation": "Unverified; do not rely on it without checking the documentation directly.",
+  "url": "https://www.rcc-acis.org/docs_webservices.html",
+  "verification": "unverified",
+  "verification_note": "[cite_context.json checked[50], claim unverifiable] The fetch returned only the title 'RCC-ACIS' and the heading 'ACIS Web Services', with no body. The research's own statement that the page rendered empty is confirmed. The integration's descriptions (StnData, GridData, JSON, free, daily) cannot be verified from this URL.",
+  "recommended_phase": "exclude",
+  "used_by_rules": [
+   "RULE-CTX-10"
+  ],
+  "research_refs": [
+   "research_context.json integrations[11]"
+  ]
+ },
+ {
+  "name": "NRCS Soil Data Access + EDIT (ecological sites)",
+  "provides": "SSURGO tabular/spatial queries; ecological site descriptions and state-and-transition models",
+  "access": "SDA: POST-only REST (XML/JSON), 100,000-row cap. EDIT: web catalog, no API documented; moved to NRCS hosting April 2026",
+  "cost": "free",
+  "licensing": "US Government (terms not read)",
+  "coverage": "US",
+  "refresh": "Static/reference",
+  "latency": "Static reference.",
+  "failure_behavior": "Browser URLs cannot invoke SDA; CORS unverified",
+  "browser_cors_or_key_issues": "Soil Data Access is POST-only and 'cannot be invoked by a URL submitted via a web browser'; CORS unverified.",
+  "recommendation": "One-time offline lookup per pasture for a real deployment; not for the demo.",
+  "url": "https://sdmdataaccess.nrcs.usda.gov/WebServiceHelp.aspx",
+  "verification": "verified",
+  "verification_note": "[cite_context.json checked[42], claim yes] Endpoint 'https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest'; 'Request parameters must be submitted via POST'; 'These methods cannot be invoked by a URL submitted via a web browser'; 'A maximum of 100,000 rows may be returned'; XML (default) or JSON. No API key and no CORS mentioned. The page does not itself describe ecological site IDs or reference production.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-CTX-14"
+  ],
+  "research_refs": [
+   "research_context.json integrations[14]"
+  ]
+ },
+ {
+  "name": "USDA NASS Crop Progress (Quick Stats API, state PDFs)",
+  "provides": "Weekly state pasture and range condition, topsoil moisture (and stock water in some states)",
+  "access": "Quick Stats API requires a key (50,000-record cap); weekly state PDFs",
+  "cost": "free",
+  "licensing": "US Government statistics",
+  "coverage": "State level",
+  "refresh": "Weekly in season; after 4:00 pm ET on the first business day (from a 2007 NASS document; not confirmed by a current source)",
+  "latency": "Weekly in season, after 4:00 pm ET on the first business day (research; from a 2007 NASS document, not confirmed by a current source).",
+  "failure_behavior": "Quick Stats API page robots-blocked to WebFetch. A key in browser JS would be public",
+  "browser_cors_or_key_issues": "Quick Stats needs an API key; a key in browser code would be public. Keep it in a build-time secret.",
+  "recommendation": "Optional build-time fetch; low priority.",
+  "url": "https://docs.ropensci.org/rnassqs/articles/rnassqs.html",
+  "verification": "verified",
+  "verification_note": "[cite_context.json checked[12], claim yes] Page says 'the QuickStats API requires authentication' and 'The API only returns queries that return 50,000 or less records.' Metadata: the research lists it as undated, but the page shows rnassqs version 0.6.4 dated 2026-09-29. This is a third-party R package vignette, not NASS documentation; the NASS Quick Stats page itself was not read.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-CTX-04"
+  ],
+  "research_refs": [
+   "research_context.json integrations[15]"
+  ]
+ },
+ {
+  "name": "USDA FSA Livestock Forage Disaster Program (rule source)",
+  "provides": "USDM-based eligibility tiers for grazing-loss payments",
+  "access": "Web page",
+  "cost": "n/a",
+  "licensing": "US Government",
+  "coverage": "US counties rated by USDM",
+  "refresh": "Rules change (page notes recent change, no date)",
+  "latency": "Rules change (the page notes a recent change).",
+  "failure_behavior": "n/a",
+  "browser_cors_or_key_issues": "Web page.",
+  "recommendation": "Link only; never compute eligibility in the dashboard.",
+  "url": "https://www.fsa.usda.gov/resources/programs/livestock-forage-disaster-program-lfp",
+  "verification": "verified",
+  "verification_note": "[cite_context.json checked[6], claim yes] Page says 'Payments will now trigger after four consecutive weeks of qualifying severe drought', replacing eight weeks. Tiers: 'D2 ... at least four consecutive weeks \u2013 One monthly payment'; 'D2 ... seven out of eight consecutive weeks \u2013 Two'; 'D3 ... at any time - Three'; 'D3 ... at least four weeks or D4 ... at any time - Four'; 'D4 ... for four weeks (not necessarily consecutive) - Five'. The page gives no effective or updated date, though it links a news release whose URL contains 07-08-2026. 'Normal grazing period' is mentioned but not defined. The D4 tiers look internally inconsistent on the page itself.",
+  "recommended_phase": "3 (link only)",
+  "used_by_rules": [
+   "RULE-CTX-03"
+  ],
+  "research_refs": [
+   "research_context.json integrations[16]"
+  ]
+ },
+ {
+  "name": "Browser localStorage (Web Storage)",
+  "provides": "Per-device persistence of small key/value data",
+  "access": "window.localStorage; synchronous; throws SecurityError when blocked or QuotaExceededError when full",
+  "cost": "Free",
+  "licensing": "Web platform standard (WHATWG HTML)",
+  "coverage": "One browser profile on one device for one origin. http and https are separate stores.",
+  "refresh": "Immediate locally; never shared",
+  "latency": "Immediate on this device; never shared.",
+  "failure_behavior": "Cleared when the last private tab closes. Evicted LRU under storage pressure unless persisted. Safari deletes script-created data after 7 days with no interaction (tracking prevention on). The page must render fully with an empty store.",
+  "browser_cors_or_key_issues": "Same-origin only; http and https are separate stores. Throws SecurityError when blocked (MDN) and QuotaExceededError when full (WHATWG).",
+  "recommendation": "Phase 2: per-device conveniences only (selected filter, last review time, an acknowledgement labelled 'this device only'). Never for shared acknowledgements, owners or shelving. The page must render fully with an empty store.",
+  "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage",
+  "verification": "partly",
+  "verification_note": "[cite_workflow.json checked[23], claim partly] Used in the localStorage integration. SecurityError is confirmed. The page names only SecurityError; it does NOT mention QuotaExceededError or full storage, which comes from WHATWG. The LRU-eviction and Safari 7-day points in failure_behavior come from the MDN quotas page, not this URL.",
+  "recommended_phase": "2",
+  "used_by_rules": [
+   "RULE-WF-15",
+   "RULE-WF-11",
+   "RULE-WF-18"
+  ],
+  "research_refs": [
+   "research_workflow.json integrations[0]"
+  ]
+ },
+ {
+  "name": "Storage API persistence (navigator.storage.persist)",
+  "provides": "Asks the browser to exempt the origin from automatic eviction",
+  "access": "navigator.storage.persist() promise; browser may prompt or decide",
+  "cost": "Free",
+  "licensing": "Web platform standard",
+  "coverage": "Same device and origin only",
+  "refresh": "n/a",
+  "latency": "n/a.",
+  "failure_behavior": "May be denied. The user can still clear data. Does not share data across devices.",
+  "browser_cors_or_key_issues": "Same device and origin; the browser may prompt or decide.",
+  "recommendation": "Not needed while localStorage holds only conveniences; it does not share data.",
+  "url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria",
+  "verification": "verified",
+  "verification_note": "[cite_workflow.json checked[24], claim yes] Used in rule 15 and the persist integration. The page reads 'last modified on Jan 5, 2026', which matches. 'In most cases, browsers manage stored data per origin.' It defines best-effort (the default) and persistent storage, and LRU eviction ('The data from the least recently used origin is deleted'). Verbatim: 'Browsers can store up to 5 MiB of local storage, and 5 MiB of session storage per origin' (also 'limited to 10 MiB of data maximum'). Safari: 'If an origin has no user interaction... in the last seven days of browser use, its data created from script will be deleted' when cross-site tracking prevention is on. persist(): Firefox shows a prompt, while Safari and Chromium auto-approve or deny, which supports 'browser may prompt or decide'. When used as the evidence_url for last_review_at, it supports only per-device storage. Calling localStorage 'acceptable' for conveniences is the researcher's judgement.",
+  "recommended_phase": "exclude",
+  "used_by_rules": [
+   "RULE-WF-15"
+  ],
+  "research_refs": [
+   "research_workflow.json integrations[1]"
+  ]
+ },
+ {
+  "name": "Committed append-only data/acknowledgements.csv",
+  "provides": "Shared acknowledgement, owner, shelve and visual-check log, read the same way as the other CSVs",
+  "access": "Edit and commit (or PR) to the repository; the page fetches it like data/*.csv",
+  "cost": "Free",
+  "licensing": "Repo MIT licence; the data is the ranch's own",
+  "coverage": "Everyone viewing the published site",
+  "refresh": "On each commit and Pages deploy (minutes)",
+  "latency": "Minutes (each commit and Pages deploy).",
+  "failure_behavior": "If missing or unparseable, show all rows unacknowledged and a 'acknowledgement log unavailable' note",
+  "browser_cors_or_key_issues": "Same-origin file; no external service.",
+  "recommendation": "Deferred with shared records. If used for the demo later, seed it with clearly fictional entries; it has no write path for live crew use.",
+  "url": null,
+  "verification": "unverified",
+  "verification_note": "Repository-local design proposal; no external page to check.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-WF-11",
+   "RULE-WF-16"
+  ],
+  "research_refs": [
+   "research_workflow.json integrations[2]"
+  ]
+ },
+ {
+  "name": "Google Sheets 'Publish to the web' as a read-only shared log",
+  "provides": "A spreadsheet the crew can edit, published for the dashboard to read",
+  "access": "Published sheet URL; owners and editors publish; output may be limited to an organisation",
+  "cost": "Free tier",
+  "licensing": "Vendor terms (Google)",
+  "coverage": "Anyone the publish setting allows. Can be everyone on the web.",
+  "refresh": "Auto-republish 'might take a few minutes'",
+  "latency": "Automatic republish 'might take a few minutes'.",
+  "failure_behavior": "Delay of minutes. If unpublished or blocked, fall back to the committed CSV. The help page warns to be careful with private or sensitive information.",
+  "browser_cors_or_key_issues": "Published URL; output format (CSV) not verified; Google's terms apply. Ranch locations, herd counts and finances are sensitive.",
+  "recommendation": "Only for a real deployment, published to the organisation rather than the public web. Not for the public demo.",
+  "url": "https://support.google.com/docs/answer/183965",
+  "verification": "verified",
+  "verification_note": "[cite_workflow.json checked[36], claim yes] Page title is 'Make Google Docs, Sheets, Slides & Forms public' (the research gave none). Verbatim: 'File owners and editors can publish files.' Visibility can be 'everyone on the web, everyone in your organization, or a group of people in your organization'. 'The automatic update might take a few minutes.' 'Be careful when publishing private or sensitive info.' The page names no formats (no CSV), which matches the research's disclosure.",
+  "recommended_phase": "defer",
+  "used_by_rules": [
+   "RULE-WF-16"
+  ],
+  "research_refs": [
+   "research_workflow.json integrations[3]"
+  ]
+ },
+ {
+  "name": "Browser print / @media print (crew briefing)",
+  "provides": "Paper briefing from the same page",
+  "access": "CSS @media print, @page, beforeprint/afterprint; a 'Print briefing' button calling window.print()",
+  "cost": "Free",
+  "licensing": "Web standard",
+  "coverage": "All browsers. Rendering differs; only Chromium was tested.",
+  "refresh": "At print time",
+  "latency": "At print time.",
+  "failure_behavior": "With no print CSS (current), Chromium prints 4 Letter pages, the key text at 2.71:1, and invisible target lines. print-color-adjust is not guaranteed to be honoured.",
+  "browser_cors_or_key_issues": "Web standard; rendering differs by browser (only Chromium was measured).",
+  "recommendation": "Phase 2: a print stylesheet with explicit black-on-white colours (do not rely on print-color-adjust), chips and tooltip hidden, one Letter page.",
+  "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Printing",
+  "verification": "verified",
+  "verification_note": "[cite_workflow.json checked[30], claim yes] The page reads 'last modified on Nov 7, 2025', which matches. It covers @media print ('The print media type sets the styles for printed media'), @page ('page's dimensions, orientation, and margins') and 'Browsers send beforeprint and afterprint events'. The Chromium page counts and contrasts in the integration row are the researcher's observations, not this source.",
+  "recommended_phase": "2",
+  "used_by_rules": [
+   "RULE-WF-17"
+  ],
+  "research_refs": [
+   "research_workflow.json integrations[4]"
+  ]
+ },
+ {
+  "name": "Industrial SCADA alarm model (Ignition 8.1; vendor documentation)",
+  "provides": "A worked state model: Active/Cleared x Acked/Unacked; shelving with duration",
+  "access": "Documentation",
+  "cost": "Commercial software (not proposed)",
+  "licensing": "Vendor",
+  "coverage": "n/a",
+  "refresh": "n/a",
+  "latency": "n/a.",
+  "failure_behavior": "n/a",
+  "browser_cors_or_key_issues": "Documentation only.",
+  "recommendation": "Design reference for the acknowledgement and shelving state model only. Do not integrate.",
+  "url": "https://docs.inductiveautomation.com/docs/8.1/platform/alarming",
+  "verification": "verified",
+  "verification_note": "[cite_workflow.json checked[18], claim yes] Used in rule 12 and the SCADA reference integration. Verbatim: 'There is always a duration associated with a shelved alarm'; 'new alarm events for this alarm are temporarily prevented'; 'At the end of the shelving period, the alarm will evaluate its source tag, potentially creating a new alarm event.'",
+  "recommended_phase": "reference only",
+  "used_by_rules": [
+   "RULE-WF-11",
+   "RULE-WF-12"
+  ],
+  "research_refs": [
+   "research_workflow.json integrations[6]"
+  ]
+ }
+]

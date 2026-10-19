@@ -1,0 +1,452 @@
+{
+ "scenario": "06-sparse-and-conflicting-weigh-ins",
+ "title": "Sparse and conflicting weigh-ins",
+ "fictional": "All data is fictional (Example Ranch). Every threshold is a demonstration setting.",
+ "purpose": "A single weigh-in (Y151), a same-day duplicate (Y001), a group change (H004 weighed with the Cows), a short off-session re-weigh (Y003-Y012) and low coverage (3 of 45 heifers on Sep 15).",
+ "as_of": "2026-09-30T18:00 America/Chicago",
+ "files": {
+  "pastures": "copied unchanged",
+  "groups": "copied unchanged",
+  "moves": "copied unchanged",
+  "weights": "changed",
+  "water": "copied unchanged",
+  "health": "changed",
+  "budget": "copied unchanged",
+  "meta": "changed",
+  "tanks": "added"
+ },
+ "files_note": "tanks.csv (tank master list, WAT-02) and meta.csv's timezone column (TIME-02) are the Phase-1 additions the lead's defaults call for; the current code ignores both. health.csv carries HLTH-03's proposed generator fix (Cows Fly tag check: done 2026-09-01, next_due blank) unless the scenario says otherwise.",
+ "settings": "../settings.json",
+ "computed_by": "docs/audit/diagnostics/scenarios.build.py: Python arithmetic on this folder's CSV files. It never calls exceptions.js or app.js.",
+ "matching": "alerts_exact: every needs-attention row the implementation shows must be one of expected_rows (or allowed_extra_rows); data-issue and CAN'T TELL rows may carry extra wording. A row matches on area, kind and subject_key; state (or a listed alternative) and severity must agree; every key number must be shown, correctly rounded to the precision shown; key_dates may be ISO or 'Mon D'; key_tags must all appear; must_not_appear strings must not.",
+ "alerts_exact": true,
+ "expected_rows": [
+  {
+   "id": "T2",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T2",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "level_pct": 11.8
+   },
+   "must_not_appear": [],
+   "findings": [
+    "WAT-01"
+   ],
+   "rules": [
+    "RULE-WAT-01"
+   ],
+   "arithmetic": "T2's last reading 2026-09-30T18:00 is 11.8%; 11.8 < 25 (demo critical line)."
+  },
+  {
+   "id": "T4",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T4",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "drop_pts": 46.0,
+    "level_pct": 10.0
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the real span of the fall in hours (WAT-03)",
+    "'unexplained fall; leak not confirmed' wording (RULE-WAT-03 phase note)"
+   ],
+   "findings": [
+    "WAT-03",
+    "WAT-08"
+   ],
+   "rules": [
+    "RULE-WAT-03"
+   ],
+   "arithmetic": "Readings in [2026-09-30T18:00 - 24 h, 2026-09-30T18:00]: 56.0, 44.5, 33.0, 21.5, 10.0; highest 56.0 - last 10.0 = 46.0 points >= 30."
+  },
+  {
+   "id": "T6",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T6",
+   "state": "needs-attention",
+   "state_alternatives": [
+    "cant-tell"
+   ],
+   "severity": "serious",
+   "key_numbers": {
+    "silent_hours": 42.0,
+    "level_pct": 98.5
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the tank's level is CAN'T TELL; the row says to check it by eye (RULE-WAT-04 phase note)"
+   ],
+   "findings": [
+    "TIME-01"
+   ],
+   "rules": [
+    "RULE-WAT-04"
+   ],
+   "arithmetic": "Last reading 2026-09-29T00:00 (98.5%); 2026-09-30T18:00 - 2026-09-29T00:00 = 42 hours >= 24."
+  },
+  {
+   "id": "GRZ",
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "days": 24,
+    "plan": 21,
+    "over": 3
+   },
+   "key_text_any": [
+    "Sand Hills"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GRZ-01"
+   ],
+   "rules": [
+    "RULE-GRZ-01"
+   ],
+   "arithmetic": "Open stay in P3 Sand Hills since 2026-09-06; Sep 6 to Sep 30 = 24 days; plan 21; 24 - 21 = 3 days over."
+  },
+  {
+   "id": "GAIN-Y",
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "count": 6,
+    "threshold": 1.0
+   },
+   "key_tags": [
+    "Y027",
+    "Y031",
+    "Y058",
+    "Y082",
+    "Y129",
+    "Y132"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GAIN-11"
+   ],
+   "rules": [
+    "RULE-GAIN-02",
+    "RULE-GAIN-03"
+   ],
+   "arithmetic": "Yearlings pooled 16608 / 8550 = 1.9425 lb/day, not under 0.8 x 2.0 = 1.6, so no group row. Animals under 0.5 x 2.0 = 1.0 lb/day over the 57 days: Y027 0.474, Y031 0.579, Y058 0.667, Y082 0.772, Y129 0.404, Y132 0.509."
+  },
+  {
+   "id": "BOOST",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Yearlings: Booster vaccine",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "overdue_days": 15
+   },
+   "key_dates": [
+    "2026-09-15"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "HLTH-01"
+   ],
+   "rules": [
+    "RULE-HLTH-01"
+   ],
+   "arithmetic": "Open, next_due 2026-09-15; Sep 15 to Sep 30 = 15 days overdue."
+  },
+  {
+   "id": "PINK",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Cows: Pinkeye check",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "due_in_days": 3
+   },
+   "key_dates": [
+    "2026-10-03"
+   ],
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-HLTH-02"
+   ],
+   "arithmetic": "Open, next_due 2026-10-03; Sep 30 to Oct 3 = 3 days, within 7."
+  },
+  {
+   "id": "FUEL",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Fuel",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 21.25,
+    "usd_over": 2040
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04",
+    "BUD-05"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 11,640 vs budget 9,600: 11,640 - 9,600 = $2,040; 2,040 / 9,600 = 21.25% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "REPAIRS",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Repairs",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 25.0,
+    "usd_over": 1800
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 9,000 vs budget 7,200: $1,800; 1,800 / 7,200 = 25.00% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "HEIFERS-CT",
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Heifers",
+   "state": "cant-tell",
+   "severity": null,
+   "key_numbers": {},
+   "key_text_any": [
+    "3 of 45",
+    "2026-07-20",
+    "Jul 20"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GAIN-07",
+    "GAIN-08",
+    "GAIN-03"
+   ],
+   "rules": [
+    "RULE-GAIN-10"
+   ],
+   "arithmetic": "Only H001, H002 and H003 crossed the scale as heifers on 2026-09-15: 3 of 45 = 6.7%, below any sensible minimum coverage. If Sep 15 is not counted as a session, the last full session is Jul 20, 72 days before Sep 30 (> 45). Either way the heifers' gain can't be judged."
+  },
+  {
+   "id": "Y001-DUP",
+   "area": "Gain",
+   "kind": "record",
+   "subject_key": "Y001",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "same-day-duplicate",
+   "key_numbers": {},
+   "key_dates": [
+    "2026-09-15"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GAIN-02",
+    "DATA-03"
+   ],
+   "rules": [],
+   "arithmetic": "Y001 has 851 and 853 on 2026-09-15. Keeping either: yearlings 16608/8550 = 1.94246 or 16610/8550 = 1.94269; both 1.94."
+  },
+  {
+   "id": "Y151",
+   "area": "Gain",
+   "kind": "record",
+   "subject_key": "Y151",
+   "state": "cant-tell",
+   "state_alternatives": [
+    "data-issue"
+   ],
+   "severity": null,
+   "topic": "first-weigh-in",
+   "key_numbers": {},
+   "key_text_any": [
+    "Y151"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GAIN-01"
+   ],
+   "rules": [],
+   "arithmetic": "Y151 has one weigh-in (2026-09-15, 820 lbs): no gain yet; left out of the yearlings' figures."
+  },
+  {
+   "id": "Y-OFF",
+   "area": "Gain",
+   "kind": "record",
+   "subject_key": "Yearlings off-session",
+   "state": "data-issue",
+   "state_alternatives": [
+    "cant-tell"
+   ],
+   "severity": null,
+   "topic": "off-session",
+   "key_numbers": {},
+   "key_dates": [
+    "2026-09-22"
+   ],
+   "key_tags": [
+    "Y003",
+    "Y004",
+    "Y005",
+    "Y006",
+    "Y007",
+    "Y008",
+    "Y009",
+    "Y010",
+    "Y011",
+    "Y012"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GAIN-03"
+   ],
+   "rules": [
+    "RULE-GAIN-07"
+   ],
+   "arithmetic": "10 of 150 yearlings re-weighed 2026-09-22, 7 days after Sep 15 (< 21-day minimum, and not a session): listed, not used."
+  }
+ ],
+ "expected_absent": [
+  {
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Heifers",
+   "reason": "coverage too low or data too old for a verdict",
+   "findings": [
+    "GAIN-07",
+    "GAIN-08"
+   ]
+  },
+  {
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Heifers",
+   "reason": "no individual verdicts from a 3-animal session or from the June-July period",
+   "findings": [
+    "GAIN-07",
+    "GAIN-08"
+   ]
+  },
+  {
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Yearlings",
+   "reason": "pooled 1.9425 >= 1.6",
+   "findings": []
+  }
+ ],
+ "allowed_extra_rows": [
+  {
+   "id": "X-H004",
+   "area": "Gain",
+   "kind": "record",
+   "subject_key": "H004",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "group-change",
+   "key_numbers": {},
+   "must_not_appear": [],
+   "findings": [
+    "GAIN-14",
+    "GAIN-06"
+   ],
+   "rules": [],
+   "arithmetic": "",
+   "note": "GAIN-14 (phase 2) wants 'H004 moved to Cows on Sep 15'; Phase 1 may or may not name it."
+  },
+  {
+   "id": "X-H-OFF",
+   "area": "Gain",
+   "kind": "record",
+   "subject_key": "Heifers off-session",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "off-session",
+   "key_numbers": {},
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [],
+   "arithmetic": "",
+   "note": "An implementation that does not treat Sep 15 as a heifer session may list H001-H003's Sep 15 readings as off-session."
+  },
+  {
+   "id": "X-COWS-Y",
+   "area": "Gain",
+   "kind": "record",
+   "subject_key": "H004",
+   "state": "cant-tell",
+   "severity": null,
+   "topic": "first-weigh-in",
+   "key_numbers": {},
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [],
+   "arithmetic": "",
+   "note": "Keyed by (group, tag), H004 in Cows has one weigh-in; the Cows are not judged on gain (target 0)."
+  }
+ ],
+ "area_states": {
+  "Water": "needs-attention",
+  "Grazing": "needs-attention",
+  "Gain": "needs-attention",
+  "Health": "needs-attention",
+  "Budget": "needs-attention"
+ },
+ "tile_expectations": [
+  {
+   "tile": "gain",
+   "renders": true,
+   "contains_any": [
+    "1.94"
+   ],
+   "note": "The yearlings' 1.94 stands; the heifers are CAN'T TELL."
+  }
+ ],
+ "findings": [
+  "GAIN-01",
+  "GAIN-02",
+  "GAIN-03",
+  "GAIN-06",
+  "GAIN-07",
+  "GAIN-08",
+  "GAIN-14"
+ ],
+ "rules": [
+  "RULE-GAIN-07",
+  "RULE-GAIN-10"
+ ],
+ "must_not_appear_anywhere": [
+  "NaN",
+  "Infinity",
+  "undefined",
+  "[object Object]"
+ ]
+}

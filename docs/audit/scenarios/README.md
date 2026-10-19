@@ -1,0 +1,214 @@
+# Phase-1 test scenarios
+
+There are ten synthetic data sets. Each one gives the result the Phase-1 dashboard should produce, and is run against
+the current code. The data are made up for the Example Ranch (fictional). Neither a passing scenario nor this audit
+makes the dashboard production-ready.
+
+**Most Phase-1 scenarios are EXPECTED to mismatch today.** Each `expected.json` describes the behaviour Phase 1 should
+have, not the current behaviour. Only two scenarios match:
+
+- **01** matches by design: it is the committed data and today's 10 alerts.
+- **02** matches because the current code already gives a correct all-clear on clean, complete data. It is the
+  false-alarm control for the checks Phase 1 adds.
+
+The other eight mismatch, and each mismatch is a reproduced finding.
+
+## How to run (from the repository root)
+
+```sh
+python3 -I docs/audit/diagnostics/scenarios.build.py          # rebuild the folders and expected.json; checks each against an independent sweep
+node docs/audit/diagnostics/scenarios.run.mjs                  # current code (exceptions.js) vs expected.json, node mode
+node docs/audit/diagnostics/scenarios.run.mjs --browser        # also drives the real page in Chromium (Playwright)
+node docs/audit/diagnostics/scenarios.run.mjs --only 09        # one scenario
+node docs/audit/diagnostics/scenarios.run.mjs --browser --json docs/audit/scenarios/run-results.json
+python3 -I docs/audit/diagnostics/scenarios.gain70.py         # the 70-day individual-minimum check (open decision 3)
+```
+
+| Tool | What it does |
+|---|---|
+| `scenarios.build.py` | Writes the folders, `settings.json` and every `expected.json`. Every expected number is computed in Python from that folder's CSV files. It never imports, runs or copies `exceptions.js` or `app.js`. It then runs a separate reference sweep (the Phase-1 rules written in Python from the registry rule text) and checks that the sweep finds exactly the expected rows. Last output: "all scenarios consistent with the reference sweep". Re-running it reproduces the folders byte for byte (checked with `diff -r` in this step). |
+| `scenarios.run.mjs` | Loads each folder with the **current** `exceptions.js` and prints the current rows next to `expected.json`, with MATCH / MISMATCH per expected row. It never throws: rule crashes, missing files and page errors are caught and printed, with the first `file:line` from the stack. In node mode it decodes each CSV as the browser does (BOM stripped), reads a missing file as an empty body, runs `parseCSV` and `findExceptions`, and runs a line-for-line port of `app.js` `tiles()`. In browser mode (`--browser`) it serves the repository, routes `data/*.csv` to the scenario folder (404 when a file is absent) and loads `index.html` in Chromium with time zone America/Chicago. It reads the exception table, the tiles, page errors and the render checks. The time zone is fixed to America/Chicago unless `TZ` is set. |
+| `scenarios.gain70.py` | See open decision 3 below. |
+
+Outputs of the run made in this step:
+
+- `run-output.txt`: the full node and browser output, about 1,150 lines.
+- `run-results.json`: the same results, machine-readable.
+
+The run exited with code 0.
+
+## Folder layout
+
+Each `NN-name/` folder is a complete, loadable data set:
+
+- the eight files the page fetches (pastures, groups, moves, weights, water, health, budget, meta);
+- the Phase-1 `tanks.csv`;
+- `scenario.md`: the case, the exact edits, the expected result, the arithmetic by hand, the current result, and the
+  findings, rules and assumptions;
+- `expected.json`.
+
+Unchanged files are byte-for-byte copies of `data/`. Changed and added files are written as the generator writes them
+(CRLF), except where a scenario changes the bytes on purpose (scenario 10). Scenario 03 has no `health.csv` on purpose.
+
+Scenarios 02 to 10 carry three Phase-1 generator additions:
+
+- `meta.csv` with a `timezone` column (TIME-02);
+- `tanks.csv` (WAT-02);
+- HLTH-03's fix for the Cows 'Fly tag check' row.
+
+Scenario 01 is the committed data as it stands. It lacks those additions and allows the three matching data-issue
+rows (see its `scenario.md`).
+
+### expected.json
+
+| Part | Meaning |
+|---|---|
+| `expected_rows` | One object per expected row: `area`, `kind` (tank, stay, group, animals, task, category, record, file), `subject_key`, `state` (`needs-attention`, `cant-tell` or `data-issue`), optional `state_alternatives`, `severity` (critical, serious or warning, for needs-attention rows), `key_numbers`, `key_dates`, `key_tags`, `key_text_any`, `must_not_appear`, `findings`, `rules`, `arithmetic`. |
+| `alerts_exact: true` | Every needs-attention row the implementation shows must be listed, or be in `allowed_extra_rows`. Data-issue and CAN'T TELL rows may carry extra wording. |
+| `expected_absent` | Subjects that must get no alert row. |
+| `area_states` | The expected state of each area: Water, Grazing, Gain, Health, Budget. |
+| `tile_expectations` | The headline tiles. |
+| `render_expectations` | Browser-only checks (scenario 10). |
+| `open_decisions` | Registry conflicts that change an expected row (08, 09). |
+| `must_not_appear_anywhere` | `NaN`, `Infinity`, `undefined`, `[object Object]`. |
+
+The matching rule (from `expected.json` `matching`): "A row matches on area, kind and subject_key; state (or a listed
+alternative) and severity must agree; every key number must be shown, correctly rounded to the precision shown;
+key_dates may be ISO or 'Mon D'; key_tags must all appear; must_not_appear strings must not."
+
+The format does not depend on any particular implementation. A Phase-1 implementation can adapt the runner's
+`currentNode()` / `currentBrowser()` and `subjectKey()` to its own output and keep every `expected.json` unchanged.
+
+### settings.json
+
+These are the demonstration settings the expected results were computed with. **None is a validated value.** Each
+carries its registry basis and class: C means a ranch-specific choice, D a synthetic demonstration setting. The
+current thresholds (25% / 40% tank, 30-point drop, 24 h silence, graze days, 2-day grace, 80% / 50% ADG, 2.0 / 1.0 lb
+targets, 7-day due, 5% / 10% budget) are applied as written. The scenarios test that the code applies them
+consistently, not that they suit any ranch.
+
+Values the registries do not give were chosen here only so that each fixture has one answer. They are marked
+"scenario assumption":
+
+- the weigh-session share (0.5);
+- the gain coverage minimum (0.5).
+
+## Results today (verified in this step)
+
+`node docs/audit/diagnostics/scenarios.run.mjs --browser` was run against the reviewed code, with TZ America/Chicago.
+Each count is matched / expected. "Unexp." is the number of current rows that `expected.json` does not list or allow.
+
+| # | Scenario | What it covers | Rows | Unexp. | Absent | Areas | Tiles | Node | Browser |
+|---|---|---|---|---|---|---|---|---|---|
+| 01 | planted-problems | The committed data: the 10 planted problems, which must match exactly | 10/10 | 0 | 15/15 | 5/5 | 5/5 | **MATCH** | **MATCH** |
+| 02 | healthy-operation | No problems, every file current: no rows, every area OK, nothing CAN'T TELL | 0/0 | 0 | 25/25 | 5/5 | 3/3 | **MATCH** | **MATCH** |
+| 03 | incomplete-and-stale | health.csv missing, 72-day-old heifer weights, T7 silent 30 h, T8 absent, a blank budget actual | 8/12 | 1 | 2/3 | 4/5 | 0/2 | MISMATCH | MISMATCH |
+| 04 | irregular-sensor-readings | 72-h gap, conflicting and exact duplicates, reversed rows, a future reading, 'ERR' | 9/16 | 1 | 2/3 | 5/5 | 0/1 | MISMATCH | MISMATCH |
+| 05 | missing-groups-and-pastures | No 'Yearlings' group, an open stay in unknown P9, a group (Bulls) only in moves.csv | 0/12 | 0 | n/a | 0/5 | 0/1 | MISMATCH (crash) | MISMATCH (crash) |
+| 06 | sparse-and-conflicting-weigh-ins | A single weigh-in, a same-day duplicate, a group change, an off-session re-weigh, 3 of 45 coverage | 0/13 | 0 | n/a | 0/5 | 0/1 | MISMATCH (crash) | MISMATCH (crash) |
+| 07 | zero-budgets-credits-future-months | Zero-budget lines with spending, a "(150)" credit, Oct-Nov plan rows | 8/11 | 1 | 4/5 | 5/5 | 0/1 | MISMATCH | MISMATCH |
+| 08 | historical-as-of-and-future-records | as_of Sep 27 with data to Sep 30, a planned out_date and stay, a later re-weigh | 3/10 | 2 | 8/10 | 3/5 | 0/2 | MISMATCH | MISMATCH |
+| 09 | exact-rule-boundaries | Every threshold exactly and one step either side | 9/17 | 1 | 8/9 | 5/5 | 1/2 | MISMATCH | MISMATCH |
+| 10 | malformed-and-hostile-csv | Quoted commas, escaped quotes, BOM, blank rows, leading-zero tags, a header typo, CR CR LF, `<img onerror>` | 3/10 | 4 | 0/2 | 2/5 | 0/2 | MISMATCH | MISMATCH (2/10 rows; render 0/3; page error) |
+
+"n/a" means the expected absences cannot be checked, because the current code produced no rows.
+
+The two modes agree except in scenario 10. There the browser parses the pasture-name markup as an element, so the T2
+subject loses its text, and the page stops at `app.js:93`.
+
+## 1. Verified findings (reproduced in this step, with evidence)
+
+Quotes are from `run-output.txt`. Finding IDs are those in `docs/audit/data/findings.json`.
+
+| Scenario | Current output (quoted) | Finding |
+|---|---|---|
+| 03 | "MISMATCH Health   expected cant-tell, current ok" (missing health.csv; in the browser the 404 body is parsed as an empty file) | LOAD-01 |
+| 03 | "[warning] Gain \| 4 heifers \| Under 0.5 lbs/day: H014, H017, H025, H033": a Jun-Jul verdict shown as current | GAIN-08 |
+| 03 | "current 3 of 7 \| 4 need a look": T8 is missing from the count | WAT-02 |
+| 03 | "+505005006043558.9% \| $446,424,425,342,594,400 of $88,400" | BUD-02, CSV-04 |
+| 04 | "[critical] Water \| Tank T1 (North Flat) \| Dropped 35 points in 24 hours, now 56.2%": a 72-hour change | WAT-03 |
+| 04 | No T3 row (the last of two same-time readings, 91.5, wins) | WAT-07 |
+| 04 | The T6 silent-sensor row is lost to a 2026-10-29 reading | TIME-01 |
+| 04 | T8 'ERR' counted OK | WAT-01 |
+| 05 | "TypeError: Cannot read properties of undefined (reading 'name') (at exceptions.js:59)"; "the page draws nothing below the header" | DATA-01, LOAD-02 |
+| 05 | With no exception rows, the `tiles()` port "would also throw TypeError: Cannot read properties of undefined (reading 'adg')" | LOAD-03 |
+| 06 | "TypeError: Cannot read properties of undefined (reading 'date') (at exceptions.js:70)" | GAIN-01 |
+| 07 | "[serious] Budget \| Hay \| Infinity% over season to date ($500)" | BUD-03 |
+| 07 | Fuel and Repairs gone ("current: none"); tile "−NaN% \| $NaN of $132,600" | BUD-01, BUD-02 |
+| 08 | "[critical] Water \| Tank T2 (Windmill, Yearlings here now) \| Down to 11.8% full" on Sep 27, when T2 read 47.8% | TIME-01, GRZ-01 |
+| 08 | "0.43 lbs/day since 2026-09-15"; Fuel "($2,040)" instead of the Jun-Aug $1,440 | TIME-01, BUD-01 |
+| 09 | No T6 row at an exact 30.0 drop (`80.1 - 50.1` = `29.999999999999993` in node) | WAT-08 |
+| 09 | "[serious] Gain \| Yearlings \| 1.60 lbs/day since 2026-07-20 vs 2.0 target" at exactly 80% | GAIN-12 |
+| 09 | "Planned move in 0 days", "Due in 0 days (2026-09-30)" | UI-06 |
+| 09 | Labor at exactly 5.0% gets no row | BUD-05 |
+| 09 | "[serious] Budget \| Vet and health \| 11% over season to date ($630)" | BUD-04 |
+| 09 | Warnings without dollars | BUD-06 |
+| 10 | "[critical] Water \| Tank 0 (undefined) \| Down to % full" and "Tank  (undefined)" | CSV-02, CSV-06 |
+| 10 | "vs 150.0 target" (a quoted comma shifted the head count into the target) | CSV-01 |
+| 10 | Health and Budget silently OK (header typo; CR CR LF) | CSV-03, CSV-01 |
+| 10 (browser) | "no_injected_element ... 1 element(s)", "global_not_set __scenarioXss: 1" | SEC-01 |
+| 10 (browser) | "TypeError: Cannot read properties of undefined (reading 'time') (at app.js:93)"; "rules table never drawn within 4 s" | LOAD-04 |
+
+**One new calculated result.** `scenarios.gain70.py` was run in this step. Over the last 57-day interval, 6 yearlings
+are under 1.0 lb/day. The 3-point regression over 106 days finds 1 (Y129, 0.984); the Jun 1 to Sep 15 two-point rate
+finds 0. The heifers' mean regression slope is 0.6525, under 0.8. This answers 02-findings.md 7.2 item 5's "not
+tested" for the committed data (see open decision 3).
+
+Also checked in this step:
+
+- `git status` shows no change to `index.html`, `app.js`, `exceptions.js`, `data/`, `scripts/`, `tests/`, `README.md`
+  or `.github/`;
+- `node --test` still gives 8 pass, 0 fail;
+- folder 01 is byte-identical to `data/` (`cmp`).
+
+## 2. Research conclusions
+
+This step did no new external research. Where a setting rests on earlier research, its basis is cited in
+`settings.json` and the registry. For example, the unbudgeted-spend severity ("warning") follows
+`budget.materiality.research.mjs` S4, as quoted in rules.json RULE-BUD-06's evidence. No threshold here is presented as
+validated.
+
+## 3. Recommendations
+
+These are suggestions, not verified results.
+
+1. **Use these folders as the Phase-1 regression set.** Adapt `scenarios.run.mjs`'s `currentNode()`,
+   `currentBrowser()` and `subjectKey()` to the Phase-1 output once the new row states exist. Then 01 (after regeneration) and 02 to 10 should all print MATCH.
+2. **Settle the open decisions below before changing the affected rows.** Then edit `expected.json` and the
+   `scenario.md` arithmetic together.
+3. **Regenerate scenario 01 once the generator gains its Phase-1 additions.** Those are `meta.timezone`, `tanks.csv`
+   and HLTH-03's row fix. Re-run `scenarios.build.py` from the regenerated `data/`. The 10 expected rows do not change,
+   and the three allowed extras can then be dropped.
+4. **Keep 02 at zero rows as a gate.** Any row a Phase-1 change shows there is a false alarm on clean data.
+
+## 4. Unresolved assumptions and open decisions
+
+1. **Closed months vs the dollar serious line.** BUD-01 counts a month once the as-of date reaches its last day.
+   RULE-BUD-05 and data-fields.json default `books_closed_through` to the month before as_of. Under that default the
+   committed data's Repairs is $720 over (13.3%, Jun-Aug), under RULE-BUD-03's $1,000 serious line, so it becomes a
+   warning. That breaks the acceptance bar. Scenario 08 shows the same arithmetic.
+2. **Exactly 10.0%.** Feed at 10.0% and $2,480 is a warning under the current rule text and BUD-05. It is serious
+   under RULE-BUD-03's "p >= seriousPct" (scenario 09).
+3. **The individual gain minimum.** RULE-GAIN-07 recommends a 70-day individual default. These fixtures use GAIN-03's
+   21-day example for both group and individual. As calculated above, a 70-day individual minimum would lose 5 of the
+   6 planted yearlings.
+4. **A time zone is required first.** data-fields.json makes time-based rules CAN'T TELL without a zone. The committed
+   `meta.csv` has none, so scenario 01 depends on the generator change (recommendation 3).
+5. **Drop-window definition.** The bounded window [last - 24 h, last] is used. Worked by hand, 02-findings.md 7.2 item
+   6's alternative gives the same rows in 04 and 09, though T3's fall in 04 would read 67.4 instead of 67.6. That
+   figure is not a key number.
+6. **Scenario assumptions:** the weigh-session share (0.5), the coverage minimum (0.5), how a same-day duplicate is
+   resolved, and whether an empty CSV line counts as a skipped row.
+
+## Limitations and blocked checks
+
+- The reference sweep in `scenarios.build.py` is this audit's reading of the registry rules. It is not an
+  implementation anyone approved. Where the rules conflict, the choice made is listed above.
+- The browser runs used Chromium only (Playwright). Firefox and Safari were not run.
+- In node mode a missing file is emulated as an empty body. The browser run serves a real 404.
+- The published GitHub Pages site could not be reached (proxy 403), so these scenarios were run only against the local
+  checkout at commit cfd77e50a050163b542cadfc6b38882c0341e99d.
+- There is no PROJECT_CONTEXT.md or AGENTS.md in the repository, so no project-level conventions beyond the audit
+  registries were applied.
+- Health content stays on observation, scheduling and records. No scenario implies a treatment or a diagnosis. An
+  overdue or due task means "schedule it, and involve the veterinarian as the ranch normally would".

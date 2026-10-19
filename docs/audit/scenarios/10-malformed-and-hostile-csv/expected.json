@@ -1,0 +1,344 @@
+{
+ "scenario": "10-malformed-and-hostile-csv",
+ "title": "Malformed and hostile CSV text",
+ "fictional": "All data is fictional (Example Ranch). Every threshold is a demonstration setting.",
+ "purpose": "Quoted commas (a pasture name), escaped quotes plus a comma (a group class), a quoted '1,169' weight, a UTF-8 BOM and blank, whitespace-only and ',,,' rows (water.csv), leading-zero tags, a header typo (health.csv 'staus'), doubled-CR line endings (budget.csv) and '<img onerror>' markup in a pasture name. Every other file is CRLF, as committed.",
+ "as_of": "2026-09-30T18:00 America/Chicago",
+ "files": {
+  "pastures": "changed",
+  "groups": "changed",
+  "moves": "copied unchanged",
+  "weights": "changed",
+  "water": "changed",
+  "health": "changed",
+  "budget": "changed",
+  "meta": "changed",
+  "tanks": "added"
+ },
+ "files_note": "tanks.csv (tank master list, WAT-02) and meta.csv's timezone column (TIME-02) are the Phase-1 additions the lead's defaults call for; the current code ignores both. health.csv carries HLTH-03's proposed generator fix (Cows Fly tag check: done 2026-09-01, next_due blank) unless the scenario says otherwise.",
+ "settings": "../settings.json",
+ "computed_by": "docs/audit/diagnostics/scenarios.build.py: Python arithmetic on this folder's CSV files. It never calls exceptions.js or app.js.",
+ "matching": "alerts_exact: every needs-attention row the implementation shows must be one of expected_rows (or allowed_extra_rows); data-issue and CAN'T TELL rows may carry extra wording. A row matches on area, kind and subject_key; state (or a listed alternative) and severity must agree; every key number must be shown, correctly rounded to the precision shown; key_dates may be ISO or 'Mon D'; key_tags must all appear; must_not_appear strings must not.",
+ "alerts_exact": true,
+ "expected_rows": [
+  {
+   "id": "T2",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T2",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "level_pct": 11.8
+   },
+   "must_not_appear": [],
+   "findings": [
+    "WAT-01"
+   ],
+   "rules": [
+    "RULE-WAT-01"
+   ],
+   "arithmetic": "T2's last reading 2026-09-30T18:00 is 11.8%; 11.8 < 25 (demo critical line).",
+   "key_text_any": [
+    "Windmill <img"
+   ],
+   "note": "The pasture name must reach the page as text (render_expectations)."
+  },
+  {
+   "id": "T4",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T4",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "drop_pts": 46.0,
+    "level_pct": 10.0
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the real span of the fall in hours (WAT-03)",
+    "'unexplained fall; leak not confirmed' wording (RULE-WAT-03 phase note)"
+   ],
+   "findings": [
+    "WAT-03",
+    "WAT-08"
+   ],
+   "rules": [
+    "RULE-WAT-03"
+   ],
+   "arithmetic": "Readings in [2026-09-30T18:00 - 24 h, 2026-09-30T18:00]: 56.0, 44.5, 33.0, 21.5, 10.0; highest 56.0 - last 10.0 = 46.0 points >= 30."
+  },
+  {
+   "id": "T6",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T6",
+   "state": "needs-attention",
+   "state_alternatives": [
+    "cant-tell"
+   ],
+   "severity": "serious",
+   "key_numbers": {
+    "silent_hours": 42.0,
+    "level_pct": 98.5
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the tank's level is CAN'T TELL; the row says to check it by eye (RULE-WAT-04 phase note)"
+   ],
+   "findings": [
+    "TIME-01"
+   ],
+   "rules": [
+    "RULE-WAT-04"
+   ],
+   "arithmetic": "Last reading 2026-09-29T00:00 (98.5%); 2026-09-30T18:00 - 2026-09-29T00:00 = 42 hours >= 24."
+  },
+  {
+   "id": "GRZ",
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "days": 24,
+    "plan": 21,
+    "over": 3
+   },
+   "key_text_any": [
+    "Sand Hills, East"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GRZ-01"
+   ],
+   "rules": [
+    "RULE-GRZ-01"
+   ],
+   "arithmetic": "Open stay in P3 Sand Hills since 2026-09-06; Sep 6 to Sep 30 = 24 days; plan 21; 24 - 21 = 3 days over."
+  },
+  {
+   "id": "GAIN-H",
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Heifers",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "adg": 0.43625730994152045,
+    "target": 1.0
+   },
+   "key_dates": [
+    "2026-07-20"
+   ],
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "coverage 45 of 45 weighed (GAIN-07)",
+    "both weigh dates, Jul 20 and Sep 15 (GAIN-11)"
+   ],
+   "findings": [
+    "GAIN-03",
+    "GAIN-11",
+    "GAIN-07"
+   ],
+   "rules": [
+    "RULE-GAIN-01",
+    "RULE-GAIN-04"
+   ],
+   "arithmetic": "Pooled gain Jul 20 to Sep 15 (57 days) over 45 heifers: 1119 lbs / 2565 animal-days = 0.4363 lb/day; 0.8 x 1.0 = 0.8; 0.4363 < 0.8. H001's Sep 15 weight is the quoted \"1,169\", read as 1169."
+  },
+  {
+   "id": "FUEL",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Fuel",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 21.25,
+    "usd_over": 2040
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04",
+    "BUD-05"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 11,640 vs budget 9,600: 11,640 - 9,600 = $2,040; 2,040 / 9,600 = 21.25% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "REPAIRS",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Repairs",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 25.0,
+    "usd_over": 1800
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 9,000 vs budget 7,200: $1,800; 1,800 / 7,200 = 25.00% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "GAIN-Y",
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "count": 6,
+    "threshold": 1.0
+   },
+   "key_tags": [
+    "027",
+    "031",
+    "058",
+    "082",
+    "129",
+    "132"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "CSV-06",
+    "CSV-01"
+   ],
+   "rules": [
+    "RULE-GAIN-02"
+   ],
+   "arithmetic": "Same six animals as the committed data, tags now written 027 ... 132: kept as text, leading zeros intact."
+  },
+  {
+   "id": "HEALTH-COL",
+   "area": "Health",
+   "kind": "file",
+   "subject_key": "health.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "missing-column",
+   "key_numbers": {},
+   "key_text_any": [
+    "status",
+    "staus"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "CSV-03",
+    "LOAD-01"
+   ],
+   "rules": [],
+   "arithmetic": "health.csv's header says 'staus'; the required 'status' column is missing, so no health task can be judged."
+  },
+  {
+   "id": "WATER-BLANKS",
+   "area": "Water",
+   "kind": "file",
+   "subject_key": "water.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "blank-rows",
+   "key_numbers": {},
+   "must_not_appear": [],
+   "findings": [
+    "CSV-02"
+   ],
+   "rules": [],
+   "arithmetic": "3 non-data lines after the T1 block.",
+   "note": "An empty line, a whitespace-only line and ',,,' are skipped and counted in a visible note (whether the empty line is counted is a choice)."
+  }
+ ],
+ "expected_absent": [
+  {
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Yearlings",
+   "reason": "target read as 2.0; pooled 1.9425 >= 1.6",
+   "findings": [
+    "CSV-01"
+   ]
+  },
+  {
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Heifers",
+   "reason": "the group-wide heifer row covers them",
+   "findings": []
+  }
+ ],
+ "allowed_extra_rows": [],
+ "area_states": {
+  "Water": "needs-attention",
+  "Grazing": "needs-attention",
+  "Gain": "needs-attention",
+  "Health": "cant-tell",
+  "Budget": "needs-attention"
+ },
+ "tile_expectations": [
+  {
+   "tile": "water",
+   "ok": 5,
+   "of": 8,
+   "need_look": 3
+  },
+  {
+   "tile": "budget",
+   "pct": 1.0,
+   "actual_usd": 89303,
+   "budget_usd": 88400
+  }
+ ],
+ "render_expectations": [
+  {
+   "check": "no_injected_element",
+   "selector": "#exceptions img, #water img, #tiles img, #budgetTable img",
+   "findings": [
+    "SEC-01"
+   ]
+  },
+  {
+   "check": "global_not_set",
+   "name": "__scenarioXss",
+   "findings": [
+    "SEC-01"
+   ]
+  },
+  {
+   "check": "text_visible",
+   "text": "Windmill <img",
+   "findings": [
+    "SEC-01"
+   ]
+  }
+ ],
+ "findings": [
+  "CSV-01",
+  "CSV-02",
+  "CSV-03",
+  "CSV-05",
+  "CSV-06",
+  "SEC-01",
+  "LOAD-01"
+ ],
+ "rules": [],
+ "must_not_appear_anywhere": [
+  "NaN",
+  "Infinity",
+  "undefined",
+  "[object Object]"
+ ]
+}

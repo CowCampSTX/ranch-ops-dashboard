@@ -1,5 +1,8 @@
 """Re-derive, from data/*.csv alone, the committed-data hand values that the regression tests in
-docs/audit/02-findings.md depend on. It does not import or run exceptions.js or app.js.
+docs/audit/02-findings.md depend on; rebuild the 10 report rows from the rule text in README.md and rules.json; and
+redo the arithmetic quoted in tests that use small inline fixtures. It does not import or run exceptions.js or app.js.
+A match shows the expected values follow from the data and the documented rules. It does not test the dashboard and
+does not validate any threshold.
 
     python3 -I docs/audit/diagnostics/findings.handvalues.py        (run from the repository root)
 
@@ -248,7 +251,93 @@ check("Jun-Aug only: Fuel and Repairs over % and $ (BUD-01 alternative)",
       (("Fuel", 20.0, 1440), ("Repairs", 13.3, 720)))
 check("smallest monthly category budget (BUD-04 control)", min(int(r["budget"]) for r in budget), 1200)
 
+# ---- The 10 report rows, rebuilt from the rule text in README.md and rules.json (not from exceptions.js)
+# (LOAD-03, CSV-06, UI-09, UI-13 and the Phase 1 acceptance bar). Demo settings: 25 / 40 %, 30 points,
+# 24 h, planned graze days, 2-day grace, 80 % / 50 % of target, 7 days, 5 % / 10 %.
+report = []  # (severity, area, subject, group the row is about or None)
+for k, series in sorted(water.items()):
+    t_last, lv_last, pid = series[-1]
+    silent_h = (AS_OF - t_last) / timedelta(hours=1)
+    if silent_h >= 24:
+        report.append(("serious", "Water", f"Tank {k}", None))
+        continue
+    earlier = [lv for (tj, lv, _) in series if t_last - tj >= timedelta(hours=24)]
+    drop = (earlier[-1] - lv_last) if earlier else 0
+    if drop >= 30 or lv_last < 25:
+        report.append(("critical", "Water", f"Tank {k}", None))
+    elif lv_last < 40:
+        report.append(("warning", "Water", f"Tank {k}", None))
+for g, m in sorted(open_moves.items()):
+    over = (AS_OF_DAY - d(m["in_date"])).days - int(pastures[m["pasture_id"]]["planned_graze_days"])
+    if over > 0:
+        report.append(("serious", "Grazing", f"{g} in {pastures[m['pasture_id']]['name']}", g))
+    elif over >= -2:
+        report.append(("warning", "Grazing", f"{g} in {pastures[m['pasture_id']]['name']}", g))
+for g, row in sorted(groups.items()):
+    target = float(row["target_adg_lbs"])
+    if not target:
+        continue
+    members = [k for k in wgroup if wgroup[k] == g]
+    if not members:
+        continue
+    mean_adg = sum(adg[k] for k in members) / len(members)
+    if mean_adg < 0.8 * target:
+        report.append(("serious", "Gain", g, g))
+    elif any(adg[k] < 0.5 * target for k in members):
+        report.append(("warning", "Gain", f"{sum(1 for k in members if adg[k] < 0.5 * target)} {g.lower()}", g))
+for h in health:
+    if h["status"] != "open" or not h["next_due"]:
+        continue
+    left = (d(h["next_due"]) - AS_OF_DAY).days
+    if left < 0:
+        report.append(("serious", "Health", f"{h['group']}: {h['task']}", h["group"]))
+    elif left <= 7:
+        report.append(("warning", "Health", f"{h['group']}: {h['task']}", h["group"]))
+for k, (b_, a_) in sorted(by.items()):
+    if a_ / b_ - 1 > 0.10:
+        report.append(("serious", "Budget", k, None))
+    elif a_ / b_ - 1 > 0.05:
+        report.append(("warning", "Budget", k, None))
+check("report rows rebuilt from the documented rules: count by severity",
+      {s: sum(1 for r in report if r[0] == s) for s in ("critical", "serious", "warning")},
+      {"critical": 2, "serious": 6, "warning": 2})
+check("report rows rebuilt from the documented rules: subjects",
+      sorted(r[2] for r in report),
+      sorted(["Tank T2", "Tank T4", "Tank T6", "Yearlings in Sand Hills", "Heifers", "6 yearlings",
+              "Yearlings: Booster vaccine", "Cows: Pinkeye check", "Fuel", "Repairs"]))
+check("rows left when the Yearlings group is gone (LOAD-03 shipped case)", sum(1 for r in report if r[3] != "Yearlings"), 7)
+check("serious rows' areas, A-Z tie-break as today (UI-09)",
+      sorted(r[1] for r in report if r[0] == "serious"), ["Budget", "Budget", "Gain", "Grazing", "Health", "Water"])
+PRIORITY = ["Water", "Health", "Grazing", "Gain", "Budget"]
+check("serious rows' areas, Water-Health-Grazing-Gain-Budget tie-break (UI-09 fix)",
+      sorted((r[1] for r in report if r[0] == "serious"), key=PRIORITY.index), ["Water", "Health", "Grazing", "Gain", "Budget", "Budget"])
+
+
+def short(day):
+    x = d(day)
+    return f"{x.strftime('%b')} {x.day}"
+
+
+check("short dates for the heifer period start, booster due, pinkeye due (UI-13)",
+      (short(A), short(booster["next_due"]), short(pinkeye["next_due"])), ("Jul 20", "Sep 15", "Oct 3"))
+
 # ---- Arithmetic quoted in regression tests that use inline fixtures (not the committed data)
+from zoneinfo import ZoneInfo  # noqa: E402
+chicago_asof = datetime(2026, 9, 30, 18, 0, tzinfo=ZoneInfo("America/Chicago"))
+check("TIME-02 as_of 2026-09-30T18:00 America/Chicago minus a reading at 2026-09-29T20:00Z, h",
+      (chicago_asof - datetime.fromisoformat("2026-09-29T20:00+00:00")) / timedelta(hours=1), 27.0)
+check("TEST-01 hours silent for last readings 09-29T12:00, 09-29T18:00, 09-29T19:00",
+      tuple((AS_OF - t(x)) / timedelta(hours=1) for x in ("2026-09-29T12:00", "2026-09-29T18:00", "2026-09-29T19:00")),
+      (30.0, 24.0, 23.0))
+check("TEST-01 falls 80 to 50, 80 to 50.1 (one decimal), 80 to 45",
+      (80 - 50, round(80 - 50.1, 1), 80 - 45), (30, 29.9, 35))
+check("TEST-02 days over a 21-day plan on Sep 30 for in_dates Sep 8..12",
+      [(AS_OF_DAY - date(2026, 9, x)).days - 21 for x in range(8, 13)], [1, 0, -1, -2, -3])
+gap = t("2026-10-16T09:00") - AS_OF
+check("LOAD-05 as_of to a clock of 2026-10-16T09:00: days, hours", (gap.days, gap.seconds // 3600), (15, 15))
+check("WAT-07 80 to 20, points", 80 - 20, 60)
+check("GAIN-11 half of 1.25 and 2.25; listed 0.61 and 1.12 below them",
+      (1.25 * 0.5, 2.25 * 0.5, 0.61 < 1.25 * 0.5, 1.12 < 2.25 * 0.5), (0.625, 1.125, True, True))
 for label, got, want, tol in [
     ("GAIN-12 456/285", 456 / 285, 1.6, 1e-9), ("GAIN-12 455/285", 455 / 285, 1.5965, 5e-5),
     ("GAIN-07 85.5/57", 85.5 / 57, 1.5, 1e-9), ("GAIN-04 (11690-1138)/57", (11690 - 1138) / 57, 185.1, 0.05),

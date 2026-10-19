@@ -1,0 +1,1152 @@
+scenarios.run.mjs  TZ=America/Chicago  modes: node, browser  exceptions.js loaded
+
+==============================================================================================================
+01-planted-problems: The ten planted problems on the committed data  [node mode]
+as_of 2026-09-30T18:00 (no time zone in meta.csv)
+  current rows (10):
+    [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Fuel | 21% over season to date ($2,040)
+    [serious] Budget | Repairs | 25% over season to date ($1,800)
+    [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+    [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+    [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+    [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  expected rows:
+  MATCH    T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+  MATCH    GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+  MATCH    GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  MATCH    FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: [serious] Budget | Fuel | 21% over season to date ($2,040)
+  MATCH    REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: [serious] Budget | Repairs | 25% over season to date ($1,800)
+  expected absent (no alert row for these):
+  MATCH    Water/tank 'T1' (healthy tank in the committed data)
+  MATCH    Water/tank 'T3' (healthy tank in the committed data)
+  MATCH    Water/tank 'T5' (healthy tank in the committed data)
+  MATCH    Water/tank 'T7' (healthy tank in the committed data)
+  MATCH    Water/tank 'T8' (healthy tank in the committed data)
+  MATCH    Gain/group 'Yearlings' (pooled 1.9425 lb/day is not under 1.6)
+  MATCH    Gain/animals 'Heifers' (the group-wide row already covers the heifers (RULE-WF-19))
+  MATCH    Grazing/stay 'Cows' (day 18 of 21: 3 days left, outside the 2-day grace)
+  MATCH    Grazing/stay 'Heifers' (day 11 of 14: 3 days left)
+  MATCH    Health/task 'Heifers: Pregnancy check' (due 2026-10-25, 25 days away)
+  MATCH    Health/task 'Yearlings: Deworm' (due 2026-11-01, 32 days away)
+  MATCH    Budget/category 'Feed and mineral' (under budget season to date)
+  MATCH    Budget/category 'Vet and health' (under budget season to date)
+  MATCH    Budget/category 'Labor' (under budget season to date)
+  MATCH    Budget/category 'Water and fencing' (under budget season to date)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MATCH    tile needs_attention expected critical=2 serious=6 warning=2 total=10; current 10 | 2 critical, 6 serious, 2 warning
+  MATCH    tile water           expected ok=5 of=8 need_look=3; current 5 of 8 | 3 need a look
+  MATCH    tile gain            expected renders=true contains_any=1.94/0.44; current 1.94 lbs/day | target 2.0, since Jul 20
+  MATCH    tile budget          expected pct=1 actual_usd=89303 budget_usd=88400; current +1.0% | $89,303 of $88,400, season to date
+  MATCH    tile head            expected value=375; current 375 | 180 cows, 45 heifers, 150 yearlings
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+02-healthy-operation: A healthy operation with sufficient data  [node mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (0):
+  expected rows:
+  expected absent (no alert row for these):
+  MATCH    Water/tank 'T1' (healthy tank)
+  MATCH    Water/tank 'T2' (healthy tank)
+  MATCH    Water/tank 'T3' (healthy tank)
+  MATCH    Water/tank 'T4' (healthy tank)
+  MATCH    Water/tank 'T5' (healthy tank)
+  MATCH    Water/tank 'T6' (healthy tank)
+  MATCH    Water/tank 'T7' (healthy tank)
+  MATCH    Water/tank 'T8' (healthy tank)
+  MATCH    Grazing/stay 'Cows' (day 18 of 21 (3 days left))
+  MATCH    Grazing/stay 'Heifers' (day 11 of 14 (3 days left))
+  MATCH    Grazing/stay 'Yearlings' (day 3 of 18 in Windmill)
+  MATCH    Gain/group 'Heifers' (pooled 2487/2565 = 0.9696 >= 0.8)
+  MATCH    Gain/group 'Yearlings' (pooled 17062/8550 = 1.9956 >= 1.6)
+  MATCH    Gain/animals 'Heifers' (slowest heifer 0.807 >= 0.5)
+  MATCH    Gain/animals 'Yearlings' (slowest yearling 1.386 >= 1.0)
+  MATCH    Health/task 'Cows: Pinkeye check' (due 2026-10-14, 14 days away)
+  MATCH    Health/task 'Yearlings: Booster vaccine' (done)
+  MATCH    Health/task 'Heifers: Pregnancy check' (25 days away)
+  MATCH    Health/task 'Yearlings: Deworm' (32 days away)
+  MATCH    Budget/category 'Feed and mineral' (24,002 vs 24,800)
+  MATCH    Budget/category 'Fuel' (9,660 vs 9,600)
+  MATCH    Budget/category 'Repairs' (7,050 vs 7,200)
+  MATCH    Budget/category 'Vet and health' (5,945 vs 6,000)
+  MATCH    Budget/category 'Labor' (34,259 vs 36,000)
+  MATCH    Budget/category 'Water and fencing' (4,457 vs 4,800)
+  area states:
+  MATCH    Water    expected ok, current ok
+  MATCH    Grazing  expected ok, current ok
+  MATCH    Gain     expected ok, current ok
+  MATCH    Health   expected ok, current ok
+  MATCH    Budget   expected ok, current ok
+  tiles:
+  MATCH    tile needs_attention expected critical=0 serious=0 warning=0 total=0; current 0 | 0 critical, 0 serious, 0 warning
+  MATCH    tile water           expected ok=8 of=8 need_look=0; current 8 of 8 | 0 need a look
+  MATCH    tile budget          expected pct=-3.4242 actual_usd=85373 budget_usd=88400; current −3.4% | $85,373 of $88,400, season to date
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+03-incomplete-and-stale: Incomplete and stale information  [node mode]
+as_of 2026-09-30T18:00 America/Chicago
+  note: health.csv missing: read as an empty body
+  current rows (9):
+    [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Fuel | 21% over season to date ($2,040)
+    [serious] Budget | Repairs | 25% over season to date ($1,800)
+    [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+    [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+    [serious] Water | Tank T7 (South Divide, Cows here now) | No reading for 30 hours; last level 65.7%
+    [warning] Gain | 4 heifers | Under 0.5 lbs/day: H014, H017, H025, H033
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  expected rows:
+  MATCH    T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+  MATCH    GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MATCH    FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: [serious] Budget | Fuel | 21% over season to date ($2,040)
+  MATCH    REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: [serious] Budget | Repairs | 25% over season to date ($1,800)
+  MATCH    T7           Water/tank 'T7' needs-attention/serious  {"silent_hours":30,"level_pct":65.7}
+             current: [serious] Water | Tank T7 (South Divide, Cows here now) | No reading for 30 hours; last level 65.7%
+  MISMATCH T8           Water/tank 'T8' cant-tell/serious  {}
+             current: none  <- no matching row
+  MISMATCH GAIN-H-STALE Gain/group 'Heifers' cant-tell  {"age_days":72}
+             current: none  <- the current code has no CANT-TELL rows
+  MISMATCH HEALTH-FILE  Health/file 'health.csv' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH VET-BLANK    Budget/category 'Vet and health' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH UNEXPECTED   current row not in expected.json: [warning] Gain | 4 heifers | Under 0.5 lbs/day: H014, H017, H025, H033
+  expected absent (no alert row for these):
+  MATCH    Gain/group 'Heifers' (no current verdict on 72-day-old weigh-ins)
+  MISMATCH Gain/animals 'Heifers' (old-period slow heifers must not be shown as a current alert)  <- current: [warning] Gain | 4 heifers | Under 0.5 lbs/day: H014, H017, H025, H033
+  MATCH    Budget/category 'Vet and health' (its season total is incomplete)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MISMATCH Health   expected cant-tell, current ok
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile water           expected ok=3 of=8 need_look=5; current 3 of 7 | 4 need a look  <- of 7, expected 8; need a look 4, expected 5
+  MISMATCH tile budget          expected sane=true; current +505005006043558.9% | $446,424,425,342,594,400 of $88,400, season to date  <- percent not sane
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+04-irregular-sensor-readings: Irregular sensor readings  [node mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (10):
+    [critical] Water | Tank T1 (North Flat) | Dropped 35 points in 24 hours, now 56.2%
+    [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Fuel | 21% over season to date ($2,040)
+    [serious] Budget | Repairs | 25% over season to date ($1,800)
+    [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+    [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+    [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  expected rows:
+  MATCH    T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MISMATCH T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: none  <- no matching row
+  MATCH    GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+  MATCH    GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  MATCH    FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: [serious] Budget | Fuel | 21% over season to date ($2,040)
+  MATCH    REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: [serious] Budget | Repairs | 25% over season to date ($1,800)
+  MISMATCH T1-HIST      Water/tank 'T1' cant-tell  {}
+             current: [critical] Water | Tank T1 (North Flat) | Dropped 35 points in 24 hours, now 56.2%  <- the current code has no CANT-TELL rows; it shows an alert instead
+  MISMATCH T3           Water/tank 'T3' needs-attention/critical  {"level_pct":20}
+             current: none  <- no matching row
+  MISMATCH T3-DUP       Water/tank 'T3' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH T5-DUP       Water/file 'water.csv' data-issue  {"count":1}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH T6-FUTURE    Water/file 'water.csv' data-issue  {"count":1}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH T8           Water/tank 'T8' cant-tell/serious  {"last_good_level":80.4}
+             current: none  <- no matching row
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank T1 (North Flat) | Dropped 35 points in 24 hours, now 56.2%
+  expected absent (no alert row for these):
+  MISMATCH Water/tank 'T1' (no leak can be claimed from a 72-hour-old baseline)  <- current: [critical] Water | Tank T1 (North Flat) | Dropped 35 points in 24 hours, now 56.2%
+  MATCH    Water/tank 'T5' (an exact duplicate changes nothing)
+  MATCH    Water/tank 'T7' (row order changes nothing; T7 is healthy)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile water           expected ok_at_most=3 of=8; current 5 of 8 | 3 need a look  <- ok 5, expected at most 3
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+05-missing-groups-and-pastures: Missing groups and pastures  [node mode]
+as_of 2026-09-30T18:00 America/Chicago
+  note: with no exception rows, the tiles() port would also throw TypeError: Cannot read properties of undefined (reading 'adg')
+  CURRENT ERROR: TypeError: Cannot read properties of undefined (reading 'name') (at exceptions.js:59)
+  ON THE PAGE: findExceptions throws at app.js:222: the page draws nothing below the header
+  current rows (0):
+  expected rows:
+  MISMATCH T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: none  <- no matching row
+  MISMATCH T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: none  <- no matching row
+  MISMATCH T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: none  <- no matching row
+  MISMATCH GRZ          Grazing/stay 'Steers' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: none  <- no matching row
+  MISMATCH GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: none  <- no matching row
+  MISMATCH GAIN-Y       Gain/animals 'Steers' needs-attention/warning  {"count":6,"threshold":1}
+             current: none  <- no matching row
+  MISMATCH BOOST        Health/task 'Steers: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: none  <- no matching row
+  MISMATCH PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: none  <- no matching row
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH COWS-P9      Grazing/record 'Cows' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH BULLS        Grazing/record 'Bulls' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  expected absent (no alert row for these):
+  N/A      Grazing/stay 'Cows' (no plan for an unknown pasture: a data issue, not an alarm)  <- not checkable: the current code produced no rows
+  N/A      Grazing/stay 'Bulls' (day 5 of Home Trap's 10 if judged; no alarm either way)  <- not checkable: the current code produced no rows
+  area states:
+  MISMATCH Water    expected needs-attention, current error (no rows)
+  MISMATCH Grazing  expected needs-attention, current error (no rows)
+  MISMATCH Gain     expected needs-attention, current error (no rows)
+  MISMATCH Health   expected needs-attention, current error (no rows)
+  MISMATCH Budget   expected needs-attention, current error (no rows)
+  tiles:
+  MISMATCH tile gain            expected renders=true; current not drawn
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+06-sparse-and-conflicting-weigh-ins: Sparse and conflicting weigh-ins  [node mode]
+as_of 2026-09-30T18:00 America/Chicago
+  note: with no exception rows, the tiles() port would also throw TypeError: Cannot read properties of undefined (reading 'date')
+  CURRENT ERROR: TypeError: Cannot read properties of undefined (reading 'date') (at exceptions.js:70)
+  ON THE PAGE: findExceptions throws at app.js:222: the page draws nothing below the header
+  current rows (0):
+  expected rows:
+  MISMATCH T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: none  <- no matching row
+  MISMATCH T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: none  <- no matching row
+  MISMATCH T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: none  <- no matching row
+  MISMATCH GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: none  <- no matching row
+  MISMATCH GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: none  <- no matching row
+  MISMATCH BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: none  <- no matching row
+  MISMATCH PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: none  <- no matching row
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH HEIFERS-CT   Gain/group 'Heifers' cant-tell  {}
+             current: none  <- the current code has no CANT-TELL rows
+  MISMATCH Y001-DUP     Gain/record 'Y001' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH Y151         Gain/record 'Y151' cant-tell  {}
+             current: none  <- the current code has no CANT-TELL rows
+  MISMATCH Y-OFF        Gain/record 'Yearlings off-session' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  expected absent (no alert row for these):
+  N/A      Gain/group 'Heifers' (coverage too low or data too old for a verdict)  <- not checkable: the current code produced no rows
+  N/A      Gain/animals 'Heifers' (no individual verdicts from a 3-animal session or from the June-July period)  <- not checkable: the current code produced no rows
+  N/A      Gain/group 'Yearlings' (pooled 1.9425 >= 1.6)  <- not checkable: the current code produced no rows
+  area states:
+  MISMATCH Water    expected needs-attention, current error (no rows)
+  MISMATCH Grazing  expected needs-attention, current error (no rows)
+  MISMATCH Gain     expected needs-attention, current error (no rows)
+  MISMATCH Health   expected needs-attention, current error (no rows)
+  MISMATCH Budget   expected needs-attention, current error (no rows)
+  tiles:
+  MISMATCH tile gain            expected renders=true contains_any=1.94; current not drawn
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+07-zero-budgets-credits-future-months: Zero budgets, unbudgeted spending, a credit and future plan months  [node mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (10):
+    [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Hay | Infinity% over season to date ($500)
+    [serious] Budget | Ear tags | Infinity% over season to date ($200)
+    [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+    [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+    [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+    [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  expected rows:
+  MATCH    T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+  MATCH    GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+  MATCH    GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH HAY          Budget/category 'Hay' needs-attention/warning  {"usd_spent":500}
+             current: [serious] Budget | Hay | Infinity% over season to date ($500)  <- severity serious, expected warning; shows '%'; shows 'Infinity'
+  MISMATCH UNEXPECTED   current row not in expected.json: [serious] Budget | Ear tags | Infinity% over season to date ($200)
+  expected absent (no alert row for these):
+  MISMATCH Budget/category 'Ear tags' ($200 < $250 (demo unbudgeted line); never 'Infinity%')  <- current: [serious] Budget | Ear tags | Infinity% over season to date ($200)
+  MATCH    Budget/category 'Water and fencing' (3,159 vs 4,800: under budget after the credit)
+  MATCH    Budget/category 'Feed and mineral' (under budget)
+  MATCH    Budget/category 'Vet and health' (under budget)
+  MATCH    Budget/category 'Labor' (under budget)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile budget          expected pct=0.345 actual_usd=88705 budget_usd=88400; current −NaN% | $NaN of $132,600, season to date  <- NaN, Infinity or e+ shown; percent −NaN%, expected 0.3%; dollars differ
+  must_not_appear_anywhere: MISMATCH shows NaN, Infinity
+
+==============================================================================================================
+08-historical-as-of-and-future-records: Historical reporting and future records  [node mode]
+as_of 2026-09-27T18:00-05:00 (ranch zone America/Chicago; 18:00 CDT)
+  current rows (8):
+    [critical] Water | Tank T2 (Windmill, Yearlings here now) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Fuel | 21% over season to date ($2,040)
+    [serious] Budget | Repairs | 25% over season to date ($1,800)
+    [serious] Gain | Heifers | 0.43 lbs/day since 2026-09-15 vs 1.0 target
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 12 days (due 2026-09-15)
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+    [warning] Health | Cows: Pinkeye check | Due in 6 days (2026-10-03)
+  expected rows:
+  MISMATCH GRZ-TODAY    Grazing/stay 'Yearlings' needs-attention/warning  {}
+             current: none  <- no matching row
+  MISMATCH GRZ-FUTURE   Grazing/record 'Yearlings' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: [serious] Gain | Heifers | 0.43 lbs/day since 2026-09-15 vs 1.0 target  <- adg 0.4363 not shown; date 2026-07-20 not shown; shows 'since 2026-09-15'
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MISMATCH W-FUTURE     Gain/file 'weights.csv' data-issue  {"count":10}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH WATER-FUTURE Water/file 'water.csv' data-issue  {"count":89}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":12}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 12 days (due 2026-09-15)
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":6}
+             current: [warning] Health | Cows: Pinkeye check | Due in 6 days (2026-10-03)
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":20,"usd_over":1440}
+             current: [serious] Budget | Fuel | 21% over season to date ($2,040)  <- pct_over 20 not shown; usd_over 1440 not shown; shows '2,040'
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/warning  {"pct_over":13.333333333333334,"usd_over":720}
+             current: [serious] Budget | Repairs | 25% over season to date ($1,800)  <- severity serious, expected warning; pct_over 13.3333 not shown; usd_over 720 not shown
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank T2 (Windmill, Yearlings here now) | Down to 11.8% full
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  expected absent (no alert row for these):
+  MATCH    Water/tank 'T1' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MISMATCH Water/tank 'T2' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)  <- current: [critical] Water | Tank T2 (Windmill, Yearlings here now) | Down to 11.8% full
+  MATCH    Water/tank 'T3' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MISMATCH Water/tank 'T4' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)  <- current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    Water/tank 'T5' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MATCH    Water/tank 'T6' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MATCH    Water/tank 'T7' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MATCH    Water/tank 'T8' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MATCH    Grazing/stay 'Cows' (day 15 of 21)
+  MATCH    Grazing/stay 'Heifers' (day 8 of 14)
+  area states:
+  MISMATCH Water    expected ok, current needs-attention
+  MISMATCH Grazing  expected needs-attention, current ok
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile water           expected ok=8 of=8 need_look=0; current 6 of 8 | 2 need a look  <- ok 6, expected 8; need a look 2, expected 0
+  MISMATCH tile budget          expected pct=-1.4072 actual_usd=65367 budget_usd=66300; current +1.0% | $89,303 of $88,400, season to date  <- percent +1.0%, expected -1.4%; dollars differ
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+09-exact-rule-boundaries: Exact rule boundaries  [node mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (15):
+    [critical] Water | Tank T1 (North Flat) | Down to 24.9% full
+    [serious] Budget | Vet and health | 11% over season to date ($630)
+    [serious] Gain | Yearlings | 1.60 lbs/day since 2026-07-20 vs 2.0 target
+    [serious] Grazing | Yearlings in Sand Hills | Day 22 of a 21-day plan (1 day over)
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 1 day (due 2026-09-29)
+    [serious] Water | Tank T9 (Creek Bottom) | No reading for 24 hours; last level 75.3%
+    [warning] Budget | Feed and mineral | 10% over season to date
+    [warning] Budget | Repairs | 10% over season to date
+    [warning] Grazing | Cows in South Divide | Planned move in 2 days
+    [warning] Grazing | Heifers in Lone Tree | Planned move in 0 days
+    [warning] Health | Cows: Pinkeye check | Due in 7 days (2026-10-07)
+    [warning] Health | Yearlings: Deworm | Due in 0 days (2026-09-30)
+    [warning] Water | Tank T2 (Windmill) | 25% full
+    [warning] Water | Tank T3 (Sand Hills, Yearlings here now) | 25.1% full
+    [warning] Water | Tank T4 (Lone Tree, Heifers here now) | 39.9% full
+  expected rows:
+  MATCH    T1           Water/tank 'T1' needs-attention/critical  {"level_pct":24.9}
+             current: [critical] Water | Tank T1 (North Flat) | Down to 24.9% full
+  MATCH    T2           Water/tank 'T2' needs-attention/warning  {"level_pct":25}
+             current: [warning] Water | Tank T2 (Windmill) | 25% full
+  MATCH    T3           Water/tank 'T3' needs-attention/warning  {"level_pct":25.1}
+             current: [warning] Water | Tank T3 (Sand Hills, Yearlings here now) | 25.1% full
+  MATCH    T4           Water/tank 'T4' needs-attention/warning  {"level_pct":39.9}
+             current: [warning] Water | Tank T4 (Lone Tree, Heifers here now) | 39.9% full
+  MISMATCH T6           Water/tank 'T6' needs-attention/critical  {"drop_pts":30,"level_pct":50.1}
+             current: none  <- no matching row
+  MATCH    T9           Water/tank 'T9' needs-attention/serious  {"silent_hours":24,"level_pct":75.3}
+             current: [serious] Water | Tank T9 (Creek Bottom) | No reading for 24 hours; last level 75.3%
+  MATCH    COWS         Grazing/stay 'Cows' needs-attention/warning  {"days_left":2}
+             current: [warning] Grazing | Cows in South Divide | Planned move in 2 days
+  MISMATCH HEIFERS      Grazing/stay 'Heifers' needs-attention/warning  {}
+             current: [warning] Grazing | Heifers in Lone Tree | Planned move in 0 days  <- none of ["today"] shown; shows 'in 0 days'
+  MATCH    YEARLINGS    Grazing/stay 'Yearlings' needs-attention/serious  {"days":22,"plan":21,"over":1}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 22 of a 21-day plan (1 day over)
+  MISMATCH Y-ANIMALS    Gain/animals 'Yearlings' needs-attention/warning  {"count":1,"threshold":1}
+             current: none  <- no matching row
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":1}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 1 day (due 2026-09-29)
+  MISMATCH DEWORM       Health/task 'Yearlings: Deworm' needs-attention/warning  {}
+             current: [warning] Health | Yearlings: Deworm | Due in 0 days (2026-09-30)  <- none of ["today"] shown; shows 'in 0 days'
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":7}
+             current: [warning] Health | Cows: Pinkeye check | Due in 7 days (2026-10-07)
+  MISMATCH FEED         Budget/category 'Feed and mineral' needs-attention/warning  {"pct_over":10,"usd_over":2480}
+             current: [warning] Budget | Feed and mineral | 10% over season to date  <- usd_over 2480 not shown
+  MISMATCH LABOR        Budget/category 'Labor' needs-attention/warning  {"pct_over":5,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/warning  {"pct_over":10,"usd_over":720}
+             current: [warning] Budget | Repairs | 10% over season to date  <- usd_over 720 not shown
+  MISMATCH VET          Budget/category 'Vet and health' needs-attention/warning  {"pct_over":10.5,"usd_over":630}
+             current: [serious] Budget | Vet and health | 11% over season to date ($630)  <- severity serious, expected warning
+  MISMATCH UNEXPECTED   current row not in expected.json: [serious] Gain | Yearlings | 1.60 lbs/day since 2026-07-20 vs 2.0 target
+  expected absent (no alert row for these):
+  MATCH    Water/tank 'T5' (40.0 is not < 40)
+  MATCH    Water/tank 'T7' (80.0 - 50.1 = 29.9 < 30; 50.1 >= 40)
+  MATCH    Water/tank 'T8' (last reading Sep 29 18:06: 23.9 hours < 24; level 70.2)
+  MATCH    Gain/group 'Heifers' (pooled 2052 / 2565 = 0.8 = exactly 0.8 x 1.0, not under it)
+  MISMATCH Gain/group 'Yearlings' (pooled 13680 / 8550 = 1.6 = exactly 0.8 x 2.0)  <- current: [serious] Gain | Yearlings | 1.60 lbs/day since 2026-07-20 vs 2.0 target
+  MATCH    Gain/animals 'Heifers' (slowest heifer 45/57 = 0.789 >= 0.5)
+  MATCH    Health/task 'Heifers: Pregnancy check' (due Oct 8: 8 days, outside 7)
+  MATCH    Budget/category 'Fuel' (10,080 vs 9,600: $480, 480 / 9,600 = 5.0%: exactly 5.0% but $480 < $500)
+  MATCH    Budget/category 'Water and fencing' (5,035 vs 4,800: $235, 235 / 4,800 = 4.9%: under 5%)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile water           expected ok=3 of=9 need_look=6; current 4 of 9 | 5 need a look  <- ok 4, expected 3; need a look 5, expected 6
+  MATCH    tile budget          expected pct=7.1776 actual_usd=94745 budget_usd=88400; current +7.2% | $94,745 of $88,400, season to date
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+10-malformed-and-hostile-csv: Malformed and hostile CSV text  [node mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (7):
+    [critical] Water | Tank 0 (undefined) | Down to % full
+    [critical] Water | Tank  (undefined) | Down to % full
+    [critical] Water | Tank T2 (Windmill <img src=x onerror=window.__scenarioXss=1>) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Gain | Yearlings | 1.94 lbs/day since 2026-07-20 vs 150.0 target
+    [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+    [warning] Gain | 32 heifers | Under 0.5 lbs/day: H002, H004, H006, H007, H008, H009, H010, H011, H012, H013, H014, H016, H017, H018, H021, H023, H024, H026, H028, H029, H031, H032, H033, H034, H036, H037, H038, H039, H040, H041, H043, H045
+  expected rows:
+  MATCH    T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill <img src=x onerror=window.__scenarioXss=1>) | Down to 11.8% full
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+  MISMATCH GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: none  <- no matching row
+  MISMATCH GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: none  <- no matching row
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: none  <- no matching row
+  MISMATCH HEALTH-COL   Health/file 'health.csv' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH WATER-BLANKS Water/file 'water.csv' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank 0 (undefined) | Down to % full
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank  (undefined) | Down to % full
+  MISMATCH UNEXPECTED   current row not in expected.json: [serious] Gain | Yearlings | 1.94 lbs/day since 2026-07-20 vs 150.0 target
+  MISMATCH UNEXPECTED   current row not in expected.json: [warning] Gain | 32 heifers | Under 0.5 lbs/day: H002, H004, H006, H007, H008, H009, H010, H011, H012, H013, H014, H016, H017, H018, H021, H023, H024, H026, H028, H029, H031, H032, H033, H034, H036, H037, H038, H039, H040, H041, H043, H045
+  expected absent (no alert row for these):
+  MISMATCH Gain/group 'Yearlings' (target read as 2.0; pooled 1.9425 >= 1.6)  <- current: [serious] Gain | Yearlings | 1.94 lbs/day since 2026-07-20 vs 150.0 target
+  MISMATCH Gain/animals 'Heifers' (the group-wide heifer row covers them)  <- current: [warning] Gain | 32 heifers | Under 0.5 lbs/day: H002, H004, H006, H007, H008, H009, H010, H011, H012, H013, H014, H016, H017, H018, H021, H023, H024, H026, H028, H029, H031, H032, H033, H034, H036, H037, H038, H039, H040, H041, H043, H045
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MISMATCH Grazing  expected needs-attention, current ok
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MISMATCH Health   expected cant-tell, current ok
+  MISMATCH Budget   expected needs-attention, current ok
+  tiles:
+  MISMATCH tile water           expected ok=5 of=8 need_look=3; current 5 of 10 | 5 need a look  <- of 10, expected 8; need a look 5, expected 3
+  MISMATCH tile budget          expected pct=1 actual_usd=89303 budget_usd=88400; current −NaN% | $NaN of $88,400, season to date  <- NaN, Infinity or e+ shown; percent −NaN%, expected 1.0%; dollars differ
+  render:
+  N/A      no_injected_element #exceptions img, #water img, #tiles img, #budgetTable img: browser only
+  N/A      global_not_set __scenarioXss: browser only
+  N/A      text_visible Windmill <img: browser only
+  must_not_appear_anywhere: MISMATCH shows NaN, undefined
+
+##############################################################################################################
+SUMMARY (node mode; MATCH means today's output already meets the Phase-1 expectation)
+scenario                                    rows  unexp  absent  areas  tiles  render  verdict    current error
+01-planted-problems                        10/10 0     15/15  5/5   5/5   -      MATCH     
+02-healthy-operation                       0/0   0     25/25  5/5   3/3   -      MATCH     
+03-incomplete-and-stale                    8/12  1     2/3    4/5   0/2   -      MISMATCH  
+04-irregular-sensor-readings               9/16  1     2/3    5/5   0/1   -      MISMATCH  
+05-missing-groups-and-pastures             0/12  0     n/a    0/5   0/1   -      MISMATCH  TypeError: Cannot read properties of undefined (reading 'name') (at ex
+06-sparse-and-conflicting-weigh-ins        0/13  0     n/a    0/5   0/1   -      MISMATCH  TypeError: Cannot read properties of undefined (reading 'date') (at ex
+07-zero-budgets-credits-future-months      8/11  1     4/5    5/5   0/1   -      MISMATCH  
+08-historical-as-of-and-future-records     3/10  2     8/10   3/5   0/2   -      MISMATCH  
+09-exact-rule-boundaries                   9/17  1     8/9    5/5   1/2   -      MISMATCH  
+10-malformed-and-hostile-csv               3/10  4     0/2    2/5   0/2   0/0    MISMATCH  
+
+==============================================================================================================
+01-planted-problems: The ten planted problems on the committed data  [browser mode]
+as_of 2026-09-30T18:00 (no time zone in meta.csv)
+  current rows (10):
+    [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Fuel | 21% over season to date ($2,040)
+    [serious] Budget | Repairs | 25% over season to date ($1,800)
+    [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+    [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+    [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+    [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  expected rows:
+  MATCH    T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+  MATCH    GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+  MATCH    GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  MATCH    FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: [serious] Budget | Fuel | 21% over season to date ($2,040)
+  MATCH    REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: [serious] Budget | Repairs | 25% over season to date ($1,800)
+  expected absent (no alert row for these):
+  MATCH    Water/tank 'T1' (healthy tank in the committed data)
+  MATCH    Water/tank 'T3' (healthy tank in the committed data)
+  MATCH    Water/tank 'T5' (healthy tank in the committed data)
+  MATCH    Water/tank 'T7' (healthy tank in the committed data)
+  MATCH    Water/tank 'T8' (healthy tank in the committed data)
+  MATCH    Gain/group 'Yearlings' (pooled 1.9425 lb/day is not under 1.6)
+  MATCH    Gain/animals 'Heifers' (the group-wide row already covers the heifers (RULE-WF-19))
+  MATCH    Grazing/stay 'Cows' (day 18 of 21: 3 days left, outside the 2-day grace)
+  MATCH    Grazing/stay 'Heifers' (day 11 of 14: 3 days left)
+  MATCH    Health/task 'Heifers: Pregnancy check' (due 2026-10-25, 25 days away)
+  MATCH    Health/task 'Yearlings: Deworm' (due 2026-11-01, 32 days away)
+  MATCH    Budget/category 'Feed and mineral' (under budget season to date)
+  MATCH    Budget/category 'Vet and health' (under budget season to date)
+  MATCH    Budget/category 'Labor' (under budget season to date)
+  MATCH    Budget/category 'Water and fencing' (under budget season to date)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MATCH    tile needs_attention expected critical=2 serious=6 warning=2 total=10; current 10 | 2 critical, 6 serious, 2 warning
+  MATCH    tile water           expected ok=5 of=8 need_look=3; current 5 of 8 | 3 need a look
+  MATCH    tile gain            expected renders=true contains_any=1.94/0.44; current 1.94 lbs/day | target 2.0, since Jul 20
+  MATCH    tile budget          expected pct=1 actual_usd=89303 budget_usd=88400; current +1.0% | $89,303 of $88,400, season to date
+  MATCH    tile head            expected value=375; current 375 | 180 cows, 45 heifers, 150 yearlings
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+02-healthy-operation: A healthy operation with sufficient data  [browser mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (0):
+  expected rows:
+  expected absent (no alert row for these):
+  MATCH    Water/tank 'T1' (healthy tank)
+  MATCH    Water/tank 'T2' (healthy tank)
+  MATCH    Water/tank 'T3' (healthy tank)
+  MATCH    Water/tank 'T4' (healthy tank)
+  MATCH    Water/tank 'T5' (healthy tank)
+  MATCH    Water/tank 'T6' (healthy tank)
+  MATCH    Water/tank 'T7' (healthy tank)
+  MATCH    Water/tank 'T8' (healthy tank)
+  MATCH    Grazing/stay 'Cows' (day 18 of 21 (3 days left))
+  MATCH    Grazing/stay 'Heifers' (day 11 of 14 (3 days left))
+  MATCH    Grazing/stay 'Yearlings' (day 3 of 18 in Windmill)
+  MATCH    Gain/group 'Heifers' (pooled 2487/2565 = 0.9696 >= 0.8)
+  MATCH    Gain/group 'Yearlings' (pooled 17062/8550 = 1.9956 >= 1.6)
+  MATCH    Gain/animals 'Heifers' (slowest heifer 0.807 >= 0.5)
+  MATCH    Gain/animals 'Yearlings' (slowest yearling 1.386 >= 1.0)
+  MATCH    Health/task 'Cows: Pinkeye check' (due 2026-10-14, 14 days away)
+  MATCH    Health/task 'Yearlings: Booster vaccine' (done)
+  MATCH    Health/task 'Heifers: Pregnancy check' (25 days away)
+  MATCH    Health/task 'Yearlings: Deworm' (32 days away)
+  MATCH    Budget/category 'Feed and mineral' (24,002 vs 24,800)
+  MATCH    Budget/category 'Fuel' (9,660 vs 9,600)
+  MATCH    Budget/category 'Repairs' (7,050 vs 7,200)
+  MATCH    Budget/category 'Vet and health' (5,945 vs 6,000)
+  MATCH    Budget/category 'Labor' (34,259 vs 36,000)
+  MATCH    Budget/category 'Water and fencing' (4,457 vs 4,800)
+  area states:
+  MATCH    Water    expected ok, current ok
+  MATCH    Grazing  expected ok, current ok
+  MATCH    Gain     expected ok, current ok
+  MATCH    Health   expected ok, current ok
+  MATCH    Budget   expected ok, current ok
+  tiles:
+  MATCH    tile needs_attention expected critical=0 serious=0 warning=0 total=0; current 0 | 0 critical, 0 serious, 0 warning
+  MATCH    tile water           expected ok=8 of=8 need_look=0; current 8 of 8 | 0 need a look
+  MATCH    tile budget          expected pct=-3.4242 actual_usd=85373 budget_usd=88400; current −3.4% | $85,373 of $88,400, season to date
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+03-incomplete-and-stale: Incomplete and stale information  [browser mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (9):
+    [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Fuel | 21% over season to date ($2,040)
+    [serious] Budget | Repairs | 25% over season to date ($1,800)
+    [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+    [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+    [serious] Water | Tank T7 (South Divide, Cows here now) | No reading for 30 hours; last level 65.7%
+    [warning] Gain | 4 heifers | Under 0.5 lbs/day: H014, H017, H025, H033
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  expected rows:
+  MATCH    T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+  MATCH    GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MATCH    FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: [serious] Budget | Fuel | 21% over season to date ($2,040)
+  MATCH    REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: [serious] Budget | Repairs | 25% over season to date ($1,800)
+  MATCH    T7           Water/tank 'T7' needs-attention/serious  {"silent_hours":30,"level_pct":65.7}
+             current: [serious] Water | Tank T7 (South Divide, Cows here now) | No reading for 30 hours; last level 65.7%
+  MISMATCH T8           Water/tank 'T8' cant-tell/serious  {}
+             current: none  <- no matching row
+  MISMATCH GAIN-H-STALE Gain/group 'Heifers' cant-tell  {"age_days":72}
+             current: none  <- the current code has no CANT-TELL rows
+  MISMATCH HEALTH-FILE  Health/file 'health.csv' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH VET-BLANK    Budget/category 'Vet and health' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH UNEXPECTED   current row not in expected.json: [warning] Gain | 4 heifers | Under 0.5 lbs/day: H014, H017, H025, H033
+  expected absent (no alert row for these):
+  MATCH    Gain/group 'Heifers' (no current verdict on 72-day-old weigh-ins)
+  MISMATCH Gain/animals 'Heifers' (old-period slow heifers must not be shown as a current alert)  <- current: [warning] Gain | 4 heifers | Under 0.5 lbs/day: H014, H017, H025, H033
+  MATCH    Budget/category 'Vet and health' (its season total is incomplete)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MISMATCH Health   expected cant-tell, current ok
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile water           expected ok=3 of=8 need_look=5; current 3 of 7 | 4 need a look  <- of 7, expected 8; need a look 4, expected 5
+  MISMATCH tile budget          expected sane=true; current +505005006043558.9% | $446,424,425,342,594,400 of $88,400, season to date  <- percent not sane
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+04-irregular-sensor-readings: Irregular sensor readings  [browser mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (10):
+    [critical] Water | Tank T1 (North Flat) | Dropped 35 points in 24 hours, now 56.2%
+    [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Fuel | 21% over season to date ($2,040)
+    [serious] Budget | Repairs | 25% over season to date ($1,800)
+    [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+    [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+    [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  expected rows:
+  MATCH    T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MISMATCH T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: none  <- no matching row
+  MATCH    GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+  MATCH    GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  MATCH    FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: [serious] Budget | Fuel | 21% over season to date ($2,040)
+  MATCH    REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: [serious] Budget | Repairs | 25% over season to date ($1,800)
+  MISMATCH T1-HIST      Water/tank 'T1' cant-tell  {}
+             current: [critical] Water | Tank T1 (North Flat) | Dropped 35 points in 24 hours, now 56.2%  <- the current code has no CANT-TELL rows; it shows an alert instead
+  MISMATCH T3           Water/tank 'T3' needs-attention/critical  {"level_pct":20}
+             current: none  <- no matching row
+  MISMATCH T3-DUP       Water/tank 'T3' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH T5-DUP       Water/file 'water.csv' data-issue  {"count":1}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH T6-FUTURE    Water/file 'water.csv' data-issue  {"count":1}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH T8           Water/tank 'T8' cant-tell/serious  {"last_good_level":80.4}
+             current: none  <- no matching row
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank T1 (North Flat) | Dropped 35 points in 24 hours, now 56.2%
+  expected absent (no alert row for these):
+  MISMATCH Water/tank 'T1' (no leak can be claimed from a 72-hour-old baseline)  <- current: [critical] Water | Tank T1 (North Flat) | Dropped 35 points in 24 hours, now 56.2%
+  MATCH    Water/tank 'T5' (an exact duplicate changes nothing)
+  MATCH    Water/tank 'T7' (row order changes nothing; T7 is healthy)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile water           expected ok_at_most=3 of=8; current 5 of 8 | 3 need a look  <- ok 5, expected at most 3
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+05-missing-groups-and-pastures: Missing groups and pastures  [browser mode]
+as_of 2026-09-30T18:00 America/Chicago
+  note: rules table never drawn within 4 s
+  CURRENT ERROR: TypeError: Cannot read properties of undefined (reading 'name') (at exceptions.js:59)
+  CURRENT TILES ERROR: no tiles on the page
+  ON THE PAGE: page error before the exception table was drawn
+  current rows (0):
+  expected rows:
+  MISMATCH T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: none  <- no matching row
+  MISMATCH T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: none  <- no matching row
+  MISMATCH T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: none  <- no matching row
+  MISMATCH GRZ          Grazing/stay 'Steers' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: none  <- no matching row
+  MISMATCH GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: none  <- no matching row
+  MISMATCH GAIN-Y       Gain/animals 'Steers' needs-attention/warning  {"count":6,"threshold":1}
+             current: none  <- no matching row
+  MISMATCH BOOST        Health/task 'Steers: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: none  <- no matching row
+  MISMATCH PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: none  <- no matching row
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH COWS-P9      Grazing/record 'Cows' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH BULLS        Grazing/record 'Bulls' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  expected absent (no alert row for these):
+  N/A      Grazing/stay 'Cows' (no plan for an unknown pasture: a data issue, not an alarm)  <- not checkable: the current code produced no rows
+  N/A      Grazing/stay 'Bulls' (day 5 of Home Trap's 10 if judged; no alarm either way)  <- not checkable: the current code produced no rows
+  area states:
+  MISMATCH Water    expected needs-attention, current error (no rows)
+  MISMATCH Grazing  expected needs-attention, current error (no rows)
+  MISMATCH Gain     expected needs-attention, current error (no rows)
+  MISMATCH Health   expected needs-attention, current error (no rows)
+  MISMATCH Budget   expected needs-attention, current error (no rows)
+  tiles:
+  MISMATCH tile gain            expected renders=true; current not drawn (no tiles on the page)
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+06-sparse-and-conflicting-weigh-ins: Sparse and conflicting weigh-ins  [browser mode]
+as_of 2026-09-30T18:00 America/Chicago
+  note: rules table never drawn within 4 s
+  CURRENT ERROR: TypeError: Cannot read properties of undefined (reading 'date') (at exceptions.js:70)
+  CURRENT TILES ERROR: no tiles on the page
+  ON THE PAGE: page error before the exception table was drawn
+  current rows (0):
+  expected rows:
+  MISMATCH T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: none  <- no matching row
+  MISMATCH T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: none  <- no matching row
+  MISMATCH T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: none  <- no matching row
+  MISMATCH GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: none  <- no matching row
+  MISMATCH GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: none  <- no matching row
+  MISMATCH BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: none  <- no matching row
+  MISMATCH PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: none  <- no matching row
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH HEIFERS-CT   Gain/group 'Heifers' cant-tell  {}
+             current: none  <- the current code has no CANT-TELL rows
+  MISMATCH Y001-DUP     Gain/record 'Y001' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH Y151         Gain/record 'Y151' cant-tell  {}
+             current: none  <- the current code has no CANT-TELL rows
+  MISMATCH Y-OFF        Gain/record 'Yearlings off-session' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  expected absent (no alert row for these):
+  N/A      Gain/group 'Heifers' (coverage too low or data too old for a verdict)  <- not checkable: the current code produced no rows
+  N/A      Gain/animals 'Heifers' (no individual verdicts from a 3-animal session or from the June-July period)  <- not checkable: the current code produced no rows
+  N/A      Gain/group 'Yearlings' (pooled 1.9425 >= 1.6)  <- not checkable: the current code produced no rows
+  area states:
+  MISMATCH Water    expected needs-attention, current error (no rows)
+  MISMATCH Grazing  expected needs-attention, current error (no rows)
+  MISMATCH Gain     expected needs-attention, current error (no rows)
+  MISMATCH Health   expected needs-attention, current error (no rows)
+  MISMATCH Budget   expected needs-attention, current error (no rows)
+  tiles:
+  MISMATCH tile gain            expected renders=true contains_any=1.94; current not drawn (no tiles on the page)
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+07-zero-budgets-credits-future-months: Zero budgets, unbudgeted spending, a credit and future plan months  [browser mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (10):
+    [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Hay | Infinity% over season to date ($500)
+    [serious] Budget | Ear tags | Infinity% over season to date ($200)
+    [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+    [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+    [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+    [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  expected rows:
+  MATCH    T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill) | Down to 11.8% full
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+  MATCH    GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 24 of a 21-day plan (3 days over)
+  MATCH    GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: [serious] Gain | Heifers | 0.44 lbs/day since 2026-07-20 vs 1.0 target
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":15}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":3}
+             current: [warning] Health | Cows: Pinkeye check | Due in 3 days (2026-10-03)
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH HAY          Budget/category 'Hay' needs-attention/warning  {"usd_spent":500}
+             current: [serious] Budget | Hay | Infinity% over season to date ($500)  <- severity serious, expected warning; shows '%'; shows 'Infinity'
+  MISMATCH UNEXPECTED   current row not in expected.json: [serious] Budget | Ear tags | Infinity% over season to date ($200)
+  expected absent (no alert row for these):
+  MISMATCH Budget/category 'Ear tags' ($200 < $250 (demo unbudgeted line); never 'Infinity%')  <- current: [serious] Budget | Ear tags | Infinity% over season to date ($200)
+  MATCH    Budget/category 'Water and fencing' (3,159 vs 4,800: under budget after the credit)
+  MATCH    Budget/category 'Feed and mineral' (under budget)
+  MATCH    Budget/category 'Vet and health' (under budget)
+  MATCH    Budget/category 'Labor' (under budget)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile budget          expected pct=0.345 actual_usd=88705 budget_usd=88400; current −NaN% | $NaN of $132,600, season to date  <- NaN, Infinity or e+ shown; percent −NaN%, expected 0.3%; dollars differ
+  must_not_appear_anywhere: MISMATCH shows NaN, Infinity
+
+==============================================================================================================
+08-historical-as-of-and-future-records: Historical reporting and future records  [browser mode]
+as_of 2026-09-27T18:00-05:00 (ranch zone America/Chicago; 18:00 CDT)
+  current rows (8):
+    [critical] Water | Tank T2 (Windmill, Yearlings here now) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Budget | Fuel | 21% over season to date ($2,040)
+    [serious] Budget | Repairs | 25% over season to date ($1,800)
+    [serious] Gain | Heifers | 0.43 lbs/day since 2026-09-15 vs 1.0 target
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 12 days (due 2026-09-15)
+    [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+    [warning] Health | Cows: Pinkeye check | Due in 6 days (2026-10-03)
+  expected rows:
+  MISMATCH GRZ-TODAY    Grazing/stay 'Yearlings' needs-attention/warning  {}
+             current: none  <- no matching row
+  MISMATCH GRZ-FUTURE   Grazing/record 'Yearlings' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: [serious] Gain | Heifers | 0.43 lbs/day since 2026-09-15 vs 1.0 target  <- adg 0.4363 not shown; date 2026-07-20 not shown; shows 'since 2026-09-15'
+  MATCH    GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: [warning] Gain | 6 yearlings | Under 1.0 lbs/day: Y027, Y031, Y058, Y082, Y129, Y132
+  MISMATCH W-FUTURE     Gain/file 'weights.csv' data-issue  {"count":10}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH WATER-FUTURE Water/file 'water.csv' data-issue  {"count":89}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":12}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 12 days (due 2026-09-15)
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":6}
+             current: [warning] Health | Cows: Pinkeye check | Due in 6 days (2026-10-03)
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":20,"usd_over":1440}
+             current: [serious] Budget | Fuel | 21% over season to date ($2,040)  <- pct_over 20 not shown; usd_over 1440 not shown; shows '2,040'
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/warning  {"pct_over":13.333333333333334,"usd_over":720}
+             current: [serious] Budget | Repairs | 25% over season to date ($1,800)  <- severity serious, expected warning; pct_over 13.3333 not shown; usd_over 720 not shown
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank T2 (Windmill, Yearlings here now) | Down to 11.8% full
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  expected absent (no alert row for these):
+  MATCH    Water/tank 'T1' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MISMATCH Water/tank 'T2' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)  <- current: [critical] Water | Tank T2 (Windmill, Yearlings here now) | Down to 11.8% full
+  MATCH    Water/tank 'T3' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MISMATCH Water/tank 'T4' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)  <- current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    Water/tank 'T5' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MATCH    Water/tank 'T6' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MATCH    Water/tank 'T7' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MATCH    Water/tank 'T8' (as of Sep 27 18:00 every tank is above 40% with no 30-point fall)
+  MATCH    Grazing/stay 'Cows' (day 15 of 21)
+  MATCH    Grazing/stay 'Heifers' (day 8 of 14)
+  area states:
+  MISMATCH Water    expected ok, current needs-attention
+  MISMATCH Grazing  expected needs-attention, current ok
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile water           expected ok=8 of=8 need_look=0; current 6 of 8 | 2 need a look  <- ok 6, expected 8; need a look 2, expected 0
+  MISMATCH tile budget          expected pct=-1.4072 actual_usd=65367 budget_usd=66300; current +1.0% | $89,303 of $88,400, season to date  <- percent +1.0%, expected -1.4%; dollars differ
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+09-exact-rule-boundaries: Exact rule boundaries  [browser mode]
+as_of 2026-09-30T18:00 America/Chicago
+  current rows (15):
+    [critical] Water | Tank T1 (North Flat) | Down to 24.9% full
+    [serious] Budget | Vet and health | 11% over season to date ($630)
+    [serious] Gain | Yearlings | 1.60 lbs/day since 2026-07-20 vs 2.0 target
+    [serious] Grazing | Yearlings in Sand Hills | Day 22 of a 21-day plan (1 day over)
+    [serious] Health | Yearlings: Booster vaccine | Overdue by 1 day (due 2026-09-29)
+    [serious] Water | Tank T9 (Creek Bottom) | No reading for 24 hours; last level 75.3%
+    [warning] Budget | Feed and mineral | 10% over season to date
+    [warning] Budget | Repairs | 10% over season to date
+    [warning] Grazing | Cows in South Divide | Planned move in 2 days
+    [warning] Grazing | Heifers in Lone Tree | Planned move in 0 days
+    [warning] Health | Cows: Pinkeye check | Due in 7 days (2026-10-07)
+    [warning] Health | Yearlings: Deworm | Due in 0 days (2026-09-30)
+    [warning] Water | Tank T2 (Windmill) | 25% full
+    [warning] Water | Tank T3 (Sand Hills, Yearlings here now) | 25.1% full
+    [warning] Water | Tank T4 (Lone Tree, Heifers here now) | 39.9% full
+  expected rows:
+  MATCH    T1           Water/tank 'T1' needs-attention/critical  {"level_pct":24.9}
+             current: [critical] Water | Tank T1 (North Flat) | Down to 24.9% full
+  MATCH    T2           Water/tank 'T2' needs-attention/warning  {"level_pct":25}
+             current: [warning] Water | Tank T2 (Windmill) | 25% full
+  MATCH    T3           Water/tank 'T3' needs-attention/warning  {"level_pct":25.1}
+             current: [warning] Water | Tank T3 (Sand Hills, Yearlings here now) | 25.1% full
+  MATCH    T4           Water/tank 'T4' needs-attention/warning  {"level_pct":39.9}
+             current: [warning] Water | Tank T4 (Lone Tree, Heifers here now) | 39.9% full
+  MISMATCH T6           Water/tank 'T6' needs-attention/critical  {"drop_pts":30,"level_pct":50.1}
+             current: none  <- no matching row
+  MATCH    T9           Water/tank 'T9' needs-attention/serious  {"silent_hours":24,"level_pct":75.3}
+             current: [serious] Water | Tank T9 (Creek Bottom) | No reading for 24 hours; last level 75.3%
+  MATCH    COWS         Grazing/stay 'Cows' needs-attention/warning  {"days_left":2}
+             current: [warning] Grazing | Cows in South Divide | Planned move in 2 days
+  MISMATCH HEIFERS      Grazing/stay 'Heifers' needs-attention/warning  {}
+             current: [warning] Grazing | Heifers in Lone Tree | Planned move in 0 days  <- none of ["today"] shown; shows 'in 0 days'
+  MATCH    YEARLINGS    Grazing/stay 'Yearlings' needs-attention/serious  {"days":22,"plan":21,"over":1}
+             current: [serious] Grazing | Yearlings in Sand Hills | Day 22 of a 21-day plan (1 day over)
+  MISMATCH Y-ANIMALS    Gain/animals 'Yearlings' needs-attention/warning  {"count":1,"threshold":1}
+             current: none  <- no matching row
+  MATCH    BOOST        Health/task 'Yearlings: Booster vaccine' needs-attention/serious  {"overdue_days":1}
+             current: [serious] Health | Yearlings: Booster vaccine | Overdue by 1 day (due 2026-09-29)
+  MISMATCH DEWORM       Health/task 'Yearlings: Deworm' needs-attention/warning  {}
+             current: [warning] Health | Yearlings: Deworm | Due in 0 days (2026-09-30)  <- none of ["today"] shown; shows 'in 0 days'
+  MATCH    PINK         Health/task 'Cows: Pinkeye check' needs-attention/warning  {"due_in_days":7}
+             current: [warning] Health | Cows: Pinkeye check | Due in 7 days (2026-10-07)
+  MISMATCH FEED         Budget/category 'Feed and mineral' needs-attention/warning  {"pct_over":10,"usd_over":2480}
+             current: [warning] Budget | Feed and mineral | 10% over season to date  <- usd_over 2480 not shown
+  MISMATCH LABOR        Budget/category 'Labor' needs-attention/warning  {"pct_over":5,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/warning  {"pct_over":10,"usd_over":720}
+             current: [warning] Budget | Repairs | 10% over season to date  <- usd_over 720 not shown
+  MISMATCH VET          Budget/category 'Vet and health' needs-attention/warning  {"pct_over":10.5,"usd_over":630}
+             current: [serious] Budget | Vet and health | 11% over season to date ($630)  <- severity serious, expected warning
+  MISMATCH UNEXPECTED   current row not in expected.json: [serious] Gain | Yearlings | 1.60 lbs/day since 2026-07-20 vs 2.0 target
+  expected absent (no alert row for these):
+  MATCH    Water/tank 'T5' (40.0 is not < 40)
+  MATCH    Water/tank 'T7' (80.0 - 50.1 = 29.9 < 30; 50.1 >= 40)
+  MATCH    Water/tank 'T8' (last reading Sep 29 18:06: 23.9 hours < 24; level 70.2)
+  MATCH    Gain/group 'Heifers' (pooled 2052 / 2565 = 0.8 = exactly 0.8 x 1.0, not under it)
+  MISMATCH Gain/group 'Yearlings' (pooled 13680 / 8550 = 1.6 = exactly 0.8 x 2.0)  <- current: [serious] Gain | Yearlings | 1.60 lbs/day since 2026-07-20 vs 2.0 target
+  MATCH    Gain/animals 'Heifers' (slowest heifer 45/57 = 0.789 >= 0.5)
+  MATCH    Health/task 'Heifers: Pregnancy check' (due Oct 8: 8 days, outside 7)
+  MATCH    Budget/category 'Fuel' (10,080 vs 9,600: $480, 480 / 9,600 = 5.0%: exactly 5.0% but $480 < $500)
+  MATCH    Budget/category 'Water and fencing' (5,035 vs 4,800: $235, 235 / 4,800 = 4.9%: under 5%)
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MATCH    Grazing  expected needs-attention, current needs-attention
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MATCH    Health   expected needs-attention, current needs-attention
+  MATCH    Budget   expected needs-attention, current needs-attention
+  tiles:
+  MISMATCH tile water           expected ok=3 of=9 need_look=6; current 4 of 9 | 5 need a look  <- ok 4, expected 3; need a look 5, expected 6
+  MATCH    tile budget          expected pct=7.1776 actual_usd=94745 budget_usd=88400; current +7.2% | $94,745 of $88,400, season to date
+  must_not_appear_anywhere: MATCH
+
+==============================================================================================================
+10-malformed-and-hostile-csv: Malformed and hostile CSV text  [browser mode]
+as_of 2026-09-30T18:00 America/Chicago
+  note: rules table never drawn within 4 s
+  CURRENT ERROR: TypeError: Cannot read properties of undefined (reading 'time') (at app.js:93)
+  current rows (7):
+    [critical] Water | Tank 0 (undefined) | Down to % full
+    [critical] Water | Tank (undefined) | Down to % full
+    [critical] Water | Tank T2 (Windmill ) | Down to 11.8% full
+    [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+    [serious] Gain | Yearlings | 1.94 lbs/day since 2026-07-20 vs 150.0 target
+    [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+    [warning] Gain | 32 heifers | Under 0.5 lbs/day: H002, H004, H006, H007, H008, H009, H010, H011, H012, H013, H014, H016, H017, H018, H021, H023, H024, H026, H028, H029, H031, H032, H033, H034, H036, H037, H038, H039, H040, H041, H043, H045
+  expected rows:
+  MISMATCH T2           Water/tank 'T2' needs-attention/critical  {"level_pct":11.8}
+             current: [critical] Water | Tank T2 (Windmill ) | Down to 11.8% full  <- none of ["Windmill <img"] shown
+  MATCH    T4           Water/tank 'T4' needs-attention/critical  {"drop_pts":46,"level_pct":10}
+             current: [critical] Water | Tank T4 (Lone Tree, Heifers here now) | Dropped 46 points in 24 hours, now 10%
+  MATCH    T6           Water/tank 'T6' needs-attention/serious  {"silent_hours":42,"level_pct":98.5}
+             current: [serious] Water | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%
+  MISMATCH GRZ          Grazing/stay 'Yearlings' needs-attention/serious  {"days":24,"plan":21,"over":3}
+             current: none  <- no matching row
+  MISMATCH GAIN-H       Gain/group 'Heifers' needs-attention/serious  {"adg":0.43625730994152045,"target":1}
+             current: none  <- no matching row
+  MISMATCH FUEL         Budget/category 'Fuel' needs-attention/serious  {"pct_over":21.25,"usd_over":2040}
+             current: none  <- no matching row
+  MISMATCH REPAIRS      Budget/category 'Repairs' needs-attention/serious  {"pct_over":25,"usd_over":1800}
+             current: none  <- no matching row
+  MISMATCH GAIN-Y       Gain/animals 'Yearlings' needs-attention/warning  {"count":6,"threshold":1}
+             current: none  <- no matching row
+  MISMATCH HEALTH-COL   Health/file 'health.csv' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH WATER-BLANKS Water/file 'water.csv' data-issue  {}
+             current: none  <- the current code has no DATA-ISSUE rows
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank 0 (undefined) | Down to % full
+  MISMATCH UNEXPECTED   current row not in expected.json: [critical] Water | Tank (undefined) | Down to % full
+  MISMATCH UNEXPECTED   current row not in expected.json: [serious] Gain | Yearlings | 1.94 lbs/day since 2026-07-20 vs 150.0 target
+  MISMATCH UNEXPECTED   current row not in expected.json: [warning] Gain | 32 heifers | Under 0.5 lbs/day: H002, H004, H006, H007, H008, H009, H010, H011, H012, H013, H014, H016, H017, H018, H021, H023, H024, H026, H028, H029, H031, H032, H033, H034, H036, H037, H038, H039, H040, H041, H043, H045
+  expected absent (no alert row for these):
+  MISMATCH Gain/group 'Yearlings' (target read as 2.0; pooled 1.9425 >= 1.6)  <- current: [serious] Gain | Yearlings | 1.94 lbs/day since 2026-07-20 vs 150.0 target
+  MISMATCH Gain/animals 'Heifers' (the group-wide heifer row covers them)  <- current: [warning] Gain | 32 heifers | Under 0.5 lbs/day: H002, H004, H006, H007, H008, H009, H010, H011, H012, H013, H014, H016, H017, H018, H021, H023, H024, H026, H028, H029, H031, H032, H033, H034, H036, H037, H038, H039, H040, H041, H043, H045
+  area states:
+  MATCH    Water    expected needs-attention, current needs-attention
+  MISMATCH Grazing  expected needs-attention, current ok
+  MATCH    Gain     expected needs-attention, current needs-attention
+  MISMATCH Health   expected cant-tell, current ok
+  MISMATCH Budget   expected needs-attention, current ok
+  tiles:
+  MISMATCH tile water           expected ok=5 of=8 need_look=3; current 5 of 10 | 5 need a look  <- of 10, expected 8; need a look 5, expected 3
+  MISMATCH tile budget          expected pct=1 actual_usd=89303 budget_usd=88400; current −NaN% | $NaN of $88,400, season to date  <- NaN, Infinity or e+ shown; percent −NaN%, expected 1.0%; dollars differ
+  render:
+  MISMATCH no_injected_element #exceptions img, #water img, #tiles img, #budgetTable img: 1 element(s)
+  MISMATCH global_not_set __scenarioXss: 1
+  MISMATCH text_visible Windmill <img: not visible as text
+  must_not_appear_anywhere: MISMATCH shows NaN, undefined
+
+##############################################################################################################
+SUMMARY (browser mode; MATCH means today's output already meets the Phase-1 expectation)
+scenario                                    rows  unexp  absent  areas  tiles  render  verdict    current error
+01-planted-problems                        10/10 0     15/15  5/5   5/5   -      MATCH     
+02-healthy-operation                       0/0   0     25/25  5/5   3/3   -      MATCH     
+03-incomplete-and-stale                    8/12  1     2/3    4/5   0/2   -      MISMATCH  
+04-irregular-sensor-readings               9/16  1     2/3    5/5   0/1   -      MISMATCH  
+05-missing-groups-and-pastures             0/12  0     n/a    0/5   0/1   -      MISMATCH  TypeError: Cannot read properties of undefined (reading 'name') (at ex
+06-sparse-and-conflicting-weigh-ins        0/13  0     n/a    0/5   0/1   -      MISMATCH  TypeError: Cannot read properties of undefined (reading 'date') (at ex
+07-zero-budgets-credits-future-months      8/11  1     4/5    5/5   0/1   -      MISMATCH  
+08-historical-as-of-and-future-records     3/10  2     8/10   3/5   0/2   -      MISMATCH  
+09-exact-rule-boundaries                   9/17  1     8/9    5/5   1/2   -      MISMATCH  
+10-malformed-and-hostile-csv               2/10  4     0/2    2/5   0/2   0/3    MISMATCH  TypeError: Cannot read properties of undefined (reading 'time') (at ap
+
+wrote docs/audit/scenarios/run-results.json

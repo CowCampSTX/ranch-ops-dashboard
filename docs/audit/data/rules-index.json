@@ -1,0 +1,1016 @@
+{
+ "note": "Compact index of rules.json. Full detail per rule: python3 -c \"import json;print(json.dumps([x for x in json.load(open('docs/audit/data/rules.json'))['rules'] if x['id']=='RULE-ID'],indent=1))\"",
+ "legend": {
+  "classification": {
+   "A": "supported general guidance",
+   "B": "context-dependent guidance",
+   "C": "ranch-specific management choice",
+   "D": "synthetic demonstration setting"
+  },
+  "classification_rule": "Where a checker dispute was credible, the stricter class was applied and classification_note says why. A rule that bundles supported guidance with a design choice takes the stricter class; the note names the supported part.",
+  "verification": {
+   "verified": "the citation checker confirmed the claim on the page",
+   "partly": "the page supports only part of the claim, or a detail is wrong (see checker_note)",
+   "unverified": "the page could not be confirmed (empty, blocked, or not checked)",
+   "failed": "unreachable, or (integrations only) checked and found not to support the use"
+  },
+  "rejected_sources": "Sources the checker marked claim_supported 'no' for this use. They are not listed as support.",
+  "kind": "vendor = vendor specification or vendor-authored material, kept apart from independent outcomes; product-documentation = agency or university product pages the research had labelled 'field-study'.",
+  "recommended_phase": {
+   "1": "Fix now",
+   "2": "Build next",
+   "3": "Add later (at most three items: water supply coverage; forage observations at moves; drought/precipitation snapshot)",
+   "defer": "Defer or exclude"
+  },
+  "data_fields.required": {
+   "phase-1 required": "needed by phase-1 rules or the phase-1 data contract",
+   "optional": "used when present, or by phase-2 features; the page works without it",
+   "later": "phase-3 or deferred rules"
+  },
+  "research_refs": "0-based indexes into the research files' arrays.",
+  "web_checks": "Every web check in the evidence went through a summarising fetch tool; direct downloads were refused by the proxy. Quotes are as the tools returned them.",
+  "critic_recheck": "Present on a source when the citation critic re-opened it (WebFetch) to confirm a number a recommendation depends on."
+ },
+ "rules": [
+  {
+   "id": "RULE-WAT-01",
+   "rule": "CURRENT: critical when a tank's latest level_pct < 25 (RULES.waterCritical). Action shown: 'Check the float and the supply line today'.",
+   "current_or_proposed": "current",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether someone goes to a tank now.",
+   "sources": 4,
+   "verified": 4
+  },
+  {
+   "id": "RULE-WAT-02",
+   "rule": "CURRENT: warning when the latest level_pct < 40 (RULES.waterLow). Action shown: 'Look at it on the next pass'.",
+   "current_or_proposed": "current",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether to add the tank to the next routine check.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WAT-03",
+   "rule": "CURRENT: critical when the level fell >= 30 points between the latest reading and the most recent reading at least 24 h earlier (RULES.waterDropPts). Action shown: 'Check for a leak or a stuck float; haul water if it can't be fixed today'.",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "Whether there is a supply failure: a leak, a float stuck shut, or a pump or pipeline failure.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-WAT-04",
+   "rule": "CURRENT: serious when the last reading is >= 24 h before as_of (RULES.sensorSilentHours). The tank's level and drop are then not judged at all ('continue').",
+   "current_or_proposed": "current",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether to send someone to look at the tank and sensor because the data is stale.",
+   "sources": 5,
+   "verified": 5
+  },
+  {
+   "id": "RULE-WAT-05",
+   "rule": "CURRENT GAP + PROPOSED: water severity should account for whether cattle are on the tank's pasture now or are planned to move there. Today the level and drop rules give the same severity with or without cattle, and the subject line only names a group when one is present. Proposed: a critical or silent tank in an occupied pasture is also shown as a reason on that group's grazing row, and a low or silent tank in the planned destination is flagged before the move. Tanks in empty pastures keep their row but rank lower; they are never hidden.",
+   "current_or_proposed": "current gap + proposed",
+   "classification": "C",
+   "recommended_phase": "2",
+   "decision_supported": "[water research rule 4] Priority of a water exception. | [grazing research rule 7] Whether to move early (water failure), or delay or redirect a planned move (destination water not ready).",
+   "sources": 3,
+   "verified": 1
+  },
+  {
+   "id": "RULE-WAT-06",
+   "rule": "PROPOSED: estimate how long the water in each tank will last for the cattle on it. Usable gallons (level x usable capacity, with and without expected refill) divided by demand (head present by class x gal/head/day for the day's temperature) gives hours or days of water. Warn below a ranch-set figure, for example less than the time until the next check plus the time needed to respond.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "3",
+   "decision_supported": "[water research rule 5] Who goes, and how soon: haul water, fix the float, or move cattle. | [context research rule 10] Whether to haul water, fix supply, or move cattle before a tank runs dry",
+   "sources": 10,
+   "verified": 8
+  },
+  {
+   "id": "RULE-WAT-07",
+   "rule": "PROPOSED: silence escalation. Mark a tank stale after N x its device's expected reporting interval. Severity = max(device-maintenance severity, worst-case water severity from the last-known level, head present and heat, projected to now).",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "2",
+   "decision_supported": "Whether a silent sensor is a maintenance chore or a reason to drive out now.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-WAT-08",
+   "rule": "PROPOSED: leak and stuck-float screen. (a) Unexplained fall = observed fall minus expected consumption, over a window of at least two reporting intervals. (b) Any sustained fall in a pasture with no cattle. (c) A float-fed tank that fails to recover within its expected refill time. (d) A float stuck open or overflowing cannot be seen in level data, so add a flow-meter or visual check.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether to send someone for a supply fault instead of a consumption problem.",
+   "sources": 3,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WAT-09",
+   "rule": "PROPOSED: storage-days check. For tanks on windmill, solar or otherwise undependable supply, compare storage (gal) with daily herd demand and flag when storage covers fewer than 3 days.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "3",
+   "decision_supported": "Whether a tank system can ride out a calm or cloudy spell or a pump failure, which drives a haul plan or a move decision.",
+   "sources": 4,
+   "verified": 4
+  },
+  {
+   "id": "RULE-WAT-10",
+   "rule": "PROPOSED: float-fed tank adequacy. Flag when design inflow cannot deliver the herd's daily need within about 4 h, or a tank holds less than 1/4 of daily need for group drinking, or refill takes more than 1 h.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether a tank and float are sized for the group placed on it, checked before a move.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-WAT-11",
+   "rule": "PROPOSED: water quality screening by TDS (field EC/TDS meter). Below 3,000 ppm is usually satisfactory. 3,000-5,000 ppm: watch young stock. 5,000-7,000 ppm: not for pregnant or lactating females. 7,000-10,000 ppm: do not use for pregnant or lactating cattle (the source's wording; it does not say 'avoid' for every class). Above 10,000 ppm: not suitable for livestock. If a screen reads above 4,500 ppm, schedule a lab test. Screen surface and shallow sources during drought.",
+   "current_or_proposed": "proposed",
+   "classification": "A",
+   "recommended_phase": "defer",
+   "decision_supported": "Scheduling a water test, and choosing which water source a class of cattle can use (observation and records, not diagnosis).",
+   "sources": 3,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WAT-12",
+   "rule": "PROPOSED: sulfate and nitrate screening flags with class and diet context. Sulfate: calves under 500 ppm, adults under 1,000 ppm (UNL and NDSU text), but limits vary with diet. Nitrate under 100 ppm (AS1764 Table 3; the source does not say whether this is NO3 or NO3-N, so record which basis the lab reports; also count feed nitrate).",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether to schedule lab confirmation and which class may use a source (records only).",
+   "sources": 3,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WAT-13",
+   "rule": "PROPOSED: blue-green algae (cyanobacteria) observation and escalation. If scum, blue, green, red or yellow colour, or wind-blown accumulation is seen on a pond, dugout or stagnant tank in hot, sunny, calm weather (late summer to early autumn), log it. Then move cattle to an alternate or windward water point, collect a 500 ml or larger sample (gloves; cool, not frozen), and contact a veterinarian. Do not move dead stock until a vet is consulted.",
+   "current_or_proposed": "proposed",
+   "classification": "A",
+   "recommended_phase": "defer",
+   "decision_supported": "Restricting access to a water source, and lab and vet escalation (observation only).",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WAT-14",
+   "rule": "PROPOSED: sensor trust band and calibration record. Store each device's stated accuracy and the sensor offset or usable-bottom setting. Mark readings within the accuracy band of a threshold as 'near threshold, verify'. Do not re-judge history when the offset changes.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "How far to trust a reading before sending someone.",
+   "sources": 6,
+   "verified": 5
+  },
+  {
+   "id": "RULE-WAT-15",
+   "rule": "PROPOSED: sensor readings supplement, and do not replace, eyes-on tank checks. The page says 'Sensors normal', not 'Water tanks OK', unless a visual check is recorded. The crew briefing lists tanks to check by eye, and the record captures who checked, when and what they saw. How often to check is a ranch choice.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Which tanks the crew physically visits today, and whether a 'normal' sensor reading has been confirmed.",
+   "sources": 1,
+   "verified": 0
+  },
+  {
+   "id": "RULE-GRZ-01",
+   "rule": "CURRENT: Serious when an open stay's days in pasture (as_of date minus in_date) is more than the pasture's planned_graze_days (exceptions.js, grazing block of findExceptions: over = g.days - g.planned; over > 0 gives 'serious'). The threshold is hard-coded; RULES has no setting for it.",
+   "current_or_proposed": "current",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Move the group now, or check the grass and record a new move date.",
+   "sources": 5,
+   "verified": 2
+  },
+  {
+   "id": "RULE-GRZ-02",
+   "rule": "CURRENT: Warning when a planned move is 2 days away or less (RULES.graceDays = 2; over >= -2).",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "Line up the move (crew, gates, trailer or horseback, water at the next pasture).",
+   "sources": 2,
+   "verified": 1
+  },
+  {
+   "id": "RULE-GRZ-03",
+   "rule": "UNUSED DATA -> PROPOSED: Rest/recovery check. pastures.csv carries min_rest_days (30-60 d), but no shipped code reads it. Proposed check: rest = days between the last out_date by ANY group and the next in_date in the same pasture, counting growing-season days only, compared with a recovery minimum that depends on growth rate (fast/slow) and region.",
+   "current_or_proposed": "current (unused data) -> proposed",
+   "classification": "B",
+   "recommended_phase": "2",
+   "decision_supported": "Before a move: don't send cattle into a pasture that has not recovered, or record why you are doing it anyway. After the fact: record and review re-entries made short of the plan.",
+   "sources": 5,
+   "verified": 2
+  },
+  {
+   "id": "RULE-GRZ-04",
+   "rule": "PROPOSED: Concurrent-occupancy check. Flag when two groups have overlapping stays in the same pasture.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "2",
+   "decision_supported": "Confirm whether herds were deliberately combined, which changes the stocking density and the planned days, or whether the move record is wrong.",
+   "sources": 1,
+   "verified": 0
+  },
+  {
+   "id": "RULE-GRZ-05",
+   "rule": "PROPOSED: record a forage observation (residual height or utilization estimate, regrowth or recovery note, photo point) at move-out and before re-entry, and warn when an occupied pasture has had no forage check within a ranch-set number of days. Use it alongside min_rest_days; satellite or forecast products do not replace it.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "3",
+   "decision_supported": "[grazing research rule 10] Schedule a pasture walk so that the move decision rests on an observation. | [context research rule 11] Whether a pasture is ready to graze again and whether planned graze days held",
+   "sources": 4,
+   "verified": 4
+  },
+  {
+   "id": "RULE-GRZ-06",
+   "rule": "PROPOSED: key-species residual check during and at the end of each stay. Use stubble height (warning near the ranch's target; serious below it with cattle still in) or, as an alternative or companion, utilization (% of current-year growth removed by weight) per grazing period and per season.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "3",
+   "decision_supported": "[grazing research rule 4] Move now, or not yet. This replaces elapsed days as the main move trigger. | [grazing research rule 5] Whether a stay or a season's use stayed within the plan, and whether the stocking rate needs adjusting next season.",
+   "sources": 6,
+   "verified": 3
+  },
+  {
+   "id": "RULE-GRZ-07",
+   "rule": "PROPOSED: Derive planned graze days from forage demand (AU-days) instead of a fixed per-pasture day count: planned days = (acres x usable forage lb/ac x harvest efficiency) / (head x AUE x daily forage per AU).",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Writing the move plan, and re-planning when herd size, animal weight or forage estimates change.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-GRZ-08",
+   "rule": "PROPOSED: Cattle behaviour and performance as a move signal (manual note: herd walking fence, bunching at gates or water, selecting less-preferred plants; plus a gain trend), giving a 'check forage now' warning.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Check the pasture or move early; link a low-gain exception to the forage situation.",
+   "sources": 2,
+   "verified": 0
+  },
+  {
+   "id": "RULE-GRZ-09",
+   "rule": "PROPOSED (season start): Range readiness. Warning when a planned first entry into a native pasture comes before its key cool-season species reaches about the 3.5-leaf stage (tame cool-season: 3-leaf), or before the ranch's height trigger.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Delay turnout or start on tame pasture first.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-GAIN-01",
+   "rule": "CURRENT: Group 'serious' when the mean of per-animal ADG since the last weigh-in is < 80% of the group's fixed target (exceptions.js: g.adg < g.target * R.adgSerious, adgSerious 0.8). Action text: 'Check forage quality and mineral; look for a health problem in the group'.",
+   "current_or_proposed": "current",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether a grazing group needs a look at forage, supplement/mineral, water, health observations or weighing conditions before the next move, sale or supplement decision.",
+   "sources": 7,
+   "verified": 7
+  },
+  {
+   "id": "RULE-GAIN-02",
+   "rule": "CURRENT: Individual 'warning' when an animal's ADG between its last two weigh-ins is < 50% of the group target (RULES.animalShare 0.5). Suppressed when the group is already serious. Action text: 'Pull and check these animals at the next gather'.",
+   "current_or_proposed": "current",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Which individual animals to look at closely at the next gather (observation, records, escalation to the herd veterinarian when observations warrant).",
+   "sources": 5,
+   "verified": 5
+  },
+  {
+   "id": "RULE-GAIN-03",
+   "rule": "CURRENT: Yearling steer target ADG = 2.0 lb/d, applied to any interval (groups.csv).",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "Expected performance benchmark for yearlings on summer grass, used to judge group and individual gain.",
+   "sources": 6,
+   "verified": 6
+  },
+  {
+   "id": "RULE-GAIN-04",
+   "rule": "CURRENT: First-calf heifer target ADG = 1.0 lb/d over the summer (groups.csv Heifers, class 'first-calf heifers'), judged by the same 80%/50% rules.",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "Whether young lactating cows are being fed well enough to keep growing and rebreed.",
+   "sources": 4,
+   "verified": 3
+  },
+  {
+   "id": "RULE-GAIN-05",
+   "rule": "CURRENT: Cows (cow-calf pairs) target 0.0, so the gain rules skip them ('if (!g.target) continue'). No other cow condition measure exists.",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "Whether mature cows need nutritional attention ahead of calving or breeding.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-GAIN-06",
+   "rule": "PROPOSED: Weigh-condition consistency gate. Every weigh-in records its weight basis (full, overnight-shrunk, pencil shrink %), gather/weigh time and hours off feed/water. ADG is only compared across weigh-ins with the same basis and routine, or after a stated adjustment.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether a change in weight reflects tissue gain or a change in gut fill and handling.",
+   "sources": 6,
+   "verified": 6
+  },
+  {
+   "id": "RULE-GAIN-07",
+   "rule": "PROPOSED: Minimum interval / number of weights before ADG is judged. Individual ADG needs at least about 70 d, or a regression on 3 or more weights. Group ADG needs an interval long enough that a plausible one-sided weighing error stays under a chosen share of the expectation.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether an ADG figure is precise enough to act on.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-GAIN-08",
+   "rule": "PROPOSED: Period-specific expected ADG. The expectation used by the group rule depends on season segment, forage type, supplementation and the current year's forage outlook.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Separating a management or health problem from normal seasonal and weather-driven decline.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-GAIN-09",
+   "rule": "PROPOSED (class not in current data): Replacement heifer target-weight rule. Required ADG = (target % of mature BW x mature BW - current BW) / days to breeding start. Flag when the projected breeding weight falls short of the ranch's target.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether developing heifers will reach the ranch's chosen breeding weight in time.",
+   "sources": 5,
+   "verified": 5
+  },
+  {
+   "id": "RULE-GAIN-10",
+   "rule": "PROPOSED: Coverage and matched-interval gate for group ADG. Report weighed head / inventory head and the number of animals with both weigh-ins in the same interval. Withhold the group verdict below a ranch-set coverage share or when intervals are mixed.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether the group figure represents the group.",
+   "sources": 1,
+   "verified": 0
+  },
+  {
+   "id": "RULE-GAIN-11",
+   "rule": "PROPOSED: Scale check per weigh session. Zero the scale and check it with a known weight at the start of each session (and after moving it). Record scale ID and the check result. Note that ranch management scales are not trade-certified.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether a weigh session's numbers can be trusted.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-HLTH-01",
+   "rule": "CURRENT: An open health task past its next_due date is 'serious', and the action reads 'Schedule it this week' (exceptions.js:140-144; app.js:211 rules row 'An open health task is past its due date').",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "Whether a scheduled herd-health job (vaccination, parasite control, exam or observation) needs attention now.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-HLTH-02",
+   "rule": "CURRENT: An open health task due within RULES.dueSoonDays = 7 days is a 'warning', and the action reads 'Plan it with the next gather' (exceptions.js:13, 145-146).",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "When to start planning a gather, crew, products or a veterinarian visit for an upcoming task.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-HLTH-03",
+   "rule": "CURRENT: An open task with a blank next_due is skipped silently (exceptions.js:141 'if (h.status !== \"open\" || !h.next_due) continue'). Statuses other than the exact string 'open' are also skipped silently.",
+   "current_or_proposed": "current",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether an outstanding health task is visible to the manager at all.",
+   "sources": 1,
+   "verified": 1
+  },
+  {
+   "id": "RULE-HLTH-04",
+   "rule": "PROPOSED: For vaccination and parasite-control tasks, evaluate against a window (window_start..window_end) recorded from the product label or the veterinarian's plan, with schedule_source stored. Warning when window_start is within the lead time. Serious when window_end has passed, with an escalate-to-vet action.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether a booster or revaccination can still be done inside its label or vet window, or needs veterinarian input first.",
+   "sources": 4,
+   "verified": 4
+  },
+  {
+   "id": "RULE-HLTH-05",
+   "rule": "PROPOSED: In fly season, each pastured group gets a recurring eye and condition observation. Warn when a group has no recorded check in N days (N is a ranch setting). When an observation records animals with watery eyes, squinting or a cloudy eye, show 'N head with eye signs recorded. Call your veterinarian' and schedule a recheck within a few days. The current one-off 'Pinkeye check' row and its 'Plan it with the next gather' action become this.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Early detection and timely veterinarian contact for eye problems during face-fly season, without the dashboard diagnosing.",
+   "sources": 6,
+   "verified": 4
+  },
+  {
+   "id": "RULE-HLTH-06",
+   "rule": "PROPOSED: A health task can be marked done only with a BQA-style completion record: date, group or animal ID, product and lot/serial (product tasks), route and location, withdrawal clear date, person administering, and head count worked. Missing items show as 'record incomplete'.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether the ranch can show what was done, to which animals, by whom, and when they clear withdrawal (BQA compliance and marketing).",
+   "sources": 4,
+   "verified": 4
+  },
+  {
+   "id": "RULE-HLTH-07",
+   "rule": "PROPOSED: Coverage gap. When head_done is less than the group's head count for a group task, show a warning 'N head not yet worked (done X of Y on [date])'.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether animals missed at a gather (strays, cut-backs, late arrivals) still need the task.",
+   "sources": 1,
+   "verified": 1
+  },
+  {
+   "id": "RULE-HLTH-08",
+   "rule": "PROPOSED: Serious when a recorded withdrawal clear date falls after the group's planned ship or sale date. Action: 'Do not ship before [clear date]. Talk with your veterinarian.'",
+   "current_or_proposed": "proposed",
+   "classification": "A",
+   "recommended_phase": "defer",
+   "decision_supported": "Marketing timing that avoids residues: whether a group can leave on its planned date.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-HLTH-09",
+   "rule": "PROPOSED: Low-stress timing for sensitive groups. When a handling task is planned for females in early pregnancy (inside a configurable number of days after bull turn-in), show a note: 'Early-pregnant females: keep handling, transport and heat stress low. Confirm timing with your veterinarian.' Pregnancy-check windows are derived from breeding-season dates.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether to combine, delay or move a gather for bred heifers or cows. When to book the pregnancy check.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-HLTH-10",
+   "rule": "PROPOSED: Escalate-to-veterinarian triggers from observation records. (a) Any death without a known cause gives 'Call your veterinarian about a necropsy'. (b) Abortions or late pregnancy losses above the herd's own baseline give 'Call your veterinarian'. (c) Signs recorded in more than one animal of a group, or the same sign recurring, give 'Call your veterinarian'. Reportable diseases are left to the veterinarian, who reports to the state.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "When the manager should bring in the herd veterinarian, worded as observations, not diagnoses.",
+   "sources": 4,
+   "verified": 3
+  },
+  {
+   "id": "RULE-HLTH-11",
+   "rule": "PROPOSED: wording rule for every Health row and for gain follow-ups. Describe what is scheduled or what was observed, and who to call. Never state a diagnosis, cause, drug, dose or treatment. For slow-gaining animals: list them, observe them at the next gather, record what was seen, and refer to the herd veterinarian under the ranch's health plan. Reword the current Gain action 'look for a health problem in the group' the same way.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "[health research rule 11] Keeping the dashboard inside the manager's role (observe, schedule, record, escalate) and the veterinarian's role (diagnose, prescribe). | [gain research rule 11] Who to look at, and how the observation is recorded.",
+   "sources": 4,
+   "verified": 4
+  },
+  {
+   "id": "RULE-HLTH-12",
+   "rule": "PROPOSED: Herd veterinarian and VCPR currency. Store the herd veterinarian's name and contact and the date of the vet's last visit to the premises. Show an info row when no visit is recorded within a ranch-set period. Escalation text uses the stored contact.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether the ranch has a working vet relationship to escalate to and to authorize prescription, extralabel or VFD products.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-BUD-01",
+   "rule": "CURRENT: Serious when a category is more than 10% over budget, season to date (exceptions.js RULES.budgetSerious = 0.10; budgetStatus sums every row in budget.csv per category, pct = (actual - budget) / budget).",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "Whether the manager should find out what drove a category overrun now and decide whether to reforecast.",
+   "sources": 4,
+   "verified": 2
+  },
+  {
+   "id": "RULE-BUD-02",
+   "rule": "CURRENT: Warning when a category is 5-10% over budget season to date (RULES.budgetWarn = 0.05; code tests pct > 0.05 and pct > 0.10 with strict inequalities; warning text omits dollars; action 'Watch it next month').",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "Whether to keep an eye on a category before it becomes serious.",
+   "sources": 2,
+   "verified": 1
+  },
+  {
+   "id": "RULE-BUD-03",
+   "rule": "PROPOSED: Combined percent-and-dollar materiality per category over closed months (V = actual - plan to date; p = V / plan). Serious if p >= seriousPct AND V >= seriousUsd. Warning if p >= warnPct AND V >= warnUsd. Large-dollar override: warning if V >= largeUsd whatever p is. Dollar floors are either fixed dollars or a share of the total season-to-date operating budget, so they scale with ranch size. Demo values used in the diagnostic: warnPct 5%, seriousPct 10%, warnUsd $500, seriousUsd $1,000, largeUsd $2,500, unbudgetedUsd $250.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Which category overruns deserve the manager's time this month, ranked by both relative and absolute size.",
+   "sources": 5,
+   "verified": 4
+  },
+  {
+   "id": "RULE-BUD-04",
+   "rule": "PROPOSED: Compare season-to-date actual against a monthly phased plan through the same month (which months count as closed is set by RULE-BUD-05, class C), not against a straight-line or full-season total.",
+   "current_or_proposed": "proposed",
+   "classification": "A",
+   "recommended_phase": "1",
+   "decision_supported": "Whether spending is ahead of plan or only ahead of a flat average, e.g., a planned early-season overhaul or winter feed purchases.",
+   "sources": 8,
+   "verified": 7
+  },
+  {
+   "id": "RULE-BUD-05",
+   "rule": "PROPOSED: Count only closed months (on or before a books-closed-through month) and show a data-completeness row when a closed month has no actual for a category. Never treat a blank as $0 and never let future plan rows dilute the season total.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether the variance shown is trustworthy enough to act on.",
+   "sources": 2,
+   "verified": 1
+  },
+  {
+   "id": "RULE-BUD-06",
+   "rule": "PROPOSED: Zero-budget or unbudgeted spending is judged in dollars only ('$X spent with no budget'), with a configurable dollar trigger. It is never shown as a percent.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether unplanned spending (e.g., emergency hay or a new category) needs a budget line or a reforecast.",
+   "sources": 1,
+   "verified": 0
+  },
+  {
+   "id": "RULE-BUD-07",
+   "rule": "PROPOSED: Credits, refunds and rebates (warranty refunds, returned supplies, patronage or fuel-tax credits) are entered as separate signed rows with an entry_type. Net spend is used for variance, but gross spend and credits are shown separately. The period a credit lands in follows the declared accounting basis. Amounts use a plain minus sign ('-300'), not accounting parentheses.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether an apparent improvement is real savings or a timing artefact of a refund.",
+   "sources": 3,
+   "verified": 2
+  },
+  {
+   "id": "RULE-BUD-08",
+   "rule": "PROPOSED: Declare the accounting basis (cash or accrual-adjusted) on the page. For operational monitoring prefer accrual-adjusted actuals (expense in the month the input was received or used), or at minimum flag prepaid and year-end purchases so they are not read as overruns.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether a variance reflects operations or only payment timing (prepaying feed, paying a quarter's fuel bill late).",
+   "sources": 4,
+   "verified": 3
+  },
+  {
+   "id": "RULE-BUD-09",
+   "rule": "PROPOSED: Split fuel variance into price and volume (gallons x $/gal). If price explains most of the overrun, the action is to reforecast or revisit purchasing. If volume does, check the use drivers (miles, hours, water hauling, feeding).",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether a fuel overrun is something the crew can manage (use) or a market condition to reforecast (price).",
+   "sources": 7,
+   "verified": 5
+  },
+  {
+   "id": "RULE-BUD-10",
+   "rule": "PROPOSED: Treat repairs as lumpy. Report large single repair events separately (by asset, with machine hours) from routine repairs. Phase known overhauls into the month they are planned. Judge repairs against the annual repair budget as well as season to date.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether a repairs overrun is one breakdown (repair-versus-replace economics are out of scope) or a creeping pattern.",
+   "sources": 4,
+   "verified": 3
+  },
+  {
+   "id": "RULE-BUD-11",
+   "rule": "PROPOSED: Record reforecasts. Keep the original budget and add a reforecast (revised plan for the remaining months). Alert against the current approved plan, and always show the variance to the original as well.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Re-planning the rest of the season after a known shift (price shock, drought feed, breakdown) without hiding the original commitment.",
+   "sources": 4,
+   "verified": 3
+  },
+  {
+   "id": "RULE-BUD-12",
+   "rule": "PROPOSED: Align budget categories with standard extension and ERS cost categories, and separate operating from capital and cash from non-cash (unpaid family labor, depreciation). The dashboard's 'Water and fencing' should state whether it means repairs and supplies or new construction.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether the category totals can be compared with extension benchmarks and read by an outside reviewer (lender, owner).",
+   "sources": 8,
+   "verified": 8
+  },
+  {
+   "id": "RULE-BUD-13",
+   "rule": "PROPOSED: Show favorable (under-budget) variances informationally when both percent and dollars are large, with a 'timing or saving?' prompt. This gives no severity and no diagnosis.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether underspending reflects real savings or deferred work (e.g., postponed repairs, or scheduled health work not yet done per the health records).",
+   "sources": 1,
+   "verified": 0
+  },
+  {
+   "id": "RULE-BUD-14",
+   "rule": "PROPOSED: At equal severity, budget rows sort below animal welfare rows (Water, Health, Grazing, Gain) instead of alphabetically first.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "2",
+   "decision_supported": "What the manager or crew looks at first in the exception table.",
+   "sources": 0,
+   "verified": 0
+  },
+  {
+   "id": "RULE-CTX-01",
+   "rule": "PROPOSED: Choose public context by when it was released, not by the week it covers. Show the latest U.S. Drought Monitor (USDM) map that was public by as_of: released Thursday 08:30 ET, valid on the Tuesday two days earlier. Label it 'valid <Tue>, released <Thu>'. as_of must carry an offset or IANA time zone.",
+   "current_or_proposed": "proposed",
+   "classification": "A",
+   "recommended_phase": "3",
+   "decision_supported": "Whether the drought context shown beside the ranch snapshot was actually knowable at as_of, so the page does not seem to know the future",
+   "sources": 5,
+   "verified": 5
+  },
+  {
+   "id": "RULE-CTX-02",
+   "rule": "PROPOSED: Mark the drought context stale when (as_of minus USDM valid date) is more than about 9.1 days, meaning a weekly release was missed or the fetch failed. Never read a missing or failed fetch as 'no drought'.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "3",
+   "decision_supported": "Whether the drought panel can be trusted this week",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-CTX-03",
+   "rule": "PROPOSED: Show the county USDM category mix and a count of weeks at D2 or worse in the last 8 weeks as information only, with a link to FSA. Do not compute or claim program eligibility.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "3",
+   "decision_supported": "Awareness that drought designation may trigger FSA Livestock Forage Disaster Program paperwork, and drought-plan escalation",
+   "sources": 2,
+   "verified": 1
+  },
+  {
+   "id": "RULE-CTX-04",
+   "rule": "PROPOSED: Show state-level NASS Crop Progress pasture and range condition (% very poor+poor and % good+excellent) with its week-ending date, as regional context only. No threshold triggers an exception.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether the ranch's own forage picture is out of line with the state",
+   "sources": 5,
+   "verified": 5
+  },
+  {
+   "id": "RULE-CTX-05",
+   "rule": "PROPOSED: Show the Grass-Cast seasonal grassland production outlook (% above or below the grid cell's ~38-year average) with its map date. Context only; never the sole basis for stocking.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Early-season forage expectation feeding drought-plan trigger dates and stocking reviews",
+   "sources": 6,
+   "verified": 5
+  },
+  {
+   "id": "RULE-CTX-06",
+   "rule": "PROPOSED: Show RAP annual herbaceous production (lbs/acre) history per pasture polygon as retrospective context. Use it to sanity-check planned_graze_days, not to judge the current season.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Whether a pasture's planned graze days are consistent with its production history; spotting long-run decline",
+   "sources": 4,
+   "verified": 4
+  },
+  {
+   "id": "RULE-CTX-07",
+   "rule": "PROPOSED: heat-stress days. From a dated forecast snapshot, show the USDA-ARS breathing-rate heat category (Normal, Alert, Danger, Emergency) as information. On days at or above a ranch-set heat level: (a) schedule an in-person water check for every tank with cattle on it, whatever the sensor shows, and record who checked and what they saw; (b) warn when a planned gather or processing task falls in a period with forecast THI at or above 84 (the BQA handling rule of thumb) and suggest working early in the day; (c) show the category beside planned gathers and moves. Never use NWS HeatRisk for cattle (RULE-CTX-08).",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "[context research rule 6] Rescheduling cattle work and moves, and checking water, on hot days | [water research rule 10] Crew scheduling. Confirms sensor data against reality. | [health research rule 8] Picking a day and time to gather and work cattle that keeps heat and handling stress low.",
+   "sources": 11,
+   "verified": 10
+  },
+  {
+   "id": "RULE-CTX-08",
+   "rule": "PROPOSED (exclusion): Do not use NWS HeatRisk as a cattle heat indicator.",
+   "current_or_proposed": "proposed (exclusion)",
+   "classification": "A",
+   "recommended_phase": "defer",
+   "decision_supported": "Avoid a mislabelled livestock alert",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-CTX-09",
+   "rule": "PROPOSED: In calving season, show a cold-stress outlook using the Comprehensive Climate Index (CCI). Use the newborn bands for calving pastures and the adult bands for others (e.g., Adult Cold Moderate -4 to 13 F; Newborn Cold Moderate 23 to 31 F). Raise it as a scheduling/observation prompt (check pairs, bedding, wind shelter), never as a treatment instruction.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "When to increase calving checks and plan shelter or feed logistics",
+   "sources": 3,
+   "verified": 1
+  },
+  {
+   "id": "RULE-CTX-10",
+   "rule": "PROPOSED: drought-plan review prompts. Record the ranch rain gauge and compare 30/60/90-day totals with a public normal; show a dated drought context line (county USDM category, optionally the Grass-Cast outlook); and at ranch-chosen trigger dates (for example spring rainfall as % of normal by a set date) prompt the drought-plan review. These prompts feed the plan review; they do not create move exceptions.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "3",
+   "decision_supported": "[context research rule 9] Whether to start the drought contingency steps (destock, buy feed, defer pastures) on schedule | [grazing research rule 8] Lengthen recovery periods, slow the rotation, destock in stages, or bring feed in early.",
+   "sources": 10,
+   "verified": 8
+  },
+  {
+   "id": "RULE-CTX-11",
+   "rule": "PROPOSED: Feed and mineral inventory. Days on hand = quantity on hand / measured daily use. Warn when days on hand fall below the supplier lead time plus a buffer, and when the last count is stale.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "When to reorder hay, supplement or mineral; drought feed planning",
+   "sources": 1,
+   "verified": 0
+  },
+  {
+   "id": "RULE-CTX-12",
+   "rule": "PROPOSED (deferred module): breeding, calving and body-condition records. Record breeding season start and end per group, and pregnant or open for every exposed female. Record body condition score (BCS, 1-9) for cows and first-calf heifers at set points (for example about 90 days before calving, at calving and at weaning). Prompt preg-check and BCS dates as schedule items set with the herd veterinarian (the research cites BIF for palpation after about 35 days post-breeding and rectal ultrasound from about 27 days). Escalate to the veterinarian; no treatment logic. This is how cows, which the gain rules skip, would be monitored.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Scheduling preg checks, BCS checks and calving-season staffing",
+   "sources": 6,
+   "verified": 6
+  },
+  {
+   "id": "RULE-CTX-13",
+   "rule": "PROPOSED (deferred): a fence, water-system and equipment maintenance log plus a crew task list. Each item has asset, task, interval or next_due, status and assignee; overdue items appear as exceptions, and an exception can become a task. Sensor device health (battery voltage, Delay, No Data or Error status) is tracked here as maintenance, kept separate from water-supply alarms.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "[context research rule 14] Who does what this week; preventing water and fence failures | [water research rule 15] Scheduling sensor maintenance without crowding out real water alarms.",
+   "sources": 6,
+   "verified": 5
+  },
+  {
+   "id": "RULE-CTX-14",
+   "rule": "PROPOSED: Per-pasture ecological site and reference production as static attributes from NRCS soil and ecological site data, looked up once and stored in pastures.csv. Never fetched live.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "defer",
+   "decision_supported": "Grounding planned_graze_days and min_rest_days in site potential",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-CTX-15",
+   "rule": "PROPOSED (demo setting): Any real public context shown next to the fictional ranch must be (a) pinned to the fictional as_of, not today's live data; (b) for a named real county chosen as a stand-in and labelled as such ('Public data: <County>, <State>; ranch data fictional'); and (c) committed as a snapshot so CI stays deterministic.",
+   "current_or_proposed": "proposed (demo setting)",
+   "classification": "D",
+   "recommended_phase": "3",
+   "decision_supported": "Keeping the portfolio piece honest and reproducible",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-CTX-16",
+   "rule": "PROPOSED (data-source rule): Do not commit or redistribute SD Mesonet data in a public repository or site. Link to the Mesonet pages instead.",
+   "current_or_proposed": "proposed (data-source rule)",
+   "classification": "A",
+   "recommended_phase": "3",
+   "decision_supported": "Licensing compliance for a public portfolio site",
+   "sources": 2,
+   "verified": 1
+  },
+  {
+   "id": "RULE-WF-01",
+   "rule": "CURRENT: severity is shown by icon shape plus a text label, never by colour alone (badge() in app.js: octagon=Critical, triangle=Serious, circle=Warning, each followed by the word).",
+   "current_or_proposed": "current",
+   "classification": "A",
+   "recommended_phase": "1",
+   "decision_supported": "Lets the manager and crew rank exceptions at a glance, including people with colour-vision deficiency and readers of a greyscale printout.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WF-02",
+   "rule": "PROPOSED (current fails): every detail now shown only on pointer hover (tank reading at a time, grazing stay dates and plan, animal tag and ADG, budget dollars) must also be reachable by keyboard and by touch, through focusable marks or an equivalent 'Show data' table.",
+   "current_or_proposed": "proposed (current fails)",
+   "classification": "A",
+   "recommended_phase": "2",
+   "decision_supported": "Lets a manager on a phone in the truck, or a keyboard or screen-reader user, find which animals are slow, when a stay started, or a tank's recent readings without a mouse.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WF-03",
+   "rule": "PROPOSED (current fails): the custom tooltip must be dismissible with Escape without moving the pointer, and hoverable (the pointer can move onto it without it disappearing), or it must be replaced by click-to-pin details.",
+   "current_or_proposed": "proposed (current fails)",
+   "classification": "A",
+   "recommended_phase": "2",
+   "decision_supported": "Lets screen-magnifier and large-cursor users read chart details. Stops the tooltip from covering the data the manager is comparing.",
+   "sources": 2,
+   "verified": 1
+  },
+  {
+   "id": "RULE-WF-04",
+   "rule": "PROPOSED (partly met): each chart needs a short text alternative that states the decision-relevant state, plus a long alternative or data table. Currently the labels name the chart but carry no values.",
+   "current_or_proposed": "proposed (partly met)",
+   "classification": "A",
+   "recommended_phase": "2",
+   "decision_supported": "Lets a screen-reader user, or a printed or text-only briefing, get 'T4 Lone Tree 10%, down 46 points in 24 h' rather than 'Tank T4 level, last 7 days'.",
+   "sources": 1,
+   "verified": 1
+  },
+  {
+   "id": "RULE-WF-05",
+   "rule": "PROPOSED (current fails): when a filter chip changes the exception list, announce the result as a status message ('Showing 3 of 10: Water') and keep keyboard focus on the chip. Remove role=status from the hover tooltip.",
+   "current_or_proposed": "proposed (current fails)",
+   "classification": "A",
+   "recommended_phase": "2",
+   "decision_supported": "Lets a screen-reader or keyboard user filter to one area and keep going without losing their place.",
+   "sources": 1,
+   "verified": 1
+  },
+  {
+   "id": "RULE-WF-06",
+   "rule": "CURRENT (passes): pointer targets are at least 24x24 CSS px (2.5.8). Any new acknowledge, note or shelve controls must keep this.",
+   "current_or_proposed": "current (passes)",
+   "classification": "A",
+   "recommended_phase": "1",
+   "decision_supported": "Cuts mis-taps on a phone in a moving vehicle or with gloves.",
+   "sources": 1,
+   "verified": 1
+  },
+  {
+   "id": "RULE-WF-07",
+   "rule": "CURRENT (passes in Chromium): keyboard focus is visible (2.4.7) and never fully hidden by author content (2.4.11). Pressed or unpressed chip state meets 3:1 (1.4.11).",
+   "current_or_proposed": "current (passes in Chromium)",
+   "classification": "A",
+   "recommended_phase": "1",
+   "decision_supported": "Lets keyboard users see where they are while triaging.",
+   "sources": 3,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WF-08",
+   "rule": "PROPOSED: chart marks a reader needs to make the decision (past grazing stays, the over-plan segment, target lines) should reach 3:1 against adjacent colours, or carry the same information in text.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "2",
+   "decision_supported": "Seeing at a glance where a group has been, and how far over plan it is, on a dim phone screen or in sunlight.",
+   "sources": 1,
+   "verified": 0
+  },
+  {
+   "id": "RULE-WF-09",
+   "rule": "CURRENT: every exception row carries a defined first response (the 'First step' column), and a condition with no response is not an exception.",
+   "current_or_proposed": "current",
+   "classification": "B",
+   "recommended_phase": "1",
+   "decision_supported": "Turns each row into something a crew lead can do, and keeps informational status off the attention list.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WF-10",
+   "rule": "PROPOSED: assign severity by consequence of no response and the time available to respond, with about 3 documented levels (e.g. Critical = act today, animals or water at risk; Serious = act this week; Warning = plan at the next gather or month).",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "2",
+   "decision_supported": "Decides what the crew does first this morning and what waits.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WF-11",
+   "rule": "PROPOSED: acknowledging an exception never clears it. Acknowledge records who, when, a note and the planned action. The row stays on the list, marked Acknowledged, until the data shows a return to normal. A condition that clears and later recurs is a new event that needs a new acknowledgement.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "2",
+   "decision_supported": "Stops 'I saw it' being mistaken for 'it is fixed' (e.g. tank T4 acknowledged at 7 am but still leaking at noon). Shows the crew what is already claimed.",
+   "sources": 2,
+   "verified": 1
+  },
+  {
+   "id": "RULE-WF-12",
+   "rule": "PROPOSED: shelving (temporarily hiding a row) must have a reason, a person and an expiry, and the count of shelved rows must stay visible. When it expires the row is re-evaluated. Permanent removal (e.g. a tank taken out of service) is a configuration change with a record, not a UI action.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Lets the manager park a known item (e.g. 'T6 sensor: replacement radio ordered, checking tank by eye daily') without it vanishing from accountability.",
+   "sources": 3,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WF-13",
+   "rule": "PROPOSED: show how long each exception has been open (first seen), and flag rows open longer than N days as 'standing' for the weekly review.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "Separates new problems (act today) from chronic ones (fix the cause, or change the plan or threshold).",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WF-14",
+   "rule": "PROPOSED: the page must state when the data is from (with a time zone) and how old it is, and flag stale data before the manager acts on it. The demo should say it is a fixed fictional snapshot.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "1",
+   "decision_supported": "Whether today's plan can rely on these readings or someone must look first.",
+   "sources": 0,
+   "verified": 0
+  },
+  {
+   "id": "RULE-WF-15",
+   "rule": "PROPOSED: acknowledgements, notes and owners that the crew must share cannot live only in localStorage. Use localStorage only for per-device conveniences (selected filter, last-review time, unsent note drafts) and label anything stored there 'saved on this device only'.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "2",
+   "decision_supported": "Makes sure what the manager acknowledged on the office PC is what the foreman sees on his phone, and that it survives a cleared browser.",
+   "sources": 3,
+   "verified": 3
+  },
+  {
+   "id": "RULE-WF-16",
+   "rule": "PROPOSED (deferred): health completion history and any shared acknowledgement or notes log are operational records. Keep them append-only (never overwrite last_done on a schedule row), exportable, and retained for at least 2 years (longer where law requires). Keep treatment details out of this dashboard; they belong in the health record system.",
+   "current_or_proposed": "proposed",
+   "classification": "C",
+   "recommended_phase": "defer",
+   "decision_supported": "[workflow research rule 16] Audit trail: who knew about a problem, when, and what was done. Supports BQA assessments and staff training records. | [health research rule 13] Audit trail for BQA and buyers. Recurring-task scheduling. Telling 'done this cycle' apart from 'done last cycle'.",
+   "sources": 5,
+   "verified": 5
+  },
+  {
+   "id": "RULE-WF-17",
+   "rule": "PROPOSED (current fails in print): a one-page printable crew briefing in black on white, large text, grouped by place or route, each item with its first step, a check box and space for a written result. Generated by @media print or a separate 'Briefing' view.",
+   "current_or_proposed": "proposed (current fails in print)",
+   "classification": "B",
+   "recommended_phase": "2",
+   "decision_supported": "Hands the morning plan to a crew without phones or signal, and brings back written observations to enter as records.",
+   "sources": 4,
+   "verified": 4
+  },
+  {
+   "id": "RULE-WF-18",
+   "rule": "PROPOSED design target (not validated): a ~2-minute morning review. Freshness line, then counts ('2 today / 6 this week / 2 plan', 'N new since last review, M resolved'), then the exception list with Open-for and Owner, with charts below as drill-down only.",
+   "current_or_proposed": "proposed (design target)",
+   "classification": "C",
+   "recommended_phase": "2",
+   "decision_supported": "What the manager assigns before the crew leaves.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WF-19",
+   "rule": "CURRENT: duplicate and stale rows are suppressed by design (a silent sensor is not also judged on its stale level; a group-wide gain problem is not repeated per animal).",
+   "current_or_proposed": "current",
+   "classification": "B",
+   "recommended_phase": "1",
+   "decision_supported": "Keeps the list short and each row distinct.",
+   "sources": 2,
+   "verified": 2
+  },
+  {
+   "id": "RULE-WF-20",
+   "rule": "PROPOSED: the rules table shows each threshold's basis: 'Demo setting (D)' for every current value until it is sourced or set by the ranch, then 'Ranch choice, set by <name>, <date>'. A change log (rule, old value, new value, who, when, why) can follow later; until then the repository history is the record of changes.",
+   "current_or_proposed": "proposed",
+   "classification": "B",
+   "recommended_phase": "1",
+   "decision_supported": "Whether the manager can trust that a threshold wasn't quietly loosened to empty the list.",
+   "sources": 2,
+   "verified": 1
+  },
+  {
+   "id": "RULE-WF-21",
+   "rule": "CURRENT demo settings used by the workflow (the as_of snapshot of 2026-09-30T18:00, 10 planted problems, the 3 severity levels and their mapping to areas) are synthetic demonstration settings, not validated operating thresholds.",
+   "current_or_proposed": "current",
+   "classification": "D",
+   "recommended_phase": "1",
+   "decision_supported": "Honest framing of the portfolio piece.",
+   "sources": 0,
+   "verified": 0
+  }
+ ]
+}

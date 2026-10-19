@@ -1,0 +1,463 @@
+{
+ "scenario": "04-irregular-sensor-readings",
+ "title": "Irregular sensor readings",
+ "fictional": "All data is fictional (Example Ranch). Every threshold is a demonstration setting.",
+ "purpose": "A 72-hour gap (T1), a conflicting duplicate (T3), an exact duplicate (T5), out-of-order rows (T7), a reading dated after as_of (T6) and a fault code (T8).",
+ "as_of": "2026-09-30T18:00 America/Chicago",
+ "files": {
+  "pastures": "copied unchanged",
+  "groups": "copied unchanged",
+  "moves": "copied unchanged",
+  "weights": "copied unchanged",
+  "water": "changed",
+  "health": "changed",
+  "budget": "copied unchanged",
+  "meta": "changed",
+  "tanks": "added"
+ },
+ "files_note": "tanks.csv (tank master list, WAT-02) and meta.csv's timezone column (TIME-02) are the Phase-1 additions the lead's defaults call for; the current code ignores both. health.csv carries HLTH-03's proposed generator fix (Cows Fly tag check: done 2026-09-01, next_due blank) unless the scenario says otherwise.",
+ "settings": "../settings.json",
+ "computed_by": "docs/audit/diagnostics/scenarios.build.py: Python arithmetic on this folder's CSV files. It never calls exceptions.js or app.js.",
+ "matching": "alerts_exact: every needs-attention row the implementation shows must be one of expected_rows (or allowed_extra_rows); data-issue and CAN'T TELL rows may carry extra wording. A row matches on area, kind and subject_key; state (or a listed alternative) and severity must agree; every key number must be shown, correctly rounded to the precision shown; key_dates may be ISO or 'Mon D'; key_tags must all appear; must_not_appear strings must not.",
+ "alerts_exact": true,
+ "expected_rows": [
+  {
+   "id": "T2",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T2",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "level_pct": 11.8
+   },
+   "must_not_appear": [],
+   "findings": [
+    "WAT-01"
+   ],
+   "rules": [
+    "RULE-WAT-01"
+   ],
+   "arithmetic": "T2's last reading 2026-09-30T18:00 is 11.8%; 11.8 < 25 (demo critical line)."
+  },
+  {
+   "id": "T4",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T4",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "drop_pts": 46.0,
+    "level_pct": 10.0
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the real span of the fall in hours (WAT-03)",
+    "'unexplained fall; leak not confirmed' wording (RULE-WAT-03 phase note)"
+   ],
+   "findings": [
+    "WAT-03",
+    "WAT-08"
+   ],
+   "rules": [
+    "RULE-WAT-03"
+   ],
+   "arithmetic": "Readings in [2026-09-30T18:00 - 24 h, 2026-09-30T18:00]: 56.0, 44.5, 33.0, 21.5, 10.0; highest 56.0 - last 10.0 = 46.0 points >= 30."
+  },
+  {
+   "id": "T6",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T6",
+   "state": "needs-attention",
+   "state_alternatives": [
+    "cant-tell"
+   ],
+   "severity": "serious",
+   "key_numbers": {
+    "silent_hours": 42.0,
+    "level_pct": 98.5
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the tank's level is CAN'T TELL; the row says to check it by eye (RULE-WAT-04 phase note)"
+   ],
+   "findings": [
+    "TIME-01"
+   ],
+   "rules": [
+    "RULE-WAT-04"
+   ],
+   "arithmetic": "Last reading 2026-09-29T00:00 (98.5%); 2026-09-30T18:00 - 2026-09-29T00:00 = 42 hours >= 24."
+  },
+  {
+   "id": "GRZ",
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "days": 24,
+    "plan": 21,
+    "over": 3
+   },
+   "key_text_any": [
+    "Sand Hills"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GRZ-01"
+   ],
+   "rules": [
+    "RULE-GRZ-01"
+   ],
+   "arithmetic": "Open stay in P3 Sand Hills since 2026-09-06; Sep 6 to Sep 30 = 24 days; plan 21; 24 - 21 = 3 days over."
+  },
+  {
+   "id": "GAIN-H",
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Heifers",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "adg": 0.43625730994152045,
+    "target": 1.0
+   },
+   "key_dates": [
+    "2026-07-20"
+   ],
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "coverage 45 of 45 weighed (GAIN-07)",
+    "both weigh dates, Jul 20 and Sep 15 (GAIN-11)"
+   ],
+   "findings": [
+    "GAIN-03",
+    "GAIN-11",
+    "GAIN-07"
+   ],
+   "rules": [
+    "RULE-GAIN-01",
+    "RULE-GAIN-04"
+   ],
+   "arithmetic": "Pooled gain Jul 20 to Sep 15 (57 days) over 45 heifers: 1119 lbs / 2565 animal-days = 0.4363 lb/day; 0.8 x 1.0 = 0.8; 0.4363 < 0.8."
+  },
+  {
+   "id": "GAIN-Y",
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "count": 6,
+    "threshold": 1.0
+   },
+   "key_tags": [
+    "Y027",
+    "Y031",
+    "Y058",
+    "Y082",
+    "Y129",
+    "Y132"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GAIN-11"
+   ],
+   "rules": [
+    "RULE-GAIN-02",
+    "RULE-GAIN-03"
+   ],
+   "arithmetic": "Yearlings pooled 16608 / 8550 = 1.9425 lb/day, not under 0.8 x 2.0 = 1.6, so no group row. Animals under 0.5 x 2.0 = 1.0 lb/day over the 57 days: Y027 0.474, Y031 0.579, Y058 0.667, Y082 0.772, Y129 0.404, Y132 0.509."
+  },
+  {
+   "id": "BOOST",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Yearlings: Booster vaccine",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "overdue_days": 15
+   },
+   "key_dates": [
+    "2026-09-15"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "HLTH-01"
+   ],
+   "rules": [
+    "RULE-HLTH-01"
+   ],
+   "arithmetic": "Open, next_due 2026-09-15; Sep 15 to Sep 30 = 15 days overdue."
+  },
+  {
+   "id": "PINK",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Cows: Pinkeye check",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "due_in_days": 3
+   },
+   "key_dates": [
+    "2026-10-03"
+   ],
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-HLTH-02"
+   ],
+   "arithmetic": "Open, next_due 2026-10-03; Sep 30 to Oct 3 = 3 days, within 7."
+  },
+  {
+   "id": "FUEL",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Fuel",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 21.25,
+    "usd_over": 2040
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04",
+    "BUD-05"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 11,640 vs budget 9,600: 11,640 - 9,600 = $2,040; 2,040 / 9,600 = 21.25% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "REPAIRS",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Repairs",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 25.0,
+    "usd_over": 1800
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 9,000 vs budget 7,200: $1,800; 1,800 / 7,200 = 25.00% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "T1-HIST",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T1",
+   "state": "cant-tell",
+   "severity": null,
+   "topic": "drop-history",
+   "key_numbers": {},
+   "key_text_any": [
+    "not enough recent history",
+    "can't be judged"
+   ],
+   "must_not_appear": [
+    "Dropped"
+   ],
+   "findings": [
+    "WAT-03"
+   ],
+   "rules": [
+    "RULE-WAT-03"
+   ],
+   "arithmetic": "T1 readings: ... 2026-09-27T18:00 91.2, then nothing until 2026-09-30T18:00 56.2. [2026-09-30T18:00 - 24 h, 2026-09-30T18:00] holds only the last reading, so the 24-hour change can't be judged. The level 56.2% is above 40. The old rule compares with the 72-hour-old reading: 91.2 - 56.2 = 35.0 'in 24 hours'."
+  },
+  {
+   "id": "T3",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T3",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "level_pct": 20.0
+   },
+   "must_not_appear": [
+    "91.5% full"
+   ],
+   "findings": [
+    "WAT-07"
+   ],
+   "rules": [
+    "RULE-WAT-01",
+    "RULE-WAT-03"
+   ],
+   "arithmetic": "Two readings at 2026-09-30T18:00: 20.0 and 91.5. The conservative rule uses the lower, 20.0 (< 25). Under the bounded window the fall is also a leak-sized drop: highest earlier reading in the window 87.6 - 20.0 = 67.6 points."
+  },
+  {
+   "id": "T3-DUP",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T3",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "conflicting-readings",
+   "key_numbers": {},
+   "key_text_any": [
+    "91.5",
+    "20"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "WAT-07",
+    "DATA-03"
+   ],
+   "rules": [],
+   "arithmetic": "Same tank, same time, different values: one data issue naming both."
+  },
+  {
+   "id": "T5-DUP",
+   "area": "Water",
+   "kind": "file",
+   "subject_key": "water.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "duplicates",
+   "key_numbers": {
+    "count": 1
+   },
+   "must_not_appear": [],
+   "findings": [
+    "DATA-03"
+   ],
+   "rules": [],
+   "arithmetic": "T5 2026-09-30T12:00 58.8 appears twice with the same value.",
+   "note": "An exact duplicate is dropped and counted; it never changes T5's result."
+  },
+  {
+   "id": "T6-FUTURE",
+   "area": "Water",
+   "kind": "file",
+   "subject_key": "water.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "future",
+   "key_numbers": {
+    "count": 1
+   },
+   "key_text_any": [
+    "2026-10-29"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "TIME-01"
+   ],
+   "rules": [
+    "RULE-WF-14"
+   ],
+   "arithmetic": "T6 2026-10-29T00:00 is after as_of 2026-09-30T18:00: left out of every rule and reported."
+  },
+  {
+   "id": "T8",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T8",
+   "state": "cant-tell",
+   "state_alternatives": [
+    "data-issue",
+    "needs-attention"
+   ],
+   "severity": "serious",
+   "topic": "bad-level",
+   "key_numbers": {
+    "last_good_level": 80.4
+   },
+   "key_text_any": [
+    "ERR"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "WAT-01"
+   ],
+   "rules": [
+    "RULE-WAT-04"
+   ],
+   "arithmetic": "T8's newest reading at 2026-09-30T18:00 is 'ERR', not a level; last good level 80.4% at 2026-09-30T12:00."
+  }
+ ],
+ "expected_absent": [
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T1",
+   "reason": "no leak can be claimed from a 72-hour-old baseline",
+   "findings": [
+    "WAT-03"
+   ]
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T5",
+   "reason": "an exact duplicate changes nothing",
+   "findings": [
+    "DATA-03"
+   ]
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T7",
+   "reason": "row order changes nothing; T7 is healthy",
+   "findings": [
+    "DATA-02"
+   ]
+  }
+ ],
+ "allowed_extra_rows": [],
+ "area_states": {
+  "Water": "needs-attention",
+  "Grazing": "needs-attention",
+  "Gain": "needs-attention",
+  "Health": "needs-attention",
+  "Budget": "needs-attention"
+ },
+ "tile_expectations": [
+  {
+   "tile": "water",
+   "ok_at_most": 3,
+   "of": 8,
+   "note": "T3, T6 and T8 are never OK; T1's 24-hour change is unknown."
+  }
+ ],
+ "findings": [
+  "WAT-01",
+  "WAT-03",
+  "WAT-07",
+  "DATA-03",
+  "TIME-01"
+ ],
+ "rules": [
+  "RULE-WAT-03",
+  "RULE-WAT-04"
+ ],
+ "must_not_appear_anywhere": [
+  "NaN",
+  "Infinity",
+  "undefined",
+  "[object Object]"
+ ]
+}
