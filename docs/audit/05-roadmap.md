@@ -23,6 +23,7 @@ to the separate Ranch Tech ROI project.
 | Built from | `docs/audit/data/findings.json` (83 findings; compact index `findings-index.json`), `docs/audit/data/rules.json` (98 rules; compact index `rules-index.json`; data fields split into `data-fields.json`, integrations into `integrations.json`), `sources.json`, `registry-changelog.md`, and the evidence files in `docs/audit/evidence/` (`baseline.json`, `audit_*`, `verify_*`, `research_*`, `cite_*`). |
 | Earlier documents | [01-baseline.md](01-baseline.md) (how the code works today), [02-findings.md](02-findings.md) (every finding, with evidence), [03-research-and-data.md](03-research-and-data.md) (rules research and data requirements), [04-workflow-and-features.md](04-workflow-and-features.md) (morning workflow and the Phase 3 ranking). |
 | Project guidance files | There is **no PROJECT_CONTEXT.md or AGENTS.md** in the repository. This roadmap is judged against README.md, the code, the committed fictional data, the project purpose and the lead's phase defaults. |
+| Scenario folders | `docs/audit/scenarios/` (10 end-to-end scenarios, each with CSV files, `expected.json` and `scenario.md`, plus a shared `settings.json`; built by `docs/audit/diagnostics/scenarios.build.py` and run against today's code by `scenarios.run.mjs`) was written by a parallel audit step while this roadmap was being finished. It is committed on the work branch in the work-in-progress commit `b548e4f` (2026-10-19) and may still change. P1-17 runs it; decision D16 reconciles its inputs with the Phase 1 data contract. |
 | Blocked checks | The published GitHub Pages site (https://cowcampstx.github.io/ranch-ops-dashboard/) could not be reached; the environment's proxy answered 403. Only Playwright Chromium (with phone and touch emulation) was run in the audit. Real phones, screen readers, Firefox and WebKit were not tested. |
 | What this roadmap did not do | It changed no code, data, test or README file and ran no new test of the dashboard. A few numbers were computed for it from `data/*.csv`; each is marked "(roadmap check)" (see "How to read this roadmap"). |
 
@@ -134,7 +135,7 @@ Phase 1 items can be built in this order. Items on the same line can run in para
 |---|---|---|
 | 1 | P1-17 (boundary tests that pin today's behaviour, part a), P1-13 | The water and grazing boundary tests ([TEST-01](02-findings.md#test-01), [TEST-02](02-findings.md#test-02)) pin today's demo behaviour before anything is refactored. Safe rendering ([SEC-01](02-findings.md#sec-01)) is independent and low-risk. |
 | 2 | P1-01, then P1-02 | The reader and the typed data contract are the base for everything else. |
-| 3 | P1-05 together with P1-03, then P1-04 | The generator writes the new `meta.csv` fields, `tanks.csv` and `weigh_sessions.csv` in the same change as the code that reads them, so CI's "committed data matches the generator" check stays green. |
+| 3 | P1-05 together with P1-03, then P1-04 | The generator writes the new `meta.csv` fields, `tanks.csv` and `weigh_sessions.csv` in the same change as the code that reads them, so CI's "committed data matches the generator" check stays green. The scenario folders' inputs are updated in the same change (decision D16). |
 | 4 | P1-06 | Loading, error and partial-data states, the row model with CAN'T TELL, and section isolation. |
 | 5 | P1-07, P1-08, P1-09, P1-10, P1-11, P1-12 | Area rules, in parallel. P1-10 follows P1-09. |
 | 6 | P1-14, P1-15, P1-16 | Tiles, charts, wording and rule copy, once the structured results exist. |
@@ -151,21 +152,22 @@ before code is written. These are recommendations; the lead or the owner can rev
 
 | # | Topic | Options in the evidence | Decision | Why |
 |---|---|---|---|---|
-| D1 | When a budget month counts as closed | [BUD-01](02-findings.md#bud-01) assumes a month closes on its last calendar day. [RULE-BUD-05](03-research-and-data.md#rule-bud-05) defaults `books_closed_through` to "the month before as_of's month, labelled 'assumed'". | `meta.csv` carries `books_closed_through`; the generator writes `2026-09`. When the field is absent, use the RULE-BUD-05 default and label it "assumed". A value whose last day is after the as-of date is a data issue and is clamped. | The committed severities must not depend on the default. On the committed data the default would give "Fuel 20.0% over (\$1,440) and Repairs 13.3% over (\$720)" ([02-findings.md 7.2](02-findings.md#72-where-the-findings-and-rules-registries-disagree)); under the combined rule in D2, \$720 is under the \$1,000 serious line, so Repairs would fall from serious to warning (roadmap check, arithmetic on those quoted values). Writing the field explicitly keeps the planted severity. |
+| D1 | When a budget month counts as closed | [BUD-01](02-findings.md#bud-01) assumes a month closes on its last calendar day. [RULE-BUD-05](03-research-and-data.md#rule-bud-05) defaults `books_closed_through` to "the month before as_of's month, labelled 'assumed'". | `meta.csv` carries `books_closed_through`; the generator writes `2026-09`. When the field is absent, use the RULE-BUD-05 default and label it "assumed". A value whose last day is after the as-of date is a data issue and is clamped. The scenario folders count a month by BUD-01's convention (`docs/audit/scenarios/settings.json` `monthClosed`: "a month counts when the ranch as-of date is on or after its last day"); under D16 they carry the field explicitly instead. | The committed severities must not depend on the default. On the committed data the default would give "Fuel 20.0% over (\$1,440) and Repairs 13.3% over (\$720)" ([02-findings.md 7.2](02-findings.md#72-where-the-findings-and-rules-registries-disagree)); under the combined rule in D2, \$720 is under the \$1,000 serious line, so Repairs would fall from serious to warning (roadmap check, arithmetic on those quoted values). Writing the field explicitly keeps the planted severity. |
 | D2 | Budget percent and dollar lines | [RULE-BUD-03](03-research-and-data.md#rule-bud-03) demo values: "warn 5% and \$500, serious 10% and \$1,000, large \$2,500, unbudgeted \$250". [BUD-04](02-findings.md#bud-04)'s test states OR-based values. [BUD-05](02-findings.md#bud-05) asks for "warning at 5% or more up to 10%, serious above 10%". | RULE-BUD-03's values and structure, with BUD-05's boundaries: serious when more than 10% over **and** at least \$1,000 over; warning when at least 5% over **and** at least \$500 over, or at least \$2,500 over whatever the percent; \$250 for spending with no budget. All demo settings (D). | RULE-BUD-03 is the rules registry's lead default; BUD-05's bounds match the rule text "more than 10%" and "5-10%". BUD-04's expected outcomes still hold: Ear tags (\$30 over) gives no row, Feed (\$9,500, 9.5%) gives a warning, Hay (\$4,000, 4%) gives a warning. |
 | D3 | Money formats in `budget.csv` | [BUD-02](02-findings.md#bud-02) accepts "accounting parentheses, '\$' and thousands separators" if the contract states it. `data-fields.json` (budget.budget) says plain digits only. [RULE-BUD-07](03-research-and-data.md#rule-bud-07) (deferred) prefers a plain minus sign. | Accept plain numbers, a leading "\$", correctly grouped thousands separators, a leading minus, and accounting parentheses for `actual` only. Anything else is a data issue. | Bookkeeping exports commonly use these forms; all registries agree an unreadable amount must block that category's conclusion and never become NaN or silence. |
 | D4 | Thousands separators in numeric columns | [CSV-01](02-findings.md#csv-01) expects a quoted "1,169" weight to be read as 1169. `data-fields.json` (weights.weight_lbs) says "no thousands separators". | Accept correctly grouped thousands separators in numeric columns (a quoted "1,169"), and nothing looser. | CSV-01's verified expected result; the strict pattern cannot be confused with two cells once quotes are read properly. |
-| D5 | 24-hour drop window | [RULE-WAT-03](03-research-and-data.md#rule-wat-03): compare with "the reading about 24 h before the latest, within one reporting interval". [WAT-03](02-findings.md#wat-03)'s fix: use only readings in [last - 24 h, last]; "drop = max level in that window minus the last level (or the max drawdown inside it); state the real span in hours". | The largest fall from an earlier to a later valid reading inside [last - 24 h, last] (the max drawdown), with the real span in hours. When the window holds only the last reading, the tank shows "not enough recent history to judge the 24-hour change" and is still judged on level and silence. The row adds RULE-WAT-03's wording "unexplained fall; leak not confirmed". | Only the drawdown form sees a fall that refilled inside the window (W-03: "the 40-point fall inside the window (90 - 50) reported"), and the window form finds a new sensor's fast drop (W-02: "45 points in 18 hours"). Both forms keep the committed result ("T4 at 46 points; every healthy tank at or under 18.2 by either measure"). |
-| D6 | Minimum interval for gain | [RULE-GAIN-07](03-research-and-data.md#rule-gain-07) recommends a 70-day individual default (from controlled-feed test standards) and says it "is met only by a method that uses all three weigh-ins; an ADG from the last 57-day interval alone falls under it (not tested in this audit)". [GAIN-03](02-findings.md#gain-03) proposes a group minimum "for example 21 days". | Two settings: a group minimum of 21 days and an individual minimum of 42 days between the two weigh sessions. Both are demo settings (D). The 70-day figure is documented in the rules table as the research default for controlled tests, not adopted for the demo. | The six planted slow yearlings are slow only in the last 57-day interval (the generator sets their rate only for the third weigh-in, `scripts/generate_data.py`), so any individual minimum above 57 days, or a method that blends all three weigh-ins, would drop or dilute a planted problem. Whether a blended method would still flag them is untested. |
+| D5 | 24-hour drop window | [RULE-WAT-03](03-research-and-data.md#rule-wat-03): compare with "the reading about 24 h before the latest, within one reporting interval". [WAT-03](02-findings.md#wat-03)'s fix: use only readings in [last - 24 h, last]; "drop = max level in that window minus the last level (or the max drawdown inside it); state the real span in hours". | The largest fall from an earlier to a later valid reading inside [last - 24 h, last] (the max drawdown), with the real span in hours. When the window holds only the last reading, the 24-hour change is CAN'T TELL: the tank gets a warning CAN'T TELL row "Not enough recent history to judge the 24-hour change" unless its level already gives an alert, and it is still judged on level and silence (WAT-03's fix: "say the 24-hour change can't be judged rather than reporting 0"; scenario 04's T1 expects such a row). The row adds RULE-WAT-03's wording "unexplained fall; leak not confirmed". | Only the drawdown form sees a fall that refilled inside the window (W-03: "the 40-point fall inside the window (90 - 50) reported"), and the window form finds a new sensor's fast drop (W-02: "45 points in 18 hours"). Both forms keep the committed result ("T4 at 46 points; every healthy tank at or under 18.2 by either measure"). The scenario folders use the other form ("(highest level in [last - 24 h, last]) - last level"); the two give the same verdict for every tank in all 10 folders (roadmap check). |
+| D6 | Minimum interval for gain | [RULE-GAIN-07](03-research-and-data.md#rule-gain-07) recommends a 70-day individual default (from controlled-feed test standards) and says it "is met only by a method that uses all three weigh-ins; an ADG from the last 57-day interval alone falls under it (not tested in this audit)". [GAIN-03](02-findings.md#gain-03) proposes a group minimum "for example 21 days". | Two settings: a group minimum of 21 days and an individual minimum of 42 days between the two weigh sessions. Both are demo settings (D). The 70-day figure is documented in the rules table as the research default for controlled tests, not adopted for the demo. | The six planted slow yearlings are slow only in the last 57-day interval (the generator sets their rate only for the third weigh-in, `scripts/generate_data.py`), so any individual minimum above 57 days, or a method that blends all three weigh-ins, would drop or dilute a planted problem. A calculation written after the registries answers RULE-GAIN-07's "not tested": `docs/audit/diagnostics/scenarios.gain70.py` prints "yearlings under 1.0 lb/day by last 57-day interval: 6", "by 3-point regression (106 days): 1 ['Y129']" and "by Jun 1-Sep 15 two-point: 0 []". The scenario folders use 21 days for animals as well (`settings.json` `gainMinIntervalDays`); on their data the result is the same, because every judged pair is 57 days apart (roadmap check). |
 | D7 | A silent tank: alert or CAN'T TELL | [RULE-WAT-04](03-research-and-data.md#rule-wat-04) phase note: "A silent tank is CAN'T TELL". findings.json `policies.phase_1_acceptance`: CAN'T TELL states should not appear on the committed data. | The T6 row becomes a CAN'T TELL row with severity **serious**, the same subject and the same "No reading for 42 hours; last level 98.5%" text. It is the only CAN'T TELL row on the committed data. | Treating "no reading" the same way for every tank (silent, no readings at all, last reading not a level) is clearer for the manager. The planted severity does not change. |
 | D8 | A group with two open stays | [RULE-GRZ-01](03-research-and-data.md#rule-grz-01) phase note: a data issue (CAN'T TELL), "not a grazing row". [GRZ-02](02-findings.md#grz-02): judge only the latest stay and report the extra one. | Judge the latest stay and add a data issue naming both stays. | GRZ-02's verified expected result keeps the real overstay visible ("One Yearlings row (Sand Hills, 3 days over) plus a data issue"). |
-| D9 | Weigh basis in Phase 1 | [RULE-GAIN-06](03-research-and-data.md#rule-gain-06) (class C, Phase 1) and `data-fields.json` put `weigh_sessions.csv` `weight_basis` in Phase 1. The lead's Phase 1 list does not name it. [GAIN-10](02-findings.md#gain-10) defers the fuller weigh-condition records. | Include the minimal `weight_basis` per weigh session in Phase 1 (P1-10). Keep the fuller records deferred. | A routine shrink difference can exceed the serious margin ([GAIN-10](02-findings.md#gain-10): "3% of the 846.74-lb mean yearling over 57 days = 0.4457 lbs/day" against a 0.4 lbs/day margin; the 3% is an assumption). If Phase 1 must shrink, this is the first item to move to Phase 2. |
+| D9 | Weigh basis in Phase 1 | [RULE-GAIN-06](03-research-and-data.md#rule-gain-06) (class C, Phase 1) and `data-fields.json` put `weigh_sessions.csv` `weight_basis` in Phase 1. The lead's Phase 1 list does not name it. [GAIN-10](02-findings.md#gain-10) defers the fuller weigh-condition records. | Include the minimal `weight_basis` per weigh session in Phase 1 (P1-10). Keep the fuller records deferred. No scenario folder has `weigh_sessions.csv`; D16 adds one to each. | A routine shrink difference can exceed the serious margin ([GAIN-10](02-findings.md#gain-10): "3% of the 846.74-lb mean yearling over 57 days = 0.4457 lbs/day" against a 0.4 lbs/day margin; the 3% is an assumption). If Phase 1 must shrink, this is the first item to move to Phase 2. |
 | D10 | Health status values | [HLTH-01](02-findings.md#hlth-01): open, done, cancelled. `data-fields.json`: open, done, cancelled, deferred. | Accept open, done and cancelled. Any other value, including "deferred", is treated as open and reported as a data issue. | Nothing is hidden; the ranch can decide later what "deferred" means. |
 | D11 | Name of the optional planned move date | [GRZ-01](02-findings.md#grz-01) says `planned_move_date`; `data-fields.json` says `moves.csv planned_out_date`. | `planned_out_date`. | Matches the data-fields registry. |
 | D12 | Under-spend (Phase 2) | [BUD-07](02-findings.md#bud-07) proposes a Phase 2 warning. [RULE-BUD-13](03-research-and-data.md#rule-bud-13) (deferred) proposes information only, with no severity. | Phase 2 shows a large under-spend as an information line in the budget section, not as a warning row. | The morning list is for things to act on today or this week; the prompt "Confirm the work was done and the bills are entered" fits the monthly budget review. |
 | D13 | Grazing re-entry counts | RULE-GRZ-03 says "13 of 15"; [GRZ-05](02-findings.md#grz-05) says 11 of 13 sequential re-entries, plus 2 shared pastures. | Use GRZ-05's figures. | The skeptic's correction, confirmed by `findings.handvalues.py` ("(13, 11)"). |
 | D14 | Dates in row text | [UI-13](02-findings.md#ui-13) (Phase 2) changes raw ISO dates to "Jul 20". Several Phase 1 tests quote ISO strings. | Phase 1 keeps ISO dates (YYYY-MM-DD) in row text, including new text. Phase 2 switches every row in one change (P2-06). | Phase 1 does not depend on Phase 2, and the Phase 1 tests stay stable. |
 | D15 | Several rows for one record | [BUD-02](02-findings.md#bud-02)'s test adds a separate credit row ('2026-09,Repairs,0,(300)') and expects it summed. `data-fields.json`: "(month, category) unique; a duplicate pair is a data issue". [DATA-03](02-findings.md#data-03): "exact duplicates are dropped and counted". | Exact duplicate rows are dropped and counted in every file. In `budget.csv`, rows that share a month and category but differ are added together and reported as a warning. In `weights.csv`, two different weights for one animal on one day are averaged and reported. In the master files (pastures, groups, tanks), one ID with two different definitions is an error, and whatever depends on it is CAN'T TELL. Several open rows for one health task are judged once, on the earliest due date, and reported. | Every resolution is order-independent and visible. Separate credit lines are normal in bookkeeping exports (BU-05 is "a warranty refund entered as an accounting-style credit"); a revised re-export would be double-counted, which is why the warning names both rows. Averaging keeps GAIN-02's expected "0.44" for H001. |
+| D16 | Scenario folders and the Phase 1 data contract | `docs/audit/scenarios/` expects the planted rows on inputs that lack the Phase 1 contract fields: folder 01 is the committed data with "as_of" only and no `tanks.csv`; no folder has `weigh_sessions.csv` or `books_closed_through`; `settings.json` counts closed months by BUD-01's convention. `data-fields.json` says a missing zone means "treat time-based rules as CAN'T TELL", an unknown weigh basis gives "no serious or individual flags (CAN'T TELL)" ("The demo must record a basis for every session so the planted gain problems still show"), and `books_closed_through` defaults "to the month before as_of's month". Folder 01's own `scenario.md` says: "Once the generator writes `meta.timezone`, `tanks.csv` and HLTH-03's row fix, rebuild this folder from the regenerated `data/` by re-running the builder. The 10 expected rows do not change." | Keep the data contract as `data-fields.json` states it and keep every `expected.json` result unchanged. In the same change as P1-05, update the folders' inputs with `scenarios.build.py`: rebuild 01 from the regenerated `data/`; add `books_closed_through` = 2026-09 to the folders whose as-of date is 2026-09-30 (01 to 07, 09, 10); add `weigh_sessions.csv` (one row per group and weigh date in `weights.csv`, basis `full`) to all 10. Folder 08 (as of 2026-09-27) keeps no `books_closed_through`, so it tests the default. | The expected results are the scenario author's hand arithmetic and remain the reference; only inputs the contract requires are added. Left unchanged, the folders would fail for contract reasons, not rule reasons: Repairs falls to a warning (13.3%, \$720) in 01, 03 to 07 and 10, folder 09 loses its "Vet and health" warning, and every judged gain group becomes CAN'T TELL (roadmap check). The alternative, making `settings.json`'s conventions the defaults, would depart from `data-fields.json` in three places (zone, weigh basis, closed months). |
 
 ---
 
@@ -189,7 +191,8 @@ or Phase 3 feature, and no "every change must" rule below requires a later-phase
 6. **Section isolation.** A failure in one file, rule area or page section never stops the others from drawing.
 7. **Safe rendering.** No CSV-derived text reaches `innerHTML` unescaped.
 8. **Honest copy.** Every threshold in `RULES` has a class (A-D) and a basis label in the rules table; demo values say
-   so. Wording says "as of <date>", never "now" or "today" for snapshot data.
+   so. Snapshot wording is tied to the as-of date: "there as of <date>", never "here now" or "to now"; "today" means
+   the ranch as-of date stated in the header (for example "Due today (2026-09-30)", UI-06).
 9. **Severity by shape plus a word**, now extended to the CAN'T TELL state ([RULE-WF-01](03-research-and-data.md#rule-wf-01),
    class A). Any control added in any phase keeps targets of at least 24 x 24 CSS px and a visible focus ring
    ([RULE-WF-06](03-research-and-data.md#rule-wf-06), [RULE-WF-07](03-research-and-data.md#rule-wf-07), class A).
@@ -233,6 +236,7 @@ or Phase 3 feature, and no "every change must" rule below requires a later-phase
 - No change that makes the fictional Example Ranch look like a real operation.
 
 ---
+
 ## 3. Phase 1: Fix now
 
 Correctness, data integrity and misleading outputs. Phase 1 keeps plain HTML and JavaScript ES modules with no build
@@ -269,6 +273,11 @@ check; [RULE-BUD-03](03-research-and-data.md#rule-bud-03) quotes "Fuel (\$2,040,
 rows are unchanged: Heifers 1119 / 2565 = 0.4363 and Yearlings 16608 / 8550 = 1.94246 (quoted in
 [CSV-01](02-findings.md#csv-01) and [GAIN-01](02-findings.md#gain-01)). Matching these 10 rows shows that the rules find what the
 generator planted; it does not validate any threshold ([RULE-WF-21](03-research-and-data.md#rule-wf-21)).
+
+Scenario folder `docs/audit/scenarios/01-planted-problems/` writes this bar down as a fixture: its `expected.json` lists
+the same 10 rows, totals "2 critical, 6 serious, 2 warning", and accepts T6 as either needs attention or CAN'T TELL.
+`scenarios.run.mjs` records it as a MATCH for today's code (`run-results.json`). P1-17 runs it against the new code
+after the input update of decision D16.
 
 ### 3.2 Work items
 
@@ -379,7 +388,8 @@ generator planted; it does not validate any threshold ([RULE-WF-21](03-research-
   draw is added or moved, so pastures, groups, moves, weights, water and budget stay byte-identical. The README's data
   table is updated in the same change.
 - **Files and data:** `scripts/generate_data.py`; `data/meta.csv`, `data/health.csv`; new `data/tanks.csv` and
-  `data/weigh_sessions.csv`; README.md.
+  `data/weigh_sessions.csv`; README.md; the inputs of `docs/audit/scenarios/` through
+  `docs/audit/diagnostics/scenarios.build.py` (decision D16; `expected.json` files unchanged).
 - **Dependencies:** none to write; it lands with P1-03 (meta fields), P1-07 (tanks) and P1-10 (weigh sessions) so CI
   stays green.
 - **Effort:** M.
@@ -428,8 +438,9 @@ generator planted; it does not validate any threshold ([RULE-WF-21](03-research-
   a data issue, and when the newest reading is not a level the tank is CAN'T TELL with its last good level and time.
   Readings are grouped by tank and the tank's pasture from `tanks.csv`; readings from another pasture are reported and
   left out. Silence is measured from the as-of time. The 24-hour drop is the largest fall inside [last - 24 h, last],
-  rounded to 0.1 point before it is compared with 30, with the real span stated (decision D5). Two different readings
-  at one time use the lower value and are reported. Rows say "Heifers there as of 2026-09-30", never "here now".
+  rounded to 0.1 point before it is compared with 30, with the real span stated (decision D5); when the window holds
+  only the last reading and the level is fine, the tank is CAN'T TELL (warning) "Not enough recent history to judge the
+  24-hour change", never a 0-point change. Two different readings at one time use the lower value and are reported. Rows say "Heifers there as of 2026-09-30", never "here now".
 - **Files and data:** `exceptions.js` (water); `data/tanks.csv` (P1-05).
 - **Dependencies:** P1-02, P1-03, P1-04, P1-05, P1-06.
 - **Effort:** M.
@@ -437,7 +448,8 @@ generator planted; it does not validate any threshold ([RULE-WF-21](03-research-
   and '80%'; T2's newest row set to ERR still gives a T2 row naming "last good level 14.8%"; -999 and 140 give no
   'Dropped' row; with every T6 row removed the tile reads "5 of 8" and "3 need a look" and T6 says "No readings";
   W-01 gives no Water row; W-02 gives one critical row with '45 points' and '18 hours'; W-03 reports 40 points;
-  80.1 to 50.1 gives "Dropped 30 points"; both orders of 78 and 20 give "now 20%" plus a data issue; the committed data
+  80.1 to 50.1 gives "Dropped 30 points"; both orders of 78 and 20 give "now 20%" plus a data issue; scenario 04's T1
+  (no reading between 2026-09-27T18:00 and 2026-09-30T18:00) gives a CAN'T TELL row and no "Dropped"; the committed data
   gives exactly 3 Water rows and T4 at 46 points. Full list: [06 section 12, P1-07](06-phase1-spec.md#p1-07).
 
 #### P1-08: Grazing rules
@@ -477,7 +489,7 @@ generator planted; it does not validate any threshold ([RULE-WF-21](03-research-
   D). Group gain uses the latest session on or before the as-of date and the latest earlier session at least 21
   days before it (decision D6), pooled over animals weighed at both: total pounds gained divided by total animal-days.
   The period is named from the two session dates. Animals are keyed by group and tag. Animals weighed only at the
-  latest session are "not yet re-weighed"; animals missing from the latest session get their own CAN'T TELL row; a
+  latest session are "not yet re-weighed" (a note in the gain section and in the data checks); animals missing from the latest session get their own CAN'T TELL row; a
   same-day duplicate is a data issue and never divides by zero. Individual flags need at least 42 days between the
   sessions and are skipped when the whole group is already serious (RULE-WF-19). Comparisons are made on values rounded
   to 3 decimals so row order never changes the result.
@@ -551,8 +563,9 @@ generator planted; it does not validate any threshold ([RULE-WF-21](03-research-
   count (decision D1). Amounts are read by a strict money parser (decision D3) and summed in whole cents. A closed
   month with no row or a blank actual makes that category CAN'T TELL. A zero budget with spending is judged in dollars
   only ("\$500 spent with no budget line"). Severity uses percent and dollars together (decision D2), with stated
-  boundaries: serious when more than 10.0% over and at least \$1,000 over; warning when 5.0% to 10.0% over and at least
-  \$500 over, or at least \$2,500 over at any percent; \$250 for unbudgeted spending. Every value is a demo setting (D)
+  boundaries: serious when more than 10.0% over and at least \$1,000 over; warning when at least 5.0% over and at least
+  \$500 over (this includes more than 10.0% over with less than \$1,000, as scenario 09's "Vet and health" 10.5% and
+  \$630 shows), or at least \$2,500 over at any percent; \$250 for unbudgeted spending. Every value is a demo setting (D)
   and labelled so. Percent is shown to one decimal.
 - **Files and data:** `exceptions.js` (budget); `app.js` (tile, chart, table); `meta.csv` fields (P1-05).
 - **Dependencies:** P1-02, P1-03, P1-05, P1-06.
@@ -636,8 +649,9 @@ generator planted; it does not validate any threshold ([RULE-WF-21](03-research-
   tile becomes "Sensors normal". The grazing note says only the current stay's days past plan are marked. Gain and
   health first steps follow RULE-HLTH-11 ("Look at these animals at the next gather and record what you see"; "watch
   the group for illness or lameness and call your veterinarian if you see any"). "here now" becomes "there as of
-  <date>". README's rules table and claims ("works on a phone", "To use real data, replace the CSVs") are updated to
-  match.
+  <date>", and the grazing chart tooltip's "to now" (`app.js` line 143) becomes "to <as-of date> (as of)". README's
+  rules table and claims ("works on a phone", "To use real data, replace the CSVs", "the group grazing that pasture
+  right now") are updated to match.
 - **Files and data:** `app.js` (rules table, notes); `index.html` (notes); `exceptions.js` (`RULE_INFO`, wording);
   README.md.
 - **Dependencies:** P1-06 to P1-12 (final wording).
@@ -654,16 +668,22 @@ generator planted; it does not validate any threshold ([RULE-WF-21](03-research-
   every water boundary (TEST-01); "'SURVIVES grace boundary >= -> > (pass 8, fail 0)'" (TEST-02). The repository has 8
   unit tests and no browser test.
 - **Proposed behaviour:** (a) before any refactor, boundary tests for the water and grazing rules exactly as the two
-  findings specify; (b) unit tests for every module and each Phase 1 item's acceptance cases; scenario tests built from
-  the audit's fixture cases under `tests/fixtures/`; the suite run under TZ=UTC, America/Chicago and Pacific/Auckland;
-  a Playwright Chromium smoke test pinned as a development-only dependency; CI checks that regenerated data has no
-  diff and no untracked file.
-- **Files and data:** `tests/`; `.github/workflows/test.yml`; new `package.json` (dev dependency only, no build step).
+  findings specify; (b) unit tests for every module and each Phase 1 item's acceptance cases; scenario tests that run
+  the 10 folders of `docs/audit/scenarios/` through the new pipeline and compare with each `expected.json` under its own
+  matching rule, plus single-change fixtures for the audit's test cases (W-02, GN-07 ...) under `tests/fixtures/`; the
+  suite run under TZ=UTC, America/Chicago and Pacific/Auckland; a Playwright Chromium smoke test pinned as a
+  development-only dependency; CI checks that regenerated data has no diff and no untracked file.
+- **Files and data:** `tests/`; `.github/workflows/test.yml`; new `package.json` (dev dependency only, no build step);
+  reads `docs/audit/scenarios/` (inputs updated by P1-05, decision D16).
 - **Dependencies:** part (a) none; part (b) the items it tests.
 - **Effort:** M.
 - **Acceptance criteria (headline):** each of the 6 water cases and 5 grazing cases in the two findings passes; re-running
-  the audit's `registry.extra.mjs` mutations, no mutant survives; CI runs the unit tests under three time zones and the
-  browser smoke test, and fails on a stray file in `data/`. Full list: [06 section 12, P1-17](06-phase1-spec.md#p1-17).
+  the audit's mutation checks (`water.verify.mjs` Part B for water, `registry.extra.mjs` Part 2 for grazing), no mutant
+  survives (run unchanged after part (a); re-expressed against the new modules after the refactor, since the scripts
+  patch today's source text); all 10 scenario folders pass under their
+  `expected.json` matching rule in all three time zones (`run-results.json` records today's code as MATCH for 01 and 02
+  and MISMATCH for 03 to 10); CI runs the unit and scenario tests under
+  three time zones and the browser smoke test, and fails on a stray file in `data/`. Full list: [06 section 12, P1-17](06-phase1-spec.md#p1-17).
 
 ### 3.3 Phase 1 effort at a glance
 
@@ -791,6 +811,7 @@ copied from `rules.json`; the full entries are in [03-research-and-data.md](03-r
 | [RULE-WF-19](03-research-and-data.md#rule-wf-19) | B | current | duplicate and stale rows are suppressed by design (a silent sensor is not also judged on its stale level; a group-wide gain problem is not repeated pe... | P1-09 |
 | [RULE-WF-20](03-research-and-data.md#rule-wf-20) | B | proposed | the rules table shows each threshold's basis: 'Demo setting (D)' for every current value until it is sourced or set by the ranch, then 'Ranch choice, ... | P1-16 |
 | [RULE-WF-21](03-research-and-data.md#rule-wf-21) | D | current | Demo settings used by the workflow (the as_of snapshot of 2026-09-30T18:00, 10 planted problems, the 3 severity levels and their mapping to areas) are... | P1-16 |
+
 ---
 
 ## 4. Phase 2: Build next
@@ -1041,6 +1062,7 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
 | [RULE-WF-15](03-research-and-data.md#rule-wf-15) | B | proposed | acknowledgements, notes and owners that the crew must share cannot live only in localStorage | P2-11 |
 | [RULE-WF-17](03-research-and-data.md#rule-wf-17) | B | proposed (current fails in print) | a one-page printable crew briefing in black on white, large text, grouped by place or route, each item with its first step, a check box and space for ... | P2-07 |
 | [RULE-WF-18](03-research-and-data.md#rule-wf-18) | C | proposed (design target) | a ~2-minute morning review | P2-02 |
+
 ---
 
 ## 5. Phase 3: Add later
@@ -1133,6 +1155,7 @@ read like the existing ones, and any public data is fetched at build time and co
 | [RULE-CTX-10](03-research-and-data.md#rule-ctx-10) | C | proposed | drought-plan review prompts | P3-03 |
 | [RULE-CTX-15](03-research-and-data.md#rule-ctx-15) | D | proposed (demo setting) | Any real public context shown next to the fictional ranch must be (a) pinned to the fictional as_of, not today's live data; (b) for a named real count... | P3-03 |
 | [RULE-CTX-16](03-research-and-data.md#rule-ctx-16) | A | proposed (data-source rule) | Do not commit or redistribute SD Mesonet data in a public repository or site | P3-03 |
+
 ---
 
 ## 6. Deferred and excluded
@@ -1197,7 +1220,8 @@ The 40 rules that `rules.json` defers, with the reason recorded there.
 ### 6.3 Deferred or excluded features and integrations
 
 From [04-workflow-and-features.md section 2.5](04-workflow-and-features.md#25-deferred-or-excluded-and-why) and
-`integrations.json` (47 integrations; none is Phase 1; browser storage and print are Phase 2; the USDM statistics
+`integrations.json` (47 integrations; none is Phase 1; browser storage and print are Phase 2, with the NRCS eFOTG
+technical notes as a Phase 2 reference for rest defaults; the USDM statistics
 service, the IEM fallback, PRISM (optional), NDSU R1780 and the FSA link are Phase 3).
 
 | Item | Decision | Reason |
@@ -1243,22 +1267,34 @@ From findings.json `unresolved_assumptions` and [03-research-and-data.md section
   +5 lbs/day), the 12-hour "late" sensor line, the 30-hour frozen-value line, the 25%-under information line and the
   dollar lines in decision D2 are synthetic demonstration settings (D). None is sourced or validated.
 - **The 42-day individual minimum** is chosen so the six planted slow yearlings (slow only in the last 57-day interval)
-  remain. Whether a method that blends all three weigh-ins would still flag them is untested (RULE-GAIN-07 says "not
-  tested in this audit").
+  remain. RULE-GAIN-07 says the 70-day alternative was "not tested in this audit"; `scenarios.gain70.py`, written later
+  by the scenario step, gives 6 slow yearlings by the last 57-day interval, 1 (Y129) by a three-point regression and 0
+  by Jun 1 to Sep 15. That is a calculation on the fictional data. It shows what a longer minimum would do to the
+  planted problem; it does not show which minimum is right for a real herd.
 - **The max-drawdown window** (decision D5) finds a fall that refilled inside the window and reports it as critical; on
   real data this may flag a fixed float. It is untested on real tank data.
-- **The weigh-basis gate** (decision D9) needs the generator to write `weigh_sessions.csv`; if Phase 1 must shrink, it
-  moves to Phase 2 and the gain rows carry a "weighing conditions not recorded" note instead.
+- **The weigh-basis gate** (decision D9) needs the generator to write `weigh_sessions.csv`, and the scenario folders
+  need one too (decision D16); if Phase 1 must shrink, it moves to Phase 2 and the gain rows carry a "weighing
+  conditions not recorded" note instead.
+- **The scenario folders** (`docs/audit/scenarios/`) were written in parallel with this roadmap and committed only in
+  the work-in-progress commit `b548e4f`; they may change before Phase 1 starts. Decision D16 assumes their
+  `expected.json` results stay as read on 2026-10-19. Their
+  `settings.json` differs from this roadmap's settings in five places (drop formula, individual minimum, coverage
+  share, closed months, weigh basis); [06-phase1-spec.md section 11.2](06-phase1-spec.md#112-scenario-tests) lists each
+  difference and its effect, which on the 10 folders is nil once D16's inputs are added (roadmap check, not run against
+  any implementation). No folder tests a coverage share between 0.5 and 0.8 or an individual interval between 21 and
+  41 days, so unit fixtures must cover those.
 - **T6 as CAN'T TELL** (decision D7) is an exception to the findings registry's statement that no CAN'T TELL state
   should appear on the committed data; the lead or owner may prefer to keep T6 as an ordinary serious alert.
 - **Fixture details.** Some acceptance cases name audit fixtures by ID (for example W-02, GN-07, CSV-35). Their
-  definitions are in `docs/audit/diagnostics/*.mjs`; the folder `docs/audit/scenarios/` named in the task does not exist
-  at the time of writing, so P1-17 builds scenario files under `tests/fixtures/` from those definitions. For LOAD-03's
+  definitions are in `docs/audit/diagnostics/*.mjs`; P1-17 builds them as single-change fixtures under
+  `tests/fixtures/`, alongside the 10 end-to-end folders in `docs/audit/scenarios/`. For LOAD-03's
   "shipped" case this roadmap assumes the Yearlings are removed from every file, which is how the finding's 7-row count
   is reached.
 - **Effort** is this roadmap's estimate using the registry's S / M / L key; no time measurement backs it.
-- **The roadmap check numbers** (Fuel 21.25%, Repairs falling to a warning under D1's default with D2's lines) were
-  computed from the quoted values for this document; they are not audit evidence.
+- **The roadmap check numbers** (Fuel 21.25%, Repairs falling to a warning under D1's default with D2's lines, and the
+  comparisons of the scenario folders under both drop formulas and both closed-month conventions) were computed for this
+  document with short Python scripts; they are not audit evidence.
 
 ---
 
@@ -1274,5 +1310,8 @@ From findings.json `unresolved_assumptions` and [03-research-and-data.md section
   [04-workflow-and-features.md](04-workflow-and-features.md).
 - Repository files at the reviewed commit, read for this roadmap: `exceptions.js`, `app.js`, `index.html`, README.md,
   `scripts/generate_data.py`, `tests/exceptions.test.mjs`, `.github/workflows/test.yml`, `data/*.csv`.
+- The scenario step's files, read on 2026-10-19: `docs/audit/scenarios/` (10 folders with `expected.json` and
+  `scenario.md`, `settings.json`, `run-results.json`) and `docs/audit/diagnostics/scenarios.build.py`,
+  `scenarios.run.mjs` and `scenarios.gain70.py` (run with `python3 -I` for the output quoted in D6).
 - External sources are cited in [03-research-and-data.md section 7](03-research-and-data.md#7-bibliography); this
   roadmap adds none.
