@@ -116,6 +116,9 @@ means a set-up problem, not a result about the page.
 - Implementation pull requests: Checkpoint 2 in
   [CODEX_REVIEW_PROMPT.md](docs/audit/CODEX_REVIEW_PROMPT.md#checkpoint-2-each-implementation-pull-request-before-merge).
 - Specification pull requests before a phase starts: a checkpoint like 1b in the same file.
+- To start a review, give the reviewer the checkpoint and the pull request, for example: "Run Checkpoint 2 from
+  docs/audit/CODEX_REVIEW_PROMPT.md on the pull request's branch, for <pull request link>." The prompt text lives in
+  this repository, so any agent can read it. Paste-ready copies in Drive (`04-reviews`) are a convenience for people.
 - Save each review report in `docs/reviews/`.
 
 ## GitHub and Google Drive
