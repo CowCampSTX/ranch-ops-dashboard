@@ -3,116 +3,547 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000">
 <title>Ranch Operations Dashboard</title>
 <meta name="description" content="One page for a ranch manager: what needs attention today across water, grazing, gain, herd health and budget. Fictional data.">
 <style>
 :root {
   color-scheme: dark;
-  --page: #000000; --surface: #0c0d0c; --surface-2: #121412; --ink: #f2f1ec; --ink-2: #c4c3ba; --muted: #8f8e86;
-  --grid: #1f211f; --axis: #34372f; --border: rgba(255,255,255,0.08); --wash: rgba(255,255,255,0.04);
-  --s1: #3ecf73; --s1-soft: #123d22; --on-s1: #04150a; --bar: #2a2c28;
-  --critical: #ef5350; --serious: #f0875c; --warning: #fab219; --good: #3ecf73;
-  --div-pos: #3ecf73; --div-neg: #ef5350;
+  --font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* surfaces and ink */
+  --page: #000000; --surface: #0b0d0b; --surface-2: #111411; --surface-3: #181b18;
+  --ink: #f3f2ed; --ink-2: #c5c4bb; --muted: #8d8c84;
+  --grid: #1c1f1c; --axis: #30342e; --border: rgba(255,255,255,0.07); --border-2: rgba(255,255,255,0.12);
+  --wash: rgba(255,255,255,0.035);
+  /* the one series colour (green) and its supporting steps; --s1-mute is the quiet step (earlier stays, unflagged budget bars) */
+  --s1: #3ecf73; --s1-mute: #2a7140; --s1-hi: #6fe39c; --s1-soft: rgba(62,207,115,0.12); --s1-line: rgba(62,207,115,0.35); --on-s1: #04150a;
+  /* status: reserved for meaning, always shown with an icon and a word; --on-status is ink on a status fill */
+  --critical: #ef5350; --serious: #f0875c; --warning: #fab219; --good: #3ecf73; --on-status: #1a0b05;
+  --radius: 16px;
+  --shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 24px 48px -28px rgba(0,0,0,0.9);
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.55 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
+/* no min-height on body and no animation fill after .rise ends: both switch off scroll anchoring, so a resize lost the reader's place */
+body {
+  margin: 0; color: var(--ink); font: 15px/1.55 var(--font); -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01", "ss03";
+  /* the glow follows the content column, not the window edge */
+  background:
+    radial-gradient(900px 520px at calc(50% - 470px) -160px, rgba(62,207,115,0.14), transparent 70%),
+    radial-gradient(760px 420px at calc(50% + 620px) -60px, rgba(62,207,115,0.06), transparent 70%),
+    var(--page);
+  background-repeat: no-repeat;
+}
 ::selection { background: var(--s1); color: var(--on-s1); }
-.wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px 40px; }
-header { padding: 40px 0 20px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
-header::before { content: ""; display: block; width: 44px; height: 3px; border-radius: 2px; background: var(--s1); margin-bottom: 16px; box-shadow: 0 0 12px rgba(62,207,115,0.6); }
-h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px; }
-h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 4px; }
-p { margin: 0 0 8px; }
-.sub, .note { color: var(--ink-2); }
+a { color: var(--s1); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; border-radius: 6px; }
+.skip { position: absolute; left: 12px; top: -48px; z-index: 50; background: var(--s1); color: var(--on-s1); padding: 8px 12px; border-radius: 8px; font-weight: 600; text-decoration: none; }
+.skip:focus { top: 12px; }
+h1, h2, h3, p { margin: 0; }
+.nw { white-space: nowrap; }
 .note { font-size: 13px; color: var(--muted); }
-.card { background: linear-gradient(180deg, var(--surface-2), var(--surface)); border: 1px solid var(--border); border-radius: 14px; padding: 20px; min-width: 0; box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 8px 24px rgba(0,0,0,0.5); }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 20px 0; }
-.tile { border-top: 2px solid var(--s1-soft); }
-.tile .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
-.tile .v { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.tile .d { color: var(--muted); font-size: 12px; }
-.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 20px; }
-@media (max-width: 900px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
-.chip { font: inherit; font-size: 13px; padding: 4px 12px; border: 1px solid var(--axis); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; }
-.chip:hover { border-color: var(--s1); }
-.chip[aria-pressed="true"] { background: var(--s1); color: var(--on-s1); border-color: var(--s1); font-weight: 600; }
-table { border-collapse: collapse; width: 100%; font-size: 14px; }
-th, td { padding: 8px; border-bottom: 1px solid var(--grid); text-align: left; vertical-align: top; }
-th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
-tbody tr:hover td, tr:hover td { background: var(--wash); }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.scroll { overflow-x: auto; }
-.sev { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
+code { font: 12px var(--mono); background: var(--wash); border: 1px solid var(--border); padding: 1px 5px; border-radius: 5px; color: var(--ink-2); }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px 48px; }
+
+/* ------------------------------------------------------------ top bar */
+.topbar { position: sticky; top: 0; z-index: 20; background: rgba(0,0,0,0.86); backdrop-filter: saturate(150%) blur(14px); -webkit-backdrop-filter: saturate(150%) blur(14px); border-bottom: 1px solid var(--border); }
+.topbar .in { max-width: 1240px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 12px 20px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; white-space: nowrap; font-weight: 650; letter-spacing: -0.01em; }
+.brand small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.02em; line-height: 1.2; }
+.brand b { display: block; font-size: 14px; line-height: 1.2; }
+.mark { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; flex: none;
+  background: linear-gradient(150deg, #17462a, #08160d); border: 1px solid var(--s1-line); box-shadow: 0 0 20px -2px rgba(62,207,115,0.35); }
+.nav { display: flex; gap: 2px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a { position: relative; display: inline-flex; align-items: center; color: var(--ink-2); text-decoration: none; font-size: 13px; font-weight: 500; padding: 6px 10px; border-radius: 8px; white-space: nowrap; transition: color .15s, background-color .15s; }
+.nav a:hover { color: var(--ink); background: var(--wash); }
+.nav a:focus-visible { outline-offset: -2px; }
+.nav a { scroll-margin-inline: 56px; }
+/* the bar is sticky, so its links are always on screen: shift their scroll box down by html's scroll-padding-top,
+   or focusing one scrolls the page up (keep the 76px in step with scroll-padding-top) */
+.topbar a { scroll-margin-block: -76px 76px; }
+/* the brand link sits outside the nav's own scroller, and Chromium still scrolls the page to centre it on keyboard focus;
+   making the bar's row a (never scrolled) scroll container keeps that focus scroll inside the bar */
+.topbar .in { overflow: hidden; }
+/* the section in view */
+.nav a[aria-current] { color: var(--ink); }
+.nav a[aria-current]::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 3px; height: 2px; border-radius: 2px; background: var(--s1); box-shadow: 0 0 8px rgba(62,207,115,0.6); }
+.stamp { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); border: 1px solid var(--border-2); border-radius: 999px; padding: 4px 11px; white-space: nowrap; background: rgba(255,255,255,0.02); }
+.stamp i { width: 7px; height: 7px; border-radius: 50%; background: var(--s1); box-shadow: 0 0 0 3px var(--s1-soft); }
+@media (max-width: 860px) {
+  /* 44px touch targets; the bar stays 49px tall */
+  .topbar .in { gap: 10px; padding-top: 2px; padding-bottom: 2px; }
+  .brand > span:last-child, .stamp { display: none; }
+  .brand { min-width: 44px; min-height: 44px; justify-content: center; }
+  .brand:focus-visible { outline-offset: -2px; }   /* the row has 2px of padding, and it clips */
+  .nav { margin-left: 0; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); padding-right: 48px; }
+  .nav a { min-height: 44px; padding: 0 11px; }
+}
+
+/* ------------------------------------------------------------ hero */
+/* the day's verdict leads: a compact title beside the summary card */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px 28px; padding: 32px 0 0; align-items: center; }
+@media (min-width: 901px) { .hero { grid-template-columns: minmax(0, 1fr) minmax(0, min(500px, 48%)); } }
+@media (max-width: 900px) { .hero { padding-top: 24px; } }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--s1); }
+.eyebrow::before { content: ""; width: 18px; height: 2px; border-radius: 2px; background: var(--s1); box-shadow: 0 0 10px rgba(62,207,115,0.7); }
+h1 { font-size: clamp(30px, 3.3vw, 40px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 700; margin: 12px 0 10px; }
+h1 span { color: var(--muted); font-weight: 600; }
+.lede { color: var(--ink-2); font-size: 15px; max-width: 54ch; }
+/* facts read as one quiet meta line; the as-of time gets its own line */
+.facts { display: flex; flex-wrap: wrap; gap: 6px 0; margin-top: 16px; padding: 0; list-style: none; }
+.facts li { font-size: 13.5px; color: var(--ink-2); }
+.facts li:not(:last-child)::after { content: ""; display: inline-block; width: 3px; height: 3px; border-radius: 50%; background: var(--muted); vertical-align: middle; margin: 0 12px; }
+.facts li:last-child { flex-basis: 100%; }
+.facts li:nth-last-child(2)::after { content: none; }
+.facts li b { color: var(--ink); font-weight: 600; }
+@media (max-width: 520px) { .facts { gap: 4px 14px; } .facts li::after { content: none !important; } }
+
+/* ------------------------------------------------------------ cards */
+.card { position: relative; background: linear-gradient(180deg, var(--surface-2), var(--surface) 120px); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; min-width: 0; box-shadow: var(--shadow); }
+.rise { animation: rise 0.55s cubic-bezier(.2,.7,.2,1) backwards; animation-delay: calc(var(--i, 0) * 60ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .rise { animation: none; } }
+section.card { margin-top: 20px; }
+@media (max-width: 520px) { .card { padding: 16px; border-radius: 14px; } section.card { margin-top: 14px; } }
+.sec-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; margin-bottom: 16px; }
+/* headings sit flush with the content they head: the icon is inline with the h2, the note runs under both */
+.sec-title { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 10px; min-width: 0; }
+.sec-title > div { display: contents; }
+.ico { flex: none; display: grid; place-items: center; color: var(--s1); }
+.ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+h2 { font-size: 19px; font-weight: 650; letter-spacing: -0.015em; line-height: 1.3; text-wrap: balance; }
+.sec-title .note { grid-column: 1 / -1; margin-top: 0; max-width: 96ch; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.grid2 > section.card { margin-top: 20px; }
+@media (max-width: 960px) { .grid2 { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+
+/* ------------------------------------------------------------ summary (hero card) */
+.summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "top cta" "bar bar" "leg leg"; gap: 18px 16px; padding: 22px 24px;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface)); }
+/* the red wash means something only when there is a critical item */
+.summary.has-critical { background: radial-gradient(420px 220px at 100% 0, rgba(239,83,80,0.10), transparent 70%), linear-gradient(180deg, var(--surface-2), var(--surface)); }
+.summary > .skel, .summary > .note, .summary > .load-error { grid-column: 1 / -1; }
+/* loading and failed states fill no named area: drop the empty rows, or their gaps pad the card */
+.summary:has(> .skel), .summary:has(> .load-error) { grid-template-areas: none; }
+.summary-top { grid-area: top; display: flex; align-items: flex-end; gap: 16px; }
+.hero-num { font-size: 68px; line-height: 0.9; font-weight: 700; letter-spacing: -0.045em; }
+.hero-label { font-size: 17px; font-weight: 600; line-height: 1.25; }
+.summary .sevbar { grid-area: bar; }
+.sevbar { display: flex; gap: 2px; height: 12px; }
+/* rounded data ends, square joins: the 2px gaps separate the segments of one bar */
+.sevbar span { min-width: 6px; }
+.sevbar span:first-child { border-radius: 6px 0 0 6px; }
+.sevbar span:last-child { border-radius: 0 6px 6px 0; }
+.sevbar span:only-child { border-radius: 6px; }
+/* the counts as one flat row, number first; a column too narrow for number and badge on one line stacks them */
+.sevlegend { grid-area: leg; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; padding: 0; margin: 0; list-style: none; container: sevleg / inline-size; }
+.sevlegend li { min-width: 0; padding: 2px 16px; border-left: 1px solid var(--border-2); }
+.sevlegend li:first-child { border-left: 0; padding-left: 0; }
+.sevlegend li:last-child { padding-right: 0; }   /* nothing follows the last count */
+.sevlegend .sl { display: flex; align-items: baseline; gap: 10px; }
+.sevlegend .n { order: -1; margin: 0; font-size: 30px; font-weight: 650; letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+.sevlegend .sev { font-size: 13.5px; font-weight: 500; color: var(--ink-2); gap: 6px; }
+.sevlegend .sev svg { width: 14px; height: 14px; align-self: center; }
+@container sevleg (max-width: 430px) { .sevlegend .sl { flex-direction: column; align-items: flex-start; gap: 6px; } }
+.summary .cta { grid-area: cta; align-self: start; margin-top: 6px; }
+.cta { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; text-decoration: none; color: var(--s1); }
+.cta:hover { color: var(--s1-hi); }
+@media (min-width: 901px) and (max-width: 999px) { .summary { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "bar" "leg" "cta"; } }
+@media (max-width: 520px) {
+  .summary { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "bar" "leg" "cta"; gap: 16px; padding: 16px; }
+  .sevlegend li { padding: 0 10px; }
+  .sevlegend .sev { font-size: 13px; gap: 5px; }
+}
+@media (max-width: 360px) { .sevlegend li { padding: 0 7px; } .sevlegend .sev { gap: 4px; } }
+
+/* ------------------------------------------------------------ tiles */
+/* one gutter: the tile row and the two-up row below share column edges */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 20px; }
+@media (min-width: 994px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.tile { padding: 18px 18px 16px; display: flex; flex-direction: column; }
+.tile .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tile .k { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.tile .ico { color: var(--muted); }
+.tile .ico svg { width: 18px; height: 18px; }
+.tile .v { font-size: 32px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.1; margin-top: 10px; }
+.tile .v small { font-size: 14px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+.tile .d { font-size: 12.5px; color: var(--muted); margin-top: auto; }
+.meter { position: relative; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35); margin: 14px 0 10px; }
+.meter i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit; }
+.meter b { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; border-radius: 2px; background: var(--ink); }
+.pips { display: grid; grid-template-columns: repeat(8, minmax(0, 16px)); gap: clamp(2px, 1.2vw - 2px, 6px); margin: 10px 0 8px; }
+.pips span { display: block; min-width: 0; }
+.pips svg { display: block; width: 100%; height: auto; max-width: 16px; }
+.split { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 2px 14px; margin: 12px 0 8px; font-size: 12.5px; color: var(--muted); }
+.split b { display: block; color: var(--ink); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+@media (max-width: 520px) {
+  .tiles { gap: 10px; margin-top: 14px; }
+  .tile { padding: 14px; }
+  .tile .v { font-size: 26px; }
+  .tile .ico { display: none; }
+  .tile .split { grid-template-columns: minmax(0, 1fr); gap: 0; margin: 8px 0 6px; }
+  .tile .split b { display: inline; font-size: 13px; }
+}
+
+/* ------------------------------------------------------------ severity badge and pills */
+.sev { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; white-space: nowrap; color: var(--ink); }
 .sev svg { width: 16px; height: 16px; flex: none; }
-.action { color: var(--ink-2); }
-svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
-svg.chart text { fill: var(--muted); font: 12px system-ui, sans-serif; }
-svg.chart .lbl { fill: var(--ink-2); }
+.tag { display: inline-block; font-size: 12px; font-weight: 500; color: var(--ink-2); background: var(--wash); border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink); padding: 3px 9px 3px 6px; border-radius: 999px; white-space: nowrap; border: 1px solid var(--border-2); background: var(--wash); }
+.pill svg { width: 14px; height: 14px; flex: none; }
+.pill.critical { border-color: rgba(239,83,80,0.45); background: rgba(239,83,80,0.12); }
+.pill.serious { border-color: rgba(240,135,92,0.45); background: rgba(240,135,92,0.12); }
+.pill.warning { border-color: rgba(250,178,25,0.45); background: rgba(250,178,25,0.10); }
+.pill.good { border-color: rgba(62,207,115,0.35); background: rgba(62,207,115,0.08); color: var(--ink-2); }
+
+/* ------------------------------------------------------------ filter chips */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; padding: 4px; border: 1px solid var(--border); background: rgba(0,0,0,0.35); border-radius: 12px; width: fit-content; max-width: 100%; }
+.chip { font: inherit; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--ink-2); cursor: pointer; min-height: 34px; }
+.chip:hover { color: var(--ink); background: var(--wash); }
+.chip .n { font-size: 11.5px; font-weight: 600; min-width: 20px; padding: 0 6px; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--ink-2); text-align: center; font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="true"] { background: var(--s1); color: var(--on-s1); font-weight: 650; box-shadow: 0 0 18px -4px rgba(62,207,115,0.6); }
+.chip[aria-pressed="true"] .n { background: rgba(4,21,10,0.18); color: var(--on-s1); }
+
+/* ------------------------------------------------------------ tables */
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 11px 10px; border-bottom: 1px solid var(--grid); text-align: left; vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; border-bottom-color: var(--axis); }
+tbody tr { transition: background-color 0.12s; }
+tbody tr:hover { background: var(--wash); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.xlist tbody tr { --sevc: var(--axis); }
+.xlist tr.sev-critical { --sevc: var(--critical); }
+.xlist tr.sev-serious { --sevc: var(--serious); }
+.xlist tr.sev-warning { --sevc: var(--warning); }
+.xlist td:first-child { box-shadow: inset 3px 0 0 var(--sevc); padding-left: 14px; }
+.xlist .c-what { font-weight: 600; }
+/* the subject leads; severity reads through the rail, the icon and a quieter word */
+.xlist .c-sev .sev { font-weight: 500; color: var(--ink-2); }
+.xlist .c-action { color: var(--ink-2); }
+.xlist .empty td { color: var(--ink-2); padding: 22px 14px; box-shadow: none; }
+@media (max-width: 760px) {
+  .xlist thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .xlist, .xlist tbody { display: block; }
+  .xlist tbody tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 14px 14px 14px 17px; margin-bottom: 10px;
+    border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); box-shadow: inset 3px 0 0 var(--sevc); }
+  .xlist td, .xlist td:first-child { display: block; padding: 0; border: 0; box-shadow: none; }
+  .xlist .c-area { justify-self: end; }
+  .xlist .c-what, .xlist .c-problem, .xlist .c-action { grid-column: 1 / -1; }
+  .xlist .c-what { font-size: 15px; margin-top: 2px; }
+  .xlist .c-action::before { content: "First step: "; color: var(--muted); }
+  .xlist .empty { display: block !important; }
+}
+
+/* ------------------------------------------------------------ water */
+.tanks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1080px) { .tanks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .tanks { grid-template-columns: minmax(0, 1fr); } }
+.tank { background: var(--surface-2); border: 1px solid var(--border); border-radius: 13px; padding: 13px 13px 8px; min-width: 0; transition: border-color 0.15s; }
+.tank:hover { border-color: var(--border-2); }
+.tank.critical { border-color: rgba(239,83,80,0.42); box-shadow: 0 0 28px -12px rgba(239,83,80,0.7); }
+.tank.serious { border-color: rgba(240,135,92,0.38); }
+.tank.warning { border-color: rgba(250,178,25,0.38); }
+.tank-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.tank-name { min-width: 0; }
+.tank-name b { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tank-name span { font: 600 11px var(--mono); color: var(--muted); letter-spacing: 0.04em; }
+.tank-level { display: flex; align-items: baseline; gap: 8px; margin: 6px 0 10px; }
+.tank-level b { font-size: 26px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.1; }
+.tank-level b small { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 1px; }
+.tank-level span { font-size: 12px; color: var(--muted); }
+@media (max-width: 520px) {
+  .tank { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; padding: 12px 12px 6px; }
+  .tank-head { grid-column: 1 / -1; align-items: center; margin-bottom: 4px; }
+  .tank-name { display: flex; align-items: baseline; gap: 8px; }
+  .tank-level { flex-direction: column; align-items: flex-start; gap: 0; margin: 0; padding-top: 4px; width: 92px; }
+}
+
+/* ------------------------------------------------------------ charts */
+.chart-box { width: 100%; min-width: 0; }
+svg.chart { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; -webkit-tap-highlight-color: transparent; }
+svg.chart:focus { outline: none; }
+svg.chart:focus-visible { outline: 2px solid var(--s1); outline-offset: 4px; border-radius: 8px; }
+svg.chart text { fill: var(--muted); font: 11.5px var(--font); }
+svg.chart .lbl { fill: var(--ink-2); font-size: 12.5px; }
+svg.chart .hd { fill: var(--ink); font-size: 13px; font-weight: 600; }
 svg.chart .ink { fill: var(--ink); font-weight: 600; }
-.multiples { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px; }
-@media (max-width: 700px) { .multiples { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.mini h4 { margin: 0; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; gap: 6px; }
-.mini h4 span { color: var(--ink-2); font-weight: 400; }
-.legend { display: flex; gap: 16px; font-size: 13px; color: var(--ink-2); margin: 6px 0; flex-wrap: wrap; }
-.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
-.tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,.15); border-radius: 8px; padding: 8px 10px; font-size: 13px; display: none; z-index: 10; max-width: 280px; }
-.wide { margin-top: 20px; }
-code { font-size: 12px; background: var(--wash); border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px; }
-a { color: var(--s1); }
+svg.chart .on { fill: var(--on-s1); font-weight: 600; font-size: 12px; }
+svg.chart .num { font-variant-numeric: tabular-nums; }
+svg.chart .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.zone-warn { fill: var(--warning); fill-opacity: 0.07; }
+.zone-crit { fill: var(--critical); fill-opacity: 0.11; }
+.legend { display: flex; gap: 6px 16px; font-size: 12.5px; color: var(--ink-2); flex-wrap: wrap; align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.legend svg { width: 14px; height: 14px; flex: none; }
+.key { display: inline-block; flex: none; }
+.key.box { width: 14px; height: 10px; border-radius: 3px; }
+.key.dot { width: 9px; height: 9px; border-radius: 50%; }
+.key.line { width: 16px; height: 0; border-top: 2px solid; }
+.key.dash { width: 16px; height: 0; border-top: 2px dashed; }
+.key.tick { width: 2px; height: 14px; border-radius: 1px; background: var(--ink-2); }
+/* a chart with nothing to draw takes its legend with it */
+.card:has(.chart-box > .empty-note) > .legend { display: none; }
+.hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
+/* the chart hint sits above the first chart and speaks touch on touch screens */
+#water .hint { margin: -4px 0 12px; }
+.hint .h-touch { display: none; }
+@media (hover: none) and (pointer: coarse) { .hint .h-fine { display: none; } .hint .h-touch { display: inline; } }
+.empty-note { font-size: 14px; color: var(--ink-2); padding: 18px 0; }
+.now { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
+.now li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); }
+.now .who { min-width: 0; font-size: 14px; }
+.now .who b { font-weight: 600; }
+.now .who span { display: block; font-size: 12.5px; color: var(--muted); }
+.now-title { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 18px; }
+.now-title:has(+ .now:empty) { display: none; }   /* no moves, or no group on a pasture right now */
+.gain-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+
+/* ------------------------------------------------------------ budget */
+.btable td { vertical-align: middle; }
+.btable .c-bar { width: 42%; min-width: 150px; }
+.btable th.c-bar { text-align: center; }
+.scale { display: flex; justify-content: space-between; font-weight: 500; color: var(--muted); letter-spacing: 0; text-transform: none; font-size: 11px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.track { position: relative; height: 22px; }
+/* one unbroken zero line down the column (the track fills the cell's content box and zero sits at its middle) */
+.btable tbody td.c-bar, .btable tfoot td.c-bar { background: linear-gradient(var(--axis), var(--axis)) calc(50% + 0.5px) 0 / 1px 100% repeat-y content-box border-box; }
+/* colour marks only the rows a budget rule flags, in that rule's status colour; the rest share the quiet green */
+.track .bar { position: absolute; top: 3px; bottom: 3px; background: var(--s1-mute); }
+.track .bar.over { border-radius: 0 4px 4px 0; }
+.track .bar.under { border-radius: 4px 0 0 4px; }
+.track .bar.serious { background: var(--serious); }
+.track .bar.warning { background: var(--warning); }
+.btable td > .pill { margin: -4px 0 -4px 8px; vertical-align: middle; }
+.track .val { position: absolute; top: 50%; transform: translateY(-50%); font-size: 12.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* a $0 budget has no percentage: a centred note sits on the zero line instead of a bar */
+.track .val.nb { left: 50%; transform: translate(-50%, -50%); padding: 0 6px; background: var(--surface); font-weight: 500; }
+.btable tfoot td { font-weight: 650; border-bottom: 0; border-top: 1px solid var(--axis); }
+.cat-sub { display: none; font-size: 12px; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .btable .c-budget, .btable .c-actual { display: none; }
+  .cat-sub { display: block; white-space: nowrap; }
+  /* the pill gets its own line under the name, so it never rides up onto the amounts below it */
+  .btable td > .pill { display: flex; width: fit-content; margin: 5px 0 4px; }
+  .btable th, .btable td { padding-left: 4px; padding-right: 4px; }
+  .btable th:first-child, .btable td:first-child { padding-left: 0; }
+  .btable th:last-child, .btable td:last-child { padding-right: 0; }
+  .btable .c-bar { width: 34%; min-width: 96px; }
+  .btable th.c-bar { white-space: normal; }
+}
+@media (max-width: 400px) { .cat-sub { white-space: normal; } }
+
+/* ------------------------------------------------------------ rules and footer */
+.rules td:first-child { color: var(--ink-2); white-space: nowrap; }
+/* grouped by area, worst first: on wide screens the area is printed once per block */
+@media (min-width: 641px) {
+  .rules tbody td { padding-top: 8px; padding-bottom: 8px; border-bottom-color: transparent; }
+  .rules tbody tr.end td { border-bottom-color: var(--grid); padding-bottom: 12px; }
+  .rules tbody tr.grp td { padding-top: 12px; }
+  .rules tbody tr.grp td:first-child { color: var(--ink); font-weight: 600; }
+  .rules td.rep span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+/* reference, one tap away on a phone (always open from 641px up, where the button is hidden) */
+.more > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 46px; padding: 0 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--ink); font-weight: 600; font-size: 14px; cursor: pointer; }
+.more > summary::-webkit-details-marker { display: none; }
+.more > summary svg { width: 16px; height: 16px; fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s; }
+.more[open] > summary svg { transform: rotate(180deg); }
+.more[open] > summary { margin-bottom: 6px; }
+.more > summary .open-l, .more[open] > summary .closed-l { display: none; }
+.more[open] > summary .open-l { display: inline; }
+@media (min-width: 641px) { .more > summary { display: none; } }
+@media (max-width: 640px) {
+  .rules thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .rules, .rules tbody { display: block; }
+  .rules tr { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--grid); }
+  .rules td { padding: 0; border: 0; }
+  .rules td:nth-child(2) { justify-self: end; }
+  .rules td:nth-child(3) { grid-column: 1 / -1; }
+}
+footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 10px 24px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+footer p { max-width: 72ch; }
+
+/* ------------------------------------------------------------ tooltip */
+.tip { position: fixed; left: 0; top: 0; z-index: 40; pointer-events: none; max-width: 280px; padding: 10px 12px; font-size: 13px; line-height: 1.45; color: var(--ink-2);
+  background: rgba(20,23,20,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--border-2); border-radius: 10px; box-shadow: 0 16px 40px -12px rgba(0,0,0,0.9); }
+.tip[hidden] { display: none; }
+.tip .tv { display: block; color: var(--ink); font-size: 18px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.2; }
+.tip .tl { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
+/* the flag line: ink text led by the rule's own status icon (the icon's colour and shape name the severity) */
+.tip .tf { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-2); color: var(--ink); font-weight: 600; }
+.tip .tf svg { width: 14px; height: 14px; flex: none; }
+
+/* ------------------------------------------------------------ loading and failure */
+.skel { display: grid; gap: 16px; }
+.skel i { display: block; border-radius: 10px; background: linear-gradient(90deg, rgba(255,255,255,0.035) 20%, rgba(255,255,255,0.085) 50%, rgba(255,255,255,0.035) 80%) 0 0 / 250% 100%; animation: shimmer 1.3s linear infinite; }
+.skel .k1 { width: 64%; height: 60px; } .skel .k2 { height: 12px; } .skel .k3 { height: 70px; }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+.chips:empty, .pill:empty, #tiles:empty { display: none; }
+.load-error { display: grid; gap: 10px; }
+.load-error .hero-label { display: flex; align-items: center; gap: 10px; }
+.load-error .hero-label svg { width: 20px; height: 20px; flex: none; }
+.btn { font: inherit; font-size: 14px; font-weight: 600; min-height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: var(--s1); color: var(--on-s1); cursor: pointer; justify-self: start; }
+.failed .wrap > :not(.hero):not(footer) { display: none; }
+
+/* ------------------------------------------------------------ phones */
+@media (max-width: 520px) {
+  /* the list follows the summary; the tiles move below it (they hold nothing focusable, so tab order still matches) */
+  .wrap { display: flex; flex-direction: column; }
+  .wrap > .hero, .wrap > #attention { order: -1; }
+  .hero { padding-top: 18px; gap: 14px; }
+  h1 { font-size: 28px; margin: 8px 0 12px; }
+  .lede { display: none; }
+  .facts { margin-top: 0; }
+  .facts li { font-size: 13px; }
+  .summary .cta { display: none; }   /* the list now follows directly */
+  .summary { grid-template-areas: "top" "bar" "leg"; }   /* and no empty row is left where it was */
+  /* the list is the phone's main surface: its rows are the cards, and the filter is a tidy grid of 42px targets */
+  #attention.card { background: none; border-color: transparent; box-shadow: none; padding: 10px 0 0; }
+  .chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 4px; }
+  .chip { justify-content: center; min-height: 42px; padding: 6px 8px; }
+}
+@media (max-width: 369px) { .chips { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .skel i { animation: none; } .more > summary svg { transition: none; } }
+
+@media (forced-colors: active) {
+  :root { --ink: CanvasText; --ink-2: CanvasText; --muted: CanvasText; --surface: Canvas; --surface-2: Canvas; }
+  .sevbar span, .meter i, .pips span, .track .bar, .key.box, .key.dot { forced-color-adjust: none; }
+  .key.tick { forced-color-adjust: none; background: CanvasText; }
+  .meter b { forced-color-adjust: none; background: CanvasText; }
+  .chip[aria-pressed="true"], .chip[aria-pressed="true"] .n { forced-color-adjust: none; background: Highlight; color: HighlightText; border-color: Highlight; }
+  /* charts take the same system focus ring as every other control */
+  svg.chart:focus-visible { outline-color: Highlight; }
+  .nav a[aria-current]::after { forced-color-adjust: none; background: Highlight; box-shadow: none; }
+}
+/* light contrast themes: darker steps of the same hues, so marks keep 3:1 and ink on them keeps 4.5:1 on a white Canvas */
+@media (forced-colors: active) and (prefers-color-scheme: light) {
+  :root { --s1: #15773b; --good: #15773b; --s1-mute: #4f9a64; --warning: #8f6100; --serious: #b8501f; --on-s1: #ffffff; }
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Ranch Operations Dashboard</h1>
-    <p class="sub">What needs attention today across water, grazing, gain, herd health and budget, on one page.</p>
-    <p class="note" id="asof"></p>
-  </header>
+<a class="skip" href="#attention">Skip to what needs attention</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="g-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ecf73" stop-opacity="0.26"/><stop offset="1" stop-color="#3ecf73" stop-opacity="0"/></linearGradient>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="in">
+    <a class="brand" href="#top" aria-label="Example Ranch, back to top">
+      <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ecf73" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="9.5" r="5"/><path d="M5 19.5h14"/></svg></span>
+      <span><b>Example Ranch</b><small>Operations</small></span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#attention">Attention</a><a href="#water">Water</a><a href="#grazing-sec">Grazing</a><a href="#gain-sec">Gain</a><a href="#budget">Budget</a><a href="#rules-sec">Rules</a>
+    </nav>
+    <span class="stamp" id="stamp"><i></i>Loading data</span>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <div class="hero">
+    <div class="rise" style="--i:0">
+      <p class="eyebrow">Daily report</p>
+      <h1>Ranch Operations <span>Dashboard</span></h1>
+      <p class="lede">What needs attention today across water, grazing, gain, herd health and budget, on one page.</p>
+      <ul class="facts" id="asof"></ul>
+    </div>
+    <div class="card summary rise" style="--i:1" id="summary" aria-live="polite"><div class="skel" aria-hidden="true"><i class="k1"></i><i class="k2"></i><i class="k3"></i></div><p class="note">Loading today's report…</p></div>
+  </div>
+
   <div class="tiles" id="tiles"></div>
 
-  <section class="card">
-    <h2>Needs attention</h2>
-    <p class="note">Every row is a rule a manager would act on, worst first. Thresholds are listed at the bottom of the page.</p>
+  <section class="card rise" style="--i:3" id="attention" aria-labelledby="h-attention">
+    <div class="sec-head">
+      <div class="sec-title">
+        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+        <div><h2 id="h-attention">Needs attention</h2><p class="note">Every row is a rule a manager would act on, worst first. The thresholds are listed under Rules at the bottom of the page.</p></div>
+      </div>
+    </div>
     <div class="chips" id="chips" role="group" aria-label="Filter by area"></div>
-    <div class="scroll"><table id="exceptions"></table></div>
+    <table class="xlist" id="exceptions"></table>
   </section>
 
-  <section class="card wide">
-    <h2>Water tanks, last 7 days</h2>
-    <p class="note">Percent full, read every 6 hours. Dashed lines mark 40% (check soon) and 25% (go now).</p>
-    <div class="multiples" id="water"></div>
+  <section class="card rise" style="--i:4" id="water" aria-labelledby="h-water">
+    <div class="sec-head">
+      <div class="sec-title">
+        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.7c-3.3 4-6 7.4-6 10.8a6 6 0 0 0 12 0c0-3.4-2.7-6.8-6-10.8z"/></svg></span>
+        <div><h2 id="h-water">Water tanks, last 7 days</h2><p class="note" id="waterNote">Percent full, read every 6 hours. The shaded bands are under 40% (check soon) and under 25% (go now).</p></div>
+      </div>
+      <span class="pill good" id="waterSum"></span>
+    </div>
+    <p class="hint" id="chart-help"><span class="h-fine">Hover, tap or focus a chart and use the arrow keys to read each reading.</span><span class="h-touch">Tap a chart, or slide a finger along it, to read each reading.</span></p>
+    <div class="tanks" id="tanks"></div>
   </section>
 
   <div class="grid2">
-    <section class="card">
-      <h2>Grazing rotation</h2>
-      <p class="note">Each group's pasture moves this season. The current stay is green; days past the planned move are marked.</p>
-      <div id="grazing"></div>
+    <section class="card rise" style="--i:5" id="grazing-sec" aria-labelledby="h-grazing">
+      <div class="sec-head">
+        <div class="sec-title">
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10M12 20v-8"/><path d="M12 12c0-3.2 2.2-5.5 6.5-5.5 0 3.2-2.2 5.5-6.5 5.5zM12 13.5c0-2.6-1.9-4.6-5.5-4.6 0 2.6 1.9 4.6 5.5 4.6z"/></svg></span>
+          <div><h2 id="h-grazing">Grazing rotation</h2><p class="note">Each group's pasture moves this season. A current stay shows the days left on its plan, or the days past it.</p></div>
+        </div>
+      </div>
+      <div class="legend" style="margin-bottom:10px">
+        <span><i class="key box" style="background:var(--s1)"></i>Current stay</span>
+        <span><i class="key box" style="background:var(--s1-mute)"></i>Earlier stays</span>
+        <span><i class="key tick"></i>Planned move date</span>
+        <span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.2l7.2 13.3H.8z" fill="var(--serious)" stroke-linejoin="round"/><path d="M8 6v4M8 12.2v.3" stroke="#1a0b05" stroke-width="1.8" stroke-linecap="round"/></svg>Past the planned move</span>
+      </div>
+      <div class="chart-box" id="grazing"></div>
+      <p class="now-title">Now grazing</p>
+      <ul class="now" id="nowGrazing"></ul>
     </section>
-    <section class="card">
-      <h2>Daily gain since the last weigh-in</h2>
-      <p class="note">One dot per animal; the line is the group's target. Hover a dot for the tag.</p>
-      <div id="gain"></div>
+    <section class="card rise" style="--i:6" id="gain-sec" aria-labelledby="h-gain">
+      <div class="sec-head">
+        <div class="sec-title">
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>
+          <div><h2 id="h-gain">Daily gain since the last <span class="nw">weigh-in</span></h2><p class="note">One dot per animal against the group's target.</p></div>
+        </div>
+      </div>
+      <div class="legend" style="margin-bottom:10px">
+        <span><i class="key dot" style="background:var(--s1)"></i>One animal</span>
+        <span><i class="key dot" style="background:var(--warning)"></i><span id="lgFlag">Flagged: under 50% of target</span></span>
+        <span><i class="key line" style="border-color:var(--ink)"></i>Target</span>
+        <span><i class="key dash" style="border-color:var(--muted)"></i><span id="lgRefs">80% and 50% of target</span></span>
+      </div>
+      <div class="chart-box" id="gain"></div>
     </section>
   </div>
 
-  <section class="card wide">
-    <h2>Spending against budget, season to date</h2>
-    <div class="legend"><span><span class="sw" style="background:var(--div-pos)"></span>Under budget</span><span><span class="sw" style="background:var(--div-neg)"></span>Over budget</span></div>
-    <div class="grid2" style="margin-top:0">
-      <div id="budgetChart"></div>
-      <div class="scroll"><table id="budgetTable"></table></div>
+  <section class="card rise" style="--i:7" id="budget" aria-labelledby="h-budget">
+    <div class="sec-head">
+      <div class="sec-title">
+        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 5.5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+        <div><h2 id="h-budget">Spending against budget, season to date</h2><p class="note">Categories sorted from most over budget to most under.</p></div>
+      </div>
+      <div class="legend" id="budgetLegend"></div>
     </div>
+    <table class="btable" id="budgetTable"></table>
   </section>
 
-  <section class="card wide">
-    <h2>Rules behind the report</h2>
-    <div class="scroll"><table id="rules"></table></div>
-    <p class="note" style="margin-top:10px">Example Ranch and all of its data are fictional, generated by <code>scripts/generate_data.py</code>.</p>
+  <section class="card rise" style="--i:8" id="rules-sec" aria-labelledby="h-rules">
+    <div class="sec-head">
+      <div class="sec-title">
+        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="M3.5 6l1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg></span>
+        <div><h2 id="h-rules">Rules behind the report</h2><p class="note">The demo's thresholds. A ranch would set its own.</p></div>
+      </div>
+    </div>
+    <details class="more" id="rulesMore">
+      <summary><span><span class="closed-l">Show the rules</span><span class="open-l">Hide the rules</span></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <table class="rules" id="rules"></table>
+    </details>
   </section>
-</div>
-<div class="tip" id="tip" role="status"></div>
+
+  <footer>
+    <p>Example Ranch and all of its data are fictional, generated by <code>scripts/generate_data.py</code>. The page flags readings and records for a person to check; it does not diagnose animals or replace a vet.</p>
+    <p>One static page: plain HTML, CSS and JavaScript reading CSV files.</p>
+  </footer>
+</main>
+<div class="tip" id="tip" role="status" aria-live="polite" hidden></div>
 <script type="module" src="app.js"></script>
 </body>
 </html>
