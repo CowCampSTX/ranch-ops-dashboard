@@ -32,11 +32,14 @@ same data ([08 section 4](08-redesign-coverage.md#4-intentional-differences-from
   size, the tank cards and the budget table are the starting point, not Phase 2 work
   ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). A Phase 1 change may move
   the code behind them but must not remove or weaken them. The preserve checks KEEP-01 to KEEP-34 in
-  [redesign/preserve.mjs](redesign/preserve.mjs) test this; they pass on main (34 of 34, Playwright Chromium,
-  2026-10-20; real phones, screen readers, Firefox and WebKit not tested) and must still pass on the Phase 1 page.
-  Two colour-only marks on main (the flagged gain dots and the gain and spend tile meters) are known issues a separate
-  pull request fixes, not features to keep; Phase 1 adds no mark like them
-  ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)).
+  [redesign/preserve.mjs](redesign/preserve.mjs) test this. They passed on main at `0315d09` (34 of 34 with the
+  script before the follow-up pull request of 06 section 15, Playwright Chromium, 2026-10-20; real phones, screen
+  readers, Firefox and WebKit not tested). That pull request changed KEEP-24: the changed script passes 34 of 34 on its
+  page and gives 33 on `0315d09`'s page files, with KEEP-24 failing, by design. They must still pass on the Phase 1 page.
+  The follow-up pull request of [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions) fixed the two
+  colour-only marks of `0315d09` on main: flagged gain animals are amber squares with a square legend key, and a tile
+  meter shows a status colour only with the status icon and words. Phase 1 keeps these marks (06 section 6.3, "Status
+  marks beyond colour") and adds no mark that shows a state by colour alone.
 - **`app.js` and `index.html` line numbers in the findings and the specification refer to `cfd77e5`.** Read the old
   code with `git show cfd77e5:app.js`, then find the matching code in the redesign. Example: the nine `innerHTML`
   places of [SEC-01](02-findings.md#sec-01) are listed by their `cfd77e5` lines in
@@ -102,9 +105,8 @@ measurement).
 6. The preserve checks KEEP-01 to KEEP-34 pass against the Phase 1 page (06 section 11.4 item 6), ported into
    `tests/browser/smoke.mjs` or run from the reference script [redesign/preserve.mjs](redesign/preserve.mjs), so
    nothing listed in [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign) is
-   removed or weakened. A check changes only where a Phase 1 item changes the behaviour it tests, or where the pull
-   request is the fix for the colour-only marks (06 section 15; KEEP-24 may then count the new mark), and the pull
-   request says which and why.
+   removed or weakened. A check changes only where a Phase 1 item changes the behaviour it tests, and the pull request
+   says which and why.
 7. CI runs the generator check (including new untracked files), the three-zone suite and the smoke test with the
    preserve checks ([06 section 11.5](06-phase1-spec.md#115-ci-changes-githubworkflowstestyml)).
 8. The generator's random draws are unchanged, the six unchanged data files are byte-identical to the reviewed commit,
@@ -154,9 +156,11 @@ scripts exercise the page, and they were written for `cfd77e5`'s page; on the re
 adapted before their output means anything ([08 section 5](08-redesign-coverage.md#5-audit-scripts-on-the-redesigned-page)
 maps them). `node docs/audit/redesign/coverage.mjs` checks the redesign's claims (recorded: 23 PASS), and
 `node docs/audit/redesign/preserve.mjs http://localhost:8766/` runs the preserve checks against a page you serve
-(recorded: 34 PASS on main; see [08 section 2](08-redesign-coverage.md#2-how-it-was-checked)). To reproduce a finding as
-recorded, run the scripts against an extracted copy of the reviewed commit (the scripts find the code relative to
-their own folder):
+(recorded: 34 PASS on main at `0315d09` with the script before the follow-up pull request of 06 section 15, see
+[08 section 2](08-redesign-coverage.md#2-how-it-was-checked); the changed script passes 34 on that pull request's page
+and fails only KEEP-24 on `0315d09`, see [08 section 6](08-redesign-coverage.md#6-the-follow-up-pull-request)). To
+reproduce a finding as recorded, run the scripts against an extracted copy of the reviewed commit (the scripts find the
+code relative to their own folder):
 
 ```bash
 REF=$(mktemp -d)

@@ -930,8 +930,10 @@ this section lists, and Phase 1 keeps it: a change may move the code behind it, 
 of it is a Phase 2 feature, and a reviewer does not flag it as one (section 14). Each line names the finding or rule it
 answers and the preserve checks that test it (KEEP-01 to KEEP-34, kept as the read-only reference script
 `docs/audit/redesign/preserve.mjs` and run by the smoke test, section 11.4). The values were measured with Playwright
-Chromium on the committed data on main (`0315d09`) on 2026-10-20, where all 34 checks pass; real phones, screen readers,
-Firefox and WebKit were not tested.
+Chromium on the committed data on main (`0315d09`) on 2026-10-20, where all 34 checks passed with the script before the
+follow-up pull request of section 15. The "Status marks beyond colour" row and the gain inset were measured on that pull
+request's branch, where the changed script passes all 34. Real phones, screen readers, Firefox and WebKit were not
+tested.
 
 | Kept | What the page does | Finding or rule | Checks |
 |---|---|---|---|
@@ -942,7 +944,8 @@ Firefox and WebKit were not tested.
 | Readings stay on screen | All 443 readings of the 10 charts lie inside the window and below the sticky top bar at 1280 x 900, 390 x 844 and 320 x 640, and a reading follows its point when the page scrolls. At 1280 x 900 the T4 reading spans x 514 to 714. | [UI-11](02-findings.md#ui-11) | KEEP-05, KEEP-34 |
 | Charts at their real width | Each chart is drawn at the width it is shown (viewBox within 1 px of the drawn width from 320 to 1920 px) and redrawn when that width changes, with focus and the reading kept. Chart text renders at 11 px or more (11.48 to 11.5 px), no two labels overlap, and long names end with an ellipsis. | [UI-03](02-findings.md#ui-03), [UI-12](02-findings.md#ui-12), [UI-14](02-findings.md#ui-14) | KEEP-19, KEEP-20, KEEP-21, KEEP-22 |
 | Tank cards | `#tanks .tank`: one card per tank, worst first, each with its name, a status pill, the last level and its time, and one 7-day chart whose line breaks where readings stop for more than 12 hours. A tank with no readings in the window says so (section 5.2). | [UI-15](02-findings.md#ui-15), [LOAD-04](02-findings.md#load-04) | KEEP-13, KEEP-23 |
-| Grazing and gain charts | The grazing chart marks only the current stay's days left or days past plan, with the Now grazing list below it (section 5.3). The gain chart draws the target, 80% and 50% lines; each animal the rules flag has "Flagged: under 50% of target", with an icon, in its reading, and the legend names the flag. The "Not shown" note names the groups with no gain target (a group with a target but no weigh-ins is in neither the chart nor the note, a known issue of the redesign for the follow-up pull request of section 15). | [UI-16](02-findings.md#ui-16), [GRZ-06](02-findings.md#grz-06) | KEEP-24 |
+| Grazing and gain charts | The grazing chart marks only the current stay's days left or days past plan, with the Now grazing list below it (section 5.3). The gain chart draws the target, 80% and 50% lines; each animal the rules flag has "Flagged: under 50% of target", with an icon, in its reading, and the legend names the flag. The "Not shown" note names the groups with no gain target and the groups with a target but no weigh-ins (the second part since the follow-up pull request of section 15). Since that pull request the gain chart's text starts at its left edge, and its marks, gridlines, reference and target lines sit inside an inset 1 px wider than the keyboard ring reaches (10.2 px where the chart is 460 px wide or more, 9.5 px where it is narrower), so a gain at the start of the axis keeps its mark and ring inside the chart. No preserve check asserts the inset. | [UI-16](02-findings.md#ui-16), [GRZ-06](02-findings.md#grz-06) | KEEP-24 |
+| Status marks beyond colour | Since the follow-up pull request of section 15: each animal the rules flag on the gain chart is an amber square (a `rect`), the other animals are dots (`circle`), and the legend's flag key is a square too. Section 5.1 keeps the hollow diamond for the CAN'T TELL marker, so the flag uses a shape that no other state uses. The gain tile's meter takes the rule's severity colour only when the rules flag the tile's group, and then the severity icon and "Under 80% of target" sit under it. Otherwise that meter is in the series colour (`--s1`). The rules never judge the season total, so the spend meter is always in `--s1-mute`, the muted green the budget table gives the season total and its "Not flagged" key. | [RULE-WF-01](03-research-and-data.md#rule-wf-01) (A) | KEEP-24 (the squares and their key, at 1280 x 900, 390 x 844 and 320 x 640). It reads each mark element's own fill and each key's own box and corner radius, and does not see what "Limits of the checks" lists, so a reviewer still looks at the gain chart and its legend. The tile line and the meter colours are not asserted by a preserve check. |
 | Budget as one table | `#budgetTable`: a header, one row per category with one bar (right of zero when over budget, left when under, none when on budget), a pill on each flagged category, a legend, and a season-total row in `tfoot` that adds up. Labels stay inside their cells, and a \$0 budget draws no NaN or Infinity. There is no separate budget chart. | [UI-17](02-findings.md#ui-17), [BUD-03](02-findings.md#bud-03) | KEEP-14, KEEP-15, KEEP-16, KEEP-17, KEEP-18 |
 | Area chips | One group labelled "Filter by area", built once, each chip with its count badge (section 5.1). A chip sets `aria-pressed`, keeps focus and shows only its area's rows; Tab moves on to the next chip. | [UI-10](02-findings.md#ui-10), [RULE-WF-05](03-research-and-data.md#rule-wf-05) (focus part) | KEEP-31 |
 | Phone layouts | At 760 px wide or less each list row is a card with every cell on screen (right edge x 358 at 390 px). At 640 px or less the budget table hides its Budget and Actual columns and shows "\$9,000 of \$7,200" under the category name, inside its card at 390 and 320 px, and the rules table sits closed behind "Show the rules". At 520 px or less the list comes right after the summary card and the tank cards stack one per row; the tiles sit two by two. The page does not scroll sideways at 33 widths from 320 to 1920 px on the committed data, or at 320, 390, 768 and 1280 px with long group and category names and with markup in pasture names and ear tags. | [UI-02](02-findings.md#ui-02) | KEEP-08, KEEP-09, KEEP-10, KEEP-11, KEEP-12 |
@@ -956,12 +959,15 @@ Basis column) fit at 320 px without sideways scroll. The banner uses `role="aler
 
 **Not kept as a feature.**
 
-- Two kinds of mark show status by colour without an icon or word of their own: the flagged gain dots (the dot differs
-  by hue only, although its reading and the legend name the flag) and the meters on the gain and spend tiles. They are
-  known issues of the redesign that a separate pull request fixes (section 15). KEEP-24 counts the gain chart's dots
-  as `circle` elements, one per keyboard reading, and the flagged ones by a fill that differs from the other dots and
-  matches a legend key; the separate pull request that fixes the colour-only marks may change KEEP-24 to count its new
-  mark, and says so. Phase 1 does not count them as features to keep, and Phase 1 adds no mark like them.
+- The colour-only marks of the redesign at `0315d09`: flagged gain dots that differed from the other dots by hue only
+  (their readings and the legend named the flag), and gain and spend tile meters coloured by state with no icon or
+  word. The follow-up pull request of section 15 fixes them on main, and Phase 1 keeps the fixed marks (the "Status
+  marks beyond colour" row above). That pull request changed KEEP-24: it now counts every mark drawn in a legend key's
+  colour, one per keyboard reading, and needs the flagged marks to differ in shape from the plain dots, and each legend
+  key to have the shape of the marks in its colour, at 1280 x 900, 390 x 844 and 320 x 640 ("Limits of the checks"
+  below says what it judges and what it does not see). The changed check passes on the fixed page and fails on
+  `0315d09`'s page files, by design (Playwright Chromium, 2026-10-20 and 2026-10-21). Phase 1 adds no mark that shows a
+  state by colour alone.
 - `#tip` cannot be hovered or clicked to keep it open (`pointer-events: none`). That part of
   [RULE-WF-03](03-research-and-data.md#rule-wf-03) stays in P2-05 (section 14).
 - The whole-page failed-load state, and the uncaught page error it throws today, are replaced by section 6.2's
@@ -977,11 +983,30 @@ Grazing and Gain links at 961 px and wider; the phone nav keeping a focused link
 styles. The empty-chart message is tested by P1-06 item 2 and P1-14 item 5.
 
 **Limits of the checks.** At 320 px the budget table runs 8.7 px into its card's right padding (inside the card, with
-no cell cut off). A budget category whose markup has a long unbroken run of characters still widens `#budgetTable`
-past a phone window (414 to 480 px at 390 px with the categories of section 7 and P1-13 items 4 and 6; Playwright
-Chromium on main `0315d09`, 2026-10-20). No check keeps it; the follow-up pull request of section 15 fixes it. KEEP-09
-has not been run on Phase 1's new tables. The touch slide uses Chromium touch events. KEEP-27
-depends on the section container ids staying.
+no cell cut off). On `0315d09` a budget category whose markup has a long unbroken run of characters widened
+`#budgetTable` past a phone window (414 to 480 px at 390 px with the categories of section 7 and P1-13 items 4 and 6;
+Playwright Chromium, 2026-10-20). The follow-up pull request of section 15 fixes it on main: a run of 16 or more
+characters may break where it does not fit in a list cell, and in the budget category cell only when the table would
+not fit otherwise. Phase 1 keeps that, but no preserve check asserts it. KEEP-24 judges the marks and legend keys at
+1280 x 900, 390 x 844 with touch and 320 x 640 with touch. At each size it reads each mark element's own fill geometry
+(nine points of the mark's box tested with the browser's `isPointInFill`, in the chart's coordinates) and each legend
+key's own box and corner radius, not the element's name or the text of a style. It fails on copies of the page whose
+flagged marks were drawn round (a `rect` with its corners rounded into a circle or with a percentage `rx`, a `path` of
+two arcs, a 24-sided `polygon`), whose flag key was round, whose two keys were swapped, or whose flagged marks and flag
+key were round only on a chart under 460 px (Playwright Chromium, 2026-10-21). It tells round from square-cornered
+only: a mark or key whose corner radius is up to 40% of its side counts as having corners, however rounded it looks,
+and any other shape, such as a diamond, fails it. It cannot judge a mark with its own `clip-path` or mask, or a key with
+its own `clip-path`, mask or transform, and fails them. It does not see whether a mark or key can be seen at all. Copies
+of the page whose flagged marks or flag key were hidden by `opacity: 0`, `filter: opacity(0)` or `visibility: hidden`,
+on the mark or key itself or on its parent, or by the marks' own `fill-opacity` of 0, pass it, with the flagged animals
+or the flag key gone from the page; so does an `opacity` of 0.01 on the marks (Playwright Chromium, 2026-10-21). A
+`visibility` attribute on the mark itself takes it out of the count, and `display: none` on a mark or key leaves nothing
+to test, so those fail it. Nor does it see a mark's stroke, a clip or mask on a mark's ancestors, a shape painted on top
+of a mark, a key's background image or a clip on the key's wrapper: copies of the page that show round flagged marks or
+a round flag key in those ways pass it. It counts shape elements only, so marks drawn with `<use>` are not counted and
+fail it, even when they are correct squares. It finds a key by its background colour, so a key drawn as an SVG or by its
+border fails it too. A reviewer still looks at the gain chart and its legend. KEEP-09 has not been run on Phase 1's new
+tables. The touch slide uses Chromium touch events. KEEP-27 depends on the section container ids staying.
 
 ---
 
@@ -1015,7 +1040,7 @@ Finding: [SEC-01](02-findings.md#sec-01) ("CSV text is written into the page wit
 - **Attributes.** Data never goes into `on*` attributes, `style`, `href` or `src`. Data in `data-*` attributes is
   set with `setAttribute` or `dataset`. Data in `title` or `aria-label` attributes is set with `setAttribute`, or, when
   it is written as markup, passes through `esc()` inside a double-quoted attribute (the redesign does this for the tank
-  IDs in the water tile's icons, `app.js:213`).
+  IDs in the water tile's icons, `app.js:213` at `0315d09`).
 - **Test.** A test file set with `<img src=x onerror=...>`, `<b>x</b>`, `<script>` and a plain "<A" in pasture, tank,
   tag, group, task and category names: no injected element (no `img` or `script` element in `main` or `#tip`, and no
   `b` element whose text is "x"; the page's own `<b>`, `<i>` and `<small>` markup is allowed), no `window.__xss_*`
@@ -1140,8 +1165,8 @@ not show the thresholds are right." ([RULE-WF-20](03-research-and-data.md#rule-w
 | Gain period | "since 2026-07-20" | "between the 2026-07-20 and 2026-09-15 weigh-ins" ([GAIN-11](02-findings.md#gain-11)) |
 | Gain chart heading | "Daily gain since the last weigh-in" | "Daily gain between the last two weigh-ins" |
 | Gain tile | "Yearling gain", "1.94 lbs/day", "Target 2.0, since Jul 20" (Yearlings when they have a target, else the first group with one) | the judged group with the lowest G / target, "{G} lbs/day {group} (target {target})": on the committed data "0.44 lbs/day Heifers (target 1.0)" (section 5.4) |
-| Gain chart note | "One dot per animal against the group's target." The hint above the charts reads "Hover, tap or focus a chart and use the arrow keys to read each reading.", or "Tap a chart, or slide a finger along it, to read each reading." on a touch screen | unchanged: the page already gives chart readings by touch and keyboard (section 6.3) |
-| Grazing chart reading, current stay | "{n} days", "{group} in {pasture id} {name}", "{in date} to now · plan {p} days" (`app.js:398` on main; `app.js:143` at `cfd77e5`) | "{in date} to {as-of date} (as of) · plan {p} days"; the value stays first |
+| Gain chart note | "One mark per animal against the group's target." The hint above the charts reads "Hover, tap or focus a chart and use the arrow keys to read each reading.", or "Tap a chart, or slide a finger along it, to read each reading." on a touch screen | unchanged: the page already gives chart readings by touch and keyboard (section 6.3) |
+| Grazing chart reading, current stay | "{n} days", "{group} in {pasture id} {name}", "{in date} to now · plan {p} days" (`app.js:398` at `0315d09`; `app.js:143` at `cfd77e5`) | "{in date} to {as-of date} (as of) · plan {p} days"; the value stays first |
 | Grazing note | "Each group's pasture moves this season. A current stay shows the days left on its plan, or the days past it." | "Each group's pasture moves this season. Only the current stay shows the days left on its plan, or the days past it; earlier stays are not marked." ([GRZ-06](02-findings.md#grz-06)) |
 | Exception card note | "Every row is a rule a manager would act on, worst first. The thresholds are listed under Rules at the bottom of the page." | adds "Rows marked Can't tell need a check before anyone can say all is well." |
 | Header | Top bar "Data as of Sep 30, 6:00 PM" (hidden at 860 px wide or less) and the as-of facts "As of September 30, 2026 at 6:00 PM", both in the viewer's zone | "Data as of Sep 30, 2026, 6:00 PM CDT (America/Chicago)" plus "Fictional snapshot, not live" in the as-of facts (`#asof`), shown at every width; the top-bar stamp also names the zone ("6:00 PM CDT") |
@@ -1320,9 +1345,11 @@ static server and checks the redesigned page, using the page terms of section 12
    "0"); water.csv header-only (no "0 of 0"; 8 tank cards, each saying it has no readings); budget.csv aborted (banner,
    other sections drawn, no "NaN" on the page); every CSV delayed 3 s (`/loading/i` visible at 1 s).
 3. **Hostile file set** (section 7) at 1280 x 900 with `hasTouch`: no injected elements, and the names shown literally
-   in the three chart readings, each reached by hover, by keyboard and by a touch tap. (At 390 px a hostile category
-   name with a long unbroken run of characters, such as `onerror="window.__xss_c=1">`, widens `#budgetTable`, the page then zooms out under `isMobile` and taps miss, so this item runs
-   at 1280 px; item 4 checks the phone layout on the committed data.)
+   in the three chart readings, each reached by hover, by keyboard and by a touch tap. (On `0315d09`, at 390 px a hostile
+   category name with a long unbroken run of characters, such as `onerror="window.__xss_c=1">`, widened `#budgetTable`,
+   the page then zoomed out under `isMobile` and taps missed, so this item runs at 1280 px. The follow-up pull request
+   of section 15 fixes the width; taps at 390 px with this file set were not re-run. Item 4 checks the phone layout on
+   the committed data.)
 4. **Phone layout**, committed data with `hasTouch` and `isMobile`, at 390 x 844 and at 320 x 640: no `pageerror`; no
    horizontal scroll (`document.documentElement.scrollWidth` <= its `clientWidth`); each of the 10
    `#exceptions tbody tr` is shown as a card (`display: grid`) with its `.c-problem` and `.c-action` cells inside the
@@ -1336,13 +1363,14 @@ static server and checks the redesigned page, using the page terms of section 12
    redesign's behaviour (section 6.3).
 5. `locale: "de-DE"`, `timezoneId: "Pacific/Auckland"`: the same 10 rows and "\$89,303 of \$88,400".
 6. **Preserve checks.** KEEP-01 to KEEP-34 (section 6.3) pass against the Phase 1 page. They are kept as the read-only
-   reference script `docs/audit/redesign/preserve.mjs`, which passed 34 of 34 on main at `0315d09` and failed 33 of 34
-   on the old page at `cfd77e5` (Playwright Chromium, 2026-10-20). The Phase 1 pull request either ports them into
+   reference script `docs/audit/redesign/preserve.mjs`. Before the follow-up pull request of section 15, it passed 34
+   of 34 on main at `0315d09` and failed 33 of 34 on the old page at `cfd77e5` (Playwright Chromium, 2026-10-20). The Phase 1 pull request either ports them into
    `tests/browser/smoke.mjs` or runs the reference script against the page it serves; either way they run in CI
    (section 11.5). The checks read structure and behaviour, not rule wording or pixel positions: all 34 also passed on
    a copy of main given the Phase 1 wording of sections 5.7 and 10.2. A check changes only where a Phase 1 item changes
-   the behaviour it tests, or where the pull request is the fix for the colour-only marks of section 15 (KEEP-24 counts
-   the flagged gain dots as circles in a second colour, section 6.3), and the pull request says which and why.
+   the behaviour it tests, and the pull request says which and why. The follow-up pull request of section 15 changed
+   KEEP-24 to count each flagged animal's square (section 6.3); the changed script passes 34 of 34 on that pull
+   request's page and fails only KEEP-24 on `0315d09`'s page files.
    `docs/audit/redesign/coverage.mjs` is not a Phase 1 gate: it asserts pre-Phase 1 wording ("Heifers here now",
    "Water tanks OK") and stays as the record of the redesign's claims.
 
@@ -1806,15 +1834,16 @@ Safe rendering ([SEC-01](02-findings.md#sec-01)).
 6. [browser] `<img src=x onerror="window.__xss_tip=1">` as a tank ID (in water.csv and tanks.csv), a pasture name, a
    group name and a budget category. Show a reading on that tank's water chart (the `#tanks .tank` whose
    `.tank-name span` is the ID; `app.js:344` at `0315d09`, `:104` at `cfd77e5`), on a stay of that group and a stay in
-   that pasture on the grazing chart (`:398`; `:143` at `cfd77e5`), and on a dot of that group on the gain chart
-   (`:532`; `:170` at `cfd77e5`), three ways each: hovering with the mouse at 1280 x 900; focusing the `svg.chart` and
-   pressing arrow keys until `#tip` names it (Home and ArrowDown reach a group's row), at 1280 x 900 and at 390 x 844;
-   and tapping in a context with `hasTouch` at 1280 x 900, as in section 11.4 item 3 (at 390 x 844 this file set's
-   category widens `#budgetTable` to 422 px, so under `isMobile` the page zooms out and taps miss). Each time `#tip` contains no `img` or `script` element,
-   `window.__xss_tip` stays unset, and `#tip`'s text contains the name literally. The page has no budget chart and no
-   budget reading (the budget tooltip was `:194` at `cfd77e5`): the category's `#budgetTable tbody` row (`:576`) shows
-   the name literally at the start of its first cell's text, and `#budgetTable` has no `img` or `script` element.
-   (Static formatting such as `<b>` built by the code is allowed.)
+   that pasture on the grazing chart (`:398` at `0315d09`; `:143` at `cfd77e5`), and on a dot of that group on the gain
+   chart (`:532` at `0315d09`; `:170` at `cfd77e5`), three ways each: hovering with the mouse at 1280 x 900; focusing
+   the `svg.chart` and pressing arrow keys until `#tip` names it (Home and ArrowDown reach a group's row), at 1280 x 900
+   and at 390 x 844; and tapping in a context with `hasTouch` at 1280 x 900, as in section 11.4 item 3 (on `0315d09`, at
+   390 x 844 this file set's category widened `#budgetTable` to 422 px, so under `isMobile` the page zoomed out and taps
+   missed; the follow-up pull request of section 15 fixes the width). Each time `#tip` contains no `img` or `script`
+   element, `window.__xss_tip` stays unset, and `#tip`'s text contains the name literally. The page has no budget chart
+   and no budget reading (the budget tooltip was `:194` at `cfd77e5`): the category's `#budgetTable tbody` row (`:576`
+   at `0315d09`) shows the name literally at the start of its first cell's text, and `#budgetTable` has no `img` or
+   `script` element. (Static formatting such as `<b>` built by the code is allowed.)
 
 ### P1-14
 
@@ -1966,7 +1995,8 @@ the gain tile "Yearling gain 1.94 lbs/day" → the Heifers figure "0.44 lbs/day 
 "Schedule it this week" → the new first step; "Pull and check these animals at the next gather" → "Look at these
 animals at the next gather and record what you see"; the T6 row gains "at 2026-09-29 00:00" and the CAN'T TELL marker.
 The README screenshots (`docs/screenshots/screenshot.png`, `water.png`, `grazing-gain.png` and `phone.png`, moved
-from `docs/` on 2026-10-20) should be retaken.
+from `docs/` on 2026-10-20) should be retaken, with `docs/screenshots/capture.mjs`
+([its README](../screenshots/README.md) says how).
 
 **Audit files.** The diagnostics scripts in `docs/audit/diagnostics/` stay as the audit's record of the behaviour at the
 reviewed commit; they are not updated to the new code. `docs/audit/redesign/coverage.mjs` stays as the record of the
@@ -1992,8 +2022,8 @@ not a Phase 2 feature ([section 6.3](#63-accessibility-and-layout-kept-from-the-
   screen, stay.
 - Short dates in rows (decision D14) and a cap on the budget bar scale (P2-06). The phone layouts, chart text size,
   label fitting and line breaks at sensor outages stay.
-- The fix for the colour-only marks the redesign shipped (the flagged gain dots and the gain and spend tile meters). A
-  separate pull request makes it (section 15).
+- The fix for the colour-only marks the redesign shipped (the flagged gain dots and the gain and spend tile meters):
+  the follow-up pull request of section 15 made it on main, and Phase 1 keeps it (section 6.3) without adding to it.
 - Printable crew briefing and visual-check capture (P2-07).
 - Rest checks, concurrent-occupancy check, a credible example rotation, "no current pasture recorded" (P2-08).
 - Consequence-aware ranking and silence escalation (P2-09).
@@ -2023,20 +2053,34 @@ the known issues below once it has merged, and keeps that pull request's fixes t
 does not ship stay deferred (section 14). The preserve checks behind section 6.3 are kept in `docs/audit/redesign/preserve.mjs` and run by the
 smoke test (section 11.4 item 6).
 
-**Known issues of the redesign, not features to keep** (recorded 2026-10-20). Two kinds of mark on main show status by
-colour without an icon or word of their own, against the rule that a status colour comes only with an icon and a
-label: the flagged gain dots, which differ from the others by hue only (1.10:1; their readings and the legend name
-the flag), and the meters on the gain and spend tiles. Both were found when Claude checked the redesigned page on main
-(`0315d09`, Playwright Chromium, 2026-10-20) for this specification; the notes of that check are not saved in this
-repository, and Codex's [Checkpoint 1 report](../reviews/2026-10-20-codex-checkpoint-1.md) does not cover them. A
-separate pull request fixes them. Phase 1 adds no mark like them, and does not count them as features to
-keep (section 6.3). A budget category with a long unbroken run of characters widens `#budgetTable` past a phone
-window, and a group with a gain target but no weigh-ins is in neither the gain chart nor its "Not shown" note; the
-same separate pull request fixes both. That pull request delivers no P1 item and is reviewed with Checkpoint 2 against
-this list: each flagged gain dot differs from the other dots by more than colour, and KEEP-24 is changed to count that
-mark; the gain and spend tile meters no longer carry a state by colour alone; at 390 x 844 a budget category of 60
-characters with no space leaves `document.documentElement.scrollWidth <= clientWidth`; a group with a gain target and
-no weigh-ins is named in `#gain p.hint`; KEEP-01 to KEEP-34 otherwise pass unchanged.
+**Known issues of the redesign, not features to keep** (recorded 2026-10-20). Two kinds of mark on main at `0315d09`
+showed status by colour without an icon or word of their own, against the rule that a status colour comes only with an
+icon and a label: the flagged gain dots, which differed from the others by hue only (1.10:1; their readings and the
+legend named the flag), and the meters on the gain and spend tiles. Both were found when Claude checked the redesigned
+page on main (`0315d09`, Playwright Chromium, 2026-10-20) for this specification; the notes of that check are not saved
+in this repository, and Codex's [Checkpoint 1 report](../reviews/2026-10-20-codex-checkpoint-1.md) does not cover them.
+The follow-up pull request below fixes them. Phase 1 adds no mark like them, and does not count them as features to
+keep (section 6.3). A budget category with a long unbroken run of characters widened `#budgetTable` past a phone
+window, and a group with a gain target but no weigh-ins was in neither the gain chart nor its "Not shown" note; the
+same pull request fixes both. That pull request delivers no P1 item and is reviewed with Checkpoint 2 against this
+list: each flagged gain dot differs from the other dots by more than colour, and KEEP-24 is changed to count that mark;
+the gain and spend tile meters no longer carry a state by colour alone; at 390 x 844 a budget category of 60 characters
+with no space leaves `document.documentElement.scrollWidth <= clientWidth`; a group with a gain target and no weigh-ins
+is named in `#gain p.hint`; KEEP-01 to KEEP-34 otherwise pass unchanged.
+
+**Fixed by the follow-up pull request** (2026-10-20 and 2026-10-21). The four issues above were on main at `0315d09`.
+The follow-up pull request fixes them on main, and Phase 1 keeps the fixed behaviour (section 6.3, "Status marks beyond
+colour"). Measured with Playwright Chromium on its branch: each flagged gain animal is an amber square (6 squares and
+189 dots on the committed data), and KEEP-24 now counts that mark and judges its shape at 1280, 390 and 320 px; the
+spend meter is always in `--s1-mute`, the muted green of the budget table's season total and its "Not flagged" key, and
+the gain meter takes a severity colour only with the icon and "Under 80% of target" under it; at 390 x 844 a
+60-character budget category with no space, on Repairs (flagged) or on Labor, gives `scrollWidth` 390 for `clientWidth`
+390 (655 before); a group with a gain target and no weigh-ins is named in `#gain p.hint` ("Not shown: Cows, with no
+gain target set; Bulls, with no weigh-ins yet."); all 34 preserve checks pass, and only KEEP-24 was changed. The same
+pull request insets the gain chart's marks and lines from its left edge, so a gain at the start of the axis keeps its
+mark inside the chart (section 6.3, "Grazing and gain charts").
+[08-redesign-coverage.md section 6](08-redesign-coverage.md#6-the-follow-up-pull-request) records each fix and how it
+was checked.
 
 **Choices made in this specification** (recommendations, not evidence):
 
@@ -2100,5 +2144,6 @@ not audit evidence.
   `tests/exceptions.test.mjs`, `.github/workflows/test.yml`, README.md, `data/*.csv`.
 - Audit test cases: `docs/audit/diagnostics/*.mjs` (case definitions only; not re-run for this specification).
 - The redesigned page on main at `0315d09` (`index.html`, `app.js`), [08-redesign-coverage.md](08-redesign-coverage.md)
-  and `docs/audit/redesign/coverage.mjs`, and the preserve checks in `docs/audit/redesign/preserve.mjs` (34 of 34 pass
-  on main), read and measured with Playwright Chromium on 2026-10-20.
+  and `docs/audit/redesign/coverage.mjs`, and the preserve checks in `docs/audit/redesign/preserve.mjs` (34 of 34
+  passed on main before the follow-up pull request of section 15 changed KEEP-24), read and measured with Playwright
+  Chromium on 2026-10-20.

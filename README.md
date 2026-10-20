@@ -43,7 +43,7 @@ Some design choices:
 |---|---|
 | Water tanks, last 7 days | One chart per tank with shaded bands under 40% and 25%, the latest level and a status label; a silent sensor shows where data stops |
 | Grazing rotation | Each group's pasture moves for the season, the days each plan has left and any days past the planned move, plus where each group is grazing now |
-| Daily gain | One dot per animal against the group's target and its 80% and 50% lines, with the animals the report flags highlighted |
+| Daily gain | One mark per animal against the group's target and its 80% and 50% lines, with the animals the report flags highlighted |
 | Spending against budget | One table: each category's percent over or under as a bar, beside its budget, actual and difference |
 
 ![Water tank levels](docs/screenshots/water.png)
@@ -94,7 +94,7 @@ data/                    the fictional example data
 scripts/generate_data.py builds data/ from a fixed seed
 tests/                   node:test unit tests
 docs/                    documentation: start at docs/README.md (status, decisions, reviews, the audit and plan)
-docs/screenshots/        the images on this page
+docs/screenshots/        the images on this page and the script that takes them
 AGENTS.md                instructions for coding agents (Claude and Codex); CLAUDE.md points to it
 ```
 

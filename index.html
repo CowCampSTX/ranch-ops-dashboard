@@ -43,6 +43,11 @@ a { color: var(--s1); text-underline-offset: 3px; }
 .skip:focus { top: 12px; }
 h1, h2, h3, p { margin: 0; }
 .nw { white-space: nowrap; }
+.brk { overflow-wrap: anywhere; }
+/* words that belong together (a tank and its state) wrap as one unit, and inside it only when it can't fit a line */
+.keep { display: inline-block; overflow-wrap: anywhere; }
+/* no one-word last line in running text */
+.note, .tile .d, .hint, .empty-note, .lede { text-wrap: pretty; }
 .note { font-size: 13px; color: var(--muted); }
 code { font: 12px var(--mono); background: var(--wash); border: 1px solid var(--border); padding: 1px 5px; border-radius: 5px; color: var(--ink-2); }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px 48px; }
@@ -85,7 +90,8 @@ code { font: 12px var(--mono); background: var(--wash); border: 1px solid var(--
 /* ------------------------------------------------------------ hero */
 /* the day's verdict leads: a compact title beside the summary card */
 .hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px 28px; padding: 32px 0 0; align-items: center; }
-@media (min-width: 901px) { .hero { grid-template-columns: minmax(0, 1fr) minmax(0, min(500px, 48%)); } }
+/* the card spans the right half of the tile row below it (tile columns 3-4, or column 2 on two-up), so their edges meet */
+@media (min-width: 901px) { .hero { column-gap: 20px; grid-template-columns: minmax(0, 1fr) calc(50% - 10px); } }
 @media (max-width: 900px) { .hero { padding-top: 24px; } }
 .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--s1); }
 .eyebrow::before { content: ""; width: 18px; height: 2px; border-radius: 2px; background: var(--s1); box-shadow: 0 0 10px rgba(62,207,115,0.7); }
@@ -117,7 +123,8 @@ section.card { margin-top: 20px; }
 h2 { font-size: 19px; font-weight: 650; letter-spacing: -0.015em; line-height: 1.3; text-wrap: balance; }
 .sec-title .note { grid-column: 1 / -1; margin-top: 0; max-width: 96ch; }
 .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.grid2 > section.card { margin-top: 20px; }
+/* a column, so a chart with nothing to draw can take the height the row gives its card */
+.grid2 > section.card { margin-top: 20px; display: flex; flex-direction: column; }
 @media (max-width: 960px) { .grid2 { grid-template-columns: minmax(0, 1fr); gap: 0; } }
 
 /* ------------------------------------------------------------ summary (hero card) */
@@ -171,7 +178,13 @@ h2 { font-size: 19px; font-weight: 650; letter-spacing: -0.015em; line-height: 1
 .tile .v { font-size: 32px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.1; margin-top: 10px; }
 .tile .v small { font-size: 14px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
 .tile .d { font-size: 12.5px; color: var(--muted); margin-top: auto; }
-.meter { position: relative; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35); margin: 14px 0 10px; }
+/* a rule's verdict on a tile: its icon and words, wrapping inside a narrow tile. The 5px gap leaves the words a
+   little room, so in Inter they keep to one line on a 390px phone */
+.tile .tflag { display: flex; align-items: flex-start; gap: 5px; color: var(--ink); font-weight: 600; margin-bottom: 2px; text-wrap: balance; }
+.tile .tflag svg { width: 14px; height: 14px; flex: none; margin-top: 1px; }
+/* the empty track is the faint --wash and its 1px edge shows the meter's length, so the spend meter's muted fill keeps
+   3:1 against the track */
+.meter { position: relative; height: 6px; border-radius: 999px; background: var(--wash); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35); margin: 14px 0 10px; }
 .meter i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit; }
 .meter b { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; border-radius: 2px; background: var(--ink); }
 .pips { display: grid; grid-template-columns: repeat(8, minmax(0, 16px)); gap: clamp(2px, 1.2vw - 2px, 6px); margin: 10px 0 8px; }
@@ -281,6 +294,8 @@ svg.chart .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 4px
 .key { display: inline-block; flex: none; }
 .key.box { width: 14px; height: 10px; border-radius: 3px; }
 .key.dot { width: 9px; height: 9px; border-radius: 50%; }
+/* the flag key: a square in the dot key's 9px box, so its label lines up */
+.key.square { width: 9px; height: 9px; border-radius: 1px; }
 .key.line { width: 16px; height: 0; border-top: 2px solid; }
 .key.dash { width: 16px; height: 0; border-top: 2px dashed; }
 .key.tick { width: 2px; height: 14px; border-radius: 1px; background: var(--ink-2); }
@@ -292,13 +307,18 @@ svg.chart .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 4px
 .hint .h-touch { display: none; }
 @media (hover: none) and (pointer: coarse) { .hint .h-fine { display: none; } .hint .h-touch { display: inline; } }
 .empty-note { font-size: 14px; color: var(--ink-2); padding: 18px 0; }
+/* a chart with nothing to draw keeps its place: the reason (and any "Not shown" hint under it) sits centred in a quiet
+   placeholder that fills the card */
+.chart-box:has(> .empty-note:first-child) { flex: 1; display: grid; place-items: center; align-content: center; min-height: 140px; border: 1px dashed var(--border-2); border-radius: 12px; background: var(--wash); }
+.chart-box > .empty-note:first-child { padding: 20px; text-align: center; }
+.chart-box > .empty-note:first-child + .hint { margin: -12px 0 0; padding: 0 20px 20px; text-align: center; }
 .now { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
 .now li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); }
 .now .who { min-width: 0; font-size: 14px; }
 .now .who b { font-weight: 600; }
 .now .who span { display: block; font-size: 12.5px; color: var(--muted); }
 .now-title { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 18px; }
-.now-title:has(+ .now:empty) { display: none; }   /* no moves, or no group on a pasture right now */
+.now-title:has(+ .now:empty), .now:empty { display: none; }   /* no moves, or no group on a pasture right now */
 .gain-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 
 /* ------------------------------------------------------------ budget */
@@ -316,6 +336,13 @@ svg.chart .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 4px
 .track .bar.serious { background: var(--serious); }
 .track .bar.warning { background: var(--warning); }
 .btable td > .pill { margin: -4px 0 -4px 8px; vertical-align: middle; }
+/* set by placeBudgetLabels() only when the table would be wider than its card or the window. Until then a long word
+   keeps its width here too, so a table with room never breaks it. No hyphens: auto: Chrome never hyphenates a
+   capitalised English word, so it would not help a long name, and it would split short words such as "total" */
+.btable.tight td:first-child { overflow-wrap: anywhere; }
+.btable:not(.tight) .brk { overflow-wrap: normal; }
+/* too narrow for name and pill on one line: the pill always takes its own line under the name, as on a phone */
+@media (min-width: 641px) and (max-width: 900px) { .btable td > .pill { display: flex; width: fit-content; margin: 5px 0 0; } }
 .track .val { position: absolute; top: 50%; transform: translateY(-50%); font-size: 12.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* a $0 budget has no percentage: a centred note sits on the zero line instead of a bar */
 .track .val.nb { left: 50%; transform: translate(-50%, -50%); padding: 0 6px; background: var(--surface); font-weight: 500; }
@@ -408,7 +435,7 @@ footer p { max-width: 72ch; }
 
 @media (forced-colors: active) {
   :root { --ink: CanvasText; --ink-2: CanvasText; --muted: CanvasText; --surface: Canvas; --surface-2: Canvas; }
-  .sevbar span, .meter i, .pips span, .track .bar, .key.box, .key.dot { forced-color-adjust: none; }
+  .sevbar span, .meter i, .pips span, .track .bar, .key.box, .key.dot, .key.square { forced-color-adjust: none; }
   .key.tick { forced-color-adjust: none; background: CanvasText; }
   .meter b { forced-color-adjust: none; background: CanvasText; }
   .chip[aria-pressed="true"], .chip[aria-pressed="true"] .n { forced-color-adjust: none; background: Highlight; color: HighlightText; border-color: Highlight; }
@@ -419,6 +446,12 @@ footer p { max-width: 72ch; }
 /* light contrast themes: darker steps of the same hues, so marks keep 3:1 and ink on them keeps 4.5:1 on a white Canvas */
 @media (forced-colors: active) and (prefers-color-scheme: light) {
   :root { --s1: #15773b; --good: #15773b; --s1-mute: #4f9a64; --warning: #8f6100; --serious: #b8501f; --on-s1: #ffffff; }
+}
+/* dark contrast themes: the spend meter's quiet green takes a lighter step, so it keeps 3:1 on a dark Canvas that is not
+   black (Dusk #2D3236 3.67:1, Aquatic #202020 4.61:1). Only in the meter: the earlier stays and budget bars can carry
+   CanvasText labels, which keep 4.5:1 only on the darker step */
+@media (forced-colors: active) and (prefers-color-scheme: dark) {
+  .meter { --s1-mute: #3a9a58; }
 }
 </style>
 </head>
@@ -432,9 +465,9 @@ footer p { max-width: 72ch; }
 
 <header class="topbar">
   <div class="in">
-    <a class="brand" href="#top" aria-label="Example Ranch, back to top">
+    <a class="brand" href="#top" aria-label="Example Ranch Operations, back to top">
       <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ecf73" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="9.5" r="5"/><path d="M5 19.5h14"/></svg></span>
-      <span><b>Example Ranch</b><small>Operations</small></span>
+      <span><b>Example Ranch</b> <small>Operations</small></span>
     </a>
     <nav class="nav" aria-label="Sections">
       <a href="#attention">Attention</a><a href="#water">Water</a><a href="#grazing-sec">Grazing</a><a href="#gain-sec">Gain</a><a href="#budget">Budget</a><a href="#rules-sec">Rules</a>
@@ -501,12 +534,12 @@ footer p { max-width: 72ch; }
       <div class="sec-head">
         <div class="sec-title">
           <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>
-          <div><h2 id="h-gain">Daily gain since the last <span class="nw">weigh-in</span></h2><p class="note">One dot per animal against the group's target.</p></div>
+          <div><h2 id="h-gain">Daily gain since the last <span class="nw">weigh-in</span></h2><p class="note">One mark per animal against the group's target.</p></div>
         </div>
       </div>
       <div class="legend" style="margin-bottom:10px">
         <span><i class="key dot" style="background:var(--s1)"></i>One animal</span>
-        <span><i class="key dot" style="background:var(--warning)"></i><span id="lgFlag">Flagged: under 50% of target</span></span>
+        <span><i class="key square" style="background:var(--warning)"></i><span id="lgFlag">Flagged: under 50% of target</span></span>
         <span><i class="key line" style="border-color:var(--ink)"></i>Target</span>
         <span><i class="key dash" style="border-color:var(--muted)"></i><span id="lgRefs">80% and 50% of target</span></span>
       </div>
