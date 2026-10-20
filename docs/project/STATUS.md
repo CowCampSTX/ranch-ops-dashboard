@@ -1,0 +1,39 @@
+# Project status
+
+Last updated 2026-10-20 by Claude. Update this file whenever a pull request opens or merges, or a blocker appears.
+
+## Where things stand
+
+| What | State |
+|---|---|
+| `main` | `0315d09`: the visual redesign (pull request #2) on top of the audit (pull request #1, `71f3492`) |
+| Live page | https://cowcampstx.github.io/ranch-ops-dashboard/, served from `main` |
+| Phase 1 ("Fix now") | Not started. Waits for pull request #3 to be reviewed and merged |
+| Checks on `main` (2026-10-20, Linux, Chromium) | Unit tests 8 of 8 pass; preserve checks 34 of 34 pass. Firefox, WebKit, real phones and screen readers not tested |
+
+## Open pull requests
+
+| Pull request | What it does | Waiting on |
+|---|---|---|
+| [#3](https://github.com/CowCampSTX/ranch-ops-dashboard/pull/3) | Documentation only: the Phase 1 specification keeps the redesign's keyboard, touch and phone features, with browser checks for the tank cards, budget table and responsive charts; adds `AGENTS.md`, `CLAUDE.md` and this `docs/` layout | Codex Checkpoint 1b review, then the owner's merge |
+
+The Checkpoint 1b prompt is in
+[CODEX_REVIEW_PROMPT.md](../audit/CODEX_REVIEW_PROMPT.md#checkpoint-1b-specification-follow-up-before-phase-1); a copy
+ready to paste, with the pull request link filled in, is in the Drive folder `04-reviews`.
+
+## Next, in order
+
+1. **Redesign follow-up pull request.** Fixes the known issues of the redesign listed in
+   [06 section 15](../audit/06-phase1-spec.md#15-open-decisions-and-assumptions) (flagged gain dots and tile meters
+   that show a state by colour alone, a long budget category that widens the table on a phone, a group missing from
+   the gain chart's note), plus small layout and chart fixes. Claude is preparing it; it opens after #3 merges.
+2. **Phase 1, step by step**, in the build order of [HANDOFF.md](../audit/HANDOFF.md#build-order), one pull request
+   per step, each reviewed with Codex Checkpoint 2. Step 1 is P1-17 part a (boundary tests) with P1-13 (safe
+   rendering).
+3. **Visual polish pass** after Phase 1, so the dashboard looks its best (the owner's request).
+
+## Open questions for the owner
+
+[07-open-questions.md](../audit/07-open-questions.md) lists them with the defaults used until they are answered.
+OQ-13 (merge the redesign first) is answered. OQ-01 (time zone), OQ-03 (tank T6), OQ-04 (budget dollar lines) and
+OQ-05 (closed months) change Phase 1 output.

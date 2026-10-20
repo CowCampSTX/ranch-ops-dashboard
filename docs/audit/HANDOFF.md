@@ -10,7 +10,8 @@ must not change.
   request #2 from the same branch (redesign commit `f9ef651`, merge commit `0315d09`, 2026-10-20).
 - **Starting point for Phase 1:** `origin/main` once the Checkpoint 1b documentation pull request is merged. Its page
   files are those of `0315d09` (the redesign); `redesign/preserve.mjs` is not in `0315d09`. Phase 1 has not started.
-- **No PROJECT_CONTEXT.md or AGENTS.md** exists in the repository; the audit and this handoff are the guidance.
+- **Agent instructions:** [AGENTS.md](../../AGENTS.md) at the repository root (`CLAUDE.md` imports it). Project status
+  is in [docs/project/STATUS.md](../project/STATUS.md); this handoff and the specification are the Phase 1 guidance.
 - **The dashboard is not production-ready**, and finishing Phase 1 will not make it so. The audit changed no production
   code.
 

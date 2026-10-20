@@ -14,7 +14,7 @@ observation, scheduling, records and escalation to a veterinarian.
 |---|---|
 | Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit was written). Phase 1 branches from main after the documentation pull request that adds this section and `docs/audit/redesign/preserve.mjs` is merged; its page files are those of `0315d09`, which adds the redesigned `index.html` and `app.js` (pull request #2); see [section 1.2](#12-non-goals) and [section 6.3](#63-accessibility-and-layout-kept-from-the-redesign). |
 | Built from | [05-roadmap.md](05-roadmap.md) (work items and decisions D1-D16), `docs/audit/data/findings.json`, `rules.json`, `data-fields.json`, `integrations.json`, the code at the reviewed commit, and [02-findings.md](02-findings.md) / [03-research-and-data.md](03-research-and-data.md). The page terms and the keep-list come from the redesigned page on main at `0315d09`, [08-redesign-coverage.md](08-redesign-coverage.md) and the preserve checks in `docs/audit/redesign/preserve.mjs`. |
-| Project guidance files | None. The repository has no PROJECT_CONTEXT.md or AGENTS.md. |
+| Project guidance files | [AGENTS.md](../../AGENTS.md) at the repository root (added 2026-10-20; `CLAUDE.md` imports it), with the project status in [docs/project/STATUS.md](../project/STATUS.md). The reviewed commit had no PROJECT_CONTEXT.md or AGENTS.md. |
 | Scenario files | `docs/audit/scenarios/`: 10 end-to-end folders (01-planted-problems to 10-malformed-and-hostile-csv), each with CSV files, `expected.json` and `scenario.md`, plus `settings.json`. A parallel audit step wrote them while this specification was being finished; they are committed on the work branch only in the work-in-progress commit `b548e4f` and were read on 2026-10-19. The 2026-10-19 review fixes then revised `expected.json` in 03, 04, 06, 08 and 09 and `settings.json` (no CSV changed; see `data/registry-changelog.md`, "Review fixes"). Section 11.2 says how Phase 1 runs them, which inputs must be added first (decision D16), and where their settings differ from section 9. The audit's single-change test cases (W-02, GN-07 ...) are built under `tests/fixtures/`. |
 | Not verified | The published GitHub Pages site (proxy 403). Only Chromium was used in the audit. Nothing in this document has been implemented. The selectors and values that describe the redesigned page (sections 5.1 to 5.6, 6.1 to 6.3, 7, 10.2, 11.4 and 12; the `app.js` function names and line numbers are from reading the code on main) were measured with Playwright Chromium on main at `0315d09` on 2026-10-20; real phones, screen readers, Firefox and WebKit were not tested. |
 
@@ -1965,8 +1965,8 @@ through 2026-09"; "since 2026-07-20 vs 1.0 target" → "between the 2026-07-20 a
 the gain tile "Yearling gain 1.94 lbs/day" → the Heifers figure "0.44 lbs/day Heifers (target 1.0)";
 "Schedule it this week" → the new first step; "Pull and check these animals at the next gather" → "Look at these
 animals at the next gather and record what you see"; the T6 row gains "at 2026-09-29 00:00" and the CAN'T TELL marker.
-The README screenshots (`docs/screenshot.png`, `docs/water.png`, `docs/grazing-gain.png`, `docs/phone.png`) should be
-retaken.
+The README screenshots (`docs/screenshots/screenshot.png`, `water.png`, `grazing-gain.png` and `phone.png`, moved
+from `docs/` on 2026-10-20) should be retaken.
 
 **Audit files.** The diagnostics scripts in `docs/audit/diagnostics/` stay as the audit's record of the behaviour at the
 reviewed commit; they are not updated to the new code. `docs/audit/redesign/coverage.mjs` stays as the record of the

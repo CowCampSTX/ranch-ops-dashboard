@@ -171,7 +171,9 @@ a scratch folder outside the repository for anything you write. If you cannot ru
 verify" and why; do not guess.
 
 REPOSITORY: CowCampSTX/ranch-ops-dashboard
-PULL REQUEST: [paste the link to the documentation pull request here]. It should change only files under docs/audit/.
+PULL REQUEST: [paste the link to the documentation pull request here]. It should change only documentation: files
+under docs/ (including README screenshots moved to docs/screenshots/), the root README.md, AGENTS.md, CLAUDE.md and
+.gitignore. It changes no page code, data, script, test or CI file.
 BASE: main at 0315d09, the merge of pull request #2 (the visual redesign; its head was e9d7ab3). Phase 1 starts from
 this page and keeps what it already does.
 WHAT THE PROJECT IS: a static ranch dashboard on FICTIONAL data (Example Ranch), a portfolio demonstration, NOT
@@ -191,14 +193,15 @@ CHECKPOINT 1 (2026-10-20) asked for:
   R5 the review scripts' prerequisites (pathToFileURL on Windows, IANA tzdata for Python) were not written down.
 
 SETUP: read "Before running the review scripts" in docs/audit/README.md first. Check out the pull request head. It
-should change nothing outside docs/audit/, so its page files are main's. Serve it from the repository root:
+should change no page code, so its page files are main's. Serve it from the repository root:
     python3 -m http.server 8766 --bind 127.0.0.1
 Report environment failures (a missing tool, a path, the time zone database, a different Node version) in their own
 list, with the command and the error. They are not findings and say nothing about the documents or the page.
 
 TASKS
-A. Scope. git diff --stat 0315d09...HEAD -- . ':(exclude)docs/audit' prints nothing. List the files the pull request
-   changes.
+A. Scope. git diff --stat 0315d09...HEAD -- index.html app.js exceptions.js data scripts tests .github prints
+   nothing. List the files the pull request changes. Outside docs/, expect only AGENTS.md, CLAUDE.md, .gitignore and
+   README.md (its image paths and its file list).
 B. R1 to R5. For each, say resolved / partly / not resolved, with file and section:
    - R1: 06 section 6.3 ("Accessibility and layout kept from the redesign") lists what Phase 1 keeps; 06 sections 1.2
      and 14, 04, 05, HANDOFF.md and Checkpoint 2 below defer only what the redesign does not ship; Checkpoint 2 flags
@@ -225,7 +228,9 @@ E. Selectors. Every selector or element a [browser] criterion or 06 section 11.4
 F. Contradictions. Look for statements that disagree among 05-roadmap.md, 06-phase1-spec.md, Checkpoint 2 below,
    HANDOFF.md and 08-redesign-coverage.md (and 04 and 07 where they touch the same point): what is kept, what is
    deferred, the starting point, the area chip badges, the tiles, the zero-head case and the review route. Flag any
-   rule that every change must meet but that needs a later-phase feature.
+   rule that every change must meet but that needs a later-phase feature. Also check that AGENTS.md,
+   docs/project/STATUS.md and docs/project/DECISIONS.md agree with HANDOFF.md and 06, that AGENTS.md's commands run
+   as written, and that every link in AGENTS.md, CLAUDE.md, README.md and docs/README.md resolves.
 G. Claims. Nothing says the dashboard is production-ready, that a threshold is validated, or how long a review takes.
    Each statement about what was measured says where and when, and what was not tested (real phones, screen readers,
    Firefox, WebKit). Health text stays on observation, records and calling the veterinarian.

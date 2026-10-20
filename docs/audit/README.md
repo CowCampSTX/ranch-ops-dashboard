@@ -14,7 +14,7 @@ production code**: every file it added is under `docs/audit/`.
 | Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit ran), "Switch the dashboard to a black theme with green accents" |
 | Work branch | `claude/project-thread-nu46kf`. The audit was merged into main in pull request #1 (merge commit `71f3492`). |
 | When | Baseline run 2026-10-15; registries built 2026-10-16; documents reviewed and fixed 2026-10-19 |
-| Project guidance files | **There is no PROJECT_CONTEXT.md and no AGENTS.md in the repository.** The audit judged the code against README.md, the code itself, the committed fictional data and the project's stated purpose. |
+| Project guidance files | **At the reviewed commit there was no PROJECT_CONTEXT.md and no AGENTS.md in the repository.** Since 2026-10-20, [AGENTS.md](../../AGENTS.md) at the repository root holds the agent instructions (`CLAUDE.md` imports it). The audit judged the code against README.md, the code itself, the committed fictional data and the project's stated purpose. |
 | Blocked checks | The published GitHub Pages site could not be reached (the environment's proxy answered 403), so the live deployment is unverified. Only Playwright Chromium, with phone and touch emulation, was run: no real phones, screen readers, Firefox or WebKit. No user testing was done. |
 | Redesign | A visual redesign of `index.html` and `app.js` that the owner asked for, in pull request #2 from the same branch, merged into main on 2026-10-20 (merge commit `0315d09`). It is not part of the audit; see [The redesign](#the-redesign). |
 
