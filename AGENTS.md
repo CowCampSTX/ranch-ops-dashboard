@@ -123,10 +123,14 @@ means a set-up problem, not a result about the page.
 
 ## GitHub and Google Drive
 
+- Everything the project needs lives in this repository or in the Drive folder, so Claude and Codex always work from
+  the same files. Nothing important lives only in a chat, a session or a local machine: before a session ends, push
+  the work to a branch, or save it to Drive when it cannot go to GitHub yet.
 - This repository is the source of truth for code, data, specifications, decisions, status and review records.
 - The owner's Google Drive folder `ranch-ops-dashboard` is the project hub for people: a "Start here" document,
-  copies of this file and the project files for reading on a phone, review prompts, uploads and media. Its layout is
-  in [docs/README.md](docs/README.md#google-drive).
+  copies of this file and the project files for reading on a phone, review prompts, uploads, media, and work that
+  cannot go to GitHub yet (code may go there when needed). Its layout is in
+  [docs/README.md](docs/README.md#google-drive).
 - An agent that can reach Drive may read it and add files there. An agent that cannot loses nothing it needs to
   build: everything required is in this repository.
 - When a Drive copy and GitHub disagree, GitHub is right. Refresh the copy.

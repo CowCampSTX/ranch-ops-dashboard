@@ -41,11 +41,12 @@ a file here disagree, the file here is right.
 | `00-start-here` | The "Start here" document: what the project is, where things are, what to do next |
 | `01-agent-instructions` | Copies of `AGENTS.md` and `CLAUDE.md` |
 | `02-project-status` | Copies of `STATUS.md` and `DECISIONS.md` |
-| `03-plans-and-specs` | Copies of the handoff and open questions, and links to the full specification and roadmap |
+| `03-plans-and-specs` | Copies of the handoff and open questions, links to the full specification and roadmap, and work in progress that is not on GitHub yet (one subfolder per piece of work) |
 | `04-reviews` | Review prompts ready to paste into Codex, and the review reports |
 | `05-design-and-media` | Screenshots, design references and other media |
 | `06-inbox` | Files the owner drops in for an agent to sort |
 | `99-archive` | Superseded files, kept for reference |
 
 Large files (the full specification, roadmap, findings and research) stay in GitHub only, with links from Drive, so
-there is one copy to keep current.
+there is one copy to keep current. Code lives in GitHub; it goes to Drive only when it cannot go to GitHub yet, and
+moves to GitHub as soon as it can.
