@@ -1,0 +1,3026 @@
+[
+ {
+  "file": "meta.csv",
+  "field": "as_of",
+  "meaning": "The moment the data snapshot represents. Every 'today', 'overdue', 'silent', 'days in pasture' and 'closed month' judgement is measured from it.",
+  "units_valid": "Current value '2026-09-30T18:00' has no UTC offset, so browsers read it as viewer-local time. Phase 1: ISO 8601 with offset (for example 2026-09-30T18:00-05:00), or a bare local time interpreted in meta.timezone.",
+  "id_relationship_rules": "One row; applies to every other file.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Set at each data export.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Reject a value that does not parse. Without an offset or meta.timezone, show 'data time unknown', drop 'today' wording and treat time-based rules as CAN'T TELL. Rows dated after as_of are excluded from rules and counted as data issues.",
+  "supports": [
+   "RULE-WAT-03",
+   "RULE-WAT-04",
+   "RULE-GRZ-01",
+   "RULE-GRZ-02",
+   "RULE-GAIN-01",
+   "RULE-HLTH-01",
+   "RULE-HLTH-02",
+   "RULE-BUD-01",
+   "RULE-BUD-05",
+   "RULE-WF-14",
+   "RULE-CTX-01",
+   "RULE-CTX-15"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example",
+  "evidence_note": "Checker (workflow): MDN localStorage has nothing on timestamps, offsets or time zones. The rationale (JavaScript parses an offset-less date-time as viewer-local time) is an observation; cite MDN Date.parse or ECMA-262 if a source is wanted. Evidence URL removed. Checker (budget): GFOA says nothing about timestamps or time zones. No supporting source after checker review (MDN localStorage and GFOA were rejected for this field). The problem itself was observed in the repository.",
+  "research_refs": [
+   "research_workflow.json data_fields[0]",
+   "research_budget.json data_fields[7]",
+   "research_context.json data_fields[0]"
+  ]
+ },
+ {
+  "file": "pastures.csv",
+  "field": "pasture_id",
+  "meaning": "Pasture key (demo P1-P8).",
+  "units_valid": "Non-empty string, unique in pastures.csv.",
+  "id_relationship_rules": "Primary key. Referenced by moves.pasture_id, water.pasture_id and tanks.pasture_id.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Static; changes when pastures are re-fenced.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Duplicate or blank id: data issue, and rows that reference it are CAN'T TELL. A moves or water row with an unknown pasture_id is a data issue, not a grazing or water alarm.",
+  "supports": [
+   "RULE-GRZ-01",
+   "RULE-GRZ-03",
+   "RULE-WAT-05"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "pastures.csv",
+  "field": "name",
+  "meaning": "Display name (demo: North Flat, Windmill, ...).",
+  "units_valid": "Text; shown as text, never as HTML.",
+  "id_relationship_rules": "Display only; never used as a key.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Static.",
+  "required": "optional",
+  "validation_and_missing_behavior": "Show the pasture_id instead.",
+  "supports": [
+   "RULE-GRZ-01",
+   "RULE-WF-17"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "pastures.csv",
+  "field": "acres",
+  "meaning": "Pasture area.",
+  "units_valid": "Acres, number > 0.",
+  "id_relationship_rules": "Per pasture_id.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Static.",
+  "required": "optional",
+  "validation_and_missing_behavior": "Blank or non-numeric: shown as unknown; no current rule uses it. Needed later for AU-day planning (RULE-GRZ-07).",
+  "supports": [
+   "RULE-GRZ-07"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "pastures.csv",
+  "field": "planned_graze_days",
+  "meaning": "The ranch's planned stay length for one visit to this pasture (demo values 10-21 days).",
+  "units_valid": "Integer days > 0. A planning value, not a published standard.",
+  "id_relationship_rules": "Per pasture_id.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "Set when the grazing plan is written; revised in season.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank or invalid: the open stay is CAN'T TELL (data issue), not 'over plan'.",
+  "supports": [
+   "RULE-GRZ-01",
+   "RULE-GRZ-02"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "pastures.csv",
+  "field": "min_rest_days",
+  "meaning": "Minimum recovery period before the pasture is grazed again (demo 30-60 days). No shipped code reads it today.",
+  "units_valid": "Integer days > 0. State technical notes give ranges by growth period and use level (for example NDSU R1780 and SD TN9).",
+  "id_relationship_rules": "Per pasture_id.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "Annually, or in drought (longer).",
+  "required": "optional",
+  "validation_and_missing_behavior": "Rest check (phase 2) shows 'no rest target set' for that pasture.",
+  "supports": [
+   "RULE-GRZ-03",
+   "RULE-GRZ-05"
+  ],
+  "evidence_url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_grazing.json data_fields[4]"
+  ]
+ },
+ {
+  "file": "groups.csv",
+  "field": "group",
+  "meaning": "Management group name (demo: Cows, Heifers, Yearlings).",
+  "units_valid": "Non-empty string, unique.",
+  "id_relationship_rules": "Primary key. Referenced by moves.group, weights.group and health.group.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Changes when groups are formed or sold.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "A row elsewhere naming an unknown group is a data issue shown on the page, not silently dropped.",
+  "supports": [
+   "RULE-GRZ-01",
+   "RULE-GAIN-01",
+   "RULE-HLTH-01",
+   "RULE-WAT-05"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "groups.csv",
+  "field": "class",
+  "meaning": "Animal class (demo: cow-calf pairs, first-calf heifers, yearling steers). Drives wording now and intake lookups later.",
+  "units_valid": "Text; later a controlled list matching the intake table classes.",
+  "id_relationship_rules": "Per group.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per season.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Shown as 'class not recorded'; class-based lookups are skipped (CAN'T TELL).",
+  "supports": [
+   "RULE-GAIN-05",
+   "RULE-WAT-06"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "groups.csv",
+  "field": "head",
+  "meaning": "Current head count in the group.",
+  "units_valid": "Integer >= 0.",
+  "id_relationship_rules": "Per group.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "On any move, sale, death or purchase.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Coverage cannot be computed, so the group gain verdict is withheld (CAN'T TELL).",
+  "supports": [
+   "RULE-GAIN-10",
+   "RULE-WAT-06",
+   "RULE-HLTH-07"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example",
+  "evidence_note": "Checker (gain): the Data.gov CPER dataset page does not support the groups.head field. Evidence URL removed.",
+  "research_refs": [
+   "research_gain.json data_fields[10]"
+  ]
+ },
+ {
+  "file": "groups.csv",
+  "field": "target_adg_lbs",
+  "meaning": "The ADG the group is judged against (demo: Yearlings 2.0, Heifers 1.0, Cows 0.0 = not judged).",
+  "units_valid": "lb/day >= 0. 0 means the gain rules skip the group; the page must say so (RULE-GAIN-05). Demo values are demo settings.",
+  "id_relationship_rules": "Per group.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "Per season.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank or non-numeric: the group is CAN'T TELL for gain, never silently skipped.",
+  "supports": [
+   "RULE-GAIN-01",
+   "RULE-GAIN-02",
+   "RULE-GAIN-03",
+   "RULE-GAIN-04",
+   "RULE-GAIN-05"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "moves.csv",
+  "field": "group",
+  "meaning": "Group that made the stay.",
+  "units_valid": "Must match groups.csv group.",
+  "id_relationship_rules": "Foreign key to groups.csv.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per move.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Unknown group: data issue row.",
+  "supports": [
+   "RULE-GRZ-01",
+   "RULE-WAT-05"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "moves.csv",
+  "field": "pasture_id",
+  "meaning": "Pasture of the stay.",
+  "units_valid": "Must match pastures.csv pasture_id.",
+  "id_relationship_rules": "Foreign key to pastures.csv.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per move.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Unknown pasture: data issue (CAN'T TELL), not a grazing alarm.",
+  "supports": [
+   "RULE-GRZ-01",
+   "RULE-GRZ-03",
+   "RULE-WAT-05"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "moves.csv",
+  "field": "in_date",
+  "meaning": "Day the group entered the pasture.",
+  "units_valid": "ISO date YYYY-MM-DD, on or before as_of.",
+  "id_relationship_rules": "Per (group, stay).",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per move.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank, invalid or after as_of: data issue; the stay is not judged.",
+  "supports": [
+   "RULE-GRZ-01",
+   "RULE-GRZ-02",
+   "RULE-GRZ-03"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "moves.csv",
+  "field": "out_date",
+  "meaning": "Day the group left; blank means the stay is open.",
+  "units_valid": "ISO date, on or after in_date; blank = open stay.",
+  "id_relationship_rules": "At most one open stay per group; two or more is a data issue.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per move.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "out_date before in_date, or a group with more than one open stay: data issue (CAN'T TELL), not a grazing alarm.",
+  "supports": [
+   "RULE-GRZ-01",
+   "RULE-GRZ-03",
+   "RULE-GRZ-04"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "water.csv",
+  "field": "tank_id",
+  "meaning": "Tank the reading came from (demo T1-T8).",
+  "units_valid": "Non-empty string.",
+  "id_relationship_rules": "Must exist in tanks.csv (phase-1 master list). A tank in tanks.csv with no readings is CAN'T TELL, not absent.",
+  "source_type": "device",
+  "timestamp_and_frequency": "Per reading.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Unknown tank_id: data issue.",
+  "supports": [
+   "RULE-WAT-01",
+   "RULE-WAT-02",
+   "RULE-WAT-03",
+   "RULE-WAT-04"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_water.json data_fields[0]"
+  ],
+  "evidence_note": "Checker (water): the NRCS 614 citation has no bearing on this field. Evidence URL removed."
+ },
+ {
+  "file": "water.csv",
+  "field": "pasture_id",
+  "meaning": "Pasture the tank serves, repeated on each reading.",
+  "units_valid": "Must match pastures.csv.",
+  "id_relationship_rules": "Must agree with tanks.csv pasture_id for that tank; a mismatch is a data issue. tanks.csv becomes the authority.",
+  "source_type": "device",
+  "timestamp_and_frequency": "Per reading.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Mismatch or unknown: data issue; the tank keeps its tanks.csv pasture.",
+  "supports": [
+   "RULE-WAT-05"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "water.csv",
+  "field": "time",
+  "meaning": "Time of the reading.",
+  "units_valid": "Current values have no UTC offset. Phase 1: ISO 8601 with offset, or local time read in meta.timezone.",
+  "id_relationship_rules": "Per (tank_id, time); duplicates are a data issue.",
+  "source_type": "device",
+  "timestamp_and_frequency": "Per reading (demo every 6 h; vendors 4/day satellite to 24/day cellular).",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Unparseable: reading rejected. Readings after as_of are excluded. Silence is measured from as_of.",
+  "supports": [
+   "RULE-WAT-03",
+   "RULE-WAT-04",
+   "RULE-WAT-07"
+  ],
+  "evidence_url": "https://intercom.help/ranchbot/en/articles/7944517-what-does-monitor-status-delay-mean",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_water.json data_fields[1]"
+  ],
+  "evidence_note": "Checker (water): the Ranchbot Delay page supports irregular reporting and staleness; the time-zone requirement comes from the repo audit, not this page."
+ },
+ {
+  "file": "water.csv",
+  "field": "level_pct",
+  "meaning": "Tank level as percent full.",
+  "units_valid": "0-100.",
+  "id_relationship_rules": "Per reading.",
+  "source_type": "device",
+  "timestamp_and_frequency": "Per reading.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank, non-numeric or outside 0-100: not a reading (never treated as 0); counted as a data issue.",
+  "supports": [
+   "RULE-WAT-01",
+   "RULE-WAT-02",
+   "RULE-WAT-03"
+  ],
+  "evidence_url": "https://intercom.help/ranchbot/en/articles/7941241-what-is-offset-and-how-to-update-it",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_water.json data_fields[2]"
+  ]
+ },
+ {
+  "file": "weights.csv",
+  "field": "tag",
+  "meaning": "Animal identifier.",
+  "units_valid": "String, unique per animal; never reused.",
+  "id_relationship_rules": "One animal belongs to one group per weigh-in; the same tag twice on one date is a data issue.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per weigh-in.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Row rejected and counted in a data-issues line.",
+  "supports": [
+   "RULE-GAIN-02",
+   "RULE-GAIN-10"
+  ],
+  "evidence_url": "https://docs.c-lockinc.com/Document - Beef Improvement Federation Guidelines for FE Testing.pdf",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_gain.json data_fields[0]"
+  ],
+  "evidence_note": "Checker (gain): the BIF guidelines (vendor-hosted copy) support per-animal pairing only indirectly and say nothing about tag uniqueness."
+ },
+ {
+  "file": "weights.csv",
+  "field": "group",
+  "meaning": "Group at the weigh-in.",
+  "units_valid": "Must match groups.csv.",
+  "id_relationship_rules": "Foreign key to groups.csv.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per weigh-in.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Row excluded from group figures and reported as a data issue.",
+  "supports": [
+   "RULE-GAIN-01",
+   "RULE-GAIN-10"
+  ],
+  "evidence_url": "https://ars.usda.gov/ARSUserFiles/30300500/Publications/JRM55-135-138.pdf",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_gain.json data_fields[2]"
+  ]
+ },
+ {
+  "file": "weights.csv",
+  "field": "date",
+  "meaning": "Weigh-in date (demo: 2026-06-01, 2026-07-20, 2026-09-15).",
+  "units_valid": "ISO date, on or before as_of.",
+  "id_relationship_rules": "(group, date) identifies the weigh session (see weigh_sessions.csv).",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per weigh-in.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Row rejected; dates after as_of are excluded.",
+  "supports": [
+   "RULE-GAIN-06",
+   "RULE-GAIN-07"
+  ],
+  "evidence_url": "https://eres.library.adelaide.edu.au/dspace/handle/2440/13249",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_gain.json data_fields[3]"
+  ]
+ },
+ {
+  "file": "weights.csv",
+  "field": "weight_lbs",
+  "meaning": "Live weight.",
+  "units_valid": "lb, number > 0; plausible range per class (for example 300-1,000 yearlings); no thousands separators.",
+  "id_relationship_rules": "Per (tag, date).",
+  "source_type": "device",
+  "timestamp_and_frequency": "Per weigh-in.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank or implausible: excluded and listed as a data issue, never coerced to 0.",
+  "supports": [
+   "RULE-GAIN-01",
+   "RULE-GAIN-02"
+  ],
+  "evidence_url": "https://Beef.unl.edu/7a4f176f-73e2-4fa9-b86c-ed95f8543602.pdf",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_gain.json data_fields[5]"
+  ]
+ },
+ {
+  "file": "health.csv",
+  "field": "group",
+  "meaning": "Group the scheduled task applies to.",
+  "units_valid": "Must match groups.csv group.",
+  "id_relationship_rules": "Foreign key to groups.csv.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per task.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Show a 'group not recorded' data-issue row.",
+  "supports": [
+   "RULE-HLTH-01",
+   "RULE-HLTH-02",
+   "RULE-HLTH-03"
+  ],
+  "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_health.json data_fields[1]"
+  ]
+ },
+ {
+  "file": "health.csv",
+  "field": "task",
+  "meaning": "Schedule label (demo: Booster vaccine, Pinkeye check, Deworm, ...).",
+  "units_valid": "Text; a schedule label only, never a finding, diagnosis or treatment instruction. Rendered as text.",
+  "id_relationship_rules": "(group, task) identifies a schedule row today; a task_id is added later.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per task.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank: data issue row.",
+  "supports": [
+   "RULE-HLTH-01",
+   "RULE-HLTH-11"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_health.json data_fields[4]"
+  ],
+  "evidence_note": "Checker (health): 21 CFR 530.3 defines the VCPR; it does not address task labels. Evidence URL removed."
+ },
+ {
+  "file": "health.csv",
+  "field": "last_done",
+  "meaning": "Date the task was last completed.",
+  "units_valid": "ISO date, on or before as_of; blank allowed for a task never done.",
+  "id_relationship_rules": "Per schedule row. Later, completions go to an append-only history (RULE-WF-16).",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per completion.",
+  "required": "optional",
+  "validation_and_missing_behavior": "Blank is allowed; an invalid date is a data issue.",
+  "supports": [
+   "RULE-HLTH-01"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "health.csv",
+  "field": "next_due",
+  "meaning": "Planned date for the task (demo: Yearlings booster 2026-09-15, Cows pinkeye check 2026-10-03).",
+  "units_valid": "ISO date. Blank is allowed only on done or cancelled rows.",
+  "id_relationship_rules": "Per schedule row.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "When scheduled.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank on an open task: show a 'No due date recorded' data-issue row (today it is skipped silently).",
+  "supports": [
+   "RULE-HLTH-01",
+   "RULE-HLTH-02",
+   "RULE-HLTH-03"
+  ],
+  "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_health.json data_fields[7]"
+  ]
+ },
+ {
+  "file": "health.csv",
+  "field": "status",
+  "meaning": "Task state.",
+  "units_valid": "open | done | cancelled | deferred, compared after trimming and lower-casing.",
+  "id_relationship_rules": "Per schedule row.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "On change.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Any other value is a data-issue row (today it is dropped silently).",
+  "supports": [
+   "RULE-HLTH-03"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_health.json data_fields[10]"
+  ],
+  "evidence_note": "Checker (health): the BQA manual does not address task status vocabularies. Evidence URL removed."
+ },
+ {
+  "file": "budget.csv",
+  "field": "month",
+  "meaning": "Budget month (demo 2026-06 to 2026-09).",
+  "units_valid": "YYYY-MM.",
+  "id_relationship_rules": "(month, category) unique; a duplicate pair is a data issue.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Monthly.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Invalid month: row rejected with a data-quality message. Months after meta.books_closed_through count as plan only, not as season-to-date.",
+  "supports": [
+   "RULE-BUD-01",
+   "RULE-BUD-04",
+   "RULE-BUD-05"
+  ],
+  "evidence_url": "https://extension.okstate.edu/fact-sheets/developing-a-cash-flow-plan",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_budget.json data_fields[0]"
+  ]
+ },
+ {
+  "file": "budget.csv",
+  "field": "category",
+  "meaning": "Spending category (demo: Feed and mineral, Fuel, Labor, Repairs, Vet and health, Water and fencing).",
+  "units_valid": "Controlled list; later mapped to ERS cost items (RULE-BUD-12).",
+  "id_relationship_rules": "Part of the (month, category) key.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Set at budget time.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank: row rejected. An unmapped category is still monitored.",
+  "supports": [
+   "RULE-BUD-01",
+   "RULE-BUD-12"
+  ],
+  "evidence_url": "https://www.ers.usda.gov/data-products/commodity-costs-and-returns/documentation",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_budget.json data_fields[1]"
+  ]
+ },
+ {
+  "file": "budget.csv",
+  "field": "budget",
+  "meaning": "Planned spend for that category and month (the phased plan).",
+  "units_valid": "USD >= 0; plain digits with optional decimal (no '$', no thousands separators, no '(300)').",
+  "id_relationship_rules": "Per (month, category).",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Set before the season; monthly columns.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank = 'no budget entered' data issue (not 0). An explicit 0 goes to the unbudgeted-spend rule in dollars (RULE-BUD-06).",
+  "supports": [
+   "RULE-BUD-01",
+   "RULE-BUD-03",
+   "RULE-BUD-04",
+   "RULE-BUD-06"
+  ],
+  "evidence_url": "https://cropwatch.unl.edu/2018/cash-flow-budgeting-farms-and-ranches",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_budget.json data_fields[2]"
+  ],
+  "evidence_note": "Checker (budget): UNL CropWatch supports monthly phasing only; the number-format and blank-versus-0 rules are the data contract's, not the source's."
+ },
+ {
+  "file": "budget.csv",
+  "field": "actual",
+  "meaning": "Actual spend for that category and month.",
+  "units_valid": "USD, signed number (credits allowed later via entry_type).",
+  "id_relationship_rules": "Per (month, category).",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Monthly at book close.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Blank in a closed month = 'actual not entered' row; no severity for that category. Never treated as $0.",
+  "supports": [
+   "RULE-BUD-01",
+   "RULE-BUD-03",
+   "RULE-BUD-05"
+  ],
+  "evidence_url": "https://agproud.com/articles/29923-twelve-steps-to-cash-flow-budgeting",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_budget.json data_fields[3]"
+  ]
+ },
+ {
+  "file": "meta.csv",
+  "field": "timezone",
+  "meaning": "The ranch's IANA time zone, used to read local times and to display as_of.",
+  "units_valid": "IANA name, for example America/Chicago or America/Denver.",
+  "id_relationship_rules": "One value for the whole snapshot.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Set once.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "If as_of carries an offset, use it and show the offset; otherwise show 'time zone not set' and treat time-based rules as CAN'T TELL.",
+  "supports": [
+   "RULE-WAT-03",
+   "RULE-WAT-04",
+   "RULE-GRZ-01",
+   "RULE-GRZ-02",
+   "RULE-GAIN-01",
+   "RULE-HLTH-01",
+   "RULE-HLTH-02",
+   "RULE-BUD-01",
+   "RULE-BUD-05",
+   "RULE-WF-14"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example",
+  "evidence_note": "A data-contract decision (lead phase-1 default); no external source needed.",
+  "research_refs": [
+   "research_context.json data_fields[0]"
+  ]
+ },
+ {
+  "file": "meta.csv",
+  "field": "books_closed_through",
+  "meaning": "Last month whose actuals are complete.",
+  "units_valid": "YYYY-MM, not after the month of as_of.",
+  "id_relationship_rules": "One value.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Monthly.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Default to the month before as_of's month and label it 'assumed closed through'.",
+  "supports": [
+   "RULE-BUD-01",
+   "RULE-BUD-05"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example",
+  "evidence_note": "Checker (budget): GFOA 'Budget monitoring' says nothing about books-closed months or data completeness. Evidence URL removed.",
+  "research_refs": [
+   "research_budget.json data_fields[6]"
+  ]
+ },
+ {
+  "file": "tanks.csv (new master list)",
+  "field": "tank_id",
+  "meaning": "Every tank the ranch expects to hear from, so a tank with no readings is visible.",
+  "units_valid": "Unique string (demo T1-T8).",
+  "id_relationship_rules": "Primary key; water.tank_id must exist here.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "On install or removal.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "If tanks.csv is missing, fall back to tanks seen in water.csv and show 'tank list not provided'.",
+  "supports": [
+   "RULE-WAT-01",
+   "RULE-WAT-04",
+   "RULE-WAT-15"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "tanks.csv (new master list)",
+  "field": "pasture_id",
+  "meaning": "Pasture the tank serves.",
+  "units_valid": "Must match pastures.csv.",
+  "id_relationship_rules": "Foreign key to pastures.csv; one tank per pasture in the demo, several allowed.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "On change.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Unknown pasture: data issue.",
+  "supports": [
+   "RULE-WAT-05"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "tanks.csv (new master list)",
+  "field": "name",
+  "meaning": "Display name.",
+  "units_valid": "Text, rendered as text.",
+  "id_relationship_rules": "Display only.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Static.",
+  "required": "optional",
+  "validation_and_missing_behavior": "Show tank_id.",
+  "supports": [
+   "RULE-WF-17"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example"
+ },
+ {
+  "file": "tanks.csv (new master list)",
+  "field": "in_service",
+  "meaning": "Whether the tank is in use (a tank drained for winter is out of service).",
+  "units_valid": "true | false; default true.",
+  "id_relationship_rules": "Per tank.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Rare; record who changed it later (RULE-WF-19).",
+  "required": "optional",
+  "validation_and_missing_behavior": "Treat as in service. An out-of-service tank is shown as 'out of service' and not judged; it is never hidden.",
+  "supports": [
+   "RULE-WAT-04",
+   "RULE-WF-19"
+  ],
+  "evidence_url": "https://www.hse.gov.uk/pubns/chis6.pdf",
+  "example_status": "fictional example",
+  "evidence_note": "Checker (workflow): HSE CHIS6 supports suppressing out-of-service plant; the changed_by/at/reason audit fields are the researcher's design.",
+  "research_refs": [
+   "research_workflow.json data_fields[9]"
+  ]
+ },
+ {
+  "file": "weigh_sessions.csv (new; keyed by group + date)",
+  "field": "weight_basis",
+  "meaning": "How the weights in a session were taken, so ADG compares like with like.",
+  "units_valid": "full | overnight_shrunk | limit_fed | pencil_shrunk.",
+  "id_relationship_rules": "One row per (group, date) in weights.csv.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per weigh session.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Basis unknown or different between the two sessions: ADG shown as provisional, with no serious or individual flags (CAN'T TELL). The demo must record a basis for every session so the planted gain problems still show.",
+  "supports": [
+   "RULE-GAIN-06",
+   "RULE-GAIN-01",
+   "RULE-GAIN-02"
+  ],
+  "evidence_url": "https://digitalcommons.unl.edu/animalscifacpub/790",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_gain.json data_fields[6]"
+  ]
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "waterCritical",
+  "meaning": "Level below which a tank is critical (demo 25%).",
+  "units_valid": "Percent 0-100; label 'Demo setting (D)' or 'Ranch choice' in the rules table.",
+  "id_relationship_rules": "Applies to every in-service tank.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Not configured: show levels without severity and say 'threshold not set'.",
+  "supports": [
+   "RULE-WAT-01",
+   "RULE-WF-20"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "waterLow",
+  "meaning": "Level below which a tank is a warning (demo 40%).",
+  "units_valid": "Percent 0-100, above waterCritical.",
+  "id_relationship_rules": "All tanks.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "As waterCritical.",
+  "supports": [
+   "RULE-WAT-02",
+   "RULE-WF-20"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "waterDropPts and drop window",
+  "meaning": "Fall in points over a bounded window that counts as an unexplained fall (demo 30 points in 24 h).",
+  "units_valid": "Points 0-100; window in hours with a tolerance of one reporting interval.",
+  "id_relationship_rules": "All tanks.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "As waterCritical.",
+  "supports": [
+   "RULE-WAT-03",
+   "RULE-WF-20"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "sensorSilentHours",
+  "meaning": "Hours without a reading, measured from as_of, before a tank is CAN'T TELL (demo 24 h).",
+  "units_valid": "Hours > 0; later per device from expected_report_interval_h.",
+  "id_relationship_rules": "All tanks.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Use 24 h and label it an assumption.",
+  "supports": [
+   "RULE-WAT-04",
+   "RULE-WAT-07",
+   "RULE-WF-20"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "graceDays",
+  "meaning": "Days before a planned move date that raise a warning (demo 2).",
+  "units_valid": "Integer days >= 0.",
+  "id_relationship_rules": "All groups.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "No move-reminder warning.",
+  "supports": [
+   "RULE-GRZ-02",
+   "RULE-WF-20"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "adgSerious",
+  "meaning": "Share of the group target below which group gain is serious (demo 0.8).",
+  "units_valid": "Fraction 0-1.",
+  "id_relationship_rules": "Groups with target_adg_lbs > 0.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Show ADG without verdict.",
+  "supports": [
+   "RULE-GAIN-01",
+   "RULE-WF-20"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "animalShare",
+  "meaning": "Share of the group target below which an individual is listed (demo 0.5).",
+  "units_valid": "Fraction 0-1.",
+  "id_relationship_rules": "Animals in judged groups.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "No individual list.",
+  "supports": [
+   "RULE-GAIN-02",
+   "RULE-WF-20"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "gain minimum interval and minimum coverage (new)",
+  "meaning": "Shortest weigh interval (or number of weights) before ADG is judged, and the share of the group that must be weighed in both sessions.",
+  "units_valid": "Days > 0 (research default for individuals about 70 d or 3+ weights); coverage fraction 0-1. Values must be chosen and tested so the demo's planted gain problems are still found.",
+  "id_relationship_rules": "Per group.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Gain verdicts shown as provisional (CAN'T TELL).",
+  "supports": [
+   "RULE-GAIN-07",
+   "RULE-GAIN-10",
+   "RULE-WF-20"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "dueSoonDays",
+  "meaning": "Days ahead that an open health task becomes a warning (demo 7).",
+  "units_valid": "Integer days >= 0.",
+  "id_relationship_rules": "Open health tasks.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "No due-soon warning.",
+  "supports": [
+   "RULE-HLTH-02",
+   "RULE-WF-20"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption"
+ },
+ {
+  "file": "exceptions.js RULES (configuration)",
+  "field": "budget thresholds (budgetWarn, budgetSerious, warnUsd, seriousUsd, largeUsd, unbudgetedUsd)",
+  "meaning": "Percent and dollar materiality for budget rows. Current: budgetWarn 0.05, budgetSerious 0.10. Phase-1 demo values: warn 5% and $500, serious 10% and $1,000, large $2,500, unbudgeted $250.",
+  "units_valid": "Fractions 0-1 and USD >= 0; inclusive comparisons; every value labelled 'Demo setting'.",
+  "id_relationship_rules": "Per category.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "Once a season or after review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Show variances with no severity and a 'thresholds not set' note.",
+  "supports": [
+   "RULE-BUD-01",
+   "RULE-BUD-02",
+   "RULE-BUD-03",
+   "RULE-BUD-06",
+   "RULE-WF-20"
+  ],
+  "evidence_url": "https://finance.uw.edu/maa/node/228",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_budget.json data_fields[9]"
+  ]
+ },
+ {
+  "file": "rules table (page copy)",
+  "field": "rule_basis",
+  "meaning": "Why each threshold exists: 'Demo setting (D)' until sourced or set by the ranch, then 'Ranch choice, set by <name>, <date>'.",
+  "units_valid": "Text plus class A/B/C/D.",
+  "id_relationship_rules": "One per RULES key.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review.",
+  "required": "phase-1 required",
+  "validation_and_missing_behavior": "Label the threshold 'Demo setting (unvalidated)'.",
+  "supports": [
+   "RULE-WF-20",
+   "RULE-WF-21"
+  ],
+  "evidence_url": "https://www.hse.gov.uk/pubns/chis6.pdf",
+  "example_status": "management assumption",
+  "evidence_note": "Checker (workflow): HSE CHIS6 supports alarm change control and audits; the change-log schema is the researcher's design.",
+  "research_refs": [
+   "research_workflow.json data_fields[12]"
+  ]
+ },
+ {
+  "file": "tanks.csv",
+  "field": "capacity_gal, shape/dimensions, usable_fraction",
+  "meaning": "Usable capacity, and the geometry that converts level to gallons Also: Tank volume and how it refills",
+  "units_valid": "gal > 0; shape in {vertical cylinder, horizontal cylinder, elliptical, rectangular}; ft",
+  "id_relationship_rules": "Per tank_id.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "once, and on any tank change",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: gal > 0; shape in {vertical cylinder, horizontal cylinder, elliptical, rectangular}; ft. Missing or invalid: Do not compute hours. Show 'capacity unknown'. Severity falls back to the labelled demo % rule.",
+  "supports": [
+   "RULE-WAT-06",
+   "RULE-WAT-09"
+  ],
+  "evidence_url": "https://goldenplains.extension.colostate.edu/wp-content/uploads/sites/56/2021/06/PR_CalculatingWaterforCattle.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[4]",
+   "research_context.json data_fields[15]"
+  ]
+ },
+ {
+  "file": "tanks.csv",
+  "field": "tank_type",
+  "meaning": "Float-fed drinking tank vs storage tank vs hauled-water tank vs pond/dugout",
+  "units_valid": "enum {float_fed, storage, hauled, surface}",
+  "id_relationship_rules": "Per tank_id.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "once",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: enum {float_fed, storage, hauled, surface}. Missing or invalid: Do not apply leak or drawdown logic. Show the fall without interpretation.",
+  "supports": [
+   "RULE-WAT-03",
+   "RULE-WAT-08"
+  ],
+  "evidence_url": "https://extension.wvu.edu/files/d/102b1da9-9f1a-40d7-90ad-5de2cd6101a8/watering-systems-by-ben-bartlett.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[6]"
+  ]
+ },
+ {
+  "file": "tanks.csv",
+  "field": "supply_type, design_inflow_gpm / refill_gph",
+  "meaning": "Water source (electric well, solar, windmill, pipeline, rural water, hauled) and measured inflow Also: Tank volume and how it refills",
+  "units_valid": "enum; gpm \u22650",
+  "id_relationship_rules": "Per tank_id.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "once a season or after repair (Bartlett: test well yield and drawdown with a driller, because summer use rises)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: enum; gpm \u22650. Missing or invalid: Hours-of-water shown with zero inflow only, labelled worst case",
+  "supports": [
+   "RULE-WAT-06",
+   "RULE-WAT-09",
+   "RULE-WAT-10"
+  ],
+  "evidence_url": "https://www.uvm.edu/d10-files/documents/2024-10/watering_systems_for_grazing_livestock.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[7]",
+   "research_context.json data_fields[15]"
+  ]
+ },
+ {
+  "file": "tanks.csv",
+  "field": "sensor_offset_in, offset_set_at",
+  "meaning": "Distance between the sensor and the usable bottom (mud, outlet height)",
+  "units_valid": "inches, \u00b1240 per Ranchbot (vendor) input validation; datetime",
+  "id_relationship_rules": "Per tank_id.",
+  "source_type": "device",
+  "timestamp_and_frequency": "on install or change",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: inches, \u00b1240 per Ranchbot (vendor) input validation; datetime. Missing or invalid: Flag readings as 'offset unknown' near thresholds",
+  "supports": [
+   "RULE-WAT-14"
+  ],
+  "evidence_url": "https://intercom.help/ranchbot/en/articles/7941241-what-is-offset-and-how-to-update-it",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[5]"
+  ]
+ },
+ {
+  "file": "tanks.csv",
+  "field": "expected_report_interval_h, device_model",
+  "meaning": "How often this device should report",
+  "units_valid": "hours > 0",
+  "id_relationship_rules": "Per tank_id.",
+  "source_type": "device",
+  "timestamp_and_frequency": "on install",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: hours > 0. Missing or invalid: Use the fixed 24 h silence limit, labelled an assumption",
+  "supports": [
+   "RULE-WAT-04",
+   "RULE-WAT-07"
+  ],
+  "evidence_url": "https://www.lonestartracking.com/?p=60249",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[12]"
+  ]
+ },
+ {
+  "file": "tanks.csv",
+  "field": "out_of_service audit (changed_by, changed_at, reason), tank_shutoff, planned_move_in",
+  "meaning": "Asset deliberately excluded from rules, e.g. a tank drained for winter Also: A float deliberately off in a resting pasture, and the next use",
+  "units_valid": "boolean plus audit fields",
+  "id_relationship_rules": "Per tank_id.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Rare; under change control",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: boolean plus audit fields. Missing or invalid: Treat as in service",
+  "supports": [
+   "RULE-WF-19",
+   "RULE-WAT-05"
+  ],
+  "evidence_url": "https://www.hse.gov.uk/pubns/chis6.pdf",
+  "example_status": "user record",
+  "evidence_note": "Checker (workflow): HSE CHIS6 supports suppressing out-of-service plant; the changed_by/at/reason audit fields are the researcher's design.",
+  "research_refs": [
+   "research_workflow.json data_fields[9]",
+   "research_water.json data_fields[20]"
+  ]
+ },
+ {
+  "file": "tanks.csv",
+  "field": "backup water / haul capacity",
+  "meaning": "Alternative source and gallons per haul",
+  "units_valid": "text; gal",
+  "id_relationship_rules": "Per tank or per ranch.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "seasonal",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: text; gal. Missing or invalid: Action text cannot name a backup",
+  "supports": [
+   "RULE-WAT-06"
+  ],
+  "evidence_url": "https://extension.sdstate.edu/hauling-water-cows-when-water-not-everywhere",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[21]"
+  ]
+ },
+ {
+  "file": "water.csv",
+  "field": "level_in (raw)",
+  "meaning": "Measured water height above the sensor, before offset",
+  "units_valid": "inches, \u22650",
+  "id_relationship_rules": "Per reading.",
+  "source_type": "device",
+  "timestamp_and_frequency": "per reading",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: inches, \u22650. Missing or invalid: Use level_pct and mark it uncalibrated",
+  "supports": [
+   "RULE-WAT-14"
+  ],
+  "evidence_url": "https://intercom.help/ranchbot/en/articles/7941241-what-is-offset-and-how-to-update-it",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[3]"
+  ]
+ },
+ {
+  "file": "water.csv",
+  "field": "device_status",
+  "meaning": "Vendor status (OK, Delay, No Data, Error, Error High, Error Low)",
+  "units_valid": "enum per vendor",
+  "id_relationship_rules": "Per reading.",
+  "source_type": "device",
+  "timestamp_and_frequency": "per transmission",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: enum per vendor. Missing or invalid: Infer only 'silent' from the timestamps",
+  "supports": [
+   "RULE-CTX-13",
+   "RULE-WAT-07"
+  ],
+  "evidence_url": "https://intercom.help/ranchbot/en/articles/14331104-xtend-statuses-overview",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[13]"
+  ]
+ },
+ {
+  "file": "water.csv",
+  "field": "battery_v",
+  "meaning": "Monitor battery voltage",
+  "units_valid": "V (vendor: 6.6-7.2 healthy, <6.5 likely failing)",
+  "id_relationship_rules": "Per reading.",
+  "source_type": "device",
+  "timestamp_and_frequency": "per transmission",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: V (vendor: 6.6-7.2 healthy, <6.5 likely failing). Missing or invalid: Cause of silence reported as unknown",
+  "supports": [
+   "RULE-CTX-13"
+  ],
+  "evidence_url": "https://intercom.help/farmbot-helpcentre/en/articles/5667006-how-do-i-check-my-monitor-battery",
+  "example_status": "user record",
+  "evidence_note": "Voltage bands are vendor statements (Farmbot), model-specific.",
+  "research_refs": [
+   "research_water.json data_fields[14]"
+  ]
+ },
+ {
+  "file": "water.csv",
+  "field": "flow_meter_gal",
+  "meaning": "Metered inflow per day",
+  "units_valid": "gal/day \u22650",
+  "id_relationship_rules": "Per tank per day.",
+  "source_type": "device",
+  "timestamp_and_frequency": "daily",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: gal/day \u22650. Missing or invalid: No overflow or stuck-open detection; say so",
+  "supports": [
+   "RULE-WAT-08"
+  ],
+  "evidence_url": null,
+  "example_status": "user record",
+  "evidence_note": "Checker (water): NRCS Missouri 'Watering Systems for Serious Graziers' never mentions flow or water meters. Evidence URL removed.",
+  "research_refs": [
+   "research_water.json data_fields[16]"
+  ]
+ },
+ {
+  "file": "visual_checks.csv",
+  "field": "checked_at, checked_by, result (ok / low / dirty / float-fault / leak / dry), float_ok, overflow, ice, notes",
+  "meaning": "In-person observation Also: Eyes-on confirmation of tank function and cleanliness",
+  "units_valid": "datetime; booleans; free text",
+  "id_relationship_rules": "Keyed by tank_id and time; tank_id must exist in tanks.csv.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "each check (more often in heat)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: datetime; booleans; free text. Missing or invalid: Show 'not checked by eye since <date>'",
+  "supports": [
+   "RULE-WAT-15",
+   "RULE-CTX-07",
+   "RULE-WF-17"
+  ],
+  "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2007/july-26-2007/water-essential-for-cattle-in-high-heat",
+  "example_status": "user record",
+  "evidence_note": "Checker (workflow): 'daily' appears only in a BQA sample protocol template; the assessment itself does not require daily checks. Checker (water): the NDSU 2007 release supports only more frequent checks in heat, not the log's structure.",
+  "research_refs": [
+   "research_water.json data_fields[15]",
+   "research_workflow.json data_fields[10]"
+  ]
+ },
+ {
+  "file": "water_quality.csv",
+  "field": "source_id, date, method (meter/strip/lab), tds_ppm, sulfate_ppm, nitrate_ppm (state NO3 or NO3-N)",
+  "meaning": "Screening and lab results",
+  "units_valid": "ppm (mg/L); method enum",
+  "id_relationship_rules": "source_id = tank_id or a named pond/well.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "per test (in drought, for new or surface sources)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: ppm (mg/L); method enum. Missing or invalid: Show 'not screened'; never 'OK'",
+  "supports": [
+   "RULE-WAT-11",
+   "RULE-WAT-12"
+  ],
+  "evidence_url": "https://info.ext.nodak.edu/agriculture/sites/default/files/2026-01/as1764%20%281%29.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[17]"
+  ]
+ },
+ {
+  "file": "water_observations.csv",
+  "field": "algae observation (source_id, date, status none/suspect/bloom, photo, sample_sent, vet_contacted)",
+  "meaning": "Cyanobacteria watch on surface water",
+  "units_valid": "enum; booleans",
+  "id_relationship_rules": "source_id = tank_id or a named pond.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "weekly or more in late summer heat (ranch choice)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: enum; booleans. Missing or invalid: Show 'not observed'",
+  "supports": [
+   "RULE-WAT-13"
+  ],
+  "evidence_url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/56136%20Cyanobacteria.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[18]"
+  ]
+ },
+ {
+  "file": "tanks.csv or route plan",
+  "field": "response_time_h, next_check_at",
+  "meaning": "Time to reach the tank, and the next scheduled pass",
+  "units_valid": "hours; datetime",
+  "id_relationship_rules": "Per tank or per route.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "per route plan",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: hours; datetime. Missing or invalid: Use a ranch default and label it",
+  "supports": [
+   "RULE-WAT-06",
+   "RULE-WAT-07"
+  ],
+  "evidence_url": "https://extension.usu.edu/rangelands/research/remote-sensing-stock-tanks.php",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_water.json data_fields[19]"
+  ]
+ },
+ {
+  "file": "derived from groups.csv + moves.csv",
+  "field": "head present by class per pasture",
+  "meaning": "Animals drinking at this tank now",
+  "units_valid": "integer head; class in {cow-calf pairs, first-calf heifers, yearling steers, ...}",
+  "id_relationship_rules": "Open stays in moves.csv joined to groups.csv; a pasture with an unknown group is CAN'T TELL.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "on each move",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: integer head; class in {cow-calf pairs, first-calf heifers, yearling steers, ...}. Missing or invalid: Treat the tank as possibly in use. Do not downgrade severity.",
+  "supports": [
+   "RULE-WAT-05",
+   "RULE-WAT-06",
+   "RULE-WAT-07"
+  ],
+  "evidence_url": "https://www.ndsu.edu/agriculture/sites/default/files/2024-04/as1763.pdf",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_water.json data_fields[8]"
+  ]
+ },
+ {
+  "file": "derived from water.csv + moves.csv",
+  "field": "water status of the occupied and destination pasture",
+  "meaning": "Latest tank level and sensor freshness, already computed by waterStatus()",
+  "units_valid": "% full; hours since last reading",
+  "id_relationship_rules": "tanks.pasture_id joined to the group's open stay and planned_next_pasture.",
+  "source_type": "device",
+  "timestamp_and_frequency": "Every 6 h in demo data",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: % full; hours since last reading. Missing or invalid: Silent sensor gives 'water unknown: check by eye before moving'",
+  "supports": [
+   "RULE-WAT-05"
+  ],
+  "evidence_url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf",
+  "example_status": "fictional example",
+  "research_refs": [
+   "research_grazing.json data_fields[13]"
+  ]
+ },
+ {
+  "file": "groups.csv",
+  "field": "avg_weight_lb, lactation_status",
+  "meaning": "Inputs to intake lookup Also: Calving date and whether the animal is nursing",
+  "units_valid": "lb; enum {dry, lactating, growing}",
+  "id_relationship_rules": "Per group (or per animal for calving dates).",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "each weigh-in and calving season",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: lb; enum {dry, lactating, growing}. Missing or invalid: Use the class default and label the assumption",
+  "supports": [
+   "RULE-WAT-06",
+   "RULE-GRZ-07"
+  ],
+  "evidence_url": "https://bookstore.ksre.ksu.edu/download/estimating-water-requirements-for-mature-beef-cows_MF3303",
+  "example_status": "user record",
+  "research_refs": [
+   "research_water.json data_fields[9]",
+   "research_gain.json data_fields[16]"
+  ]
+ },
+ {
+  "file": "lookup (static table)",
+  "field": "intake_gal_per_head_day by class and temperature",
+  "meaning": "Reference daily intake by class, weight and temperature Also: Estimated daily intake by class, weight and temperature",
+  "units_valid": "gal/head/day; table rows 40-90F",
+  "id_relationship_rules": "Rows by class; columns by temperature band (40-90F).",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "static (cite version)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: gal/head/day; table rows 40-90F. Missing or invalid: Use the highest value in the class's row and label it an assumed hot-day figure (for lactating cows in AS1763 that is 80F, 17.9 gal)",
+  "supports": [
+   "RULE-WAT-06",
+   "RULE-WAT-09"
+  ],
+  "evidence_url": "https://extensionpubs.unl.edu/publication/g2060/2011/pdf/view/g2060-2011.pdf",
+  "example_status": "research estimate",
+  "evidence_note": "Checker: the 90F column is not the most conservative for lactating cows (AS1763: 17.9 gal at 80F vs 16.2 at 90F).",
+  "research_refs": [
+   "research_water.json data_fields[10]",
+   "research_context.json data_fields[16]"
+  ]
+ },
+ {
+  "file": "weather snapshot (build-time, dated)",
+  "field": "daily_high_f and hourly forecast (temp_f, rh_pct, wind_mph, sky_cover_pct), forecast THI",
+  "meaning": "NWS gridpoint hourly forecast for the location Also: Temperature driving intake / Temperature-humidity index computed from hourly forecast temperature and RH or dewpoint for the ranch location",
+  "units_valid": "F, %, mph, %",
+  "id_relationship_rules": "Keyed by forecast point and hour; pinned to as_of in the demo.",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "Not stated on the cited documentation page; record retrieved_at on each snapshot",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: F, %, mph, %. Missing or invalid: No heat/cold panel; never default to 'Normal'",
+  "supports": [
+   "RULE-CTX-07",
+   "RULE-WAT-06"
+  ],
+  "evidence_url": "https://www.weather.gov/documentation/services-web-API",
+  "example_status": "public observation",
+  "evidence_note": "Checker (health): weather.gov documentation states no forecast update frequency; 'several times daily' is unsupported.",
+  "research_refs": [
+   "research_context.json data_fields[9]",
+   "research_water.json data_fields[11]",
+   "research_health.json data_fields[26]"
+  ]
+ },
+ {
+  "file": "weather snapshot (derived)",
+  "field": "heat_stress_category",
+  "meaning": "ARS breathing-rate category from the forecast",
+  "units_valid": "Normal <90, Alert 90-110, Danger 110-130, Emergency >130 breaths/min",
+  "id_relationship_rules": "Per forecast hour.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "with each forecast snapshot",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: Normal <90, Alert 90-110, Danger 110-130, Emergency >130 breaths/min. Missing or invalid: Hide",
+  "supports": [
+   "RULE-CTX-07"
+  ],
+  "evidence_url": "https://www.ars.usda.gov/plains-area/clay-center-ne/marc/documents/heat-stress/forecastingheatstress/",
+  "example_status": "research estimate",
+  "research_refs": [
+   "research_context.json data_fields[10]"
+  ]
+ },
+ {
+  "file": "weather snapshot (derived)",
+  "field": "cci_f_adult / cci_f_newborn",
+  "meaning": "Comprehensive Climate Index apparent temperature",
+  "units_valid": "degrees F; NDAWN bands",
+  "id_relationship_rules": "Per forecast hour.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "with each forecast snapshot (calving season)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: degrees F; NDAWN bands. Missing or invalid: Hide",
+  "supports": [
+   "RULE-CTX-09"
+  ],
+  "evidence_url": "https://ndawn.info/agriculture_cci.html",
+  "example_status": "research estimate",
+  "research_refs": [
+   "research_context.json data_fields[11]"
+  ]
+ },
+ {
+  "file": "moves.csv",
+  "field": "planned_out_date",
+  "meaning": "Planned move-out date for this stay (replaces the per-pasture planned_graze_days as the plan of record)",
+  "units_valid": "ISO date YYYY-MM-DD, on or after in_date",
+  "id_relationship_rules": "Per stay.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "When the plan is written or revised",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: ISO date YYYY-MM-DD, on or after in_date. Missing or invalid: Fall back to in_date + pasture planned_graze_days and label it 'default plan'",
+  "supports": [
+   "RULE-GRZ-01",
+   "RULE-GRZ-02"
+  ],
+  "evidence_url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[0]"
+  ]
+ },
+ {
+  "file": "moves.csv",
+  "field": "planned_next_pasture",
+  "meaning": "Destination pasture for the next move",
+  "units_valid": "pasture_id in pastures.csv",
+  "id_relationship_rules": "Must match pastures.csv pasture_id.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Per stay",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: pasture_id in pastures.csv. Missing or invalid: Show 'destination not planned'; skip the destination readiness check (do not report ready)",
+  "supports": [
+   "RULE-WAT-05"
+  ],
+  "evidence_url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[1]"
+  ],
+  "evidence_note": "Checker (grazing): CPS 528 supports only the general water and monitoring criteria; its link to this field is loose."
+ },
+ {
+  "file": "moves.csv",
+  "field": "head_in, group average weight",
+  "meaning": "Head count and average weight (or AUE) of the group on this stay",
+  "units_valid": "integer head > 0; lb (or AUE 0.5-1.5)",
+  "id_relationship_rules": "Per stay.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "At each move and weigh-in",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: integer head > 0; lb (or AUE 0.5-1.5). Missing or invalid: Use groups.csv head and a class-default AUE labelled as an assumption",
+  "supports": [
+   "RULE-GRZ-07"
+  ],
+  "evidence_url": "https://www.ndsu.edu/agriculture/ag-hub/publications/determining-carrying-capacity-and-stocking-rates-range-and-pasture-north-dakota",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[2]"
+  ]
+ },
+ {
+  "file": "moves.csv",
+  "field": "override_reason",
+  "meaning": "Recorded reason for an intentional deviation (early re-entry, combined herds, dormant-season use, targeted grazing, drought)",
+  "units_valid": "free text or enumerated code",
+  "id_relationship_rules": "Per stay.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "When a deviation is decided",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: free text or enumerated code. Missing or invalid: The deviation is reported as a warning",
+  "supports": [
+   "RULE-GRZ-01"
+  ],
+  "evidence_url": "https://www.nrcs.usda.gov/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025-rev.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[3]"
+  ]
+ },
+ {
+  "file": "pastures.csv",
+  "field": "min_rest_fast_days / min_rest_slow_days",
+  "meaning": "Recovery minimum before re-grazing during fast (vegetative, pre-boot) and slow (boot onward) growth",
+  "units_valid": "integer days, roughly 25-90; defaults from the state NRCS FOTG (e.g. SD TN9 West River range 40/60 at 20-30% use; NDSU western ND range 45/65)",
+  "id_relationship_rules": "Per pasture_id.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "Annually, or in drought (extend to 90+)",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: integer days, roughly 25-90; defaults from the state NRCS FOTG (e.g. SD TN9 West River range 40/60 at 20-30% use; NDSU western ND range 45/65). Missing or invalid: Use the existing single min_rest_days and label it 'not growth-adjusted'",
+  "supports": [
+   "RULE-GRZ-03"
+  ],
+  "evidence_url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_grazing.json data_fields[4]"
+  ]
+ },
+ {
+  "file": "pastures.csv",
+  "field": "growing_season_start / end",
+  "meaning": "Window in which rest counts as recovery",
+  "units_valid": "month-day",
+  "id_relationship_rules": "Per pasture_id.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "Annually",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: month-day. Missing or invalid: Count all calendar days and label the rest figure 'calendar days'",
+  "supports": [
+   "RULE-GRZ-03"
+  ],
+  "evidence_url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_grazing.json data_fields[5]"
+  ]
+ },
+ {
+  "file": "pastures.csv",
+  "field": "key_species, target_stubble_in",
+  "meaning": "Species monitored in the pasture's key area and its minimum residual height at end of grazing",
+  "units_valid": "species name; inches (e.g. western wheatgrass 4, big bluestem 6, Kentucky bluegrass 2 per SD TN9 Table 3)",
+  "id_relationship_rules": "Per pasture_id.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Set once and reviewed annually",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: species name; inches (e.g. western wheatgrass 4, big bluestem 6, Kentucky bluegrass 2 per SD TN9 Table 3). Missing or invalid: Stubble rule disabled for the pasture; show 'no target set'",
+  "supports": [
+   "RULE-GRZ-06"
+  ],
+  "evidence_url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[6]"
+  ]
+ },
+ {
+  "file": "pastures.csv",
+  "field": "forage_lb_ac, harvest_efficiency",
+  "meaning": "Forage available for planning graze days",
+  "units_valid": "lb/ac air-dry; harvest efficiency 0.125-0.40 (NDSU: 25% season-long native, 30% tame)",
+  "id_relationship_rules": "Per pasture_id.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "Start of season; mid-season revision",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: lb/ac air-dry; harvest efficiency 0.125-0.40 (NDSU: 25% season-long native, 30% tame). Missing or invalid: Label planned days 'manager plan, not forage-derived'",
+  "supports": [
+   "RULE-GRZ-07"
+  ],
+  "evidence_url": "https://www.ndsu.edu/agriculture/ag-hub/publications/determining-carrying-capacity-and-stocking-rates-range-and-pasture-north-dakota",
+  "example_status": "research estimate",
+  "research_refs": [
+   "research_grazing.json data_fields[12]"
+  ]
+ },
+ {
+  "file": "forage_obs.csv",
+  "field": "date, pasture_id, observer, residual_in or utilization_pct, recovery_ready, photo_point",
+  "meaning": "Field check of residual and regrowth",
+  "units_valid": "inches or %; yes/no/unsure; text",
+  "id_relationship_rules": "pasture_id must exist in pastures.csv; link to the stay by pasture and date.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "at move-out and before move-in",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: inches or %; yes/no/unsure; text. Missing or invalid: 'Recovery not checked' before planned move-in",
+  "supports": [
+   "RULE-GRZ-05",
+   "RULE-GRZ-06",
+   "RULE-GRZ-03"
+  ],
+  "evidence_url": "https://grasscast.unl.edu/docs/Examples-of-Total-Production-vs-Grazing-Production.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_context.json data_fields[17]"
+  ]
+ },
+ {
+  "file": "forage_obs.csv",
+  "field": "stubble_in (with n_readings, ungrazed_ref_in, species)",
+  "meaning": "Mean grazed height of the key species in the key area",
+  "units_valid": "inches >= 0; n_readings integer (NDSU suggests at least 30 per key species)",
+  "id_relationship_rules": "Per pasture_id and date.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "Before entry, about weekly during occupancy, within 3 days of exit",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: inches >= 0; n_readings integer (NDSU suggests at least 30 per key species). Missing or invalid: Stale-observation warning; never 'OK'",
+  "supports": [
+   "RULE-GRZ-06"
+  ],
+  "evidence_url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/R1780%20The%20North%20Dakota%20Grazing%20Monitoring%20Stick%20%281%29.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[7]"
+  ]
+ },
+ {
+  "file": "forage_obs.csv",
+  "field": "utilization_pct (method; temporal or seasonal scope)",
+  "meaning": "Percent of current-year growth removed by weight",
+  "units_valid": "0-100; method in {grazing-stick height-weight, ocular, paired-plot}",
+  "id_relationship_rules": "Per pasture_id and stay or season.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "End of each stay (temporal); end of season (seasonal)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: 0-100; method in {grazing-stick height-weight, ocular, paired-plot}. Missing or invalid: Do not report compliance with take-half-leave-half",
+  "supports": [
+   "RULE-GRZ-06"
+  ],
+  "evidence_url": "https://extension.arizona.edu/sites/extension.arizona.edu/files/attachment/utilstudies.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[8]"
+  ]
+ },
+ {
+  "file": "forage_obs.csv",
+  "field": "growth_stage",
+  "meaning": "Phenology of the key species (vegetative/pre-boot = fast; boot, heading, seed = slow; dormant)",
+  "units_valid": "enum",
+  "id_relationship_rules": "Per pasture_id and date.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "Every 1-2 weeks in season",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: enum. Missing or invalid: Use a month proxy (May/Jun fast, Jul/Aug slow) labelled as an assumption",
+  "supports": [
+   "RULE-GRZ-09",
+   "RULE-GRZ-03"
+  ],
+  "evidence_url": "https://efotg.sc.egov.usda.gov/references/public/SD/No.9-PrescribedGrazing.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[9]"
+  ]
+ },
+ {
+  "file": "forage_obs.csv",
+  "field": "condition_score",
+  "meaning": "Quick ranch-defined condition/readiness score for the pasture. NRCS's 10-indicator 1-5 Pasture Condition Score is framed around improved (tame) pastures; that it does not apply to rangeland is an inference, not stated in the guide.",
+  "units_valid": "ordinal 1-5 (ranch rubric) or NRCS PCS total for tame pasture",
+  "id_relationship_rules": "Per pasture_id and date.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "Before grazing (NRCS PCS: best just before a pasture is grazed) and at critical periods",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: ordinal 1-5 (ranch rubric) or NRCS PCS total for tame pasture. Missing or invalid: Not shown",
+  "supports": [
+   "RULE-GRZ-05"
+  ],
+  "evidence_url": "https://www.nrcs.usda.gov/sites/default/files/2023-06/Guide_To_Pasture_Condition_Scoring_JAN2020.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[10]"
+  ]
+ },
+ {
+  "file": "forage_obs.csv",
+  "field": "behavior_note",
+  "meaning": "Herd behaviour that signals forage shortfall (walking fence, bunching at gate/water, selecting less-preferred plants)",
+  "units_valid": "enum + free text",
+  "id_relationship_rules": "Per group, pasture and date.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "Each check",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: enum + free text. Missing or invalid: Treat as unknown, not normal",
+  "supports": [
+   "RULE-GRZ-08"
+  ],
+  "evidence_url": "https://www.ars.usda.gov/ARSUserFiles/51815/67. 2020 REM - CARM - adaptive multipaddock rotational grazing - vegetation and livestock responses.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_grazing.json data_fields[11]"
+  ]
+ },
+ {
+  "file": "pastures.csv",
+  "field": "rap_production_lb_ac by year",
+  "meaning": "RAP annual herbaceous production, weighted mean over the pasture polygon Also: Modelled herbaceous production per pasture polygon (annual; 16-day provisional for current year)",
+  "units_valid": "lbs/acre; years 1986 to the previous year",
+  "id_relationship_rules": "Per pasture polygon (real locations only).",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "annual (one-off snapshot)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: lbs/acre; years 1986 to the previous year. Missing or invalid: No polygon: omit; no county substitute",
+  "supports": [
+   "RULE-CTX-06"
+  ],
+  "evidence_url": "https://rangelands.app/support/71-api-documentation",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_context.json data_fields[7]",
+   "research_grazing.json data_fields[17]"
+  ]
+ },
+ {
+  "file": "pastures.csv",
+  "field": "ecosite_id, ref_production_lbs_ac",
+  "meaning": "NRCS ecological site and its reference production",
+  "units_valid": "ESD ID string; lbs/acre (normal/favorable/unfavorable)",
+  "id_relationship_rules": "Per pasture_id (one-time lookup).",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "once",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: ESD ID string; lbs/acre (normal/favorable/unfavorable). Missing or invalid: Label planned_graze_days as ranch-set",
+  "supports": [
+   "RULE-CTX-14"
+  ],
+  "evidence_url": "https://sdmdataaccess.nrcs.usda.gov/WebServiceHelp.aspx",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_context.json data_fields[8]"
+  ]
+ },
+ {
+  "file": "meta.csv",
+  "field": "context_county_fips, context_state",
+  "meaning": "Real county/state used as a labelled stand-in for public context (the ranch is fictional)",
+  "units_valid": "5-digit FIPS (e.g. 46065); state postal code",
+  "id_relationship_rules": "One value; the demo uses a labelled stand-in county.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "set once",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: 5-digit FIPS (e.g. 46065); state postal code. Missing or invalid: Hide all public-context panels",
+  "supports": [
+   "RULE-CTX-01",
+   "RULE-CTX-03",
+   "RULE-CTX-15"
+  ],
+  "evidence_url": "https://usdmdataservices.unl.edu/api/CountyStatistics/GetDroughtSeverityStatisticsByAreaPercent?aoi=46065&startdate=9/1/2026&enddate=10/15/2026&statisticsType=1",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_context.json data_fields[1]"
+  ]
+ },
+ {
+  "file": "context.csv (build-time snapshot)",
+  "field": "usdm_pct_none/d0/d1/d2/d3/d4 (county)",
+  "meaning": "Percent of county area in each USDM category Also: U.S. Drought Monitor category D0-D4 for the ranch county / U.S. Drought Monitor category for the county",
+  "units_valid": "0-100 %",
+  "id_relationship_rules": "Keyed by county FIPS and valid date.",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "weekly (valid Tuesday, released Thursday 08:30 ET)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: 0-100 %. Missing or invalid: Show 'Drought Monitor unavailable, last valid <date>'; never 'no drought'",
+  "supports": [
+   "RULE-CTX-01",
+   "RULE-CTX-03",
+   "RULE-CTX-10"
+  ],
+  "evidence_url": "https://droughtmonitor.unl.edu/DmData/DataDownload/WebServiceInfo.aspx",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_context.json data_fields[2]",
+   "research_grazing.json data_fields[15]",
+   "research_gain.json data_fields[20]"
+  ],
+  "evidence_note": "Checker (context, grazing, gain): the Web Service Info page does not mention thousands separators and states no release schedule; the Tuesday-valid, Thursday-released timing is on the USDM home page."
+ },
+ {
+  "file": "context.csv (build-time snapshot)",
+  "field": "usdm_valid_date, usdm_released_at",
+  "meaning": "MapDate (Tuesday valid date) and the release instant (Thursday 08:30 ET)",
+  "units_valid": "YYYY-MM-DD; ISO instant",
+  "id_relationship_rules": "Per USDM week; select the latest released at or before as_of.",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "weekly",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: YYYY-MM-DD; ISO instant. Missing or invalid: Do not show the category without both dates",
+  "supports": [
+   "RULE-CTX-01",
+   "RULE-CTX-02"
+  ],
+  "evidence_url": "https://www.drought.gov/drought/data-maps-tools/current-conditions",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_context.json data_fields[3]"
+  ],
+  "evidence_note": "Checker (context): drought.gov says only 'Thursday morning'; the 08:30 ET release time is on the USDM home page (re-read by the citation critic 2026-10-16)."
+ },
+ {
+  "file": "context.csv (build-time snapshot)",
+  "field": "usdm_weeks_d2plus_8wk",
+  "meaning": "Count of the last 8 weekly maps with any (or at least X%) county area in D2+",
+  "units_valid": "0-8 weeks; X% is a ranch choice",
+  "id_relationship_rules": "Per county and valid date.",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "weekly",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: 0-8 weeks; X% is a ranch choice. Missing or invalid: Show 'incomplete series' if any week is missing",
+  "supports": [
+   "RULE-CTX-03"
+  ],
+  "evidence_url": "https://www.fsa.usda.gov/resources/programs/livestock-forage-disaster-program-lfp",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_context.json data_fields[4]"
+  ]
+ },
+ {
+  "file": "context.csv (build-time snapshot)",
+  "field": "source_provenance (source_url, retrieved_at, license_note)",
+  "meaning": "Where each context value came from and when",
+  "units_valid": "URL; ISO instant; text",
+  "id_relationship_rules": "One per public value.",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "each refresh",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: URL; ISO instant; text. Missing or invalid: Do not display a value without provenance",
+  "supports": [
+   "RULE-CTX-15",
+   "RULE-CTX-16"
+  ],
+  "evidence_url": "https://droughtmonitor.unl.edu/About/Permission.aspx",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_context.json data_fields[24]"
+  ],
+  "evidence_note": "Checker (context): the Permission page's 'Map courtesy of NDMC' wording is map guidance; applying it to data rows is an extension."
+ },
+ {
+  "file": "rain_gauge.csv",
+  "field": "gauge_id, date, precip_in",
+  "meaning": "Ranch-measured daily precipitation Also: Precipitation since a reference date vs normal",
+  "units_valid": "inches >= 0; one row per day; blank is not zero",
+  "id_relationship_rules": "One row per gauge per day; blank is not zero.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "daily or after each event",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: inches >= 0; one row per day; blank is not zero. Missing or invalid: Gaps block % of normal; show 'gauge record incomplete'",
+  "supports": [
+   "RULE-CTX-10"
+  ],
+  "evidence_url": "https://ranchdrought.unl.edu/Monitor.aspx",
+  "example_status": "user record",
+  "research_refs": [
+   "research_context.json data_fields[12]",
+   "research_grazing.json data_fields[14]"
+  ]
+ },
+ {
+  "file": "context.csv (build-time snapshot)",
+  "field": "precip_public_in, normal_in, retrieved_at",
+  "meaning": "Public gridded or station precipitation and its normal for the location",
+  "units_valid": "inches; retrieval timestamp (values revised for ~6 months)",
+  "id_relationship_rules": "Per grid cell or station and date.",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "daily, revised up to 8 times over 6 months (PRISM)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: inches; retrieval timestamp (values revised for ~6 months). Missing or invalid: Show the gauge only",
+  "supports": [
+   "RULE-CTX-10"
+  ],
+  "evidence_url": "https://www.prism.oregonstate.edu/documents/PRISM_downloads_web_service.pdf",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_context.json data_fields[13]"
+  ]
+ },
+ {
+  "file": "drought_plan.csv",
+  "field": "trigger (date, indicator, threshold, action)",
+  "meaning": "Ranch-defined critical dates and actions",
+  "units_valid": "date; text; number; text",
+  "id_relationship_rules": "One row per trigger.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "annual review",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: date; text; number; text. Missing or invalid: No trigger prompts",
+  "supports": [
+   "RULE-CTX-10"
+  ],
+  "evidence_url": "https://ranchdrought.unl.edu/Plan.aspx",
+  "example_status": "user record",
+  "research_refs": [
+   "research_context.json data_fields[14]"
+  ]
+ },
+ {
+  "file": "context.csv (build-time snapshot)",
+  "field": "nass_pasture_vp_p_pct, g_ex_pct, week_ending",
+  "meaning": "State pasture and range condition, % very poor+poor and % good+excellent",
+  "units_valid": "0-100 %; week-ending Sunday date",
+  "id_relationship_rules": "Per state and week.",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "weekly in season (the 4:00 pm ET release time comes from a 2007 NASS document and was not confirmed by a current source)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: 0-100 %; week-ending Sunday date. Missing or invalid: Off-season or missing: 'no report for week ending X'",
+  "supports": [
+   "RULE-CTX-04"
+  ],
+  "evidence_url": "https://www.nass.usda.gov/Statistics_by_State/Kansas/Publications/Crop_Progress_and_Condition/2026/KS-weekly0706.pdf",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_context.json data_fields[5]"
+  ]
+ },
+ {
+  "file": "context.csv (build-time snapshot)",
+  "field": "grasscast_pct_vs_avg, map_date, scenario",
+  "meaning": "Forecast % change in grassland production vs the cell's ~38-year average under a precipitation scenario Also: Forecast % change in total grassland production vs the grid cell's long-term average / Grass-Cast forecast of rangeland production vs the long-term average for the ranch's grid cell, by precipitation scenario",
+  "units_valid": "percent; date; above/near/below-normal",
+  "id_relationship_rules": "Per 10 km cell and map date.",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "every two weeks, late April to Aug 31",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: percent; date; above/near/below-normal. Missing or invalid: Out of season: show the final value with 'season closed' or hide",
+  "supports": [
+   "RULE-CTX-05",
+   "RULE-GAIN-08"
+  ],
+  "evidence_url": "https://grasscast.unl.edu/Outlook/About.aspx",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_context.json data_fields[6]",
+   "research_grazing.json data_fields[16]",
+   "research_gain.json data_fields[19]"
+  ]
+ },
+ {
+  "file": "weights.csv",
+  "field": "eid",
+  "meaning": "Electronic ID (RFID) read at the scale, used to match weights to animals",
+  "units_valid": "RFID string; confirm length and format against the reader's export (the 15-digit format is unsourced in this audit)",
+  "id_relationship_rules": "Per animal; maps to tag.",
+  "source_type": "device",
+  "timestamp_and_frequency": "per weigh-in",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: RFID string in the format the reader exports. Missing or invalid: Fall back to tag",
+  "supports": [
+   "RULE-GAIN-02"
+  ],
+  "evidence_url": null,
+  "example_status": "user record",
+  "evidence_note": "Checker (gain): the Tru-Test info sheet does not mention a 15-digit RFID format or any reduction in tag-entry errors. Evidence URL removed.",
+  "research_refs": [
+   "research_gain.json data_fields[1]"
+  ]
+ },
+ {
+  "file": "weights.csv",
+  "field": "weigh_time",
+  "meaning": "Clock time the animal (or session) was weighed",
+  "units_valid": "HH:MM local, with a stated timezone",
+  "id_relationship_rules": "Per weigh-in.",
+  "source_type": "device",
+  "timestamp_and_frequency": "per weigh-in",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: HH:MM local, with a stated timezone. Missing or invalid: ADG marked 'conditions unknown'",
+  "supports": [
+   "RULE-GAIN-06"
+  ],
+  "evidence_url": "https://rangelandsgateway.org/dlio/22019",
+  "example_status": "user record",
+  "research_refs": [
+   "research_gain.json data_fields[4]"
+  ]
+ },
+ {
+  "file": "weigh_sessions.csv",
+  "field": "pencil_shrink_pct",
+  "meaning": "Shrink deducted, if a pencil shrink is applied",
+  "units_valid": "0-10 %",
+  "id_relationship_rules": "Per (group, date).",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per weigh session",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: 0-10 %. Missing or invalid: Treated as 0 and stated",
+  "supports": [
+   "RULE-GAIN-06"
+  ],
+  "evidence_url": "https://rangelandsgateway.org/node/25589",
+  "example_status": "user record",
+  "research_refs": [
+   "research_gain.json data_fields[7]"
+  ]
+ },
+ {
+  "file": "weigh_sessions.csv",
+  "field": "gather_time, hours_off_feed_water",
+  "meaning": "When cattle were gathered and how long they stood off feed and water before weighing",
+  "units_valid": "HH:MM; hours 0-24",
+  "id_relationship_rules": "Per (group, date).",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "per weigh session",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: HH:MM; hours 0-24. Missing or invalid: 'conditions unknown' note",
+  "supports": [
+   "RULE-GAIN-06"
+  ],
+  "evidence_url": "https://pods.okstate.edu/fact-sheets/ANSI-3257pod.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_gain.json data_fields[8]"
+  ]
+ },
+ {
+  "file": "weigh_sessions.csv",
+  "field": "scale_id, check_weight_lbs, check_reading_lbs, zeroed",
+  "meaning": "Which scale was used and the result of the zero/known-weight check",
+  "units_valid": "string; lb; lb; yes/no",
+  "id_relationship_rules": "Per (group, date).",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per weigh session",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: string; lb; lb; yes/no. Missing or invalid: Informational 'scale not checked' note",
+  "supports": [
+   "RULE-GAIN-11"
+  ],
+  "evidence_url": "https://pami.ca/pdfs/reports_research_updates/(5e)%20Livestock%20Scales/654.PDF",
+  "example_status": "user record",
+  "research_refs": [
+   "research_gain.json data_fields[9]"
+  ]
+ },
+ {
+  "file": "groups.csv",
+  "field": "gain_metric",
+  "meaning": "How the class is judged",
+  "units_valid": "ADG | BCS | none",
+  "id_relationship_rules": "Per group.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "per season",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: ADG | BCS | none. Missing or invalid: Default by class: yearlings ADG; cows and first-calf heifers BCS",
+  "supports": [
+   "RULE-GAIN-05",
+   "RULE-GAIN-04",
+   "RULE-CTX-12"
+  ],
+  "evidence_url": "https://beef.unl.edu/learning/condition1a.shtml",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_gain.json data_fields[11]"
+  ]
+ },
+ {
+  "file": "gain_expectations.csv",
+  "field": "group, forage type, start_date, end_date, expected_adg_lbs, supplemented",
+  "meaning": "Expected ADG for a period of the season Also: Whether the group is receiving supplement in the period",
+  "units_valid": "lb/d, typically -0.5 to 3.0; dates ISO",
+  "id_relationship_rules": "Per group and season segment.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per season, revised with forage outlook",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: lb/d, typically -0.5 to 3.0; dates ISO. Missing or invalid: Report ADG without verdict, or compare to ranch prior years",
+  "supports": [
+   "RULE-GAIN-08"
+  ],
+  "evidence_url": "https://ars.usda.gov/ARSUserFiles/30300500/Publications/JRM55-135-138.pdf",
+  "example_status": "research estimate",
+  "research_refs": [
+   "research_gain.json data_fields[12]",
+   "research_gain.json data_fields[13]"
+  ]
+ },
+ {
+  "file": "bcs.csv",
+  "field": "group or tag, date, score, target",
+  "meaning": "Body condition score of a cow or first-calf heifer (or a group median from a sample) Also: Ranch target BCS at a scoring point / Body condition score",
+  "units_valid": "1-9, half points allowed",
+  "id_relationship_rules": "tag must exist in the animal list, or group in groups.csv.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "weaning, ~45 d after weaning, ~90 d before calving, calving, breeding start, late summer in drought",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: 1-9, half points allowed. Missing or invalid: 'Condition not recorded' shown; no 'all clear'",
+  "supports": [
+   "RULE-CTX-12",
+   "RULE-GAIN-05",
+   "RULE-GAIN-04"
+  ],
+  "evidence_url": "https://beef.unl.edu/learning/condition1a.shtml",
+  "example_status": "user record",
+  "research_refs": [
+   "research_gain.json data_fields[14]",
+   "research_gain.json data_fields[15]",
+   "research_context.json data_fields[21]"
+  ]
+ },
+ {
+  "file": "replacement.csv",
+  "field": "mature_weight_lbs, target_pct_mature, breeding_start",
+  "meaning": "Inputs for the replacement-heifer target-weight projection",
+  "units_valid": "lb; 50-70 %; ISO date",
+  "id_relationship_rules": "Per heifer group.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per development season",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: lb; 50-70 %; ISO date. Missing or invalid: No projection",
+  "supports": [
+   "RULE-GAIN-09"
+  ],
+  "evidence_url": "https://extension.sdstate.edu/targeted-feeding-heifer-development",
+  "example_status": "user record",
+  "research_refs": [
+   "research_gain.json data_fields[17]"
+  ]
+ },
+ {
+  "file": "observations.csv",
+  "field": "date, group, tag(s), observer, head_with_signs, sign_code, note, escalated",
+  "meaning": "What was seen on a pasture check, recorded as signs, not diagnoses Also: What was seen when a slow animal was checked",
+  "units_valid": "sign_code from a fixed list (watery_eyes, squinting, cloudy_eye, lame, off_feed, found_dead, abortion, other); head_with_signs integer >= 0",
+  "id_relationship_rules": "group in groups.csv; tags in weights.csv. Observations only; no diagnosis.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "every pasture check; at least the ranch-set interval in fly season",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: sign_code from a fixed list (watery_eyes, squinting, cloudy_eye, lame, off_feed, found_dead, abortion, other); head_with_signs integer >= 0. Missing or invalid: 'No check recorded since [date]'. Never 'group clear'.",
+  "supports": [
+   "RULE-HLTH-05",
+   "RULE-HLTH-10",
+   "RULE-HLTH-11",
+   "RULE-GAIN-02"
+  ],
+  "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2025/july/summer-brings-raised-pinkeye-concerns-in-cowherds",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[19]",
+   "research_gain.json data_fields[18]"
+  ]
+ },
+ {
+  "file": "health.csv",
+  "field": "task_id",
+  "meaning": "Stable ID of a scheduled health task, so completions can link to it",
+  "units_valid": "string, unique",
+  "id_relationship_rules": "Unique per task.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "when a task is planned",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: string, unique. Missing or invalid: Reject the row with a visible data-issue message. Do not drop it silently.",
+  "supports": [
+   "RULE-HLTH-06",
+   "RULE-WF-16"
+  ],
+  "evidence_url": null,
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[0]"
+  ],
+  "evidence_note": "Checker (health): the BQA manual does not address task IDs. Evidence URL removed."
+ },
+ {
+  "file": "health.csv",
+  "field": "animal_ids",
+  "meaning": "Individual IDs when the task or record is for specific animals (official 840 EID where applicable)",
+  "units_valid": "list of IDs; official ID format per APHIS for covered cattle",
+  "id_relationship_rules": "Official IDs where APHIS rules apply.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per record",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: list of IDs; official ID format per APHIS for covered cattle. Missing or invalid: Treat the record as a group record",
+  "supports": [
+   "RULE-HLTH-06"
+  ],
+  "evidence_url": "https://www.govinfo.gov/content/pkg/FR-2024-05-09/html/2024-09717.htm",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[2]"
+  ]
+ },
+ {
+  "file": "health.csv",
+  "field": "task_type",
+  "meaning": "Kind of job; sets lead time, severity and wording",
+  "units_valid": "vaccination | parasite_control | fly_control | observation | vet_exam (pregnancy check, BSE) | other",
+  "id_relationship_rules": "Per task.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per task",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: vaccination | parasite_control | fly_control | observation | vet_exam (pregnancy check, BSE) | other. Missing or invalid: Use neutral wording ('Past planned date') and no vaccination or observation wording",
+  "supports": [
+   "RULE-HLTH-04",
+   "RULE-HLTH-11"
+  ],
+  "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2025/july/summer-brings-raised-pinkeye-concerns-in-cowherds",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[3]"
+  ]
+ },
+ {
+  "file": "health.csv",
+  "field": "schedule_source",
+  "meaning": "Who set the timing",
+  "units_valid": "product_label | vet_plan | ranch_plan",
+  "id_relationship_rules": "Per task.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per task",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: product_label | vet_plan | ranch_plan. Missing or invalid: Show 'window source not recorded: check label or vet plan'. No confident overdue wording.",
+  "supports": [
+   "RULE-HLTH-04"
+  ],
+  "evidence_url": "https://vetext.vetmed.ucdavis.edu/sites/g/files/dgvnsk5616/files/local_resources/pdfs/pdfs_beef/cca0810-booster-vaccines.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[5]"
+  ]
+ },
+ {
+  "file": "health.csv",
+  "field": "window_start, window_end",
+  "meaning": "Earliest acceptable date (from label, vet plan, or derived from breeding dates) Also: Latest acceptable date. Replaces the single next_due as the overdue test.",
+  "units_valid": "YYYY-MM-DD (date-only, as health dates already are; HB-C8 observed these are zone-safe)",
+  "id_relationship_rules": "Per task; window_end on or after window_start.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per task",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: YYYY-MM-DD (date-only, as health dates already are; HB-C8 observed these are zone-safe). Missing or invalid: Warn from window_end minus lead time",
+  "supports": [
+   "RULE-HLTH-04"
+  ],
+  "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[6]",
+   "research_health.json data_fields[7]"
+  ]
+ },
+ {
+  "file": "health.csv",
+  "field": "responsible, vet_needed",
+  "meaning": "Person or role who owns the task (crew lead, herd vet) Also: Task needs the veterinarian present or booked (preg check, BSE, prescription product)",
+  "units_valid": "text",
+  "id_relationship_rules": "Per task.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per task",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: text. Missing or invalid: Show 'Unassigned' in the row",
+  "supports": [
+   "RULE-HLTH-04",
+   "RULE-WF-17"
+  ],
+  "evidence_url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[8]",
+   "research_health.json data_fields[9]"
+  ],
+  "evidence_note": "Checker (health): the KS-BQA form's 'Crew Initials' records who did the work, not who owns an upcoming task."
+ },
+ {
+  "file": "health_records.csv",
+  "field": "done_date, done_by",
+  "meaning": "Date the task was completed (completion record, append-only) Also: Person administering or performing the task",
+  "units_valid": "YYYY-MM-DD, not after as_of",
+  "id_relationship_rules": "Per completion; task_id foreign key.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per completion",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: YYYY-MM-DD, not after as_of. Missing or invalid: 'done' without done_date shows as 'record incomplete'",
+  "supports": [
+   "RULE-HLTH-06",
+   "RULE-WF-16"
+  ],
+  "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[11]",
+   "research_health.json data_fields[12]"
+  ]
+ },
+ {
+  "file": "health_records.csv",
+  "field": "head_done, head_planned",
+  "meaning": "Number of head actually worked or treated Also: Group head count at the time of the task",
+  "units_valid": "integer 0..group head",
+  "id_relationship_rules": "Per completion; head_done <= group head.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per completion",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: integer 0..group head. Missing or invalid: 'head count not recorded'. Do not claim full coverage.",
+  "supports": [
+   "RULE-HLTH-07"
+  ],
+  "evidence_url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[13]",
+   "research_health.json data_fields[14]"
+  ],
+  "evidence_note": "Checker (health): the KS-BQA form's 'No. of Head' supports head_done (head processed), not head_planned."
+ },
+ {
+  "file": "health_records.csv",
+  "field": "product_and_lot, route_location",
+  "meaning": "Product name and manufacturer lot/serial number (record only, never shown as an instruction) Also: Route and injection site (record only)",
+  "units_valid": "text",
+  "id_relationship_rules": "Per completion.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per completion",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: text. Missing or invalid: 'record incomplete'",
+  "supports": [
+   "RULE-HLTH-06"
+  ],
+  "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+  "example_status": "user record",
+  "evidence_note": "Record only. Never shown as an instruction; may stay in the ranch's health record system (RULE-WF-16).",
+  "research_refs": [
+   "research_health.json data_fields[15]",
+   "research_health.json data_fields[16]"
+  ]
+ },
+ {
+  "file": "health_records.csv",
+  "field": "withdrawal_clear_date",
+  "meaning": "Earliest date the animals clear withdrawal (from label, or from the veterinarian for extralabel use)",
+  "units_valid": "YYYY-MM-DD",
+  "id_relationship_rules": "Per completion; from the label or the veterinarian, never computed by the dashboard.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per completion",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: YYYY-MM-DD. Missing or invalid: Block any 'clear to ship' reading; show 'withdrawal not recorded'",
+  "supports": [
+   "RULE-HLTH-08"
+  ],
+  "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[17]"
+  ]
+ },
+ {
+  "file": "marketing plan",
+  "field": "planned_ship_date",
+  "meaning": "Planned sale, shipping or cull date per group",
+  "units_valid": "YYYY-MM-DD",
+  "id_relationship_rules": "Per group or lot.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "as marketing plans change",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: YYYY-MM-DD. Missing or invalid: Skip the conflict check and say so",
+  "supports": [
+   "RULE-HLTH-08"
+  ],
+  "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_field-_guide.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[18]"
+  ]
+ },
+ {
+  "file": "health.csv",
+  "field": "fly_season_start / fly_season_end",
+  "meaning": "Ranch-entered dates bounding face- and horn-fly season for observation cadence and fly-tag in and out tasks",
+  "units_valid": "YYYY-MM-DD",
+  "id_relationship_rules": "Per year.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "yearly (adjust in-season)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: YYYY-MM-DD. Missing or invalid: Do not run the fly-season observation rule; show a note",
+  "supports": [
+   "RULE-HLTH-05"
+  ],
+  "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2024/may/controlling-flies-on-cattle-requires-proper-timing",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_health.json data_fields[20]"
+  ]
+ },
+ {
+  "file": "observations.csv",
+  "field": "fly_count_per_animal",
+  "meaning": "Scouted fly count per animal (record the species; the NDSU 200-per-animal threshold names none)",
+  "units_valid": "integer >= 0",
+  "id_relationship_rules": "Per group and date.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "weekly in season (ranch choice)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: integer >= 0. Missing or invalid: Ignore",
+  "supports": [
+   "RULE-HLTH-05"
+  ],
+  "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2024/may/controlling-flies-on-cattle-requires-proper-timing",
+  "example_status": "user record",
+  "evidence_note": "Checker (health): the NDSU 2024 article gives 200 flies per animal as the economic threshold but names no species.",
+  "research_refs": [
+   "research_health.json data_fields[21]"
+  ]
+ },
+ {
+  "file": "breeding.csv",
+  "field": "group, bull_in_date, bull_out_date",
+  "meaning": "Breeding season exposure dates Also: Breeding-season dates per group",
+  "units_valid": "dates",
+  "id_relationship_rules": "Per group and season.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per season",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: dates. Missing or invalid: Cannot compute earliest preg-check date",
+  "supports": [
+   "RULE-CTX-12",
+   "RULE-HLTH-09"
+  ],
+  "evidence_url": "https://guidelines.beefimprovement.org/index.php/Exposure_Data",
+  "example_status": "user record",
+  "research_refs": [
+   "research_context.json data_fields[19]",
+   "research_health.json data_fields[22]"
+  ]
+ },
+ {
+  "file": "preg_check.csv",
+  "field": "group, date, method, pregnant_n, open_n",
+  "meaning": "Pregnancy diagnosis results for exposed females",
+  "units_valid": "date; palpation|ultrasound|blood; counts",
+  "id_relationship_rules": "Per group and date.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per season",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: date; palpation|ultrasound|blood; counts. Missing or invalid: Task stays open",
+  "supports": [
+   "RULE-CTX-12"
+  ],
+  "evidence_url": "https://guidelines.beefimprovement.org/index.php/Pregnancy_Data",
+  "example_status": "user record",
+  "research_refs": [
+   "research_context.json data_fields[20]"
+  ]
+ },
+ {
+  "file": "losses.csv",
+  "field": "death_date, group, id, cause_known, abortion flag; baseline_loss_rate",
+  "meaning": "Deaths and pregnancy losses, plus the herd's own historical rate",
+  "units_valid": "dates, IDs; baseline as % per season",
+  "id_relationship_rules": "Per event; group in groups.csv.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "as events occur; baseline yearly",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: dates, IDs; baseline as % per season. Missing or invalid: Show counts only and 'set a baseline with your veterinarian'",
+  "supports": [
+   "RULE-HLTH-10"
+  ],
+  "evidence_url": "https://beef.unl.edu/beefwatch/2023/investigating-cause-cattle-abortions-when-involve-your-veterinarian-and-what-happens/",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[23]"
+  ]
+ },
+ {
+  "file": "meta.csv",
+  "field": "vet_name, vet_phone, last_vet_premises_visit",
+  "meaning": "Herd veterinarian contact and last recorded premises visit",
+  "units_valid": "text; YYYY-MM-DD",
+  "id_relationship_rules": "One per ranch.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "on change; per visit",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: text; YYYY-MM-DD. Missing or invalid: Escalation reads 'Call your veterinarian (no contact recorded)'",
+  "supports": [
+   "RULE-HLTH-12",
+   "RULE-HLTH-10"
+  ],
+  "evidence_url": "https://www.law.cornell.edu/cfr/text/21/530.3",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[24]"
+  ],
+  "evidence_note": "Checker (health): 21 CFR 530.3 does not address vet contact fields; its VCPR definition ('medically appropriate and timely visits to the premises') bears only on last_vet_premises_visit."
+ },
+ {
+  "file": "health.csv",
+  "field": "planned_work_start / planned_work_end",
+  "meaning": "Planned gather or processing time for a task day",
+  "units_valid": "local datetime with a stated time zone (meta.csv as_of has no zone today)",
+  "id_relationship_rules": "Per handling task; local time with zone.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per scheduled gather",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: local datetime with a stated time zone (meta.csv as_of has no zone today). Missing or invalid: Skip the heat check",
+  "supports": [
+   "RULE-CTX-07"
+  ],
+  "evidence_url": "https://newsroom.unl.edu/announce/beef/8200/47172",
+  "example_status": "user record",
+  "research_refs": [
+   "research_health.json data_fields[25]"
+  ]
+ },
+ {
+  "file": "budget.csv",
+  "field": "reforecast_usd",
+  "meaning": "Revised plan for a remaining month after a reforecast",
+  "units_valid": "USD >= 0",
+  "id_relationship_rules": "Per (month, category).",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "when reforecast (monthly or quarterly)",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: USD >= 0. Missing or invalid: Compare against original budget only",
+  "supports": [
+   "RULE-BUD-11"
+  ],
+  "evidence_url": "https://www.fcsamerica.com/resources/learning-center/cash-flow-budgeting-about-amount-and-timing",
+  "example_status": "user record",
+  "research_refs": [
+   "research_budget.json data_fields[4]"
+  ]
+ },
+ {
+  "file": "budget.csv",
+  "field": "entry_type",
+  "meaning": "Kind of entry: expense, refund, credit, rebate, tax_credit, prepaid, capital",
+  "units_valid": "enum",
+  "id_relationship_rules": "Per entry.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per entry",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: enum. Missing or invalid: Treated as expense; credits cannot be shown separately",
+  "supports": [
+   "RULE-BUD-07"
+  ],
+  "evidence_url": "https://extension.psu.edu/farm-accrual-adjustments-to-a-cash-basis-income-statement",
+  "example_status": "user record",
+  "research_refs": [
+   "research_budget.json data_fields[5]"
+  ],
+  "evidence_note": "Checker (budget): Penn State supports only the prepaid and payable kinds; refund, credit, rebate, tax_credit and capital are design choices."
+ },
+ {
+  "file": "meta.csv",
+  "field": "accounting_basis",
+  "meaning": "Whether actuals are cash basis or accrual-adjusted",
+  "units_valid": "enum: cash | accrual_adjusted",
+  "id_relationship_rules": "One value per season.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "set once per season",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: enum: cash | accrual_adjusted. Missing or invalid: Label 'basis not stated' beside the spend tile",
+  "supports": [
+   "RULE-BUD-08"
+  ],
+  "evidence_url": "https://extension.okstate.edu/fact-sheets/developing-an-income-statement",
+  "example_status": "user record",
+  "research_refs": [
+   "research_budget.json data_fields[8]"
+  ]
+ },
+ {
+  "file": "derived",
+  "field": "total_season_budget_usd",
+  "meaning": "Sum of all categories' phased budget to date, used to scale dollar floors",
+  "units_valid": "USD",
+  "id_relationship_rules": "Sum of budget.csv for the season.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "derived each refresh",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: USD. Missing or invalid: Use fixed-dollar floors",
+  "supports": [
+   "RULE-BUD-03"
+  ],
+  "evidence_url": null,
+  "example_status": "user record",
+  "evidence_note": "Checker (budget): U Alberta's 5% is a share of a unit's own revised budget for year-end carry-forward; nothing scales dollar floors as a share of an organization-wide total. Evidence URL removed.",
+  "research_refs": [
+   "research_budget.json data_fields[10]"
+  ]
+ },
+ {
+  "file": "fuel.csv",
+  "field": "gallons, price_usd_per_gal (actual)",
+  "meaning": "Gallons delivered or purchased in the month by fuel type Also: Average price paid per gallon from invoices",
+  "units_valid": "gal >= 0; fuel_type enum dyed_diesel | diesel | gasoline",
+  "id_relationship_rules": "Per delivery; summed by month.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per delivery, summed monthly",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: gal >= 0; fuel_type enum dyed_diesel | diesel | gasoline. Missing or invalid: No price/volume split; say 'price vs use unknown'",
+  "supports": [
+   "RULE-BUD-09"
+  ],
+  "evidence_url": "https://extension.msstate.edu/publications/farm-machinery-cost-calculations",
+  "example_status": "user record",
+  "research_refs": [
+   "research_budget.json data_fields[11]",
+   "research_budget.json data_fields[12]"
+  ],
+  "evidence_note": "Checker (budget): MSU P3543 supports modelling fuel as quantity x price for machinery costing only; it says nothing about delivery tickets or variance analysis."
+ },
+ {
+  "file": "fuel.csv",
+  "field": "plan_gallons, plan_price_usd_per_gal",
+  "meaning": "The quantity and price assumptions behind the fuel budget",
+  "units_valid": "gal; USD/gal",
+  "id_relationship_rules": "Per month.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "set at budget time; updated on reforecast",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: gal; USD/gal. Missing or invalid: No price/volume split",
+  "supports": [
+   "RULE-BUD-09"
+  ],
+  "evidence_url": null,
+  "example_status": "user record",
+  "evidence_note": "Checker (budget): the UNL 2026 cow-herd budget gives fuel only in dollars, with no gallons or price per gallon. Evidence URL removed.",
+  "research_refs": [
+   "research_budget.json data_fields[13]"
+  ]
+ },
+ {
+  "file": "context.csv (build-time snapshot)",
+  "field": "diesel_price_padd (EIA PADD 2 or PADD 4)",
+  "meaning": "Public on-highway retail diesel price incl. all taxes, used as a market index",
+  "units_valid": "USD/gal; weekly (Monday) and monthly",
+  "id_relationship_rules": "Per week or month.",
+  "source_type": "public dataset",
+  "timestamp_and_frequency": "weekly",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: USD/gal; weekly (Monday) and monthly. Missing or invalid: Hide the context line; never block budget alerts",
+  "supports": [
+   "RULE-BUD-09"
+  ],
+  "evidence_url": "https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=PET&s=EMD_EPD2D_PTE_R20_DPG&f=M",
+  "example_status": "public observation",
+  "research_refs": [
+   "research_budget.json data_fields[14]"
+  ]
+ },
+ {
+  "file": "repairs.csv",
+  "field": "date, asset_id, amount_usd, planned flag, hours_or_miles",
+  "meaning": "Individual repair events for lumpy-cost attribution",
+  "units_valid": "ISO date; text id; USD; boolean; hours or miles >= 0",
+  "id_relationship_rules": "Per event.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "per event",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: ISO date; text id; USD; boolean; hours or miles >= 0. Missing or invalid: Repairs alert shows monthly total only, with no 'one breakdown' attribution",
+  "supports": [
+   "RULE-BUD-10"
+  ],
+  "evidence_url": "https://blog.uvm.edu/groundwk/files/2016/05/Replacement-Strategies-for-Farm-Machinery.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_budget.json data_fields[15]"
+  ]
+ },
+ {
+  "file": "budget.csv",
+  "field": "variance_note, owner",
+  "meaning": "Manager's explanation and who is responsible for a serious variance",
+  "units_valid": "free text; name or role",
+  "id_relationship_rules": "Per (month, category) variance.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "per serious variance, monthly",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: free text; name or role. Missing or invalid: Alert stays open with 'no explanation recorded'",
+  "supports": [
+   "RULE-BUD-03",
+   "RULE-BUD-13"
+  ],
+  "evidence_url": "https://gfoa.org/materials/budget-monitoring",
+  "example_status": "user record",
+  "research_refs": [
+   "research_budget.json data_fields[16]"
+  ]
+ },
+ {
+  "file": "head_count.csv",
+  "field": "head by group and month",
+  "meaning": "Head on hand for per-head context (cost per head vs extension benchmarks)",
+  "units_valid": "integer >= 0",
+  "id_relationship_rules": "Per group and month.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "monthly or on change",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: integer >= 0. Missing or invalid: No per-head view",
+  "supports": [
+   "RULE-BUD-12"
+  ],
+  "evidence_url": "https://www.beefmagazine.com/beef/what-your-cow-calf-cost-production",
+  "example_status": "user record",
+  "research_refs": [
+   "research_budget.json data_fields[17]"
+  ]
+ },
+ {
+  "file": "budget_annual.csv",
+  "field": "annual_budget_usd per category",
+  "meaning": "Full-year budget, so season-to-date can be read against the annual plan (extension budgets are annual)",
+  "units_valid": "USD >= 0",
+  "id_relationship_rules": "Per category and year.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "once per year; on reforecast",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: USD >= 0. Missing or invalid: Show season-to-date only",
+  "supports": [
+   "RULE-BUD-10",
+   "RULE-BUD-12"
+  ],
+  "evidence_url": "https://cap.unl.edu/cattlebudgets/northern-panhandle/",
+  "example_status": "user record",
+  "research_refs": [
+   "research_budget.json data_fields[18]"
+  ]
+ },
+ {
+  "file": "inventory.csv",
+  "field": "item, unit, on_hand, count_date, daily_use, lead_time_days",
+  "meaning": "Feed, supplement and mineral stock",
+  "units_valid": "tons/bales/lbs/bags; numbers >= 0; date",
+  "id_relationship_rules": "Per item.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "weekly or at delivery/count",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: tons/bales/lbs/bags; numbers >= 0; date. Missing or invalid: Quantity only, no days on hand",
+  "supports": [
+   "RULE-CTX-11"
+  ],
+  "evidence_url": "https://ranchdrought.unl.edu/Plan.aspx",
+  "example_status": "user record",
+  "research_refs": [
+   "research_context.json data_fields[18]"
+  ]
+ },
+ {
+  "file": "maintenance.csv",
+  "field": "asset_id, asset_type, task, last_done, interval_days, next_due, status, assignee",
+  "meaning": "Fence, water and equipment upkeep log",
+  "units_valid": "text; dates; integer days; open|done",
+  "id_relationship_rules": "Per asset task.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "as work is done",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: text; dates; integer days; open|done. Missing or invalid: No overdue judgement without next_due/interval",
+  "supports": [
+   "RULE-CTX-13"
+  ],
+  "evidence_url": "https://www.ndsu.edu/agriculture/extension/publications/livestock-water-requirements",
+  "example_status": "user record",
+  "research_refs": [
+   "research_context.json data_fields[22]"
+  ]
+ },
+ {
+  "file": "crew_task.csv",
+  "field": "task_id, area, subject, assignee, due_date, status, source_exception",
+  "meaning": "Who is doing what, linked to the exception that created it",
+  "units_valid": "text; date; open|in-progress|done",
+  "id_relationship_rules": "source_exception = exception_id.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "daily",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: text; date; open|in-progress|done. Missing or invalid: Unassigned tasks listed as 'unassigned'",
+  "supports": [
+   "RULE-CTX-13"
+  ],
+  "evidence_url": null,
+  "example_status": "user record",
+  "evidence_note": "Checker (context): the NDMC 'Plan for Drought' page does not support a crew_task field. Evidence URL removed.",
+  "research_refs": [
+   "research_context.json data_fields[23]"
+  ]
+ },
+ {
+  "file": "page state (derived)",
+  "field": "source_last_update per source (water, weigh-ins, moves, health, budget)",
+  "meaning": "When each input was last updated, so a fresh as_of cannot hide an old source",
+  "units_valid": "ISO 8601 timestamp per source",
+  "id_relationship_rules": "One per input file.",
+  "source_type": "device",
+  "timestamp_and_frequency": "Per export",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: ISO 8601 timestamp per source. Missing or invalid: Show 'unknown' for that source and do not mark its rows 'new'",
+  "supports": [
+   "RULE-WF-14",
+   "RULE-WF-18"
+  ],
+  "evidence_url": null,
+  "example_status": "fictional example",
+  "evidence_note": "Checker (workflow): the exida paper has nothing on data freshness; its 'stale alarms' means standing alarms. Evidence URL removed.",
+  "research_refs": [
+   "research_workflow.json data_fields[1]"
+  ]
+ },
+ {
+  "file": "page state (derived)",
+  "field": "exception_id",
+  "meaning": "Stable key for an exception across loads (area + subject id + rule id, e.g. Water|T4|drop24h)",
+  "units_valid": "String; deterministic",
+  "id_relationship_rules": "Deterministic: area + subject id + rule id (for example Water|T4|drop24h).",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "Computed every load",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: String; deterministic. Missing or invalid: Without it, acknowledgements cannot be matched, so show every row as New and unacknowledged and never hide it",
+  "supports": [
+   "RULE-WF-11",
+   "RULE-WF-15",
+   "RULE-WF-13"
+  ],
+  "evidence_url": null,
+  "example_status": "management assumption",
+  "evidence_note": "Checker (workflow): the Ignition manual gives no deterministic ID scheme; exception_id is a design assumption. Evidence URL removed.",
+  "research_refs": [
+   "research_workflow.json data_fields[2]"
+  ]
+ },
+ {
+  "file": "browser localStorage (this device only)",
+  "field": "local acknowledgement (exception_id, acked_at), selected filter, last_review_at",
+  "meaning": "Per-device conveniences for the phase-2 morning review and the optional 'this device only' acknowledgement. Never shared, never clears or hides a condition.",
+  "units_valid": "Small key/value strings; ISO 8601 times.",
+  "id_relationship_rules": "Keyed by exception_id.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "On each visit or action.",
+  "required": "optional",
+  "validation_and_missing_behavior": "Storage blocked, empty or cleared: every row shows as unacknowledged and the page renders fully. Every call wrapped in try/catch.",
+  "supports": [
+   "RULE-WF-11",
+   "RULE-WF-15",
+   "RULE-WF-18"
+  ],
+  "evidence_url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria",
+  "example_status": "user record",
+  "research_refs": [
+   "research_workflow.json data_fields[11]"
+  ]
+ },
+ {
+  "file": "acknowledgements.csv (shared log)",
+  "field": "first_seen_at",
+  "meaning": "First load or run at which this exception_id was active (current event)",
+  "units_valid": "ISO 8601",
+  "id_relationship_rules": "Per exception_id event.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Set once per event; a new event after clearing gets a new value",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: ISO 8601. Missing or invalid: Show 'age unknown' (not 'new')",
+  "supports": [
+   "RULE-WF-13"
+  ],
+  "evidence_url": "https://www.hse.gov.uk/pubns/chis6.pdf",
+  "example_status": "user record",
+  "evidence_note": "Checker (workflow): HSE CHIS6 supports reducing standing alarms; the first_seen_at field design is the researcher's.",
+  "research_refs": [
+   "research_workflow.json data_fields[3]"
+  ]
+ },
+ {
+  "file": "acknowledgements.csv (shared log)",
+  "field": "cleared_at",
+  "meaning": "When the data first showed the condition back to normal",
+  "units_valid": "ISO 8601",
+  "id_relationship_rules": "Per exception_id event.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Computed every load",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: ISO 8601. Missing or invalid: If unknown, a row that disappears is listed as 'no longer flagged (time unknown)' in the Resolved strip",
+  "supports": [
+   "RULE-WF-11",
+   "RULE-WF-13"
+  ],
+  "evidence_url": "https://docs.inductiveautomation.com/docs/8.1/platform/alarming",
+  "example_status": "user record",
+  "evidence_note": "Checker (workflow): Ignition supports separate event states and new events on recurrence, not the cleared_at field design itself.",
+  "research_refs": [
+   "research_workflow.json data_fields[4]"
+  ]
+ },
+ {
+  "file": "acknowledgements.csv (shared log)",
+  "field": "ack_by, ack_at",
+  "meaning": "Who acknowledged the current event, and when",
+  "units_valid": "Person name or initials from the crew roster; ISO 8601",
+  "id_relationship_rules": "Per exception_id event.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On action",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: Person name or initials from the crew roster; ISO 8601. Missing or invalid: Row shown as unacknowledged. A missing ack_by is stored as 'unattributed'.",
+  "supports": [
+   "RULE-WF-11",
+   "RULE-WF-16"
+  ],
+  "evidence_url": null,
+  "example_status": "user record",
+  "evidence_note": "Checker (workflow): the Ignition manual never mentions recording the acknowledging user or time; a design assumption. Evidence URL removed.",
+  "research_refs": [
+   "research_workflow.json data_fields[5]"
+  ]
+ },
+ {
+  "file": "acknowledgements.csv (shared log)",
+  "field": "ack_note / planned_action",
+  "meaning": "Free-text note: what was decided (e.g. 'hauling water 2 pm; float part ordered')",
+  "units_valid": "Text up to ~280 chars; no treatment details",
+  "id_relationship_rules": "Per exception_id event.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "On action",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: Text up to ~280 chars; no treatment details. Missing or invalid: Empty is allowed",
+  "supports": [
+   "RULE-WF-11",
+   "RULE-WF-16"
+  ],
+  "evidence_url": "https://www.bqa.org/Media/BQA/Docs/bqa-field-guide-2026.pdf",
+  "example_status": "user record",
+  "evidence_note": "Checker (workflow): the BQA Field Guide supports record keeping only; the ~280-character limit and 'no treatment details' are design choices.",
+  "research_refs": [
+   "research_workflow.json data_fields[6]"
+  ]
+ },
+ {
+  "file": "acknowledgements.csv (shared log)",
+  "field": "owner (assigned_to), due_by",
+  "meaning": "Who will do the first step, and by when",
+  "units_valid": "Crew roster name; date",
+  "id_relationship_rules": "Per exception_id event.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "Daily at review",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: Crew roster name; date. Missing or invalid: Show 'unassigned', and list it in the briefing under 'unassigned'",
+  "supports": [
+   "RULE-WF-18",
+   "RULE-CTX-13"
+  ],
+  "evidence_url": null,
+  "example_status": "user record",
+  "evidence_note": "Checker (workflow): Cornell's 'Onboarding Farm Employees' page says nothing about task owners or due dates. Evidence URL removed.",
+  "research_refs": [
+   "research_workflow.json data_fields[7]"
+  ]
+ },
+ {
+  "file": "acknowledgements.csv (shared log)",
+  "field": "shelved_until, shelve_reason, shelved_by",
+  "meaning": "Time-limited hide of a known item, with justification",
+  "units_valid": "ISO 8601 (bounded max per severity); text; name",
+  "id_relationship_rules": "Per exception_id event.",
+  "source_type": "manual observation",
+  "timestamp_and_frequency": "On action; re-evaluated at expiry",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: ISO 8601 (bounded max per severity); text; name. Missing or invalid: Reject the shelve if the expiry or reason is missing. Critical rows cannot be shelved.",
+  "supports": [
+   "RULE-WF-12"
+  ],
+  "evidence_url": "http://www.exida.com/articles/ALARM-MANAGEMENT-AND-ISA-18-A-JOURNEY-NOT-A-DESTINATION.pdf",
+  "example_status": "user record",
+  "research_refs": [
+   "research_workflow.json data_fields[8]"
+  ]
+ },
+ {
+  "file": "rules change log",
+  "field": "rule_change_log (rule_id, old, new, changed_by, changed_at, reason)",
+  "meaning": "Why each threshold and severity exists, and its history",
+  "units_valid": "Text and enum A/B/C/D; audit rows",
+  "id_relationship_rules": "Per change; until then the repository history is the record.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "On change",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: Text and enum A/B/C/D; audit rows. Missing or invalid: Label the threshold 'Demo setting (unvalidated)'",
+  "supports": [
+   "RULE-WF-20"
+  ],
+  "evidence_url": "https://www.hse.gov.uk/pubns/chis6.pdf",
+  "example_status": "user record",
+  "evidence_note": "Checker (workflow): HSE CHIS6 supports alarm change control and audits; the change-log schema is the researcher's design.",
+  "research_refs": [
+   "research_workflow.json data_fields[12]"
+  ]
+ },
+ {
+  "file": "rules table (page copy)",
+  "field": "severity_consequence and response_window per rule",
+  "meaning": "Consequence of no response and the time available, which justify the severity level",
+  "units_valid": "Enum (animal welfare / production / financial) plus hours or days",
+  "id_relationship_rules": "One per rule.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "On rule review",
+  "required": "optional",
+  "validation_and_missing_behavior": "Valid: Enum (animal welfare / production / financial) plus hours or days. Missing or invalid: Show the rule at Warning with 'basis not documented'",
+  "supports": [
+   "RULE-WF-10",
+   "RULE-BUD-14",
+   "RULE-WAT-05"
+  ],
+  "evidence_url": "http://www.exida.com/articles/ALARM-MANAGEMENT-AND-ISA-18-A-JOURNEY-NOT-A-DESTINATION.pdf",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_workflow.json data_fields[13]"
+  ]
+ },
+ {
+  "file": "crew_roster.csv",
+  "field": "name, role, language preference, route/pastures",
+  "meaning": "Who can be assigned, and how their briefing is printed",
+  "units_valid": "Text; language code (e.g. en, es)",
+  "id_relationship_rules": "Per person; route pastures must exist in pastures.csv.",
+  "source_type": "ranch records",
+  "timestamp_and_frequency": "Seasonal",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: Text; language code (e.g. en, es). Missing or invalid: Print a single unassigned briefing in English",
+  "supports": [
+   "RULE-WF-17"
+  ],
+  "evidence_url": "https://bpb-us-e1.wpmucdn.com/blogs.cornell.edu/dist/7/8192/files/2018/03/SOPManual-1-2drpn48.pdf",
+  "example_status": "user record",
+  "evidence_note": "Checker (workflow): Stup (Penn State) has no translation advice; translation comes from Skellie (Cornell 2019).",
+  "research_refs": [
+   "research_workflow.json data_fields[14]"
+  ]
+ },
+ {
+  "file": "meta.csv",
+  "field": "record_retention_years",
+  "meaning": "How long acknowledgement, notes and visual-check logs are kept",
+  "units_valid": "Integer, at least 2 (BQA recommendation), longer if law requires",
+  "id_relationship_rules": "One value.",
+  "source_type": "assumption",
+  "timestamp_and_frequency": "Set once",
+  "required": "later",
+  "validation_and_missing_behavior": "Valid: Integer, at least 2 (BQA recommendation), longer if law requires. Missing or invalid: Default to 2 years; never auto-delete without export",
+  "supports": [
+   "RULE-WF-16"
+  ],
+  "evidence_url": "https://www.bqa.org/Media/BQA/Docs/bqa-field-guide-2026.pdf",
+  "example_status": "management assumption",
+  "research_refs": [
+   "research_workflow.json data_fields[15]"
+  ]
+ }
+]

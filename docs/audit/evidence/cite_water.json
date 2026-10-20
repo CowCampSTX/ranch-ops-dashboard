@@ -1,0 +1,371 @@
+{
+ "checked": [
+  {
+   "url": "https://intercom.help/ranchbot/en/articles/8388692-how-to-set-up-water-tank-alerts-notifications",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Written by Kadee Petty, September 20, 2023. Warning: 'When the tank is low e.g. you may set this at 40-50% level'. Critical: 'e.g. you may set this to 10-20% level'. Rapid drop: 'When water level has fallen rapidly (excessive rate of fall) e.g. 11.81 inches in 60mins'. No defaults are stated. All values are 'e.g.' examples, and the page says triggers can be edited 'depending on your water tank and operations'."
+  },
+  {
+   "url": "https://intercom.help/ranchbot/en/articles/7941241-what-is-offset-and-how-to-update-it",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "August 11, 2023 (Kadee Petty). Example: an 80-in tank with 10 in of mud reads '40 / 80 inches (50%)'. After a +10 in offset it shows 50/80 (60%), with 'only 30 inches or 37.5% available space'. 'Changes to offset will NOT be applied retrospectively.' 'Field validation means offset can be +/- 240 inches' confirms the \u00b1240 data-field claim."
+  },
+  {
+   "url": "https://www.lonestartracking.com/?p=60249",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Title 'Water Tank Level Monitoring System 2026 - LoneStar Tracking', footer (c) 2026. 'The LST Vita water level sensors are accurate to about 10%'. Listed factors: 'water temperature, changes in barometric pressure and sediment in the bottom of the tank'. Sensor wire 15 ft. Cellular '24 / day', satellite '4 / day', and also 'once every 1 hour' (a conflict). Battery claims conflict: 5 years, '10 years on 2 D cells', and 2-3 years in the table. Price $250.00 plus subscription, $99/yr after the first year. Sends SMS/email low alerts and a 'returned to normal' notice. Has a hydrostatic pressure sensor. Minor: cellular is named 'Global 4G Cat M1'. Myriota is not named on this page (it appears on the Myriota partner page). No API or export is mentioned. The page metadata lists price 100 USD, which conflicts with the visible $250."
+  },
+  {
+   "url": "https://goldenplains.extension.colostate.edu/wp-content/uploads/sites/56/2021/06/PR_CalculatingWaterforCattle.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Scott Stinnett, CSU Extension Golden Plains, June 17, 2021. Formula: \u03c0 x diameter\u00b2 \u00f7 4 x depth. At about 24 in: 10 ft \u2248 1,000 gal and 12 ft \u2248 1,690 gal. On days over 90F: 'provide 2 gallons of water per 100 pounds of body weight'. Cattle drink '2 gallons to as much as 5 gallons in a single trip'. Windmill/solar pumps 'may provide 2 to 4 gallons per minute'; home wells 3-6 gpm. 'Cows normally drink first and lower the tank water level' (calves). All cited claims match."
+  },
+  {
+   "url": "https://www.ag.ndsu.edu/news/newsreleases/2007/july-26-2007/water-essential-for-cattle-in-high-heat",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Undated on the page, so the URL-path-only dating is correct. Karl Hoppe, Carrington REC. Quotes: 'With 100-degree weather, checking water supplies on a daily basis may not be often enough.' Cattle can drink '20 or more gallons a day'. 'Spring-fed ponds that have water one day may be dry the next day.' As evidence for the visual_check log data field it supports only more frequent checks in heat, not the log's structure."
+  },
+  {
+   "url": "https://www.nrcs.usda.gov/sites/default/files/2023-08/614_NHCP_CPS_Watering_Facility_2023.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "NRCS CPS Watering Facility Code 614, August 2023. 'To determine the storage volume, use the availability of water, replenishment rate, location, and planned operation.' 'When windmill, solar, or other potentially unreliable power sources are used, consider supplying additional daily water storage volume (3\u20135 days), a battery backup system, or an alternate water source.' O&M: 'Check for leaks, site erosion, and damage to fences' and 'Checking the performance of the automatic water level device, if present.' No numeric leak rate. Weak use: it is cited as evidence for the tank_id/pasture_id field, which it does not address, and for tank_shutoff/planned_move_in only through the phrase 'planned operation'."
+  },
+  {
+   "url": "https://extension.wvu.edu/files/d/102b1da9-9f1a-40d7-90ad-5de2cd6101a8/watering-systems-by-ben-bartlett.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'The ABCs of Livestock Watering Systems', Ben Bartlett (MSU), LPES Small Farms Fact Sheets, MidWest Plan Service, Iowa State University, (c) 2006. Quotes: 'the tank should hold at least \u00bc of the daily requirement'; 'If the tank cannot be refilled in one hour or less, use a larger tank size'; 'The typical tank float has only a 1/8-inch opening'; 'provides total daily needs in four hours or less of pumping'; 'allow 5% to 10% of the animals to drink at one time'; 'Hot temperatures and dry forage can increase these water needs over fourfold'; 900 ft travel distance. I did not separately confirm the 'worked gpm examples'. This document says nothing about well testing."
+  },
+  {
+   "url": "https://intercom.help/ranchbot/en/articles/7944517-what-does-monitor-status-delay-mean",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "February 16, 2024. Delay = values 'are likely out of date and are no longer accurate'. Monitors 'transmit data at irregular intervals' but must update 'within a maximum transmission time period'. Causes: cloud cover 'for a few days', connectivity, battery, and 'an animal or a severe weather event may damage it'. 'longer than 3-4 days, a manual inspection may be required.' Caveat: this page has no '3-5 days' battery figure. That figure, which the research credits to Ranchbot in the Delay-rule limitations and the integrations, is on Ranchbot's battery page (5702599). The page also does not support the data field's timezone requirement, which comes from the repo."
+  },
+  {
+   "url": "https://intercom.help/farmbot-helpcentre/en/articles/5666871-what-does-device-status-delay-mean",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "April 13, 2026 (Jen Duff). Same Delay definition, 'irregular intervals', 'maximum transmission time period', and 'longer than 3-4 days' manual inspection. Cloud cover 'for a few days'. Pump automation: 'automation will be paused if it is enabled' when a linked monitor is in Delay. It groups causes differently from Ranchbot ('Transmission Missed', 'Transmission Failure', other), so 'same guidance' is accurate in substance only. I did not verify the help centre's 'Integrations' collection."
+  },
+  {
+   "url": "https://myriota.com/partner-products/satellite-water-tank-monitoring-system/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Partner LoneStar Tracking. Modified 2025-02-03T06:24:28Z; footer (c) 2026 Myriota. '4 measurements per day from anywhere on earth'. 'powered by 2 AA lithium batteries for up to 5 year'. No accuracy claim. The page's own title is 'Myriota Partner Products Showcase | Satellite IoT Solutions'."
+  },
+  {
+   "url": "https://extension.usu.edu/rangelands/research/remote-sensing-stock-tanks.php",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Undated. Kevin Heaton. Southern Utah. Vendor not named ('the company'). 'One problem that occurs quite frequently is spikes in the data' (satellite transmission errors). On the bad unit: 'most likely faulty equipment' that 'will be sent back to the company for replacement'. That is future tense, so 'was returned' slightly overstates it. Costs: monitor $1,800.00, installation $100.00, website $3-10.00/month. Payback is 'just over 2 years' for one rancher who drives 20 miles one way 2-3 times a week. As evidence for the response_time_h/next_check_at field it gives only travel and trip figures, not response time."
+  },
+  {
+   "url": "https://www.ndsu.edu/agriculture/sites/default/files/2024-04/as1763.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "AS1763 'Livestock Water Requirements', Meehan, Stokka and Mostrom, Revised March 2021. 'Adapted from Nutrient Requirements of Beef Cattle: Eighth Revised Edition: Updated 2016, 2016, NRC'. Raw table text, 90F row: '9.5 12.7 15.0 14.3 17.4 20.6 [blank] [blank] 16.2 19.0 20.6'. So growing 600 lb is 5.3\u219212.7, finishing 1,000 lb is 8.7\u219220.6, and lactating 900 lb is 11.4 / 16.9 / 17.9 / 16.2 at 40/70/80/90F, all confirmed. Note: in this table the lactating 90F value (16.2) is LOWER than the 80F value (17.9). The proposal to 'use the 90F column (conservative)' is therefore not conservative for lactating cows if AS1763 is the lookup. The flattened headers ('Lactating Cows 900 lb 1,400 lb; Mature Bulls 1,600 lb') make 1,400 lb look like lactating; G2060 shows it is mature bulls, which matches the researcher's reading."
+  },
+  {
+   "url": "https://extensionpubs.unl.edu/publication/g2060/2011/pdf/view/g2060-2011.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "G2060, Rasby and Walz, March 2011. Source: 1996 NRC 7th rev. ed., derived from Winchester and Morris (J. Anim. Sci. 15(3), Aug 1956). Raw text: 'Lactating Cows4 / 900 11.4 12.6 14.5 16.9 17.9 18.2'. This confirms the 16.2 (NDSU) vs 18.2 (UNL) disagreement is real in the published documents and is not a WebFetch extraction error. The growing rows show '600' twice, which confirms that note. Footnote: 'Water intake is constant up to 40oF.' Other values: TDS '3,000 ppm TDS or less is usually satisfactory'; 5,000 ppm \u2248 10% performance reduction; 5,000-7,000 not for pregnant or lactating; NO3-N <100 safe, 100-300 caution, >300 unsafe; sulfate <500 calves, <1,000 adults."
+  },
+  {
+   "url": "https://bookstore.ksre.ksu.edu/download/estimating-water-requirements-for-mature-beef-cows_MF3303",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "MF3303 (also ANSI-3299), Spencer, Lalman, Rolf and Richards, December 2016. Table 2: a 1,100 lb cow with 25 lb milk needs 12.8 / 15.4 / 17.9 gal at 40/65/90F. A 1,500 lb cow with 35 lb milk at 40F needs 16.3. Quotes: '0.85 pound of increased water intake per one degree increase in temperature beyond 40 degrees'; 'adjusted by 0.9 pound for each pound of milk'. Equations cite Murphy 1983, Hicks 1988, Meyer 2006, Winchester and Morris 1956, NRC 2000. The 40\u219290F rise for this lactating cow is only about 1.4x (12.8\u219217.9), not 'roughly doubles'."
+  },
+  {
+   "url": "https://extension.okstate.edu/fact-sheets/estimating-water-requirements-for-mature-beef-cows.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "AFS-3299, Lalman, Richards, Spencer and Rolf, published July 2017. NRC values 'were taken from research data published in 1956'. 'Current guidelines are restricted to 900- to 1,100-pound mature weight in gestating cows and 900-pound lactating cows only'. 'Free water intake could be substantially lower than the estimates' (moist feed). Gives about 1 gal per 10F. Table value for a 1,500 lb cow with 35 lb milk at 40F is 15.3, versus 16.3 in the K-State PDF, so the discrepancy is confirmed."
+  },
+  {
+   "url": "https://beef.unl.edu/beefwatch/2023/how-much-water-do-cattle-need-and-what-water-problems-should-cattle-producers-watch-0",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Walz and Berger. The page shows April 30, 2025 although the URL path says 2023, which matches the researcher's note. Quotes: 'lactating cows need two gallons of water per 100 pounds of bodyweight per day'; 'close to 20 to 24 gallons of water per day for themselves'; 'another 5 to 10 gallons for their calf when it gets hot'; 'calves may struggle to get a drink if there is a slow recharge'. Also sulfate <500 calves and <1,000 adults, and NO3-N <100 ppm."
+  },
+  {
+   "url": "https://www.k-state.edu/news/beef-tips/articles/2018/04/water-questions-and-answers.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "April 30, 2018. Byline Angie Denton; content by Justin Waggoner. Quotes: '1 to 2 gallons of water per 100 lbs of bodyweight'; 'additional gallon of water for every 10 degree increase in temperature' (above 40F); 'A minimum of 15 inches of linear trough space per head'; 'at least 10% of the animals ... drink ... at once', and 30% for larger pastures with long travel."
+  },
+  {
+   "url": "https://extension.sdstate.edu/hauling-water-cows-when-water-not-everywhere",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Taylor Grussing, 'Updated July 17, 2026'. Confirmed: '37.5 gal \u00d7 100 = 3750 gallons' for 100 pairs; 'stationary storage tanks to hold at least half your water needs will help with demand on hot days'; '625 gallon volume per 8-foot tank'. Partly: the 0.66-1 gal per lb DM above 75F figure is credited to Alfredo DiCostanzo (UNL) and applies to 'a feedlot animal'. The research presents it as an SDSU rule for cattle in general."
+  },
+  {
+   "url": "https://www.nationalacademies.org/read/19014/chapter/2",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "This is the Summary of 'Nutrient Requirements of Beef Cattle: Eighth Revised Edition' (NAP, 2016), not Chapter 9. 'Chapter 9 provides an update of equations to predict water intake by beef cattle' and 'examines factors that influence water intake, including the role of water quality'. As the researcher says, Chapter 9 itself was not read."
+  },
+  {
+   "url": "https://archive.jornada.nmsu.edu/files/bibliography/21-059.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "McIntosh, Cibils et al., 2021 NMSU ACES Beef, Dairy and Livestock Update, pp. 51-54. Data from 2020 (GPS Mar 9 to Jun 9, 2020). One 'Decentlab\u00ae water level sensor'. Trough level data were 'more consistent and reliable' than GPS trackers (46 \u00b1 4% packet reception). The sensors 'timed out when the Wi-Fi system went down'. 'The rancher checked the water level sensor daily.' No accuracy figure. I could not verify the 'archive entry dated 2022-01-25' from the PDF."
+  },
+  {
+   "url": "https://www.nrcs.usda.gov/sites/default/files/2023-06/Watering_Systems_for_Serious_Graziers.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "NRCS Missouri (Columbia, MO), August 2006. Confirmed: 'Use \"full flow\" float valves ... to allow rapid refill'; clamp-on floats 'do not refill tanks rapidly enough'; 'One gallon of flow per minute output equals 1,440 gallons per day. That's enough water for 50 cow-calf pairs.'; backup water sources; 'Check pipeline routes for leaks'. Not supported: the flow_meter_gal data field cites this document for 'Leak and overflow detection', but it never mentions flow or water meters (only a bucket method for spring flow) and says nothing about stuck-open floats."
+  },
+  {
+   "url": "https://acquire.cqu.edu.au/articles/journal_contribution/Tracking_and_sensor-based_detection_of_livestock_water_system_failure_A_case_study_simulation/15001191",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "no",
+   "notes": "Tobin, Bailey and Trotter, Rangeland Ecology & Management 77(1):9-16, DOI 10.1016/j.rama.2021.02.013. Data from 2018-2019. 'Water system failure was simulated in a 1 096-ha pasture in Arizona' by 'placing metal panels around the only drinker for 4 h (0800\u22121200)'. Movement intensity was greater (P = 0.03), and 'cows remained closer to water (P = 0.01)'. 'Real-time GPS tracking ... has the potential to remotely detect water system failure'. Metadata error: 2021-07-19 is the date the article was posted to the CQU repository, not the online publication date. The article was accepted 2021-02-24 and is in the July 2021 volume. The bioone full text was blocked for me too (Incapsula)."
+  },
+  {
+   "url": "https://intercom.help/ranchbot/en/articles/8388698-reading-my-water-level-data-and-graphs",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "September 20, 2023. Units are 'inches (in), gallons (gal) or percentage (%)'. Values 'calculated based on all previous data points, trend predictions'. A dotted projected line is shown. Trend labels Rising/Steady/Falling. No accuracy figure and no mention of leaks."
+  },
+  {
+   "url": "https://efotg.sc.egov.usda.gov/api/CPSFile/3900/614_CO_CPS_Watering_Facility_2015",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Colorado CPS 614, October 2015, marked ARCHIVED on every page. Storage for 'tanks supplied by windmill pumps, other undependable sources ... shall be 4 days'. Frequently inspected tanks with adequate supply: 'minimum volume of 10% of the daily water requirement'. 'maintain the water level 2 inches below the top of the tank'."
+  },
+  {
+   "url": "https://www.uvm.edu/d10-files/documents/2024-10/watering_systems_for_grazing_livestock.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Ben Bartlett DVM (MSU Extension), Great Lakes Basin Grazing Network / MSU Extension, undated. Solar: 'at least three days of non-pumping'. Compressed-air windmill: 'five-to seven-day water supply'. Gravity: 'three-to seven-day period'. 'Pumps should run only about four hours per day, with a maximum of 12 hours'. 'should be able to handle double the intake'. On the supply_type field claim ('have the well tested before summer'), the text only advises testing well yield and draw down with a driller because summer use rises; 'before summer' is a paraphrase."
+  },
+  {
+   "url": "https://www.nrcs.usda.gov/sites/default/files/2022-12/Water-Res-Dev-for-Managing-Intens-Grazing-Beef.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "NRCS Illinois, Illinois Grazing Manual, 2004. Solar systems store 'up to five day's supply of water'. About 9 gal per 1,000 lb in winter rising to 'nearly 30 gallons per 1000 lbs. bodyweight per day on hot summer days'. Inexpensive floats 'can only supply 2-3 gallons per minute'; full-flow floats 'can deliver up to 20 gallons per minute'."
+  },
+  {
+   "url": "https://www.ars.usda.gov/plains-area/clay-center-ne/marc/documents/heat-stress/forecastingheatstress/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "USDA ARS MARC, Last Modified 8/12/2016. Uses NWS seven-day forecasts of temperature, humidity, wind and cloud cover. Breathing rates: <90 normal, 90-110 alert, 110-130 danger, >130 emergency. The model is 'the predicted breathing rate of cattle in a feedlot'. The maps are 'an estimate of general trends'. No coverage area and no data download stated."
+  },
+  {
+   "url": "https://beef.unl.edu/beefwatch/2024/modern-water-monitoring-technology-ranch",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Aquino and Xiong, March 27, 2024. Cameras '$400 to $700 per camera'; 'Monitoring is limited to what can be seen in camera's field of view'. Covers drones. Names Ranchbot, Gallagher and Lonestar, plus integrated systems (701X xWatSen, mOOvement). No evaluation, accuracy or outcome data."
+  },
+  {
+   "url": "https://preec.unl.edu/news/cameras-and-cellular-technology-checking-water-afar",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Aaron Berger, April 23, 2025. Covers cellular cameras, pipeline pressure sensors and ultrasonic level sensors. Solar panels are framed as reducing battery replacement, and 'external, high-gain antennas can boost signal reception'. Calling these 'for reliability' is a mild paraphrase. No outcome or accuracy data."
+  },
+  {
+   "url": "https://info.ext.nodak.edu/agriculture/sites/default/files/2026-01/as1764%20%281%29.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "AS1764 'Livestock Water Quality', Meehan, Galbreath and Mostrom, 'Revised January 2026'. TDS table: <3,000 'Usually satisfactory for most livestock'; 3,000-5,000 young stock may be affected; 5,000-7,000 'Should not be consumed by pregnant or lactating females'; 7,000-10,000 'Do not use for pregnant or lactating ruminants or horses' (and swine); >10,000 'May cause brain damage or death'. Lab trigger: 'If TDS levels exceed 4,500 ppm and/or sulfates levels exceed 800 ppm'. Screening with an 'EC or TDS meter and sulfate test strips'; calibration per WQ1923. 'salts in surface water become more concentrated as water levels decline'. Table 2: sulfate <600 ppm on >85% concentrate (diet S 0.3%) and <2,500 ppm on >40% forage (diet S 0.5%). Table 3: 'Nitrate 100', 'Nitrite 33', 'Sulfate 500 to 1,000'. Nitrate is not labelled NO3 vs NO3-N, so 'nitrate-N 100' is not explicit here. Not supported: the labs integration names NDSU VDL, SDSU testing and Midwest Laboratories, but this document names only the 'NDSU Veterinary Diagnostic Lab' (it does mention 'algal toxin determination')."
+  },
+  {
+   "url": "https://extension.sdstate.edu/sites/default/files/2023-11/P-00212.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "P-00212, Robin Salverson, November 2023. The 2004 original was by Thiex and German. TDS bands are <1,000, 1,000-2,999, 3,000-4,999, 5,000-6,999, 7,000-10,000 and >10,000 mg/L; the boundaries match NDSU above 3,000. Sulfate: <1,500 'no serious effects' with mild diarrhea near the limit; 3,500-4,500 not for pregnant or lactating cows; >4,500 not recommended. NO3-N <100 / 100-300 / >300. 'Divide sulfate content by 3 to convert to sulfur content'. Dietary S max 0.4%. Field 'quick test' with an EC or TDS meter."
+  },
+  {
+   "url": "https://www.ndsu.edu/agriculture/sites/default/files/2026-06/56136%20Cyanobacteria.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "V1136, 'Revised June 2026', original 1997 (Stoltenow). Quotes: blooms from nitrogen and phosphorus with 'hot, sunny days'; 'doubling in one day or less'; gentle winds concentrate it 'on the leeward (downwind) side'; 'commonly occur in late summer and early autumn'; 'the presence of the bacteria does not mean the water is toxic'; 'at least 500 ml', surface and deeper, 'kept cool but not frozen', 'wear gloves'; 'avoid moving dead stock until a veterinarian has been consulted'; alternate water and fencing; 'Force the cattle to the windward side'."
+  },
+  {
+   "url": "https://beef.unl.edu/beefwatch/2021/blue-green-algae-impacts-cattle",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Amy Timmerman, July 7, 2021. Hot, sunny days plus nutrients; 'doubling in a day or less'; 'at least 500 milliliters'; keep cool, do not freeze, wear gloves; necropsy by a veterinarian. 'If wind concentrates the bacteria on one corner ... fence that corner off.' 'Pump water from the center of the water body well below the surface to a water tank.' Alternate water sources. On toxicity it says 'not all species are harmful'."
+  },
+  {
+   "url": "https://beef.unl.edu/water-requirements-for-beef-cattle/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Troy Walz, July 2, 2020. Sulfate: 'upper limit for calves is less than 500 ppm' and 'For adult cattle ... less than 1,000 ppm'. 'A safe level of nitrate nitrogen (NO3N) ... is less than 100 ppm.' Intake runs from 1 gal per 100 lb in cold weather to nearly 2 gal in the hottest weather. No TDS guidance."
+  },
+  {
+   "url": "https://intercom.help/ranchbot/en/articles/10173097-how-to-set-water-tank-shape-and-volume-alerts",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "November 21, 2024. Shapes offered: horizontal, vertical and elliptical cylinder. There is no rectangular option, although the tank_shape data-field enum includes rectangular (that field cites CSU, not this page). Shape is chosen 'to better calculate your tank's volume', with dimension inputs per shape. 'You can set up water alerts based on inches OR volume (gallons)'."
+  },
+  {
+   "url": "https://intercom.help/farmbot-helpcentre/en/articles/5322574-how-do-i-read-my-water-level-data-and-graphs",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "September 16, 2024 (Jen Duff). Units 'centimetre (cm), litres (L) or percentage (%)'. 'If you are seeing a dash instead, you will need to add the tank's total volume'. Dotted projected line 'based on water trend and behaviours'. No accuracy figure. No mention of leaks or floats."
+  },
+  {
+   "url": "https://mla.com.au/research-and-development/reports/2021/water-monitoring-in-the-digital-age-reducing-stress-and-improving-the-efficiency-of-the-water-run",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Published 08 November 2022; project 10 Nov 2019 to 29 Nov 2021. The '10 x water trough sensors' and '5 x water tank sensors' (plus 1 silo sensor) are the planned supply list. A single 'working farm' is implied; no farm count is stated. Hardware change confirmed: 'All future deployments will be based on a more robust internal circuitry hardware'. No accuracy or uptime data. Not supported: 'MLA has its own product interest'. The page names no MLA product. It uses first-person developer language ('Waterwatch Live') and lists a 'Farm Monitoring Solutions' subscription, and the developer is not identified. MLA is only shown as funder and publisher."
+  },
+  {
+   "url": "https://www.mla.com.au/contentassets/0e15746c51c64adaa343ac5cd50ebab4/v.dig.2022-farmbot-final-report.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "V.DIG.2022, prepared by Farmbot Australia (Pascal Hendricks), published 08 February 2022. Site visits Nov 2019 to Jul 2020. 'There were no periods of monitoring downtime or missing data' (one satellite Monitor plus three trough sensors). Vegetation moisture 'might attenuate the signal sufficiently to cause packet loss', which led to version 2 sensors 'with a higher gain antenna'. No quantitative accuracy. Vendor-authored, as the research says."
+  },
+  {
+   "url": "https://www.mla.com.au/research-and-development/reports/2023/evaluation-of-on-farm-sensing-devices-using-mobile-technology/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Stanbroke trial, published 30 August 2022; project dates not given. 'initially sixteen sensing devices tested over two locations'. 'up to a 60% reduction in the need to manually check watering points' (interim business case; elsewhere the page says '60%' without 'up to'). The objectives mention accuracy and reliability, but no results are reported."
+  },
+  {
+   "url": "https://intercom.help/farmbot-helpcentre/en/articles/5667006-how-do-i-check-my-monitor-battery",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "September 16, 2024. 'Between 6.6-7.2 volts indicates a charged and healthy battery'; 'Anything below 6.5 volts can indicate a flat battery'; 'can last to 3-5 days during cloud cover'. Advises cleaning dirt, snow and bird droppings off the panel."
+  },
+  {
+   "url": "https://intercom.help/ranchbot/en/articles/5702599-monitor-battery-low-notifications",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "January 5, 2023. 'A healthy solar battery will range between 6.6-7.4 V within 24 hours'; 'consistently below 6.5 V, your battery is likely going to die'; 'reminder notification every few days'; flatline; '3-5 days during cloud cover'. Silent on whether reporting stops. This is the Ranchbot source for the 3-5 day figure."
+  },
+  {
+   "url": "https://intercom.help/ranchbot/en/articles/5702598-ranchbot-monitor-cold-weather-care",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "October 29, 2025. 'clean any snow off the solar panel'. 'If continued snowfall is expected, we suggest you switch the Ranchbot Monitor off to prevent the battery going flat.' Nothing on ice or sensor readings."
+  },
+  {
+   "url": "https://intercom.help/ranchbot/en/articles/14331104-xtend-statuses-overview",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "June 30, 2026. Defines No Data ('not received a transmission ... within expected time window'), Error ('data isn't logical'), Error (High) and Error (Low). OK is not defined and Delay is only mentioned, so the data-field enum 'OK, Delay' relies on other pages."
+  },
+  {
+   "url": "https://www.weather.gov/documentation/services-web-API",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Confirmed: 'open data, free to use for any purpose'; 'A User Agent is required'; the /points endpoint; 'about 2.5km x 2.5km'; caching the grid; retry 'typically within 5 seconds'; observations 'delayed up to 20 minutes'; gridX/gridY 'may occasionally change'. Small mislabel: the 'Known Issues' section says 'No significant known issues'. The null 24h max/min 'for stations outside the central time zone' is listed under Upstream Issues/Changes as a MADIS ingest bug, and it affects station observations endpoints, not forecasts."
+  },
+  {
+   "url": "https://climate.sdstate.edu/weather",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "SD Mesonet. '150+ stations', but the page also says 'Over 150 new or upgraded stations will be installed', so part of the count is planned. 'Nearly every South Dakotan within 20 miles of a station'. 'updated every five minutes'. Has a 'Livestock Stress' tool. Daily and Custom Data Request forms; no download formats stated. Terms of Use linked; no licence; cost not stated."
+  },
+  {
+   "url": "https://droughtmonitor.unl.edu/Data.aspx",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "GIS 'shapefiles, kmz, wms and more' for 'each week'. Weekly is implied, not stated outright. Tabular data, statistics download (DSCI), and a 'Web Service Info' link. Partnership of NDMC-UNL with USDA, NOAA and NASA logos. A separate Permission page is linked; no licence on this page."
+  },
+  {
+   "url": "https://am.gallagher.com/Products/liquid-level-monitoring",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "'Satellite Liquid Monitoring | Gallagher United States'. Micro-satellite; tanks, troughs and dams. No reading-frequency, battery or accuracy specs, and a subscription with no figures. Both confirmed. The quoted refresh text 'Daily check-in option or near-instant alerts' is not verbatim. The page says 'Whether you need a quick daily check-in or near-instant alerts the moment something changes.'"
+  },
+  {
+   "url": "https://pir.sa.gov.au/__data/assets/pdf_file/0009/440559/water-monitoring-comparison.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Water monitoring comparison', undated. The PDF does not name its publisher; the domain is PIRSA. Products: Agbot, Alpha Group Consulting, Farmbot, Farmo Water Rat, Goanna Ag Go Tank, OneTemp HOBO. Prices are ex GST. Farmbot: installation $1,209 and subscription $342/yr, with the currency shown only as '$'. The figures' source is not stated, so 'likely vendor-supplied' is the researcher's inference."
+  },
+  {
+   "url": "https://extension.usu.edu/garfield/remote-stock-water-monitoring",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Cited only in feature_notes. Undated. Demonstration on '15 ranches in southern Utah', funded by an NRCS Conservation Innovation Grant. No accuracy, reliability or savings data; it says only that the technology 'could reduce the costs'."
+  },
+  {
+   "url": "https://rangelandsgateway.org/dlio/153776",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Cited only in feature_notes. J. Walker, 'Remote monitoring of stock water reservoirs', Rangelands 43(2):65-71, April 2021, DOI 10.1016/j.rala.2020.12.001. Abstract only. It surveys cameras, pressure transducers and automatic meter reading over cellular or satellite. No accuracy data."
+  },
+  {
+   "url": "https://bioone.org/journals/rangeland-ecology-and-management/volume-77/issue-1/j.rama.2021.02.013/----Custom-HTML----Tracking/10.1016/j.rama.2021.02.013.full",
+   "reachable": "blocked",
+   "claim_supported": "unverifiable",
+   "metadata_correct": "unverifiable",
+   "notes": "Not cited as a source in the research. I tried it only to check the Tobin et al. online date. WebFetch returned only an Incapsula bot-protection resource, which matches the researcher's report."
+  }
+ ],
+ "classification_disputes": [
+  "PROPOSED leak and stuck-float screen is classed B but should be C (an unvalidated ranch or design choice). No cited source proposes or validates an 'observed fall minus expected consumption' detector. NRCS 614 only says 'Check for leaks' and check 'the automatic water level device'. Bartlett and NRCS Missouri cover float sizing and refill, not detection. Tobin et al. detected failure from cattle GPS and accelerometers, not tank level. The researcher concedes 'I found no independent study that validates level-curve leak detection.' The NRCS Missouri guide cited for the flow-meter field never mentions meters.",
+  "PROPOSED sensor trust band and calibration record is classed B but should be C (a vendor claim plus a design choice). The only numeric accuracy is LoneStar's vendor statement 'accurate to about 10%'. Ranchbot, Farmbot, MLA, USU and NMSU give no accuracy figures, and the researcher found no independent accuracy trial. The 'near threshold, verify' band is the researcher's design.",
+  "PROPOSED device health as maintenance tasks is classed B but should be C. The voltage cut-offs (6.6-7.2/7.4 V healthy, below 6.5 V) and the '3-4 days' Delay inspection come only from vendor help pages (Farmbot, Ranchbot), and they are model-specific. Splitting maintenance from water alarms is a dashboard design choice, not published guidance.",
+  "PROPOSED hours-of-water rule (B) bundles two kinds of claim. The intake inputs are supported (NDSU AS1763, UNL G2060, K-State MF3303). The alert threshold ('less than the time until the next check plus response time') has no source and is a ranch management choice (C). Two supporting statements are also inaccurate. (1) 'Use the 90F column (conservative)' is not conservative for lactating cows under AS1763: its raw table gives 17.9 gal at 80F but 16.2 at 90F. (2) 'Intake roughly doubles from 40F to 90F' holds for growing, finishing and bulls (about 2.4x: 5.3\u219212.7, 8.7\u219220.6). It does not hold for lactating cows, the dashboard's 180-pair herd: about 1.4-1.6x (11.4\u219216.2/18.2; K-State 12.8\u219217.9).",
+  "PROPOSED heat-day visual check is classed B; C is more accurate for the rule as written. The sources support only the qualitative point that checks should be more frequent in heat (NDSU/Hoppe: 'daily basis may not be often enough' at 100F). The rule's operative parameter, the trigger temperature, is a ranch choice; the researcher states 'I found no source that gives a single trigger temperature for pasture cattle.' The MARC tool is for feedlot cattle.",
+  "PROPOSED water-quality TDS screening (A) is mostly sound, with a minor overreach: 'Above 7,000 ppm: avoid'. NDSU AS1764's 7,000-10,000 band says 'Do not use for pregnant or lactating ruminants or horses' (and swine), not avoid for all cattle. The 'screen in drought' trigger and the testing interval are ranch choices, as the rule's own 'Partly' configurable note admits. The published bands and the NDSU lab trigger (TDS over 4,500 and/or sulfate over 800) do justify A for the thresholds themselves.",
+  "Minor: the PROPOSED storage-days check (B) flags below 3 days. That is the low end of NRCS 614's 'consider ... (3\u20135 days)' and below Colorado 614's archived 'shall be 4 days' minimum for undependable sources. These are design criteria, not alarm levels. B is acceptable only if the 3-day figure is presented as a ranch-set target within that published range."
+ ],
+ "summary": "I checked all 48 unique URLs in rules[].sources, data_fields[].evidence_url and integrations[].url, plus the two feature_notes URLs. I could not download any PDF directly: curl got \"curl: (56) CONNECT tunnel failed, response 403\" for all 16 PDFs I tried. So every check went through WebFetch, which summarises pages with a small model. For the disputed intake tables I asked for the raw extracted table text.\n\n**Reachability:** all 50 URLs were reachable. The only blocked fetch was bioone.org (Incapsula), which I tried only to confirm the Tobin et al. online date. It is not a cited source.\n\n**Most cited numbers check out.** Confirmed:\n- Ranchbot alert examples: 40-50%, 10-20% and 11.81 in in 60 min, all marked 'e.g.' with no defaults.\n- Ranchbot offset example (50% vs 37.5%; offsets not retrospective; \u00b1240 in).\n- LoneStar 'about 10%' accuracy and its conflicting cadence and battery claims.\n- CSU tank volumes and pump rates.\n- NRCS 614 (2023) wording on storage, the 3-5 days and the O&M leak checks.\n- Colorado 614: 4 days, 10%, 2 in.\n- Bartlett: 1/4 of daily need, 1 h refill, 1/8 in float opening, 4 h pumping, 5-10% drinking at once, over fourfold rise in heat.\n- K-State and OSU intake figures, and the UNL BeefWatch figures.\n- NDSU AS1764 TDS bands and the 4,500/800 ppm lab triggers.\n- SDSU P-00212 bands.\n- NDSU V1136 and BeefWatch algae guidance.\n- Vendor battery voltages and Delay guidance.\n- The MLA report facts.\n\n**Resolved: 16.2 vs 18.2 gal.** The researcher's unresolved discrepancy is real in the published documents. AS1763's raw 90F row ends '16.2 19.0 20.6'. G2060's raw text reads 'Lactating Cows4 / 900 11.4 12.6 14.5 16.9 17.9 18.2'. Consequence: under AS1763, 90F is not the highest lactating value (80F is 17.9), so the proposed '90F column = conservative' fallback is wrong for lactating cows with that table.\n\n**Errors and overreaches found:**\n1. **Tobin et al.:** the pub_date 2021-07-19 '(online)' is the CQU repository posting date. The article is REM 77(1):9-16, accepted 2021-02-24.\n2. **SDSU hauling-water page:** the 0.66-1 gal per lb DM above 75F figure is credited to DiCostanzo (UNL) and is for 'a feedlot animal', not cattle in general.\n3. **NRCS Missouri:** it does not mention flow meters, so it does not support the flow_meter_gal field it is cited for.\n4. **AS1764:** it names only the NDSU Veterinary Diagnostic Lab. The SDSU and Midwest Laboratories integration claims are unsupported there. Its nitrate limit of 100 is not labelled as NO3-N.\n5. **MLA 2021 report:** the claim that 'MLA has its own product interest' is not on the page. The sensor counts are planned supply quantities, and no farm count is stated.\n6. **Gallagher:** the quote 'Daily check-in option or near-instant alerts' is not verbatim.\n7. **Ranchbot Delay page:** it has no 3-5 day battery figure. That figure is on the Ranchbot battery page (5702599) and the Farmbot battery page.\n8. **NWS:** the null 24h max/min is listed under Upstream Issues (a MADIS bug, observations only), not under Known Issues.\n9. **Smaller points:**\n   - USU says the faulty unit 'will be sent back', not that it was returned.\n   - Ranchbot's tank shapes do not include rectangular.\n   - UVM Bartlett does not say 'before summer'.\n   - The NRCS 614 citation for tank_id/pasture_id has no bearing on that field.\n\n**Classification:** I found the classifications of the current rules (C, C, D, C, C) reasonable. Several PROPOSED rules are too generous: the leak/stuck-float screen, the sensor trust band and device health are classed B but rest on unvalidated or vendor-only evidence (C). The hours-of-water alert threshold and the heat-day trigger are ranch choices built on supported inputs. Details are in classification_disputes.\n\n**Not checked:** Bartlett WVU's 'worked gpm examples' and the Jornada archive entry date (2022-01-25).\n\nNo repo files were modified. The only file I created was an empty download directory under /tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/cite-water/dl."
+}

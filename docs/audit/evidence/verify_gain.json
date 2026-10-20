@@ -1,0 +1,184 @@
+{
+ "verdicts": [
+  {
+   "title": "An animal with a single weigh-in crashes findExceptions; the page shows no alerts at all",
+   "verdict": "confirmed",
+   "evidence": "Re-ran gain.repro.mjs: GN-01/GN-02 \"threw TypeError: Cannot read properties of undefined (reading 'date')\"; GB-01 \"pageerrors=[...'date'...]; asof=\"\"; tiles=0; exception rows=0\". Fresh script v1.mjs: \"F1 single weigh-in Y151: THREW TypeError Cannot read properties of undefined (reading 'date')\" and a one-row file also throws. Fresh browser case p1: pageerrors=[\"Cannot read properties of undefined (reading 'date')\"], asof=\"\", nTiles=0, no table rows. Code: exceptions.js:69-70 reads b.date with b undefined; app.js:222 runs findExceptions at module top level, before the as-of line at 223. Regression value 16608/8550 = 1.942456 was recomputed in Python (indep.py).",
+   "corrections": "Severity high is fair. Wording: 'the most common kind of real weigh-in file' overstates it. Better: 'common in a cumulative weigh-in file (purchases, replacements)'. The root cause duplicates CSV-17 and csv.browser B-02 in the CSV area; dedupe when merging."
+  },
+  {
+   "title": "A zero-day interval (same-day duplicate weigh-in) gives \u00b1Infinity/NaN ADG: the alert is lost or garbled, and the page hangs",
+   "verdict": "confirmed",
+   "evidence": "Node (v1.mjs): dup 1180 and dup 1169 give rows [\"warning|32 heifers|...\",\"warning|6 yearlings|...\"] with no serious Heifers row; dup 1160 gives \"serious|Heifers|-Infinity lbs/day since 2026-09-15 vs 1.0 target\". Browser p2 (+Inf): \"EVALUATE FAILED: no answer within 4000 ms\". With the gridline loop instrumented in a scratch copy of app.js: p2b pageerrors=[\"gridline loop over 5000 iterations, lo=0 hi=Infinity\"] and p7 (1160) [\"... lo=-Infinity hi=3\"], which proves app.js:156 never terminates. Browser p6 (NaN): nanDots=195, gridlines=0, labels \"avg NaN\". Regression values recomputed: 1130/2565 = 0.440546 and 1119/2565 = 0.436257.",
+   "corrections": "Severity high is fair. I did not re-verify the '270 MB in 3 s' memory figure; my free -m readings were taken after the browser closed. The +Infinity loop doesn't strictly run forever: it stalls once v reaches about 2^52 (adding 0.5 no longer changes it), which is effectively the same. The -Infinity loop is truly endless. Overlaps CSV-32 (EID double read) in the CSV area."
+  },
+  {
+   "title": "The Yearling tile hard-codes a group named 'Yearlings'; when it's missing, tiles() throws before the report is drawn",
+   "verdict": "confirmed",
+   "evidence": "Browser p3 (groups.csv and weights.csv renamed to Steers): pageerrors=[\"Cannot read properties of undefined (reading 'adg')\"], nTiles=0, no exception rows, no gain chart, while the as-of line rendered. Repro GB-02, GB-03 and GB-06 output the same. Code: app.js:48 .find(g => g.group === \"Yearlings\"), app.js:56 gain.adg, and app.js:225 calls tiles() before exceptionsTable(). README line 74: \"To use real data, replace the CSVs with exports in the same columns.\"",
+   "corrections": "Severity high is fair given the README invitation. This duplicates render R11/R12 and csv.browser B-03; dedupe across areas."
+  },
+  {
+   "title": "Animals are keyed by tag alone, so the same tag number in two groups merges into one 'animal'",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F4: [{\"group\":\"Heifers\",\"head\":1,\"adg\":null(-Infinity),\"from\":\"2026-09-15\",\"to\":\"2026-09-15\"}], so the yearling disappears. F4b: parseCSV(\"tag,x\\n0101,1\\n101,2\") gives tags [101,101]. Expected values 30/57 = 0.5263 and 110/57 = 1.9298 checked by hand. The page hang follows from the -Infinity path, confirmed separately (p7 instrumented loop lo=-Infinity).",
+   "corrections": "None on substance. The '007 vs 7' aspect is also CSV-18 in the CSV area. That reused tag series across colours are common is the auditor's inference, not shown."
+  },
+  {
+   "title": "No minimum interval, and the group figure is a plain mean of per-animal ADG: one short re-weigh masks a group-wide problem",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F5: Heifers adg 0.8686159844054578, rows [\"warning|32 heifers|...\",\"warning|6 yearlings|...\"], with no serious row. Python: pooled over each animal's last two rows (1119-31+20)/(44*57+1) = 0.441610, and the Jul 20 to Sep 15 event pair gives 0.436257. Code exceptions.js:69-70 and 77.",
+   "corrections": "None. Medium is fair. The missing minimum interval is the primary cause: pooling alone would still keep the serious row (0.4416), so the fix should lead with event-based periods or a minimum interval."
+  },
+  {
+   "title": "No plausibility check on weights or ADG: one typo masks the heifer alert and wrecks the gain chart's scale",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F6: Heifers adg 4.538011695906437, rows with no serious heifer row. By hand: (11690-1138)/57 = 185.12, so hi = ceil(370.24)/2 = 185.5 and gridlines = 185.5/0.5 + 1 = 372, matching repro GB-05 \"gridlines=372\". 1088/2508 = 0.433812 recomputed in Python.",
+   "corrections": "None. Medium is fair."
+  },
+  {
+   "title": "A blank weight cell is treated as 0 lbs and creates a false 'pull this animal' alert",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F7 (blank written into the real CSV text): Y001 adg -12.473684210526315, weight \"\", rows include \"warning|7 yearlings|Under 1.0 lbs/day: Y001, Y027, ...\". Python: 16468/8493 = 1.939009. New variant (gain.missed.mjs M5): a blank in the EARLIER (Jul 20) weight gives \"H001 adg=20.50877192982456; Heifers adg=0.8799220272904481; rows=[\\\"warning | 32 heifers | ...\\\"]\", so the serious heifer row is gone.",
+   "corrections": "The consequence is understated. A blank in the earlier weigh-in coerces to 0, so the ADG becomes the animal's whole body weight divided by the interval (1169/57 = 20.51). One such blank hides the serious heifer alert (a missed alert), not only a false pull. Keep medium, but add this case to the repro and the regression test: with H001's Jul 20 weight blank, expect a serious Heifers row at 1088/2508 = 0.4338. Overlaps CSV-48."
+  },
+  {
+   "title": "Animals that missed the last weigh-in are averaged in with stale ADGs, and the group's 'since' date comes from the first animal only",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F8a: Heifers from 2026-06-01 to 2026-07-20, adg 0.4414051000517167, row \"serious|Heifers|0.44 lbs/day since 2026-06-01 vs 1.0 target\". F8b: only [\"serious|Heifers|0.44 lbs/day since 2026-07-20 vs 1.0 target\"], so no yearling row. Extra control F8c: when H002 (not first in file order) misses Sep 15, the dates stay 2026-07-20..2026-09-15.",
+   "corrections": "Precision: part (a) occurs only when the absent animal is the first of its group in file order (F8c). Part (b), the hidden poor-doers, is the material defect. Medium is fair."
+  },
+  {
+   "title": "Weigh-in rows or groups that don't line up with groups.csv vanish without a trace",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F9a (six slow yearlings labelled 'yearlings'): [\"serious|Heifers|0.44 lbs/day since 2026-07-20 vs 1.0 target\"], with no slow-yearling warning. F9b (no heifer rows): [\"warning|6 yearlings|...\"], with no heifer mention. Code exceptions.js:74-75 does an exact match and then `if (!mine.length) continue`.",
+   "corrections": "None. Overlaps CSV-28 ('Heifer' vs 'Heifers') in the CSV area."
+  },
+  {
+   "title": "Weigh-in dates are sorted and parsed as text: non-ISO dates use the wrong pair, and numeric dates crash",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F10a: Y001 from \"7/20/2026\" to \"9/15/2026\", adg 2.456140350877193, weight 851 (by hand, Sep 15 to Oct 12 is 27 days, so 29/27 = 1.0741). F10b: \"THREW TypeError a.date.localeCompare is not a function\". New variant (gain.missed.mjs M6) with day-first DD/MM/YYYY: \"Heifers adg=NaN from=15/09/2026 to=20/07/2026; Yearlings adg=NaN ...; rows=[]; total exceptions=8\". Browser p5: tile \"YEARLING GAIN / NaN lbs/day / target 2.0, since Invalid Date\", 8 rows, 195 NaN dots. Control p8 (committed data rewritten to M/D/YYYY): 10 rows, \"0.44 lbs/day since 7/20/2026\", 7 gridlines.",
+   "corrections": "Two corrections. (1) US M/D/YYYY dates are harmless while all weigh-ins fall in Jun-Sep of one year (p8 renders correctly). The wrong-pair failure needs an Oct-Dec weigh-in or a year boundary; the auditor's 10/12/2026 repro does have one. (2) The finding misses the most damaging variant. Day-first dates (V8 cannot parse 15/09/2026) make every ADG NaN, so ALL gain alerts disappear silently (8 instead of 10 exceptions) and the tile reads 'NaN lbs/day ... since Invalid Date'. Keep medium for a US operation; add the day-first case to the repro and the regression test."
+  },
+  {
+   "title": "A non-numeric target silently disables a group's gain alerts (and crashes the tile)",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F11: with a good target, rows include \"serious|Yearlings|0.88 lbs/day since 2026-07-20 vs 2.0 target\"; with '2.O' that row is gone. Repro GB-06: pageerrors [\"gain.target.toFixed is not a function\"], 0 rows. Extra browser case p9 (Heifers target '1.O'): errs [\"g.target.toFixed is not a function\"], tiles 5, 9 exception rows without the serious heifer row, gainChart false, budgetChart false, rulesRows 0.",
+   "corrections": "'In the browser it also blanks the report' holds only when the bad target is on the Yearlings row, because of the tile. For any other group (p9, Heifers '1.O') the report draws without that group's alert. gainStrip then throws at app.js:173, so the gain chart, budget chart and rules table never render. The alert is still missed silently, so medium stands. Overlaps CSV-47 (blank target)."
+  },
+  {
+   "title": "No coverage or sample-size check: a group verdict can rest on a handful of animals, undisclosed",
+   "verdict": "design-limitation",
+   "evidence": "v1.mjs F12: {\"group\":\"Yearlings\",\"head\":3,\"adg\":1.5} gives [\"serious|Yearlings|1.50 lbs/day since 2026-07-20 vs 2.0 target\"], while groups.csv says 150 head. By hand, 85.5/57 = 1.5.",
+   "corrections": "None. The design-limitation label and medium are fair."
+  },
+  {
+   "title": "Stale weigh-ins are presented as current: no age check, and an all-clear based on 72-day-old data",
+   "verdict": "design-limitation",
+   "evidence": "v1.mjs F13 (all Sep 15 rows removed): [\"warning|4 heifers|Under 0.5 lbs/day: H014, H017, H025, H033\"], so the serious heifer row is gone and nothing gives the period's age. Jul 20 to Sep 30 = 11+31+30 = 72 days by hand.",
+   "corrections": "None."
+  },
+  {
+   "title": "Weigh conditions (shrink and gut fill) aren't recorded; an ordinary 3% difference flips both group verdicts",
+   "verdict": "design-limitation",
+   "evidence": "Repro GN-19 output: Heifers adg 1.0203, Yearlings 1.4973, \"serious | Yearlings | 1.50 lbs/day\", and no heifer row. Python with the same Math.round of perturbed weights: Yearlings 1.4973099, Heifers 1.0202729 (unrounded: 1.4968, 1.0207). 3% of the 846.74-lb mean yearling Sep 15 weight over 57 days = 0.4458 lbs/day, which exceeds the 0.4 margin.",
+   "corrections": "The scenario applies opposite conditions to the two groups (yearlings shrunk, heifers full), so 'flips both verdicts' describes a constructed case. The underlying point stands: one ordinary shrink difference (~0.45 lbs/day) is larger than the serious-rule margin. The 3% figure is an assumption, as the auditor says."
+  },
+  {
+   "title": "Groups with a 0.0 target (cows) are skipped silently in the report and the chart",
+   "verdict": "design-limitation",
+   "evidence": "v1.mjs F15: Cows adg -1.4912280701754386 (hand: -85/57 = -1.4912); rows show only Heifers and yearlings. Code exceptions.js:128 `if (!g.target) continue` and app.js:150 `.filter((g) => g.target)`. The rules table text at app.js:209-210 says nothing about it.",
+   "corrections": "None."
+  },
+  {
+   "title": "Weigh-ins dated after as_of are used, and their date becomes the group's 'since' date",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F16: Heifers from 2026-09-15 to 2026-10-15, adg 0.4471345029239768, row \"serious|Heifers|0.45 lbs/day since 2026-09-15 vs 1.0 target\". By hand, H001 (1200-1169)/30 = 1.0333, which replaces 31/57 in the mean.",
+   "corrections": "None. Low is fair."
+  },
+  {
+   "title": "An animal that changes group between weigh-ins is counted in its earlier group",
+   "verdict": "partially-confirmed",
+   "evidence": "v1.mjs F17 (H001's Sep 15 row labelled Cows): [[\"Heifers\",45,0.43625730994152057],...]. H001 is still counted in Heifers, as stated. Code exceptions.js:70 `group: a.group`.",
+   "corrections": "The behaviour is reproduced, but the 'expected' result is debatable. H001 grazed with the heifers for the whole measured period (Jul 20 to Sep 15), so attributing that period's gain to Heifers is defensible. Moving her to Cows (target 0) would just drop her from judgement. The real defect is narrower: the group change isn't disclosed, and a pull list would send the crew to the heifer herd for an animal now with the cows. Low is fair. The regression test should assert disclosure of the change rather than require Heifers head = 44 and adg = 0.4338."
+  },
+  {
+   "title": "Wording: 'since <date>' hides that the period ended at the last weigh-in; the slow list has no dates; '1 yearlings'; 1.598 shown as '1.60'",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs F18: [\"warning|1 yearlings|Under 1.0 lbs/day: A\"] and [\"serious|Yearlings|1.60 lbs/day since 2026-06-01 vs 2.0 target\"] for 159.8/100 = 1.598. Browser p0: tile \"YEARLING GAIN / 1.94 lbs/day / target 2.0, since Jul 20\", gainHeading \"Daily gain since the last weigh-in\" (index.html:94). The rules text at app.js:209 also ends in 'since the last weigh-in'.",
+   "corrections": "None. Also note that the table prints ISO dates ('2026-07-20') while the tile prints 'Jul 20' for the same date."
+  }
+ ],
+ "missed": [
+  {
+   "title": "Weights exported with a thousands separator (\"1,169\") make every animal of 1,000 lbs or more NaN, and the serious heifer alert disappears silently",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "exceptions.js:22-31 (split on ',' with no quote handling; '\"1' kept as a string), exceptions.js:70 (string arithmetic gives NaN), exceptions.js:129 and 133 (NaN comparisons are false); app.js:153 (NaN axis)",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/gain.missed.mjs, case M2: committed weights.csv with every 4-digit weight written quoted with a separator, e.g. 'H001,Heifers,2026-09-15,\"1,169\"' (yearlings are all under 1,000 lbs and stay unquoted). Browser: node /tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/verify-gain/page.mjs p4 (case data built by mkcases.py in the same folder).",
+   "expected": "Serious | Gain | Heifers | 0.44 lbs/day ... (1119/2565 = 0.4363 by hand), or a data-error row naming weight_lbs. 10 exceptions.",
+   "actual": "Node: \"sample row \\\"H001,Heifers,2026-09-15,\\\\\\\"1,169\\\\\\\"\\\" parsed weight_lbs=\\\"\\\\\\\"1\\\"; Heifers adg=NaN; rows=[\\\"warning | 6 yearlings | Under 1.0 lbs/day: ...\\\"]; total exceptions=9\". Browser p4: pageerrors=[], excRows=9, no heifer gain row, dots=195, nanDots=195, gridlines=0, labels [\"avg NaN\",\"target 1.0\",\"avg 1.94\",\"target 2.0\"].",
+   "consequence": "A spreadsheet re-save with the weight column formatted '#,##0' silently gives an all-clear for every group whose animals weigh 1,000 lbs or more (heifers here, and mature cows). There is no error, the gain chart loses every dot position, and the manager has no hint that the heifers' gain problem was dropped. That spreadsheets write displayed formats is my inference; CSV-04 shows the same export style for money.",
+   "regression_test": "Parse weights.csv with all heifer weights written as quoted thousands (e.g. \"1,169\"). Assert either a serious Heifers row whose problem starts '0.44' (1119/2565 = 0.4363 by hand, after stripping separators) with findExceptions length 10, or a data-error row naming weight_lbs. Assert no group adg is NaN.",
+   "proposed_fix": "Use a real CSV parser that handles quoted fields. Validate numeric columns: strip thousands separators or reject the row with a data-error row. Treat any non-finite ADG as a data error, never as a silent pass. The root cause is shared with CSV-04, so fix it once in parseCSV.",
+   "effort": "M"
+  },
+  {
+   "title": "An individual animal losing weight is never named while its whole group is flagged",
+   "area": "Gain",
+   "status": "design-limitation",
+   "severity": "medium",
+   "location": "exceptions.js:134 (`if (slow.length && !groupLow)`); README 'No noise' design choice",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/gain.missed.mjs, case M3: committed data with H026's Sep 15 weight set to 959 (Jul 20 = 1130, so -171/57 = -3.0 lbs/day).",
+   "expected": "A row naming H026 (losing 3.0 lbs/day) alongside the serious Heifers row.",
+   "actual": "\"H026 Jul 20=1130; rows=[\\\"serious | Heifers | 0.37 lbs/day since 2026-07-20 vs 1.0 target\\\",\\\"warning | 6 yearlings | ...\\\"]; any row mentions H026: false\" (also false at -1.0 lbs/day in v2.mjs).",
+   "consequence": "A first-calf heifer losing 3 lbs/day for eight weeks is a likely individual health case (not a forage problem). The report gives only the group action 'look for a health problem in the group', with no tag to pull. Even on the committed data, four heifers under 25% of target (H006, H016, H026, H038, computed in Python) are unnamed.",
+   "regression_test": "With H026 Jul 20 1130 and Sep 15 959, assert a Gain row whose text includes 'H026'. On the committed data, assert findExceptions length is still 10 if the extra rule is 'ADG < 0' (Python: no committed heifer or yearling has a negative ADG), so the README's 'exactly 10 planted problems' invariant holds.",
+   "proposed_fix": "Always emit a separate row for animals losing weight (ADG < 0), or under a low floor such as 25% of target, even when the group is flagged. Or append the worst few tags to the serious group row ('worst: H026 -3.0').",
+   "effort": "S"
+  },
+  {
+   "title": "A group exactly at 80% of target is flagged serious depending on CSV row order (floating-point mean)",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "exceptions.js:77 (mean of per-animal ADG via reduce), exceptions.js:129 (strict `<`)",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/gain.missed.mjs, case M1: five yearlings weighed Jul 20 at 700 and Sep 15 at 700 + [104, 79, 97, 105, 71] lbs (integer weights, the committed 57-day interval). The same ten rows are then run again with Y005 listed first.",
+   "expected": "456 lbs / 285 animal-days = 1.6 exactly = 80% of 2.0, so no Gain row in either order (the rule and README say 'under 80%').",
+   "actual": "\"file order: adg=1.5999999999999999 rows=[\\\"serious | Yearlings | 1.60 lbs/day since 2026-07-20 vs 2.0 target\\\"]  ||  Y005 first: adg=1.6 rows=[]\"",
+   "consequence": "At the boundary, the verdict depends on how the export happened to order rows, and the flagged row reads '1.60 lbs/day vs 2.0 target', which looks like a rule violation to a careful reader. It also contradicts the auditor's checked_ok claim (GN-C3) that the thresholds are strictly 'under'; that control used a single animal, where no summation happens.",
+   "regression_test": "With the five yearlings above, assert no Gain row both in file order and with the rows rotated (456/285 = 1.6 by hand). Also assert that 455 lbs (1.5965) gives a serious row.",
+   "proposed_fix": "Compute the group figure as pooled integer gain over animal-days (\u03a3 lbs / \u03a3 days), which is exact here. Or round ADG to 3 decimals before comparing, or compare with a small epsilon.",
+   "effort": "S"
+  },
+  {
+   "title": "Displayed thresholds disagree with the applied ones for non-round targets (toFixed(1))",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "exceptions.js:131 (`g.target.toFixed(1)`), exceptions.js:136 (`(g.target * R.animalShare).toFixed(1)`); app.js:56 and 173",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/gain.missed.mjs, case M4: groups.csv targets Heifers 1.25 and Yearlings 2.25. Heifer A gains 34.77 lbs over 57 days (0.61). Yearling E gains 63.84 lbs (1.12). The other animals are near target.",
+   "expected": "'Under 0.625 lbs/day: A' and 'Under 1.125 lbs/day: E' (or the animal's own figure shown), so every listed animal is below the number printed.",
+   "actual": "[\"warning | 1 heifers | Under 0.6 lbs/day: A\",\"warning | 1 yearlings | Under 1.1 lbs/day: E\"]; A adg=0.6100, E adg=1.1200. Also toFixed(1): \"1.25->1.3 1.75->1.8 2.25->2.3\", so tiles, chart labels and serious rows would print 'target 2.3' for a 2.25 target.",
+   "consequence": "The row tells the crew an animal is 'under 0.6' when it is at 0.61, and the target shown isn't the one used. The README invites tuning targets; quarter-pound targets are common in stocker and heifer programs (my inference). It is a credibility problem rather than a missed alert.",
+   "regression_test": "With targets 1.25 and 2.25 and the animals above: assert the problems read 'Under 0.625 lbs/day' (or '0.63') and 'Under 1.125 lbs/day'. Assert each listed animal's ADG is below the displayed number (0.61 < 0.625 and 1.12 < 1.125 by hand). Assert the tile or label shows 'target 2.25'.",
+   "proposed_fix": "Format targets and thresholds with up to 2-3 decimals, trimming trailing zeros, and include each listed animal's ADG in the warning row. Fix the '1 heifers' plural at the same time.",
+   "effort": "S"
+  },
+  {
+   "title": "The gain chart doesn't mark the animals the report flags, or the 50%/80% thresholds",
+   "area": "Gain",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "app.js:167-173 (every circle gets fill var(--s1), fill-opacity 0.55, r 3.5; 'Under half of target' exists only in the hover HTML at :170); index.html:95 note",
+   "repro": "node /tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/verify-gain/page.mjs p0 (committed data, scratch copy served on port 8931).",
+   "expected": "The six yearlings in the warning row (Y027, Y031, Y058, Y082, Y129, Y132) are visibly distinct, ideally labelled, with a reference mark at 50% (and 80%) of each target.",
+   "actual": "p0: dots=195, dotFills=[\"var(--s1)/0.55/3.5\"] (one style for all 195), titledDots=0. Chart text: \"0.0 | 0.5 | 1.0 | 1.5 | 2.0 | 2.5 | 3.0 | lbs per day | Heifers | avg 0.44 | target 1.0 | Yearlings | avg 1.94 | target 2.0\".",
+   "consequence": "The chart can't answer 'which ones?' for the report's pull list. Finding the six yearlings means hovering over up to 150 overlapping dots, and nothing shows how far the group average sits from the serious line. Keyboard and touch access to tooltips is covered separately by browser-check.mjs in another area.",
+   "regression_test": "On the committed data, assert the gain chart has exactly 6 marked dots in the Yearlings row, labelled Y027, Y031, Y058, Y082, Y129, Y132 (Python: the only yearlings under 1.0). If heifers are marked too, the count is 32 (Python: heifers under 0.5). Assert a reference mark at x(1.0) for yearlings and x(0.5) for heifers.",
+   "proposed_fix": "Draw animals under 50% of target with a distinct shape or outline and label their tags; add 50% and 80% reference ticks per group row; keep the 'avg' label but also draw the average as a mark.",
+   "effort": "S"
+  }
+ ]
+}

@@ -1,0 +1,152 @@
+{
+ "verdicts": [
+  {
+   "title": "Water charts crash when a tank has no readings in the last 7 days, blanking every section after them",
+   "verdict": "confirmed",
+   "evidence": "I ran it again with my own script (scratch vb.mjs, data copy with T6 rows after 2026-09-22T12:00 dropped). Output: errors=[\"Cannot read properties of undefined (reading 'time')\"], heads=[], grazing/gain/budget svg=false,false,false, rules tr=0. Report row: 'Serious Water Tank T6 (Cedar Draw) No reading for 198 hours; last level 100%'. Hand check: Sep 22 12:00 to Sep 30 18:00 is 198 h, and data/water.csv line 688 reads 'T6,P6,2026-09-22T12:00,100'. Edge control: with T6's last row exactly at as_of minus 7 d (2026-09-23T18:00), the page renders, because app.js:90 uses >=. Output for that case: no errors, 'No reading for 168 hours; last level 93.8%'. In the crash case the exception report still renders in full (water.verify.mjs V-B01: excRows=10; chips 'All (10) Water (3) Grazing (1) Gain (2) Health (2) Budget (2)').",
+   "corrections": "The consequence is slightly overstated. Tiles and all 10 exception rows still render, including 'Grazing: Yearlings in Sand Hills', so the overdue move is still reported. What is lost is the grazing timeline chart, the other charts, the budget table and the rules table. Precise trigger: the tank's newest reading is strictly older than as_of minus 168 h. 'High' stands for portfolio credibility because the page visibly breaks. The operational impact is closer to medium because every alert is still listed."
+  },
+  {
+   "title": "level_pct is never validated: 'ERR' hides a critical tank as healthy, a blank level becomes an 80-point 'leak'",
+   "verdict": "confirmed",
+   "evidence": "My own node run (v1.mjs):\n- W10: []\n- W09: 'critical|Tank T1 (North Flat)|Dropped 80 points in 24 hours, now %'\n- W10c (T2's 18:00 row set to ERR): T2 is gone; only the T4 and T6 rows remain.\nBrowser (vb.mjs b05): tile 'WATER TANKS OK 6 of 8 2 need a look', heading 'T2 Windmill ERR%', console 'Error: <path> attribute d: Expected number, \"\u202645.9,79.6L254.0,NaN\".'\nHand check of data/water.csv line 240: 'T2,P2,2026-09-30T12:00,14.8'.\nExtra reproduced variants (v3.mjs):\n- ERR on T4's baseline row (09-29T18:00) gives drop24h=NaN and 'critical|Tank T4 (Lone Tree, Heifers here now)|Down to 10% full'. The leak diagnosis and the 'haul water' action are silently lost.\n- ERR on silent T6's last row prints 'No reading for 42 hours; last level ERR%'.",
+   "corrections": "Regression test (c) is garbled. 11.8 is T2's 18:00 value, the one replaced by ERR. The last good reading is 14.8 at 2026-09-30T12:00, so the expected text should read 'last good level 14.8% at Sep 30 12:00'. Add the reproduced ERR-on-baseline case: the leak rule is disabled with no visible sign. Out-of-range numbers (-999, 140) also pass unvalidated. The CSV audit (csv.repro.mjs CSV-5x) already covers them, and the fix is the same. Severity high is fair."
+  },
+  {
+   "title": "No tanks master table: a tank with zero readings is invisible to the alerts, the charts and the tile",
+   "verdict": "design-limitation",
+   "evidence": "W08 in v1.mjs: [7, ['critical|Tank T2 (Windmill)|Down to 11.8% full', 'critical|Tank T4 (Lone Tree, Heifers here now)|Dropped 46 points in 24 hours, now 10%']]. Re-running the auditor's script, B-02 gives tile 'WATER TANKS OK 5 of 7 2 need a look' and 7 charts. scripts/generate_data.py:39 defines TANKS. main() (lines 133-141) writes pastures, groups, moves, weights, water, health, budget and meta, and no tanks file. The code works as written; the gap is in the data model.",
+   "corrections": "High is defensible on consequence: it is a confident all-clear on water. Likelihood depends on the export shape. With the README's full-period export, a tank disappears only if it never reported in the period. A rolling-window export, or a sensor replaced under a new device ID, makes it likely. Consider medium-high."
+  },
+  {
+   "title": "Readings are ordered by string comparison of time: Excel-style or mixed timestamps pick the wrong 'last' reading",
+   "verdict": "partially-confirmed",
+   "evidence": "The code defect is confirmed:\n- W05 gives [] (the 20% reading at '2026-09-30 18:00' sorts before '2026-09-30T12:00', so 75% is used).\n- W05b gives 8 rows, starting 'serious|Tank T1 (North Flat)|No reading for 516 hours; last level 89.8%', and every tank's lastTime is '9/9/2026 6:00'.\nControl I added: the whole file converted to '2026-09-30 18:00' form (space, ISO order) gives the correct 3 rows. Neither the auditor nor I ran Excel.",
+   "corrections": "1. The claim that opening and re-saving this water.csv in Excel produces m/d/yyyy is unverified. Excel is not generally known to auto-convert ISO strings with a 'T' separator, so the committed file would probably be saved unchanged. Realistic triggers are a source export already in 'yyyy-mm-dd hh:mm' or m/d/yyyy form that Excel then re-saves, or a hand-added row in a different format.\n2. The whole-file failure is loud: all 8 tanks show 'No reading for 516 hours', which sends someone to check every tank, T2 and T4 included. The silent miss needs a mixed-format file (W-05).\n3. Severity should be medium, not high.\n4. This overlaps the time audit's TIME-10 and the CSV audit (csv.repro.mjs:255)."
+  },
+  {
+   "title": "drop24h baseline has no upper age limit: after a reading gap a multi-day change is reported as 'in 24 hours' and raises a false critical leak",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs W01: ['critical|Tank T1 (North Flat)|Dropped 36 points in 24 hours, now 54%']. By hand: the baseline 09-27T18:00 (90) is 72 h before the last reading (54). 90 - 54 = 36. Inside the true 24-h window there are only 56 and 54. exceptions.js:45 has no upper bound.",
+   "corrections": "None on severity; medium is fair. A related missed defect (reported separately): the water chart draws the 66-h outage as one straight segment, so the chart appears to back up the false '24 hours' claim."
+  },
+  {
+   "title": "A fast drop is missed when no reading is 24 h older than the last one (new sensor, resumed sensor, export starting at midnight)",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs W02: [0, []] (drop24h=0, no alerts) for 95, 80, 65 and 50 on Sep 30. By hand: 95 - 50 = 45 over 18 h, or 2.5 pts/h. (50 - 25) / 2.5 = 10 h to reach 25%.",
+   "corrections": "'Resumed sensor' in the title is wrong. A resumed sensor has a pre-gap row, so the W-01 stale-baseline path applies and the drop is reported (water.verify.mjs V-W02, with a row 5 days old: 'critical | Tank T1 (North Flat) | Dropped 45 points in 24 hours, now 50%'). The trigger is limited to a new sensor or an export whose first reading is less than 24 h before the last. Medium is at the upper end given that narrow trigger."
+  },
+  {
+   "title": "Readings dated after as_of give negative silence and pass as fresh; one mistyped row hides a real 42-hour silence",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs output:\n- W06: [-48, []]\n- W07: [-678, [T2 critical, T4 critical]], with T6 absent. By hand: Oct 29 00:00 minus Sep 30 18:00 = 28 d 6 h = 678 h.\n- B-04 dot cx=319.14. By hand: 26 + (216/168) \u00d7 228 = 319.14, past the 254 edge.",
+   "corrections": "A stale meta.csv is a more likely trigger than a month typo. The README says to replace the CSVs with exports, but meta.csv is not an export. With as_of 2026-09-28T18:00 and the committed water.csv, T6 silentHours=-6 and the T6 row disappears: water.verify.mjs V-W06 gives ['critical | Tank T2 ...', 'critical | Tank T4 ...']. This overlaps the time audit's TIME-11. Medium is fair."
+  },
+  {
+   "title": "Conflicting readings at the same timestamp: the alert depends on row order in the file",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs:\n- W04a: ['critical|Tank T1 (North Flat)|Dropped 60 points in 24 hours, now 20%']\n- W04b: []\nThe stable sort at exceptions.js:43 keeps the later row.",
+   "corrections": "Lower severity to low. Two very different levels at the identical minute stamp are rare. A re-sent packet carries the same value, and a manual check rarely shares the sensor's exact timestamp. The order dependence is real, but the scenario is unusual."
+  },
+  {
+   "title": "A silent tank last seen nearly empty and falling is only 'serious', ranked below every critical row",
+   "verdict": "design-limitation",
+   "evidence": "v1.mjs W12: ['serious|Tank T1 (North Flat)|No reading for 30 hours; last level 8%']. By hand: 60 - 8 = 52 points over Sep 28 18:00 to Sep 29 12:00 (18 h), then silence from Sep 29 12:00 to Sep 30 18:00 (30 h). The README states the choice: 'the sensor's last level can't be trusted, so it isn't judged'.",
+   "corrections": "The row already shows 'last level 8%', its action says 'today', and the behaviour is documented. Severity is low to medium rather than medium. Note that the existing test for 'not judged' cannot fail (see the missed test-coverage item), so changing this rule is not currently guarded either way."
+  },
+  {
+   "title": "Severity uses level % alone: it ignores stock on the pasture, tank capacity and consumption, so an empty-pasture tank outranks a leaking tank 45 heifers drink from",
+   "verdict": "design-limitation",
+   "evidence": "v1.mjs W16: ['warning|Tank TB (Windmill)|38% full', 'warning|Tank TA (South Divide, Cows here now)|38% full']. C01 has T2 before T4. The open moves in moves.csv (blank out_date) are Cows P7, Heifers P4 and Yearlings P3, so P2 is empty.",
+   "corrections": "T2 appears above T4 only because T2 comes first in water.csv. Within a severity the sort is stable and uses no level or stock key, so this ordering is file-order chance, not a level-based ranking. Medium is fair. The gallons illustration is correctly labelled as assumed (180 \u00d7 20 / 24 = 150 gal/h; 380 / 150 = 2.53 h)."
+  },
+  {
+   "title": "A tank whose pasture_id changes (moved portable trough) is compared across placements and raises a false leak",
+   "verdict": "design-limitation",
+   "evidence": "v1.mjs W11: ['critical|Tank T9 (Sand Hills, Yearlings here now)|Dropped 35 points in 24 hours, now 55%']. The series is keyed by tank_id only (exceptions.js:41).",
+   "corrections": "None. Low is fair."
+  },
+  {
+   "title": "An exact 30.0-point drop is missed by floating-point subtraction",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs W13: [29.999999999999993, []]. My own scan of pairs a in 70.0..100.0 (step 0.1) with b = a - 30.0: '48 of 301 pairs ... compute a-b < 30'. Values parsed from strings give the same 48.",
+   "corrections": "None. Low is fair."
+  },
+  {
+   "title": "A large fall inside the window that refills before the last reading is not seen (endpoint comparison)",
+   "verdict": "design-limitation",
+   "evidence": "v1.mjs W03: [] (drop24h=4). My independent worst 24-h drawdown for each tank over the month: T1 16.1, T2 15.3, T3 16.2, T4 46, T5 14.5, T6 12.4, T7 17.1, T8 18.2 (at 2026-09-28T18:00). A max-drawdown rule therefore adds no false alarm on the committed data and keeps T4 at 46.",
+   "corrections": "None. Low is fair, and the 18.2 (T8) evidence checks out."
+  },
+  {
+   "title": "The 'Water tanks OK' tile re-parses the tank id from the alert text and miscounts tank ids that contain a space",
+   "verdict": "confirmed",
+   "evidence": "vb.mjs b03: tile 'WATER TANKS OK 6 of 8 2 need a look', while the report lists Well 2, Well 4 and T6. split(' ')[1] gives {'Well', 'T6'}, size 2 (app.js:47).",
+   "corrections": "None. Low is fair."
+  },
+  {
+   "title": "A tank in a pasture missing from pastures.csv is labelled 'Tank T9 (undefined)'",
+   "verdict": "confirmed",
+   "evidence": "v1.mjs W15: ['critical|Tank T9 (undefined)|Down to 20% full']. The auditor marked app.js:82 as inferred; I have now run it: with T8 placed in P9 the heading reads 'T8 undefined 84.5%' (water.verify.mjs V-W15).",
+   "corrections": "The app.js:82 part is now verified, not inferred. The app.js:104 tooltip was not run."
+  }
+ ],
+ "missed": [
+  {
+   "title": "A leaking tank whose sensor stopped less than 24 h ago is judged on its old reading and counted OK",
+   "area": "Water rules / reading age",
+   "status": "design-limitation",
+   "severity": "medium",
+   "location": "exceptions.js:104-115 (silence is flagged only at 24 h or more; the drop and level rules treat the last reading as current and never state its age); app.js:82 (heading prints the old level); app.js:47,55 (tile counts the tank OK)",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/water.verify.mjs, case V-M3 (node and Chromium). Input: committed data with the T4 rows after 2026-09-30T00:00 removed. T4 then ends 65.0 @09-29T00, 67.1 @06, 67.5 @12, 56.0 @18, 44.5 @09-30T00.",
+   "expected": "T4 is flagged: the last reading is 18 h old (09-30T00:00 to 18:00), at 44.5%, and fell 23 points in the 12 h before it stopped (67.5 to 44.5, about 1.92 pts/h). Projected at as_of: 44.5 - 1.92 \u00d7 18 \u2248 10.0%, which matches the committed 18:00 value of 10.0. The tile should read '5 of 8, 3 need a look'.",
+   "actual": "node: 'T4 last=2026-09-30T00:00 level=44.5 silentHours=18 drop24h=20.5; water rows: [\"critical | Tank T2 (Windmill) | Down to 11.8% full\",\"serious | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%\"]'. Chromium: tile 'WATER TANKS OK 6 of 8 2 need a look', heading 'T4 Lone Tree 44.5%', 9 exception rows.",
+   "consequence": "A power or radio fault often takes out the sensor along with the pump or solar. If that happens mid-leak on the tank 45 heifers drink from, the report shows an all-clear for up to 24 h (four missed 6-h readings). A once-a-morning check can miss a dry tank by a full day, and no row or heading says how old the shown level is.",
+   "regression_test": "- V-M3 data: expect one T4 Water row whose problem contains '18 hours' and '44.5%'.\n- Committed data: still exactly 3 Water rows. All other tanks report at 18:00 and T6 is already silent, so a 12-h 'late' rule adds no false alarm.",
+   "proposed_fix": "- Add RULES.sensorLateHours = 12 (two missed 6-h readings). Emit a warning 'Last reading N h ago (L%)'.\n- Escalate to critical when the data before it was falling faster than waterDropPts/24 points per hour, or stock is on the pasture.\n- Show the reading time in the chart heading and in the leak and low rows (for example 'now 10%' becomes '10% at 18:00').",
+   "effort": "S"
+  },
+  {
+   "title": "The water tests cannot catch a broken rule: removing the 'don't judge a silent tank' line and moving every threshold boundary all pass",
+   "area": "Tests (water rules)",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "tests/exceptions.test.mjs:34-36 (the silent-sensor test uses T6 at 98.5%, which no level rule could flag); tests/exceptions.test.mjs:42-52 (one point per rule, no boundaries); exceptions.js:107 (the continue)",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/water.verify.mjs, Part B. It copies exceptions.js, data/ and tests/ to a temp dir, applies one change at a time and runs node --test tests/exceptions.test.mjs.",
+   "expected": "Each of these changes fails at least one test:\n- removing `continue` at exceptions.js:107, the behaviour the test 'a silent sensor isn't also judged on its stale level' is named for\n- changing >= or < at the 24 h, 30-point, 25% and 40% boundaries\n- dropping the sort\n- shrinking the 24-h drop window",
+   "actual": "'SURVIVES silent tank also judged (continue removed) (pass 8, fail 0)'. Also SURVIVES: silence >= to >, drop >= to >, critical < to <=, low < to <=, no sort, and drop window 24 h to 18 h. Only 'drop window 24 h -> 30 h' is killed (pass 7, fail 1). With continue removed, the C-09 data gives two rows ['critical|Down to 10% full', 'serious|No reading for 30 hours; last level 10%'] while the suite stays green.",
+   "consequence": "The README says the tests prove 'no noise' and check the rule thresholds. In practice, a later edit could double-flag silent tanks or shift an alert boundary with CI green (the W-13 30.0-point miss is this kind of boundary slip). A reviewer reading the test will see it cannot fail.",
+   "regression_test": "Add these cases, with as_of 2026-09-30T18:00, tank T1 in P1 and no moves. All 6 pass on the current code, and each surviving mutant fails one (verified in scratch kill/extra.test.mjs).\n(1) Readings 09-29T06:00 12 and 12:00 10: exactly 1 row, serious.\n(2) A last reading at 09-29T18:00 gives serious; at 09-29T19:00 gives no row.\n(3) 80 to 50 over 24 h gives critical; 80 to 50.1 gives no row.\n(4) Flat levels 24.9 / 25 / 39.9 / 40 give critical / warning / warning / none.\n(5) Readings 09-29T18:00 80, 09-30T00:00 50, 09-30T18:00 45 give 'Dropped 35 points in 24 hours, now 45%'. This kills the 18-h window mutant and also holds under a windowed max rule.\n(6) The same rows given newest-first give the same message.",
+   "proposed_fix": "Add the six cases to tests/exceptions.test.mjs. Optionally run a small mutation check like Part B in CI.",
+   "effort": "S"
+  },
+  {
+   "title": "Water chart draws a straight line across sensor outages inside the 7-day window",
+   "area": "Water chart (app.js)",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "app.js:90-91 (one path through every row in the window, with no break at gaps); app.js:94-97 (the 'no data' wash is drawn only after the last reading)",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/water.verify.mjs, case V-GAP (Chromium). Input: committed water.csv with the T1 rows strictly between 2026-09-27T18:00 and 2026-09-30T12:00 removed, a 66-h outage.",
+   "expected": "The line breaks at the gap (two 'M' commands), or the gap is shaded like the silent-sensor wash. No single segment should be wider than a normal 6-h step (6 \u00d7 228/168 = 8.1 px).",
+   "actual": "'\"firstPathM\":1,\"firstPathWidestStepPx\":89.6'. By hand: 66 h \u00d7 228/168 = 89.6 px. There is no wash and no 'no data' label.",
+   "consequence": "The README says 'a silent sensor shows where data stops', but an outage earlier in the week is drawn as a smooth line of readings that never existed. In the W-01 situation, the chart's invented 90-to-56 slide appears to back up the false 'Dropped 36 points in 24 hours' alert.",
+   "regression_test": "V-GAP data: T1's path has 2 'M' commands and no segment wider than 12 h \u00d7 228/168 = 16.3 px. Alternatively, a wash rect spans x 156.3 to 245.9. By hand: from = Sep 23 18:00; Sep 27 18:00 is +96 h, so 26 + 96/168 \u00d7 228 = 156.3; Sep 30 12:00 is +162 h, so 26 + 162/168 \u00d7 228 = 245.9.",
+   "proposed_fix": "When consecutive readings are more than 12 h apart (or more than twice the median interval), start a new subpath with 'M'. Draw the same wash and 'no data' label over the gap.",
+   "effort": "S"
+  },
+  {
+   "title": "A sensor that keeps sending the same frozen value is treated as a healthy tank",
+   "area": "Water rules / sensor health",
+   "status": "design-limitation",
+   "severity": "low",
+   "location": "exceptions.js:104 (sensor health is judged only by the time of the last row); exceptions.js:109-115",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/water.verify.mjs, case V-M4. Input: committed data with every T4 level from 2026-09-29T18:00 on set to 67.5, giving 6 identical readings from 09-29T12:00 to 09-30T18:00.",
+   "expected": "A T4 flag such as 'Reading unchanged at 67.5% for 30 hours; check the sensor'. By hand: 09-29T12:00 to 09-30T18:00 = 30 h. Control (V-M4b): in the committed data the longest run of identical readings below 98% is 2 (T4, T5), and all longer runs sit at the 100% clamp. A rule of '4+ identical readings below 98%' therefore adds no false alarm. Full float-fed tanks normally sit at 100%, so exclude 98% and above.",
+   "actual": "'[\"critical | Tank T2 (Windmill) | Down to 11.8% full\",\"serious | Tank T6 (Cedar Draw) | No reading for 42 hours; last level 98.5%\"]'. There is no T4 row, and T4 is counted OK.",
+   "consequence": "A fouled ultrasonic sensor, a stuck float switch or a logger repeating its last value reads as a steady, healthy tank. In this repro the T4 leak, on the tank 45 heifers drink from, is invisible.",
+   "regression_test": "- V-M4 data: one T4 Water row containing '67.5%' and '30 hours'.\n- Committed data: still exactly 3 Water rows.",
+   "proposed_fix": "Add RULES.stuckReadings = 4. If the last N valid readings are identical and below 98%, emit serious: 'Reading unchanged at L% for H hours; check the sensor'.",
+   "effort": "S"
+  }
+ ]
+}

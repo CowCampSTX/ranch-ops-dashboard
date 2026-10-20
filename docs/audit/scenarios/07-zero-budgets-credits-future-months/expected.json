@@ -1,0 +1,395 @@
+{
+ "scenario": "07-zero-budgets-credits-future-months",
+ "title": "Zero budgets, unbudgeted spending, a credit and future plan months",
+ "fictional": "All data is fictional (Example Ranch). Every threshold is a demonstration setting.",
+ "purpose": "A Hay line with no budget and $500 spent; an Ear tags line with no budget and $200 spent; a September credit '(150)' on Water and fencing; October and November plan rows with blank actuals.",
+ "as_of": "2026-09-30T18:00 America/Chicago",
+ "files": {
+  "pastures": "copied unchanged",
+  "groups": "copied unchanged",
+  "moves": "copied unchanged",
+  "weights": "copied unchanged",
+  "water": "copied unchanged",
+  "health": "changed",
+  "budget": "changed",
+  "meta": "changed",
+  "tanks": "added"
+ },
+ "files_note": "tanks.csv (tank master list, WAT-02) and meta.csv's timezone column (TIME-02) are the Phase-1 additions the lead's defaults call for; the current code ignores both. health.csv carries HLTH-03's proposed generator fix (Cows Fly tag check: done 2026-09-01, next_due blank) unless the scenario says otherwise.",
+ "settings": "../settings.json",
+ "computed_by": "docs/audit/diagnostics/scenarios.build.py: Python arithmetic on this folder's CSV files. It never calls exceptions.js or app.js.",
+ "matching": "alerts_exact: every needs-attention row the implementation shows must be one of expected_rows (or allowed_extra_rows); data-issue and CAN'T TELL rows may carry extra wording. A row matches on area, kind and subject_key; state (or a listed alternative) and severity must agree; every key number must be shown, correctly rounded to the precision shown; key_dates may be ISO or 'Mon D'; key_tags must all appear; must_not_appear strings must not.",
+ "alerts_exact": true,
+ "expected_rows": [
+  {
+   "id": "T2",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T2",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "level_pct": 11.8
+   },
+   "must_not_appear": [],
+   "findings": [
+    "WAT-01"
+   ],
+   "rules": [
+    "RULE-WAT-01"
+   ],
+   "arithmetic": "T2's last reading 2026-09-30T18:00 is 11.8%; 11.8 < 25 (demo critical line)."
+  },
+  {
+   "id": "T4",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T4",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "drop_pts": 46.0,
+    "level_pct": 10.0
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the real span of the fall in hours (WAT-03)",
+    "'unexplained fall; leak not confirmed' wording (RULE-WAT-03 phase note)"
+   ],
+   "findings": [
+    "WAT-03",
+    "WAT-08"
+   ],
+   "rules": [
+    "RULE-WAT-03"
+   ],
+   "arithmetic": "Readings in [2026-09-30T18:00 - 24 h, 2026-09-30T18:00]: 56.0, 44.5, 33.0, 21.5, 10.0; highest 56.0 - last 10.0 = 46.0 points >= 30."
+  },
+  {
+   "id": "T6",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T6",
+   "state": "needs-attention",
+   "state_alternatives": [
+    "cant-tell"
+   ],
+   "severity": "serious",
+   "key_numbers": {
+    "silent_hours": 42.0,
+    "level_pct": 98.5
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the tank's level is CAN'T TELL; the row says to check it by eye (RULE-WAT-04 phase note)"
+   ],
+   "findings": [
+    "TIME-01"
+   ],
+   "rules": [
+    "RULE-WAT-04"
+   ],
+   "arithmetic": "Last reading 2026-09-29T00:00 (98.5%); 2026-09-30T18:00 - 2026-09-29T00:00 = 42 hours >= 24."
+  },
+  {
+   "id": "GRZ",
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "days": 24,
+    "plan": 21,
+    "over": 3
+   },
+   "key_text_any": [
+    "Sand Hills"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GRZ-01"
+   ],
+   "rules": [
+    "RULE-GRZ-01"
+   ],
+   "arithmetic": "Open stay in P3 Sand Hills since 2026-09-06; Sep 6 to Sep 30 = 24 days; plan 21; 24 - 21 = 3 days over."
+  },
+  {
+   "id": "GAIN-H",
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Heifers",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "adg": 0.43625730994152045,
+    "target": 1.0
+   },
+   "key_dates": [
+    "2026-07-20"
+   ],
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "coverage 45 of 45 weighed (GAIN-07)",
+    "both weigh dates, Jul 20 and Sep 15 (GAIN-11)"
+   ],
+   "findings": [
+    "GAIN-03",
+    "GAIN-11",
+    "GAIN-07"
+   ],
+   "rules": [
+    "RULE-GAIN-01",
+    "RULE-GAIN-04"
+   ],
+   "arithmetic": "Pooled gain Jul 20 to Sep 15 (57 days) over 45 heifers: 1119 lbs / 2565 animal-days = 0.4363 lb/day; 0.8 x 1.0 = 0.8; 0.4363 < 0.8."
+  },
+  {
+   "id": "GAIN-Y",
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "count": 6,
+    "threshold": 1.0
+   },
+   "key_tags": [
+    "Y027",
+    "Y031",
+    "Y058",
+    "Y082",
+    "Y129",
+    "Y132"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GAIN-11"
+   ],
+   "rules": [
+    "RULE-GAIN-02",
+    "RULE-GAIN-03"
+   ],
+   "arithmetic": "Yearlings pooled 16608 / 8550 = 1.9425 lb/day, not under 0.8 x 2.0 = 1.6, so no group row. Animals under 0.5 x 2.0 = 1.0 lb/day over the 57 days: Y027 0.474, Y031 0.579, Y058 0.667, Y082 0.772, Y129 0.404, Y132 0.509."
+  },
+  {
+   "id": "BOOST",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Yearlings: Booster vaccine",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "overdue_days": 15
+   },
+   "key_dates": [
+    "2026-09-15"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "HLTH-01"
+   ],
+   "rules": [
+    "RULE-HLTH-01"
+   ],
+   "arithmetic": "Open, next_due 2026-09-15; Sep 15 to Sep 30 = 15 days overdue."
+  },
+  {
+   "id": "PINK",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Cows: Pinkeye check",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "due_in_days": 3
+   },
+   "key_dates": [
+    "2026-10-03"
+   ],
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-HLTH-02"
+   ],
+   "arithmetic": "Open, next_due 2026-10-03; Sep 30 to Oct 3 = 3 days, within 7."
+  },
+  {
+   "id": "FUEL",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Fuel",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 21.25,
+    "usd_over": 2040
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04",
+    "BUD-05"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 11,640 vs budget 9,600: 11,640 - 9,600 = $2,040; 2,040 / 9,600 = 21.25% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "REPAIRS",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Repairs",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 25.0,
+    "usd_over": 1800
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 9,000 vs budget 7,200: $1,800; 1,800 / 7,200 = 25.00% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "HAY",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Hay",
+   "state": "needs-attention",
+   "severity": "warning",
+   "topic": "unbudgeted",
+   "key_numbers": {
+    "usd_spent": 500
+   },
+   "must_not_appear": [
+    "%",
+    "Infinity"
+   ],
+   "findings": [
+    "BUD-03"
+   ],
+   "rules": [
+    "RULE-BUD-06"
+   ],
+   "arithmetic": "Hay budget 0 every month; actual 0 + 0 + 0 + 500 = $500 >= $250 (demo unbudgeted line): shown in dollars only."
+  }
+ ],
+ "expected_absent": [
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Ear tags",
+   "reason": "$200 < $250 (demo unbudgeted line); never 'Infinity%'",
+   "findings": [
+    "BUD-03"
+   ]
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Water and fencing",
+   "reason": "3,159 vs 4,800: under budget after the credit",
+   "findings": [
+    "BUD-02"
+   ]
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Feed and mineral",
+   "reason": "under budget",
+   "findings": []
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Vet and health",
+   "reason": "under budget",
+   "findings": []
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Labor",
+   "reason": "under budget",
+   "findings": []
+  }
+ ],
+ "allowed_extra_rows": [
+  {
+   "id": "X-FUTURE",
+   "area": "Budget",
+   "kind": "file",
+   "subject_key": "budget.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "future",
+   "key_numbers": {},
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "TIME-01"
+   ],
+   "rules": [],
+   "arithmetic": "",
+   "note": "A plain note that the October and November plan rows are not counted yet is allowed (the lead's as-of rule says rows after as_of are reported). Calling their blank actuals 'not entered' is not."
+  }
+ ],
+ "area_states": {
+  "Water": "needs-attention",
+  "Grazing": "needs-attention",
+  "Gain": "needs-attention",
+  "Health": "needs-attention",
+  "Budget": "needs-attention"
+ },
+ "tile_expectations": [
+  {
+   "tile": "budget",
+   "pct": 0.345,
+   "actual_usd": 88705,
+   "budget_usd": 88400,
+   "note": "Jun-Sep only; the credit counts as -150; Hay and Ear tags add 700 of actual and 0 of budget."
+  }
+ ],
+ "computed": {
+  "water_and_fencing": [
+   4800,
+   3159
+  ],
+  "totals": [
+   88400,
+   88705
+  ]
+ },
+ "findings": [
+  "BUD-01",
+  "BUD-02",
+  "BUD-03",
+  "BUD-04"
+ ],
+ "rules": [
+  "RULE-BUD-03",
+  "RULE-BUD-05",
+  "RULE-BUD-06",
+  "RULE-BUD-07"
+ ],
+ "must_not_appear_anywhere": [
+  "NaN",
+  "Infinity",
+  "undefined",
+  "[object Object]",
+  "not entered (2026-10",
+  "not entered (2026-11"
+ ]
+}

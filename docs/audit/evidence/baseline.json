@@ -1,0 +1,353 @@
+{
+ "commit": "cfd77e50a050163b542cadfc6b38882c0341e99d (branch claude/project-thread-nu46kf, identical to main). Worktree after the audit: tracked files unchanged (\"git diff --stat\" empty); the only untracked path is docs/audit/.",
+ "automated": [
+  {
+   "check": "Record branch and commit",
+   "command": "git -C /home/claude/ranch-ops-dashboard rev-parse HEAD; git branch --show-current; git status --porcelain",
+   "result": "pass",
+   "evidence": "cfd77e50a050163b542cadfc6b38882c0341e99d / claude/project-thread-nu46kf / porcelain was empty at the start. At the end porcelain shows only \"?? docs/audit/\". git log: \"cfd77e5 Switch the dashboard to a black theme with green accents\", \"6d82b81 Add ranch operations dashboard\"."
+  },
+  {
+   "check": "Unit tests",
+   "command": "cd /home/claude/ranch-ops-dashboard && node --test tests/exceptions.test.mjs   (node v22.22.0)",
+   "result": "pass (8/8)",
+   "evidence": "\"# tests 8 / # suites 0 / # pass 8 / # fail 0 / # cancelled 0 / # skipped 0 / # todo 0 / # duration_ms 167.849356\""
+  },
+  {
+   "check": "Data regeneration in an isolated clone is byte-identical",
+   "command": "git clone -q /home/claude/ranch-ops-dashboard <scratch>/audit/baseline/regen && cd regen && python3 scripts/generate_data.py && git status --porcelain && git diff --stat data/   (Python 3.13.16)",
+   "result": "pass",
+   "evidence": "Clone HEAD cfd77e50a050163b542cadfc6b38882c0341e99d; generator printed \"wrote 8 files to .../regen/data\"; the \"--- status:\" and \"--- diff stat:\" sections were both empty, followed by \"(end diff)\"."
+  },
+  {
+   "check": "Generator is deterministic under a different hash seed and time zone",
+   "command": "PYTHONHASHSEED=12345 TZ=Pacific/Auckland python3 scripts/generate_data.py && git status --porcelain && git diff --stat data/; PYTHONHASHSEED=random TZ=America/Denver python3 scripts/generate_data.py && git diff --exit-code data/; sha256sum data/*.csv | sha256sum (clone and repo)",
+   "result": "pass",
+   "evidence": "Both runs left the status and diff empty. The second printed \"exit=0\". Aggregate hashes matched: clone \"37c0da714cd52d1068f257cac344904c3d92e65f16e563f2247d3934b9a80519  -\", repo \"37c0da714cd52d1068f257cac344904c3d92e65f16e563f2247d3934b9a80519  -\"."
+  },
+  {
+   "check": "Browser diagnostic, desktop 1280x900 (load, errors, counts, chips, tab walk, hover tooltips, edge tooltips)",
+   "command": "python3 -m http.server 8801 --bind 127.0.0.1 --directory /home/claude/ranch-ops-dashboard & node docs/audit/diagnostics/browser-check.mjs http://127.0.0.1:8801/ <scratch>/audit/baseline/out docs/audit/screenshots   (chromium 141.0.7390.37)",
+   "result": "pass for load, errors and counts; fail for keyboard access to charts and tooltip edge placement (see findings)",
+   "evidence": "\"errors: console=0 page=0 requestfailed=0 status>=400=0 []\"; \"rows: exceptions=10 budget=6 rules=11 waterMinis=8 charts=11 fictionalLabel=true\"; \"chips: All (10)->10 | Water (3)->3 | Grazing (1)->1 | Gain (2)->2 | Health (2)->2 | Budget (2)->2\"; \"page overflow: 1280/1280\"; \"keyboard tooltips: {\\\"tabStopsInsideCharts\\\":0,\\\"tooltipShownOnAnyFocus\\\":false}\"; \"edge rightEdgeWater: insideViewport=false\"; \"edge bottomEdgeBudget: insideViewport=false\"."
+  },
+  {
+   "check": "Browser diagnostic, phone 390x844 (isMobile, hasTouch, DSF 2)",
+   "command": "same run as above (second viewport)",
+   "result": "pass for load and counts; fail for touch tooltips, chart text size and table columns (see findings)",
+   "evidence": "\"errors: console=0 page=0 requestfailed=0 status>=400=0 []\"; \"page overflow: 390/390 exceptions: scrolls=true cut=[Problem,First step]; budgetTable: scrolls=true cut=[Difference]\"; \"chart text (effective px): mini:7 ... grazing:6.8 gain:6.8 budgetChart:6.8\"; \"tap gain: target=3.9x3.9px tipVisible=false \\\"\\\"\"."
+  },
+  {
+   "check": "Loading, missing-data, error, all-clear and time-zone states (40 scenarios via page.route; no files touched)",
+   "command": "node docs/audit/diagnostics/states-check.mjs http://127.0.0.1:8801/ <scratch>/audit/baseline/states",
+   "result": "fail for missing, error and loading states; pass for time zones",
+   "evidence": "Missing or garbled data was silently reported as all-clear in 8 of 32 file scenarios, e.g. \"[health:404] ready=true pageErrors=0 rows=8 warnsUser=false ... Health (0)  <-- SILENT ALL-CLEAR\". The other 24 ended with \"ready=false pageErrors=1\". Loading showed \"loadingText=false\". Under tz:UTC, America/Chicago, America/Los_Angeles, Pacific/Auckland, Asia/Kolkata and Pacific/Kiritimati, every run gave \"sameRowsAsBaseline=true sameTiles=true\"."
+  },
+  {
+   "check": "Tooltip values match the CSVs (independent Python calculation)",
+   "command": "python3 script reading data/weights.csv, budget.csv, water.csv, moves.csv",
+   "result": "pass",
+   "evidence": "H026: weights 1130 (2026-07-20) to 1136 (2026-09-15), adg 0.10526 over 57 days, which matches the tooltip \"H026 (Heifers) / 0.11 lbs/day, Jul 20 to Sep 15 / Now 1136 lbs / Under half of target\". Repairs: budget 7200, actual 9000, matching \"Budget $7,200 / Actual $9,000 / Over by $1,800\". T4 last row 2026-09-30T18:00 10.0 matches \"Sep 30, 6 PM: 10%\". T8 84.5 matches. Yearlings P3 in 2026-09-06 gives 24 days, matching \"Sep 6 to now (24 days) / Plan: 21 days\"."
+  }
+ ],
+ "manual": [
+  {
+   "check": "Desktop layout: overlaps, clipping, readability",
+   "method": "Full-page screenshot plus in-page inventory from browser-check.mjs (card overlaps, chart text pairs that intersect, text outside its card, value clipping). Viewed desktop-full.png and desktop-tooltip-gain.png.",
+   "observation": "cardOverlaps 0, no text outside cards, no clipped tile values, no page overflow (1280/1280). Chart text renders at 11.8 to 13 px. One label collision in the gain chart: '\"3.0\" x \"lbs per day\" (20 px2)'.",
+   "pass": "partial"
+  },
+  {
+   "check": "Phone layout (390x844): overlaps, clipped text, readability of 12px chart text",
+   "method": "browser-check.mjs inventory and overflow, plus per-card element screenshots (<scratch>/audit/baseline/extra/phone-card-*.png) that I viewed",
+   "observation": "The page itself has no sideways overflow (390/390). The exceptions table hides Problem and First step (scrollWidth 413 vs 316). The budget table clips Difference: the screenshot shows \"+$1,80\" and \"DIFFERENC\". Chart text renders at 6.8 to 7.0 CSS px. The T6 header wraps to 2 lines (height 40.3 vs 20.1), so the T6 chart sits lower than T5's. The gain tick '3.0' overlaps 'lbs per day' (12 px2).",
+   "pass": "fail"
+  },
+  {
+   "check": "Every filter chip works and its count matches",
+   "method": "browser-check.mjs chipCheck: click (desktop) or tap (phone) each chip, then count data rows and read aria-pressed",
+   "observation": "On both viewports every label count equals the visible rows: All 10, Water 3, Grazing 1, Gain 2, Health 2, Budget 2. Exactly one chip has aria-pressed=true, and areasShown matches the chip. After every click, activeElement is \"body\" (focus is lost).",
+   "pass": "pass"
+  },
+  {
+   "check": "Every chart renders",
+   "method": "Inventory of svg.chart plus screenshots",
+   "observation": "11 charts at both sizes: 8 water minis, grazing, gain and budget. T6 shows 'no signal' with a shaded 'no data' band. Budget table has 6 rows, rules table 11. Tiles read: Needs attention 10, Head on grass 375, Water tanks OK 5 of 8, Yearling gain 1.94 lbs/day, Spend vs budget +1.0%.",
+   "pass": "pass"
+  },
+  {
+   "check": "Tooltip content for sample points (desktop hover)",
+   "method": "page.mouse.move to the centre of one mark per chart, read #tip, compare with the Python calculation",
+   "observation": "All 5 samples are correct (see the automated check). The water tooltip on the right-hand column renders 53 px wide and 179 px tall, one word per line, with its right edge at 1281.66 (past 1280). A budget tooltip near the bottom of the viewport opens at top 893.7, bottom 992.3, with innerHeight 900.",
+   "pass": "partial"
+  },
+  {
+   "check": "Keyboard navigation order",
+   "method": "browser-check.mjs keyboardWalk: Tab from the top, record activeElement each step; chipKeyboardActivation: Tab to Water, press Enter, Tab again",
+   "observation": "Desktop: the 6 chips in DOM order, then focus leaves the page (step 7 \"body\"). Phone: the 6 chips, then 2 div.scroll table containers (Chromium makes scrollers focusable), then body. Nothing else is focusable. After Enter on Water, active becomes \"body\" and the next Tab goes to \"All (10)\", so focus is lost after activation.",
+   "pass": "partial"
+  },
+  {
+   "check": "Focus visibility on chips (custom styles; is the default outline suppressed?)",
+   "method": "Computed outline and box-shadow when focused vs unfocused, a pixel diff of the padded element clip, plus a visual check of desktop-focus-all-chip.png and phone-focus-all-chip.png (2x)",
+   "observation": "The outline is not suppressed. Focused: outlineStyle \"auto\", colour rgb(16,16,16) on desktop and rgb(229,151,0) on phone. Unfocused: \"none\". Unpressed chips change 418-1822 px with best contrast 19.47:1 against the same pixels unfocused. The pressed 'All' chip scores 3.19 (desktop) and 2.06 (phone) on that metric, because the white ring replaces green edge pixels. In the screenshots the white ring is still clearly visible against the black page, so I count it as visible. Box-shadow is \"none\" in both states.",
+   "pass": "pass"
+  },
+  {
+   "check": "Are chart marks focusable / chart details reachable by keyboard?",
+   "method": "Count of descendants with tabIndex >= 0 in each svg.chart; tooltip state recorded after each Tab",
+   "observation": "focusableDescendants = 0 and svgFocusable = false for all 11 charts. tabStopsInsideCharts 0, tooltipShownOnAnyFocus false. Each chart is role=img with a generic aria-label such as \"Average daily gain per animal by group\". The budget chart is the only one with an equivalent data table.",
+   "pass": "fail"
+  },
+  {
+   "check": "Touch access to chart details",
+   "method": "Phone context, page.touchscreen.tap at the centre of a water hit area, grazing stay, gain dot and budget bar, then read #tip after 150 ms",
+   "observation": "No tooltip appeared for any of them: tipVisible=false with empty text. Rendered target sizes: gain dot 3.9x3.9 px, budget bar 86x10.2, grazing bar 52.1x14.7, water hit area 132.4x48.8. The page text still says \"Hover a dot for the tag.\"",
+   "pass": "fail"
+  },
+  {
+   "check": "Loading state",
+   "method": "states-check 'loading': every CSV delayed 3 s, snapshot and screenshot at 1 s; 'stalled-water': water.csv never answers, snapshot at 6 s",
+   "observation": "The user sees the header, the section headings and notes, empty cards, an empty as-of line and no tiles. There is no loading text or spinner (loadingText=false). The stalled case looks identical after 6 s and would stay that way indefinitely. The footer fictional-data note is still shown because it is static HTML.",
+   "pass": "fail"
+  },
+  {
+   "check": "Empty state (a filter with zero rows; all-clear data)",
+   "method": "The real data has no chip with zero rows. states-check 'all-clear' edits the CSVs in flight (problem tanks replaced by T1's readings, yearlings moved in 2026-09-16, every last weigh-in set exactly on target, health tasks closed or moved out, actual = budget) and clicks every chip",
+   "observation": "All chips show (0) and the tile reads \"Needs attention: 0 (0 critical, 0 serious, 0 warning)\". The messages are \"Nothing in all needs attention.\" and \"Nothing in water needs attention.\" (and the same for each other area). The tile reads \"Spend vs budget: \u22120.0% ($88,400 of $88,400 ...)\". It works, but the copy is awkward.",
+   "pass": "partial"
+  },
+  {
+   "check": "Missing-data state (one CSV 404 / network failure / header only)",
+   "method": "states-check: for each of the 8 files, (a) redirect to a missing path to get the server's real 404 page, (b) route.abort('failed'), (d) 200 with the header only",
+   "observation": "For health, budget, and header-only water and moves, the page renders normally and the affected area reads as clear, with no message. Example: \"[health:404] ... Health (0)\" and \"Needs attention: 8\". Budget 404 gives \"Spend vs budget: \u2212NaN% ($NaN of $NaN...)\". Header-only water gives \"Water tanks OK: 0 of 0\", and both critical tank alerts disappear. Every other file and every network abort throws an uncaught error (e.g. \"Cannot read properties of undefined (reading 'localeCompare')\", \"Failed to fetch\") and leaves the blank loading skeleton.",
+   "pass": "fail"
+  },
+  {
+   "check": "Error state (one CSV returns garbage)",
+   "method": "states-check '<file>:garbage': 200 text/csv with body \"\\u0000\\u0001 this is not a csv\\n<html>...\"",
+   "observation": "For health and budget it is a silent all-clear: \"Health (0)\", or \"Budget (0)\" with \"\u2212NaN%\" in the tile. For pastures, groups, moves, weights, water and meta, there is an uncaught pageerror and a blank skeleton with no message. No case shows the user any error text (warnsUser=false in all of them).",
+   "pass": "fail"
+  },
+  {
+   "check": "Browser time zone does not change the report",
+   "method": "states-check under 6 timezoneIds, comparing exception rows, tiles and the as-of line with the baseline",
+   "observation": "Identical in every zone: \"Data as of September 30, 2026 at 6:00 PM.\", with sameRowsAsBaseline=true and sameTiles=true.",
+   "pass": "pass"
+  },
+  {
+   "check": "Data stays labelled fictional",
+   "method": "Body text check plus screenshots",
+   "observation": "The as-of line reads \"Example Ranch (fictional), 4,300 acres in 8 pastures...\". The footer reads \"Example Ranch and all of its data are fictional, generated by scripts/generate_data.py\". fictionalLabel=true on both viewports. The footer stays visible even when loading fails.",
+   "pass": "pass"
+  }
+ ],
+ "blocked": [
+  {
+   "check": "Published GitHub Pages URL https://cowcampstx.github.io/ranch-ops-dashboard/",
+   "reason": "This environment's network proxy blocks it. A single plain curl -m 20 returned \"curl: (56) CONNECT tunnel failed, response 403\" (http_code=000). I made no attempt to bypass it, so the live deployment (paths, 404 page, caching) is unverified."
+  },
+  {
+   "check": "Real mobile browsers (iOS Safari, Android Chrome) and screen readers",
+   "reason": "Only Playwright Chromium 141 with isMobile/hasTouch emulation was available. Real-device tap behaviour and VoiceOver/TalkBack announcements (e.g. of the role=status tooltip) were not tested."
+  },
+  {
+   "check": "Firefox / WebKit rendering",
+   "reason": "Only Chromium was run."
+  }
+ ],
+ "findings": [
+  {
+   "title": "Missing, unreadable or empty data for an area is reported as 'nothing needs attention' in that area",
+   "area": "data loading / error handling",
+   "status": "confirmed",
+   "severity": "high",
+   "location": "app.js:221 (fetch has no res.ok check; any body goes to parseCSV); exceptions.js:22-33 (parseCSV accepts any text, no header or row validation); exceptions.js:141 (rows without status='open' are skipped silently); exceptions.js:82-89 + app.js:57 (budget NaN)",
+   "repro": "python3 -m http.server 8801 --bind 127.0.0.1 --directory /home/claude/ranch-ops-dashboard & node docs/audit/diagnostics/states-check.mjs http://127.0.0.1:8801/ /tmp/out. Minimal case: page.route('**/data/health.csv', r => r.continue({ url: base + 'data/__missing_health.csv' })) returns the server's real 404 HTML. Same result with a 200 garbage body, or a 200 header-only body for health, budget, water or moves.",
+   "expected": "The page says that health.csv (or whichever file) could not be loaded or is empty. That area is not shown as clear, e.g. the chip reads 'Health (no data)' and there is no 'Nothing in health needs attention.'",
+   "actual": "\"[health:404] ready=true pageErrors=0 rows=8 warnsUser=false ... chips: All (8), Water (3), Grazing (1), Gain (2), Health (0), Budget (2)\" and \"Needs attention: 8 (2 critical, 5 serious, 1 warning)\". The only trace is a console message: \"Failed to load resource: the server responded with a status of 404 (File not found)\". budget:404 gives \"Budget (0)\" and \"Spend vs budget: \u2212NaN% ($NaN of $NaN, season to date)\". water:header-only gives \"Water (0)\" and \"Water tanks OK: 0 of 0 (0 need a look)\", with \"0 critical\". moves:header-only gives \"Grazing (0)\". health:garbage and health:header-only behave the same as health:404.",
+   "consequence": "The overdue yearling booster and the pinkeye check disappear from the morning list while the page looks normal and the as-of line is intact, so a manager who trusts the page skips a vet task. An empty water export hides a leaking tank and a tank at 11.8%. That is the opposite of what an exception report is for, and an interviewer testing failure modes would find it in one try.",
+   "regression_test": "Playwright with page.route on the real data, values checked against the CSVs. (1) health.csv to 404: expect visible text matching /health/i and /could not load|missing|unavailable/i, and expect the Health chip not to equal 'Health (0)'. With full data the Health chip is 'Health (2)': the booster is due 2026-09-15, 15 days overdue at 2026-09-30; pinkeye is due 2026-10-03, 3 days away. (2) water.csv body 'tank_id,pasture_id,time,level_pct\\n': expect an error naming water.csv instead of 'Water tanks OK 0 of 0'. (3) Unit test: validateTable(parseCSV('<!DOCTYPE HTML>\\n<html>'), ['group','task','last_done','next_due','status'], {minRows:1}) throws, and so does the header-only health text.",
+   "proposed_fix": "Load each file through a helper that throws on !res.ok, checks the required columns for that file, and requires at least 1 row (meta must have as_of). On failure, show a visible error card naming the file(s). Mark the affected areas' chips and tiles as 'no data' instead of computing exceptions from an empty table.",
+   "effort": "M"
+  },
+  {
+   "title": "Any other load failure leaves a blank skeleton forever, with no loading or error message",
+   "area": "loading / error state",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "app.js:221-225 (top-level await with no try/catch); index.html:72-112 (empty containers, no placeholder or loading text)",
+   "repro": "node docs/audit/diagnostics/states-check.mjs http://127.0.0.1:8801/ /tmp/out. Scenario 'loading': page.route('**/data/*.csv', async r => { await sleep(3000); r.continue(); }), snapshot at 1 s. Scenario 'water:abort': route.abort('failed') for water.csv. Scenario 'meta:404'.",
+   "expected": "While data loads, a visible loading message. If a file fails, a visible error naming the file. No uncaught exception.",
+   "actual": "loading: \"ready=false pageErrors=0 rows=0 warnsUser=false loadingText=false\"; only headings and notes are visible (state-loading.png). 24 of the 32 per-file failure scenarios end with \"ready=false pageErrors=1\", e.g. \"[water:404] ... (Cannot read properties of undefined (reading 'localeCompare'))\", \"[health:abort] ... (Failed to fetch)\", \"[meta:header-only] ... (Cannot read properties of undefined (reading 'as_of'))\". The screen matches the loading state, and the as-of line is empty.",
+   "consequence": "On a weak connection, or if a file fails to deploy, the manager sees empty cards and can't tell 'still loading' from 'broken'. In a portfolio demo the page simply looks broken.",
+   "regression_test": "(1) Delay all CSVs 3 s: at 1 s expect text matching /loading/i inside #tiles or the Needs attention card. (2) water.csv aborted: within 2 s expect visible text matching /water\\.csv/ and /could not load/i, and zero pageerror events. (3) meta.csv header-only: expect an error mentioning the as-of date instead of a blank page.",
+   "proposed_fix": "Put a 'Loading example data...' placeholder in the static HTML. Wrap the load-and-render block in try/catch and replace the placeholder with an error card listing the failed files and the error message. Reuse the per-file validation from the previous finding.",
+   "effort": "S"
+  },
+  {
+   "title": "Chart details cannot be opened by touch; gain dots are 3.9 px on a phone",
+   "area": "touch / mobile",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "app.js:26-32 (hover() listens only for pointermove/pointerleave); app.js:100-107 (water uses pointermove only); app.js:169 (dot r 3.5 in a 560-wide viewBox); index.html:95 ('Hover a dot for the tag.'); README.md:52 ('Every chart has hover details ... works on a phone')",
+   "repro": "node docs/audit/diagnostics/browser-check.mjs http://127.0.0.1:8801/ /tmp/out. In the phone context (390x844, isMobile, hasTouch) it calls page.touchscreen.tap(centre) on a water hit area, a grazing stay, the slowest gain dot and a budget bar.",
+   "expected": "A tap shows that mark's details, and touch targets are large enough to hit.",
+   "actual": "\"tap water: target=132.4x48.8px tipVisible=false \\\"\\\"\", \"tap grazing: target=52.1x14.7px tipVisible=false\", \"tap gain: target=3.9x3.9px tipVisible=false\", \"tap budget: target=86x10.2px tipVisible=false\".",
+   "consequence": "On a phone the manager can't see which tags are slow from the chart, when a tank reading was taken, or a pasture stay's dates. The README's phone claim does not hold for the charts.",
+   "regression_test": "Phone context: tap the H026 dot (the slowest animal). Expect #tip to be visible and contain 'H026', '0.11 lbs/day' and 'Now 1136 lbs'; independently, (1136-1130)/57 = 0.105. Tap the Repairs bar: expect 'Budget $7,200', 'Actual $9,000' and 'Over by $1,800' (4 x 1,800 = 7,200; summed actual 9,000). Tap T4's right end: expect 'Sep 30, 6 PM: 10%' (water.csv T4 2026-09-30T18:00 10.0).",
+   "proposed_fix": "Show and pin the tooltip on pointerdown/click for pointerType 'touch' and dismiss it on a tap elsewhere. For the strip plot, pick the nearest dot within ~16 px of the tap (like the water chart's nearest-reading logic), or add larger invisible hit circles. Change the note to 'Hover or tap'.",
+   "effort": "M"
+  },
+  {
+   "title": "Chart details cannot be reached by keyboard or screen reader",
+   "area": "accessibility / keyboard",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "app.js:83, 119, 155, 183 (svg role=img with a generic aria-label; no focusable marks; no focus handlers); app.js:26-32",
+   "repro": "node docs/audit/diagnostics/browser-check.mjs http://127.0.0.1:8801/ /tmp/out. keyboardWalk presses Tab from the top and records activeElement and #tip each step. The inventory counts descendants of svg.chart with tabIndex >= 0.",
+   "expected": "Keyboard users can reach per-mark details or an equivalent data table for each chart.",
+   "actual": "\"keyboard tooltips: {\\\"tabStopsInsideCharts\\\":0,\\\"tooltipShownOnAnyFocus\\\":false}\". Desktop tab stops are steps 1-6 (the chips), then \"7:body (focus left the page content)\". focusableDescendants = 0 for all 11 charts. Only the budget chart has a data table.",
+   "consequence": "Water history, grazing dates and per-animal gain exist only in hover tooltips. A keyboard or screen-reader user gets 'Average daily gain per animal by group' and nothing more. This undercuts the README's accessibility positioning ('Severity is never color alone').",
+   "regression_test": "Tab past the last chip: focus reaches a control or mark in the gain chart. Focusing the H026 mark (or its table row) exposes 'H026 (Heifers) 0.11 lbs/day, Jul 20 to Sep 15'. Alternatively, each of the water, grazing and gain charts has an associated table in which T4 reads 'Sep 30, 6 PM: 10%' and Yearlings reads 'Sand Hills, Sep 6, 24 days of 21'.",
+   "proposed_fix": "Add a 'Show data' toggle or a visually hidden table for each chart (water: latest level and 24 h drop; grazing: current stay vs plan; gain: group average plus slow tags). Optionally make key marks focusable (tabindex=0) with focus/blur handlers that place the tooltip at the mark.",
+   "effort": "M"
+  },
+  {
+   "title": "On a phone the 'Problem' and 'First step' columns are off-screen and budget differences are cut mid-number",
+   "area": "mobile layout",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "index.html:45 (.scroll { overflow-x: auto }); app.js:66-69 (5-column exceptions table); app.js:203-205 (budget table)",
+   "repro": "browser-check.mjs phone viewport, overflow(). The screenshots <scratch>/audit/baseline/extra/phone-card-exceptions.png and phone-card-budget.png (from extra/sections.mjs) show it.",
+   "expected": "At 390 px every exception row shows what is wrong and the first step without sideways scrolling, and dollar values are fully visible.",
+   "actual": "\"exceptions: scrolls=true cut=[Problem,First step]\" (clientWidth 316, scrollWidth 413). \"budgetTable: scrolls=true cut=[Difference]\" (316 vs 330). The screenshots show 'DIFFERENC' and '+$1,80'. There is no visible cue that the table scrolls.",
+   "consequence": "The README's main design point is that every row says what to do so it can go to a crew lead. On a phone, the 'what to do' column is hidden and over-budget amounts are truncated.",
+   "regression_test": "At 390x844, for every th in #exceptions and #budgetTable, th.getBoundingClientRect().right <= its .scroll container's right + 1, or with a stacked layout each row's First step text is inside the viewport. The Repairs Difference cell '+$1,800' (9,000 - 7,200) is fully inside its container.",
+   "proposed_fix": "Below ~600 px, render each exception as a stacked row: severity + subject, then the problem, then the first step. Drop the Area column there, since the chips already show area. Tighten the budget table, e.g. drop the Budget column on narrow screens or shrink the font and padding.",
+   "effort": "M"
+  },
+  {
+   "title": "Chart text renders at about 7 px on a phone",
+   "area": "mobile readability",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "index.html:50 (svg.chart text 12px in viewBox units); app.js:79 (W=260), 115, 151, 179 (W=560) with width:100% scaling",
+   "repro": "browser-check.mjs inventory: effective px = 12 x rendered width / viewBox width, per chart, at 390x844 vs 1280x900.",
+   "expected": "Chart labels at least ~11 px rendered.",
+   "actual": "Phone: \"chart text (effective px): mini:7 mini:7 mini:7 mini:7 mini:7 mini:7 mini:7 mini:7 grazing:6.8 gain:6.8 budgetChart:6.8\". Desktop: \"mini:13 ... grazing:11.8 gain:11.8 budgetChart:12.3\".",
+   "consequence": "On a phone outdoors, axis labels, the pasture IDs on grazing bars, the '+3d' over-plan marker and the budget % labels are hard to read.",
+   "regression_test": "At 390 px, for each svg.chart, 12 x getBoundingClientRect().width / viewBox.baseVal.width >= 11. Today: grazing, gain and budget are 316/560 x 12 = 6.8; water is ~151/260 x 12 = 7.0.",
+   "proposed_fix": "Draw each chart at its container's CSS width (read clientWidth, set the viewBox to it, redraw on resize). Or switch to a 1-column water grid and narrower viewBoxes on small screens.",
+   "effort": "M"
+  },
+  {
+   "title": "Keyboard focus is lost after activating a filter chip",
+   "area": "accessibility / keyboard",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "app.js:62-65 (chips rebuilt via innerHTML on every click); app.js:224",
+   "repro": "browser-check.mjs chipKeyboardActivation: blur, Tab until data-a=Water, press Enter, read activeElement, press Tab.",
+   "expected": "After Enter, focus stays on the Water chip (aria-pressed=true), and the next Tab goes to Grazing.",
+   "actual": "Both viewports: \"{\\\"focusedBeforeEnter\\\":\\\"button.chip[data-a=Water] \\\\\\\"Water (3)\\\\\\\"\\\",\\\"afterEnter\\\":{\\\"active\\\":\\\"body\\\",\\\"pressed\\\":[\\\"Water (3)\\\"]},\\\"afterNextTab\\\":\\\"button.chip[data-a=All] \\\\\\\"All (10)\\\\\\\"\\\"}\". After a mouse click, activeElement is also 'body'.",
+   "consequence": "Keyboard users lose their place after each filter and must tab from the start. Screen-reader focus jumps to the document body.",
+   "regression_test": "Tab, Tab, Enter: expect document.activeElement.dataset.a === 'Water' and aria-pressed 'true'. Press Tab: expect data-a 'Grazing'.",
+   "proposed_fix": "Render the chips once and update only aria-pressed and the counts. Or, after re-rendering, focus the button whose data-a equals the selected area.",
+   "effort": "S"
+  },
+  {
+   "title": "Tooltips near the right or bottom edge are squeezed or open off-screen",
+   "area": "tooltip placement",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "app.js:105 (water tooltip: left and top not clamped); app.js:30 (hover(): top not clamped)",
+   "repro": "browser-check.mjs edgeTooltips at 1280x900: hover the T4 hit area 2 px from its right edge; scroll the Repairs bar to 30 px above the viewport bottom and hover it. See <scratch>/audit/baseline/extra/desktop-water-tooltip-edge.png.",
+   "expected": "The tooltip stays fully inside the viewport at its natural width.",
+   "actual": "\"edge rightEdgeWater: insideViewport=false rect={\\\"left\\\":1228.5,\\\"top\\\":463.625,\\\"right\\\":1281.65625,\\\"bottom\\\":642.75}\": the tooltip is 53 px wide and 179 px tall, one word per line. \"edge bottomEdgeBudget: insideViewport=false rect={...\\\"top\\\":893.6875,...\\\"bottom\\\":992.25}\" with innerHeight 900.",
+   "consequence": "The latest reading of the right-column tanks (T4, the leaking one, and T8) shows as a crushed sliver. Tooltips for marks low on the screen are mostly hidden.",
+   "regression_test": "1280x900: hover T4 at its right edge and expect tip.right <= 1280 and tip.width >= 120. Hover the Repairs bar placed 30 px above the bottom and expect tip.bottom <= 900 with the text 'Over by $1,800'.",
+   "proposed_fix": "Use one positionTip(e) for both handlers: clamp left to innerWidth - width - 8, and place the tooltip above the pointer when top + height > innerHeight - 8.",
+   "effort": "S"
+  },
+  {
+   "title": "Small chart label collisions: the '3.0' tick overlaps 'lbs per day', and the T6 header wraps on a phone",
+   "area": "chart layout",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "app.js:158-160 (axis title at y=H, right-aligned, under the last tick label at H-12); index.html:55 (.mini h4 flex with no nowrap)",
+   "repro": "browser-check.mjs inventory (text bounding boxes that intersect within each svg; heights of .mini h4) at both viewports",
+   "expected": "No intersecting labels, and every small-multiple header on one line so the charts line up.",
+   "actual": "Desktop: \"\\\"3.0\\\" x \\\"lbs per day\\\" (20 px2)\". Phone: the same, at 12 px2. At phone width \"T6 Cedar Draw no signal\" is 40.3 px tall and every other header is 20.1, so the T6 chart starts lower than T5's (visible in phone-card-water.png).",
+   "consequence": "Small polish issues that a reviewer notices on the first scroll.",
+   "regression_test": "In #gain svg, no two text bounding boxes intersect (today there is 1 pair). At 390 px, all 8 .mini h4 heights are equal (20.1 px).",
+   "proposed_fix": "Move 'lbs per day' below the tick row (raise m.b) or anchor it at the left. Give the h4 name span white-space:nowrap with text-overflow:ellipsis, or use a shorter 'silent' label.",
+   "effort": "S"
+  },
+  {
+   "title": "Exception text shows raw ISO dates while the rest of the page uses 'Jul 20'",
+   "area": "copy / consistency",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "exceptions.js:131, 144, 146",
+   "repro": "Load the page (any viewport) and read the exceptions table. browser-check.mjs reports it in inventory.exceptionTable.",
+   "expected": "The same date format as the tiles and tooltips, e.g. 'since Jul 20' and 'due Sep 15'.",
+   "actual": "\"0.44 lbs/day since 2026-07-20 vs 1.0 target\", \"Overdue by 15 days (due 2026-09-15)\", \"Due in 3 days (2026-10-03)\". The tile says \"since Jul 20\". On a phone the dates wrap as \"2026-\" / \"07-20\" (phone-card-exceptions.png).",
+   "consequence": "Minor inconsistency in the table meant to be handed to a crew lead.",
+   "regression_test": "The Heifers row's problem text contains 'since Jul 20' (the second-to-last weigh-in in weights.csv is 2026-07-20). The health rows contain 'Sep 15' and 'Oct 3'. The existing tests match on subject, so they still pass.",
+   "proposed_fix": "Format these dates with a shared short-date helper (en-US month and day) in exceptions.js.",
+   "effort": "S"
+  },
+  {
+   "title": "All-clear copy reads 'Nothing in all needs attention.' and the budget tile shows '\u22120.0%'",
+   "area": "empty state copy",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "app.js:69; app.js:57",
+   "repro": "node docs/audit/diagnostics/states-check.mjs ... scenario 'all-clear' (the data edited in flight so no rule fires)",
+   "expected": "'Nothing needs attention.' for All, and '0.0%' when spend equals budget.",
+   "actual": "\"empty message: \\\"Nothing in all needs attention.\\\"\" and \"Spend vs budget: \u22120.0% ($88,400 of $88,400, season to date)\".",
+   "consequence": "The 'good day' state, which a demo viewer might see if thresholds are tuned, reads awkwardly.",
+   "regression_test": "With the all-clear data: the table message equals 'Nothing needs attention.', and the tile value equals '0.0%' (88,400 - 88,400 = 0). Clicking Water still shows 'Nothing in water needs attention.'",
+   "proposed_fix": "Special-case area === 'All'. Choose the sign as ta > tb ? '+' : ta < tb ? '\u2212' : ''.",
+   "effort": "S"
+  },
+  {
+   "title": "'Head on grass 375' counts 180 cow-calf pairs as 180 head",
+   "area": "domain wording",
+   "status": "plausible",
+   "severity": "low",
+   "location": "app.js:53-55 (head = sum of groups.head); data/groups.csv ('Cows,cow-calf pairs,180')",
+   "repro": "Load the page and read the second tile",
+   "expected": "Either '180 pairs' with calves counted, or a label that does not imply a total head count.",
+   "actual": "\"Head on grass: 375 (180 cows, 45 heifers, 150 yearlings)\"",
+   "consequence": "A ranch reviewer may read 375 as leaving out the roughly 180 calves on the place. This is a domain judgement, not a code error.",
+   "regression_test": "The tile detail reads '180 pairs' (groups.csv class 'cow-calf pairs', head 180). Or, if calves are counted, the total is 180 x 2 + 45 + 150 = 555 under a one-calf-per-pair assumption stated in the README.",
+   "proposed_fix": "Change the wording to '180 pairs, 45 heifers, 150 yearlings', and either rename the tile (e.g. 'Cattle on grass') or count calves and say so.",
+   "effort": "S"
+  }
+ ],
+ "screenshots": [
+  "/home/claude/ranch-ops-dashboard/docs/audit/screenshots/desktop-full.png",
+  "/home/claude/ranch-ops-dashboard/docs/audit/screenshots/phone-full.png",
+  "/home/claude/ranch-ops-dashboard/docs/audit/screenshots/desktop-focus-chip.png",
+  "/home/claude/ranch-ops-dashboard/docs/audit/screenshots/desktop-tooltip-gain.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/out/phone-after-tap-gain.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/out/report.json",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/extra/desktop-water-tooltip-edge.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/extra/desktop-budget-tooltip-bottom-edge.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/extra/desktop-focus-all-chip.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/extra/phone-focus-all-chip.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/extra/phone-card-exceptions.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/extra/phone-card-water.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/extra/phone-card-gain.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/extra/phone-card-grazing.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/extra/phone-card-budget.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/states/state-loading.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/states/state-stalled-water.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/states/state-health-404.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/states/state-water-header-only.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/states/state-all-clear.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/states/state-meta-404.png",
+  "/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/baseline/states/states-report.json"
+ ]
+}

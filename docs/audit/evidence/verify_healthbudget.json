@@ -1,0 +1,150 @@
+{
+ "verdicts": [
+  {
+   "title": "Health status must be exactly 'open'; 'Open', 'OPEN', 'open ', 'in progress', 'scheduled' and 'overdue' silently drop an overdue vaccination",
+   "verdict": "confirmed",
+   "evidence": "I re-ran healthbudget.repro.mjs (H-01a/b/c, H-02a/b/c all '(no alerts)') and wrote a fresh script, docs/audit/diagnostics/healthbudget.skeptic.mjs. Output: 'F1 \"open\": serious | Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15)', then 'F1 \"Open\": (none)', 'F1 \"OPEN\": (none)', 'F1 \"open \": (none)', 'F1 \" open\": (none)', 'F1 \"in progress\": (none)', 'F1 \"scheduled\": (none)', 'F1 \"overdue\": (none)'. The trim caveat holds: \"F1 'open ' as LAST row (trim): serious | ... Overdue by 15 days\". The code at exceptions.js:141 is `if (h.status !== \"open\" || !h.next_due) continue;`. app.js reads d.health only through findExceptions, and index.html has no health section, so 'nowhere else on the page' is correct. The regression values check out: Sep 15 to Sep 30 is 15 days, and Deworm (Nov 1) is 32 days out, so it gives no row.",
+   "corrections": "Severity high is fair for the case and whitespace variants ('Open', 'OPEN', 'open ', ' open'). One capitalised status column blanks the whole Health area without any message. 'in progress', 'scheduled' and 'overdue' are a different problem: the data model never lists the allowed statuses. Treat that part as a design limitation, not a code defect. A leading space (' open') also drops the row. Capitalised 'Done' is skipped too, which happens to be correct."
+  },
+  {
+   "title": "budgetStatus ignores the month column: future plan rows, a blank current month, or a missing month change 'season to date' and can hide overspend",
+   "verdict": "confirmed",
+   "evidence": "Repro BU-06: 'Fuel 11640/14400 = -19.2%; Repairs 9000/10800 = -16.7%; (no alerts)'. AB-07: 'SPEND VS BUDGET \u221232.7% $89,303 of $132,600'. My browser run S7 shows the same tile, 'budget report rows: []'. My node run: 'F2 future rows: Fuel 11640/14400; budget alerts: (none); tb=132600 ta=89303 tile=-32.7%'. I added an as_of check: with as_of moved to 2026-07-31 the output is still 'serious | Budget | Fuel | 21% over season to date ($2,040)'. If the as_of month were respected, Jun-Jul would give Fuel 5,520 vs 4,800 = +15% and Repairs 4,140 vs 3,600 = +15%. Deleting the Sep Fuel row gives 'Fuel | 20% over season to date ($1,440)'. Hand sums: Fuel 2592+2928+3120+3000 = 11,640 vs 9,600 (+21.25%). Repairs 9,000 vs 7,200 (+25%). Total actual 20,723+22,798+21,846+23,936 = 89,303. Total budget 4\u00d722,100 = 88,400. With Oct/Nov added, budget is 88,400+44,200 = 132,600, and (89,303\u2212132,600)/132,600 = \u221232.65%. exceptions.js:82-89 never reads r.month or asOf.",
+   "corrections": "High is defensible: a full-season plan with future actuals at 0 is a common export shape, and the result is a silent all-clear. Calling it 'the normal way to load a budget' overstates it a little. Add to the evidence that as_of is also ignored: as_of Jul 31 still counts September. BU-04/AB-08 (blank Sep Fuel actual) is cited under both this finding and the next one. Its lost Fuel alert belongs here (blank counted as 0), not to the string bug."
+  },
+  {
+   "title": "Blank or accounting-format amounts ('', '(300)') turn budget totals into strings via +=: Fuel/Repairs alerts vanish and the headline tile shows $884,000, e+22% or NaN",
+   "verdict": "confirmed",
+   "evidence": "My node run: 'F3 Hay blank budget: Hay budget=\"0\"; tb=\"884000\"; ta=89803'. Browser S3: 'SPEND VS BUDGET \u221289.8% $89,803 of $884,000'. '(300)' gives 'Repairs actual=\"9000(300)\" pct=NaN; alerts serious | Budget | Fuel ...' with no Repairs row. Browser S10: 'SPEND VS BUDGET \u2212NaN% $NaN of $88,400', table row 'Repairs $7,200 $NaN $NaN', 18 NaN attributes. Blank Sep Fuel: 'Fuel actual=\"8640\"; pct=-0.1', and the tile is '+2.715256118778953e+22% $24,002,864,090,005,946,000,000,000 of $88,400' (S8). Expected values check out: 89,303+500 = 89,803 and 1,403/88,400 = +1.59%. For '(300)': 9,000\u2212300 = 8,700, which is +1,500 over budget = 20.83%, shown as '21% over'. For AB-08: 86,303 vs 86,000 = +0.35%.",
+   "corrections": "For blank Sep Fuel, the string concatenation does not cause the lost Fuel alert. 'F3 Sep Fuel actual typed 0 (control)' also gives only the Repairs row, because \"8640\"\u22129600 coerces to the same \u221210% either way. There the string bug only corrupts the tile. Two consequences are missing from the finding. (a) A blank first-month cell creates a huge false alarm instead of hiding one. With Jun Fuel actual blank, the actual is '\"0292831203000\"' and the alert reads 'serious | Budget | Fuel | 3050324931% over season to date ($292,831,193,400)', and the tile shows '+2.715161683610894e+31%' (S8b). (b) '$3000' with no comma gives 'Fuel actual=\"8640$3000\"' and the Fuel alert disappears. High severity stands."
+  },
+  {
+   "title": "Zero-budget categories print 'Infinity% over'; a 0-budget or unreadable row turns every bar coordinate into NaN, so the budget chart draws no bars",
+   "verdict": "confirmed",
+   "evidence": "Node: 'F4 Hay 0/500: serious | Budget | Hay | Infinity% over season to date ($500)' and 'F4 Hay 0/0 pct: NaN'. Browser S1: 'chart NaN/Infinity attrs: 36; labels: [\"Hay\",\"+Infinity%\",...]', console 'Error: <line> attribute x1: Expected length, \"NaN\".' S2: 21 NaN attributes and label 'Hay \u2212NaN%'. At app.js:181, lim = Math.max(0.3, ...|pct|) becomes Infinity or NaN, so every x(v) is NaN.",
+   "corrections": "Fix the consequence text. The alert does show the dollars ('Infinity% over season to date ($500)'), and the budget table still shows 'Hay $0 $500 +$500' (S1). So the manager does see the dollar amount. The harm is the broken-looking 'Infinity%' and the blank chart. Medium is fair."
+  },
+  {
+   "title": "An open health task with a blank or unreadable next_due is never shown anywhere",
+   "verdict": "design-limitation",
+   "evidence": "Node: 'F5 blank due: (none)' and 'F5 TBD: (none)'. exceptions.js:141 skips a blank next_due. For 'TBD', days() returns NaN, which fails both `left < 0` and `left <= 7`. README.md:27 defines the rule only as 'An open task is overdue / due within 7 days', so the code does what the documented rule says.",
+   "corrections": "Reproduced, but this is a gap in what the rule covers, not a code defect. Lower severity to low: an open task with no date is backlog more than a time-critical exception. A data-quality warning ('no due date' or 'can't read the date') is still a good addition."
+  },
+  {
+   "title": "Committed 'Fly tag check' row (status done, last_done Jun 5, next_due Sep 1) contradicts itself and is never flagged; last_done is never read",
+   "verdict": "design-limitation",
+   "evidence": "Node 'F6 committed health' gives only the Booster and Pinkeye rows, with no Fly tag row. data/health.csv has 'Cows,Fly tag check,2026-06-05,2026-09-01,done'. exceptions.js:140-147 never reads last_done. Sep 1 to Sep 30 is 29 days.",
+   "corrections": "Wrong location: the generator row is scripts/generate_data.py:114, not :180. Lower severity to low. It only affects how credible the sample data looks to someone who opens health.csv. The data model doesn't define what next_due means on a 'done' row, and the code is consistent with its own rule."
+  },
+  {
+   "title": "Budget severity is percent only: $30 over on $200 is serious, $9,500 over on $100,000 is a warning, $4,000 is ignored",
+   "verdict": "design-limitation",
+   "evidence": "Node F7: 'serious | Budget | Ear tags | 15% over season to date ($30) ... || warning | Budget | Feed | 10% over season to date'. There is no Hay row. Hand: 30/200 = 15%, 9,500/100,000 = 9.5% (Math.round gives '10%'), 4,000/100,000 = 4%. exceptions.js:151/154 compare only pct.",
+   "corrections": "Correctly labelled a design limitation. Nothing goes wrong on the committed data, where every category is at least $1,200 a month. Medium is acceptable as a rule-design critique, since dual percent-and-dollar materiality thresholds are standard in variance reporting."
+  },
+  {
+   "title": "Ties within a severity are sorted A-Z by area, so Budget overruns head the serious block, above an overdue vaccination and a silent water sensor",
+   "verdict": "design-limitation",
+   "evidence": "Node F8 order: '3.serious/Budget/Fuel | 4.serious/Budget/Repairs | 5.serious/Gain/Heifers | 6.serious/Grazing/Yearlings in Sand Hills | 7.serious/Health/Yearlings: Booster vaccine | 8.serious/Water/Tank T6 (Cedar Draw)'. Line 158 tie-breaks with a.area.localeCompare(b.area). The 'worst first' test only checks severity order.",
+   "corrections": "Lower severity to low. The T6 subject has no 'here now' suffix, so no group is currently in Cedar Draw, which weakens the 'time-critical for animal welfare' claim for this data. The booster is already 15 days overdue, not a same-day item. The README's 'worst first' holds at the severity level."
+  },
+  {
+   "title": "Budget boundaries: exactly 5.0% gets no row though the rules say '5-10%'; 9.6% and 10.4% both print '10% over' at different severities",
+   "verdict": "confirmed",
+   "evidence": "Node F9: '1000/1049: pct=0.049 (none)', '1000/1050: pct=0.05 (none)', '1000/1051: ... warning | 5% over', '1000/1096: warning | 10% over', '1000/1100: pct=0.1 warning | 10% over', '1000/1104: serious | 10% over season to date ($104)'. Also '50/1000 === 0.05: true'. The rules table renders 'A category is 5-10% over budget'.",
+   "corrections": "Wrong location: the README rule text is README.md:28, not :243 (the README has 98 lines). Note also that 1,051 vs 1,000 prints '5% over' and is flagged while 1,050 prints nothing, so the same rounded '5%' appears on both sides of the line. Low is fair."
+  },
+  {
+   "title": "With amounts in cents, a floating-point sum tips an exact 10.00% overrun into 'serious' (pct 0.10000000000000007)",
+   "verdict": "confirmed",
+   "evidence": "Node F10 cents: 'serious | Budget | X | 10% over season to date ($741.9)'. Python sums: budgets 7419.0, actuals 8160.9, over 741.90 = exactly 10%. The repro shows 'actual=8160.900000000001 pct=0.10000000000000007'. Control: a single row of 1000.00 vs 1100.00 gives 'warning', so the drift needs a sum of several rows with cents.",
+   "corrections": "Low is right, maybe generous. The values came from a search (fpsearch.mjs), and it only happens when the overrun is exactly 10.000% to the cent."
+  },
+  {
+   "title": "Budget alert dollars are raw toLocaleString ('$104.5', '$741.9') and warning rows carry no dollars at all",
+   "verdict": "confirmed",
+   "evidence": "Node F11: 'serious | Budget | X | 10% over season to date ($104.5) ... || warning | Budget | Y | 6% over season to date'. exceptions.js:152 uses `$${b.variance.toLocaleString()}`, and line 155 has no dollar figure. Math.round(104.5) = 105, which matches money().",
+   "corrections": "One more problem: toLocaleString() is called with no locale (here and in money()), while dates are pinned to en-US. Browser S11 with locale de-DE shows 'Fuel 21% over season to date ($2.040)' and 'SPEND VS BUDGET +1.0% $89.303 of $88.400', next to 'Data as of September 30, 2026 at 6:00 PM'. The time verifier already reported this as MISSED-2. Low is fair."
+  },
+  {
+   "title": "Spend vs budget tile shows '\u22120.0%' when exactly on budget and '\u2212NaN% $0 of $0' with no budget rows; on-budget bars read '\u22120%' and 'Under by $0'",
+   "verdict": "confirmed",
+   "evidence": "Browser S4: 'SPEND VS BUDGET \u22120.0% $88,400 of $88,400, season to date', labels '\u22120%' \u00d76. Hovering the last bar gave '[\"block\",\"Water and fencing Budget $4,800 Actual $4,800 Under by $0\"]'. S5: 'SPEND VS BUDGET \u2212NaN% $0 of $0, season to date'. In app.js, the sign comes from ta > tb at :57, the label sign from r.pct > 0 at :193, and the tooltip from r.variance > 0 at :194.",
+   "corrections": "None. Low is fair."
+  },
+  {
+   "title": "'Due in 0 days' for a task due today",
+   "verdict": "confirmed",
+   "evidence": "Node F13: 'warning | Health | Cows: Pinkeye check | Due in 0 days (2026-09-30) | Plan it with the next gather'.",
+   "corrections": "Duplicates TIME-18. Low is fair."
+  },
+  {
+   "title": "next_due with a time part ('2026-09-30 00:00:00') gives fractional days and flips severity with the viewer's time zone",
+   "verdict": "confirmed",
+   "evidence": "My skeptic.mjs run under three zones. UTC: 'Due in 0 days (2026-09-30 00:00:00)'. America/Chicago: 'warning | ... Due in 0.20833333333333334 days'. Europe/Berlin: 'serious | ... Overdue by 0.08333333333333333 days (due 2026-09-30 00:00:00) | Schedule it this week'. The date-only string parses as UTC midnight and the space-separated form as local time: Chicago 05:00Z is +5/24, Berlin 22:00Z the day before is \u22122/24.",
+   "corrections": "Another trigger: a leading space in the date cell (', 2026-09-15'), because parseCSV doesn't trim cells. Under America/Chicago it gives 'Overdue by 14.791666666666666 days (due  2026-09-15)'. Low is fair."
+  },
+  {
+   "title": "Open task whose last_done is after next_due is reported 'Overdue ... Schedule it this week' (risk of a repeat treatment)",
+   "verdict": "design-limitation",
+   "evidence": "Node F15: 'serious | Health | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15) | Schedule it this week' for last_done 2026-09-20, next_due 2026-09-15, status open. last_done is never read (exceptions.js:140-147).",
+   "corrections": "None. Design limitation and low are both fair."
+  },
+  {
+   "title": "Budget chart: a category about 25% or more under budget draws its value label on top of its category name",
+   "verdict": "confirmed",
+   "evidence": "I measured label bounding boxes in the browser (committed data, Water and fencing actual varied, lim = 0.3). S9a at \u221220%: no overlap. S9b at \u221225%: no overlap. S9c at \u221227%: 'Water and fencing[27-130] vs \u221227%[119-152]'. S9d at \u221230%: '[27-130] vs \u221230%[99-134]'. S9e at \u221240%: '[27-130] vs \u221240%[99-134]'. S7 (future rows, lim 0.38): four rows overlap, for example 'Vet and health[49-130] vs \u221234%[119-154]'.",
+   "corrections": "The threshold is a little past 25%: no overlap at \u221225%, overlap from about \u221226/\u221227% when the scale limit is \u00b130%. More generally, the overlap hits whichever category sits within about 4 points of the chart's \u2212lim edge, so its trigger is relative to the scale, not a fixed percent. Low is fair."
+  },
+  {
+   "title": "Rules table prints floating-point noise when a budget threshold is tuned (0.07 -> '7.000000000000001-10%')",
+   "verdict": "confirmed",
+   "evidence": "Browser S6 (exceptions.js copy with budgetWarn 0.07): 'Budget Warning A category is 7.000000000000001-10% over budget'. Node: '0.07*100' prints 7.000000000000001, while 0.06, 0.08, 0.15 and 0.12 print cleanly.",
+   "corrections": "None. Low is fair."
+  }
+ ],
+ "missed": [
+  {
+   "title": "One large percentage overrun squashes the budget chart and stacks all five axis tick labels on top of each other",
+   "area": "Budget",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "app.js:181-187 (lim = max(0.3, |pct|); fixed tick set [-0.2, -0.1, 0, 0.1, 0.2])",
+   "repro": "node docs/audit/diagnostics/healthbudget.skeptic.missed.mjs (case M1: committed data + '2026-09,Hay,500,1500'; copies the repo to a temp dir, serves it, measures getBBox of the tick labels and the bar widths)",
+   "expected": "Axis tick labels that don't overlap, and the six real categories still readable. Hay is (1500\u2212500)/500 = +200%, so lim = 2 and the fixed ticks are 0.1/(2\u00b72)\u00b7366 = 9.15 px apart, narrower than one '\u221220%' label (about 32 px). The tick set or the scale has to adapt.",
+   "actual": "Control: 'tick boxes [[\"-20%\",185.1,216.9],[\"-10%\",247.1,276.9],...]; overlapping tick pairs=0; ... Fuel=129.6px'. With Hay: 'tick boxes [[\"-20%\",288.8,320.6],[\"-10%\",299,328.7],[\"0%\",313.3,332.7],[\"+10%\",316.1,348.2],[\"+20%\",324.2,358.4]]; overlapping tick pairs=4; bar widths Hay=183px, Repairs=22.9px, Fuel=19.4px, Vet and health=1px, Feed and mineral=2.9px, Labor=4.4px, Water and fencing=6.5px'",
+   "consequence": "A small unbudgeted-ish line, here $1,000 over on a $500 hay budget, takes over the spending chart. The $2,040 Fuel overrun shrinks to a 19 px sliver, and the axis becomes an unreadable smear. The chart then ranks the categories by percent, opposite to their dollar importance.",
+   "regression_test": "In the browser, with committed data + '2026-09,Hay,500,1500': no two axis tick label bounding boxes in #budgetChart intersect horizontally, and the Fuel bar is at least 60 px wide. Hand calculation: with the scale capped at \u00b1100%, Fuel at +21.25% is 0.2125/2\u00b7366 \u2248 39 px; with an outlier-clipped \u00b130% scale it is 0.2125/0.6\u00b7366 \u2248 130 px. So the bound depends on the chosen cap. Assert \u2265 39 px for a \u00b1100% cap.",
+   "proposed_fix": "Derive ticks from lim (a nice step such as 0.1, 0.25, 0.5 or 1, chosen so there are at most 5 ticks). Cap the scale (for example at \u00b1100%, or at the 2nd-largest |pct| \u00d7 1.2) and draw any bar beyond the cap clipped, with an arrow and its true label. Use the same U+2212 minus on tick labels as on the bar labels; ticks currently use an ASCII '-'.",
+   "effort": "S"
+  },
+  {
+   "title": "A numeric next_due (Excel serial date or yyyymmdd) is read as 1970 epoch milliseconds, so a task due in 32 days is reported 'serious, Overdue by 20725.99 days'",
+   "area": "Health",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "exceptions.js:30 (numeric-looking cell becomes a Number), exceptions.js:36 (new Date(number) = epoch ms), exceptions.js:142-144",
+   "repro": "node docs/audit/diagnostics/healthbudget.skeptic.missed.mjs (case M2): health row 'Yearlings,Deworm,2026-06-02,46327,open' (and '...,20261101,open'), as_of 2026-09-30T18:00",
+   "expected": "No alert. Excel serial 46327 is 1899-12-30 + 46327 days = 2026-11-01 (checked in Python: '46327 -> 2026-11-01'), which is 32 days after Sep 30 and beyond the 7-day window. Failing that, a row saying the due date can't be read. The ISO control '2026-11-01' gives '(none)'.",
+   "actual": "'M2 next_due=46327 (typeof number): serious | Yearlings: Deworm | Overdue by 20725.99946380787 days (due 46327)' and 'M2 next_due=20261101 (typeof number): serious | Yearlings: Deworm | Overdue by 20725.765496516204 days (due 20261101)'",
+   "consequence": "A due-date column that Excel saved as General (serial numbers) turns every open health task into a serious overdue alert with a nonsense day count. Real alerts drown in false ones, the true due dates are lost, and the report looks broken to a reviewer. The gain auditor reported the same parseCSV mechanism for weigh-in dates (GN-16, a crash). The health consequence, a false serious alarm, was not reported.",
+   "regression_test": "findExceptions with only the health row 'Yearlings,Deworm,2026-06-02,46327,open' and as_of 2026-09-30T18:00 must give no Health row matching /Overdue/. Either no row at all (Nov 1 is 32 days out: 30 days in October + 1 + 1 = 32), or one warning matching /can't be read|unreadable/. The same for '20261101'. The control 'Yearlings,Deworm,2026-06-02,2026-11-01,open' gives no alert.",
+   "proposed_fix": "Keep date columns as strings in parseCSV (a per-file list of date columns), or in the health loop require String(next_due) to match /^\\d{4}-\\d{2}-\\d{2}$/. Otherwise emit a warning \"Due date '<raw>' can't be read\". Compute days from Date.UTC parts.",
+   "effort": "S"
+  },
+  {
+   "title": "Large under-spend is never surfaced: a category 50% under budget gets no row",
+   "area": "Budget",
+   "status": "design-limitation",
+   "severity": "low",
+   "location": "exceptions.js:149-156 (only pct > budgetWarn / budgetSerious are checked); README.md:28",
+   "repro": "node docs/audit/diagnostics/healthbudget.skeptic.missed.mjs (case M3): budget rows '2026-09,Vet and health,6000,3000' and '2026-09,Labor,36000,18000'",
+   "expected": "Under a variance-review rule, a warning such as 'Vet and health: 50% under season to date ($3,000)' to prompt a check for skipped work or invoices not yet posted. Hand: (3,000\u22126,000)/6,000 = \u221250%.",
+   "actual": "'M3 pct=[[\"Vet and health\",-0.5],[\"Labor\",-0.5]]; alerts: (none)'",
+   "consequence": "Halfway through the season, a vet line at 50% of plan can mean skipped treatments, or bills not yet entered. Unentered bills also understate every 'season to date' overspend check. The chart shows the bar, but the exception report, which is the page's main output, stays silent. This is a judgement about the rule, not a code error.",
+   "regression_test": "With a proposed RULES.budgetUnderWarn = 0.25: the rows above produce exactly two warnings, problem 'Vet and health 50% under season to date ($3,000)' and 'Labor 50% under season to date ($18,000)'. The dollars are by subtraction: 6,000\u22123,000 and 36,000\u221218,000. The committed data must still give no under-budget row: its largest under-spend is Water and fencing at 4,457/4,800 = \u22127.1%.",
+   "proposed_fix": "Add an under-budget warning (for example 25% or more under, plus a dollar floor) with the action 'Confirm the work was done and the bills are entered'. List it in the rules table and the README.",
+   "effort": "S"
+  }
+ ]
+}

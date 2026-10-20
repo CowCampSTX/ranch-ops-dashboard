@@ -1,0 +1,166 @@
+{
+ "verdicts": [
+  {
+   "title": "parseCSV is not a CSV parser: quoted commas shift columns, quotes and escaped quotes stay in the text, CR-only and fully quoted exports break",
+   "verdict": "confirmed",
+   "evidence": "I re-ran `node docs/audit/diagnostics/csv.repro.mjs` and got the same totals: '66 cases: 8 MATCH, 58 MISMATCH'. The totals are identical under TZ=UTC, America/Chicago and Asia/Tokyo. CSV-01/02/03/04/06/08 print '(no alerts)'. CSV-05 prints 'warning|Cows: \"Check \"\"bad eye\"\" calves\"|Due in 3 days (2026-10-03)'. CSV-07 prints 'THROWS TypeError: Cannot read properties of undefined (reading 'localeCompare')'. My own minimal case, parseCSV('a,b,c\\n\"x, y\",2,3'), gives [{\"a\":\"\\\"x\",\"b\":\" y\\\"\",\"c\":2}]. Round trip through the repo's writer: Python csv.writer writes 'P3,\"Sand Hills, east\",720,21,60\\r\\n', and parseCSV reads it back as {\"name\":\"\\\"Sand Hills\",\"acres\":\" east\\\"\",\"planned_graze_days\":720,\"min_rest_days\":21}. Browser B-09 shows the header 'Example Ranch (fictional), 1200 east\"480400600700200 acres in 8 pastures', the chip 'Grazing (0)' and the chart head 'T3 \"Sand Hills91.5%'. The cited code at exceptions.js:22-34 matches.",
+   "corrections": "Wrong citation: scripts/generate_data.py:108-112 is inside water() and health(). csv.writer is used in write() at lines 42-46. The writer/reader mismatch is latent today because the committed data has no commas or quotes. CR-only line endings (CSV-08) are a rare trigger now, so the high severity comes from the quoted-comma and fully-quoted cases. High is fair."
+  },
+  {
+   "title": "Blank, whitespace-only and Excel ',,,' rows become records: a false critical water alert, or a crash that blanks the whole report",
+   "verdict": "confirmed",
+   "evidence": "My committed-data probe (v1.mjs) gives: 'moves ,,,: THROWS TypeError: Cannot read properties of undefined (reading 'name')'; 'weights ,,,: THROWS TypeError: ... (reading 'date')'; 'water ,,,: 11 alerts ... NEW critical|Water|Tank  (undefined)|Down to % full'. The same row appended to health, budget, pastures or groups still gives '10 alerts'. Browser B-01 gives page errors [\"Cannot read properties of undefined (reading 'name')\"], header \"\", tiles [] and 0 exception rows. CSV-12 gives 'critical|Tank 0 (undefined)|Down to % full'.",
+   "corrections": "'The empty Needs attention section reads as an all-clear' overstates it. In my B-01 screenshot the tiles, the as-of line, the table, every chart, the budget table and the rules table are all empty. That looks like a page that failed to load, not an explicit all-clear. The real harm is that every alert (including both critical water alerts) is unavailable and no error text says why. A ',,,' row only hurts in moves, weights and water. Whitespace-only lines inside a file are unusual; ',,,' is the realistic trigger. High still holds for moves and weights."
+  },
+  {
+   "title": "An animal with a single weigh-in (bought or tagged mid-season) crashes gainStatus and blanks the page",
+   "verdict": "confirmed",
+   "evidence": "CSV-17 gives 'THROWS TypeError: Cannot read properties of undefined (reading 'date')'. Browser B-02 (committed data plus 'Y151,Yearlings,2026-09-15,700') gives page errors [\"Cannot read properties of undefined (reading 'date')\"], tiles [] and 0 exception rows. Code at exceptions.js:69-70: `const [a, b] = rows.slice(-2)`, then `b.date`. The regression values check out: (820-700)/57 = 2.105.",
+   "corrections": "The trigger is broader than a mid-season purchase. Between the first and second weigh-in of a season every animal has one row, so the whole dashboard is unusable until a second weigh-in exists. High is fair."
+  },
+  {
+   "title": "Blank cells act as zero or get concatenated as text: false critical/serious alerts, a hidden over-budget alert, absurd tile numbers",
+   "verdict": "confirmed",
+   "evidence": "The repro reproduces CSV-13, 43, 44, 45, 46 and 48 exactly, for example 'serious|Fuel|2700324931% over season to date ($259,231,193,400)' and 'serious|Cows in South Divide|Day 18 of a -day plan (18 days over)'. On committed data with the September Fuel actual blank, budgetStatus returns {\"category\":\"Fuel\",\"budget\":9600,\"actual\":\"8640\",\"variance\":-960,\"pct\":-0.1}, with actual typed as a string, and 'LOST serious|Budget|Fuel|21% over season to date ($2,040)'. Browser B-07 shows the tile 'SPEND VS BUDGET / +2.715256118778953e+22% / $24,002,864,090,005,946,000,000,000 of $88,400'. B-08 shows 'HEAD ON GRASS / 180150'. I checked the hand totals: 2592+2928+3120 = 8640 against 7200 is 20%, and 2592+3120+3000 = 8712 against 7200 is 21% ($1,512).",
+   "corrections": "CSV-44 has a different root cause from the one given. The concatenated '8640' coerces back to the same number, so the alert is hidden because a blank actual counts as 0 against a season budget that includes the unbooked month. String concatenation is what drives CSV-45 and the B-07 tile. CSV-43 is not a pure false alarm: a missing latest reading does need attention. The defect is that it is labelled critical with the wording 'Down to % full / check the float' instead of being raised as a sensor or data alert. The budgetStatus regression test feeds '' straight into budgetStatus, which contradicts the proposed loader-level fix that produces null. The test should go through the loader, or pass null."
+  },
+  {
+   "title": "Non-numeric, non-finite and out-of-range readings pass as OK or become nonsense alerts",
+   "verdict": "confirmed",
+   "evidence": "CSV-50/51/52/55 print '(no alerts)'. CSV-53 prints 'critical|Tank T1 (North Flat)|Dropped 1079 points in 24 hours, now -999%'. CSV-56 prints 'serious|Hay|Infinity% over season to date ($500)'. Browser B-06 (committed T2 latest set to ERR) shows the tile 'WATER TANKS OK / 6 of 8 / 2 need a look', the chart head 'T2 WindmillERR%' and 9 rows, with T2's critical row gone. Mechanism: JS compares 'ERR' < 25 as false, and drop24h is NaN.",
+   "corrections": "The high severity rests on CSV-50/51/52 and B-06, where a low tank passes silently. CSV-49, 53, 54 and 56 still raise alerts that make someone look. Their problem is wording and credibility (for example 'Infinity%' or '1079 points'), not a missed alert, so on their own they would be medium or low."
+  },
+  {
+   "title": "No column checks: a renamed, misspelled or space-padded header silently turns a rule off",
+   "verdict": "confirmed",
+   "evidence": "My committed-data probe with the header 'level_pct ' gives '8 alerts (base 10)': LOST T2 critical, T4 critical and T6 '...last level 98.5%'; NEW 'serious|Water|Tank T6 (Cedar Draw)|No reading for 42 hours; last level undefined%'. CSV-24 and CSV-25 print '(no alerts)'. CSV-31 prints 'THROWS TypeError: Cannot read properties of undefined (reading 'as_of')'.",
+   "corrections": "There are more common real-world triggers than a renamed column, and the same fix covers them. (1) A one-line vendor preamble above the header. My CV-04 (water) gives 'THROWS TypeError: Cannot read properties of undefined (reading 'localeCompare')', and CV-04b (health) gives 'LOST serious|Yearlings: Booster vaccine|Overdue by 15 days ... ; warning|Cows: Pinkeye check'. (2) Doubled-CR line endings leave '\\r' on the last header name (reported under missed). High is fair."
+  },
+  {
+   "title": "IDs and names that look like numbers are coerced to numbers: tags merge, ear tags are renamed, pastures collide, numeric group names crash",
+   "verdict": "confirmed",
+   "evidence": "CSV-18 to CSV-23 reproduce exactly. parseCSV('tag\\n007\\n1e3\\n0x10\\n 12 ') gives [{\"tag\":7},{\"tag\":1000},{\"tag\":16},{\"tag\":12}]. CSV-21 gives 'warning|Cows in South|Planned move in 1 day'. CSV-22 gives 'THROWS TypeError: g.group.toLowerCase is not a function'. CSV-23 gives 'THROWS TypeError: a.time.localeCompare is not a function'. Hand checks: Sep 1 to Sep 30 is 29 days, and 29 \u2212 10 = 19. (0.351 + 3\u00d72.105)/4 = 1.667, which is at least 1.6.",
+   "corrections": "The severity is overstated; medium fits better. The merge and collision cases (007 with 7, 1e3, 0x10, pastures 01 and 1) are contrived. The likely leading-zero case only prints '7' for '007', which is cosmetic. The real weight is in two crash triggers: an epoch time and a digits-only group name. The browser crash is wider than reported. tiles() at app.js:54 calls g.group.toLowerCase() on every group, so any digits-only group name blanks the page even when no slow-animal warning exists. My VB-10 (Cows renamed '2025') gives page errors [\"g.group.toLowerCase is not a function\"], tiles [] and 0 rows."
+  },
+  {
+   "title": "Whitespace and letter case in keys and status values are not normalized",
+   "verdict": "confirmed",
+   "evidence": "Committed data with ',open' replaced by ',Open' gives '8 alerts (base 10)' and LOST both 'serious|Health|Yearlings: Booster vaccine|Overdue by 15 days (due 2026-09-15)' and 'warning|Health|Cows: Pinkeye check|Due in 3 days (2026-10-03)'. ',open ' (trailing space) gives the same loss. 'T4, P4' gives 'NEW critical|Water|Tank T4 (undefined)|Dropped 46 points...', which loses 'Heifers here now'. CSV-10 prints 'THROWS TypeError: ... (reading 'name')'.",
+   "corrections": "The severity is inconsistent with the rest of the report. A capital O or a trailing space silently removes every health alert. That is the same class as finding 6, a silent loss of a whole rule, which was graded high. Either this should be high, or findings 6 and 13 should come down to medium."
+  },
+  {
+   "title": "Unknown references (pasture or group not in the lookup tables) crash the page or silently drop data",
+   "verdict": "confirmed",
+   "evidence": "CSV-26 gives 'THROWS TypeError: Cannot read properties of undefined (reading 'name')'. CSV-27 gives 'critical|Tank T9 (undefined)|Down to 11.8% full'. CSV-28 gives '(no alerts)'. Committed data with Heifers weigh-ins relabelled 'Steers' gives '9 alerts (base 10)' and 'LOST serious|Gain|Heifers|0.44 lbs/day since 2026-07-20 vs 1.0 target'. Hand check: 40/57 = 0.702, which is below 0.8.",
+   "corrections": ""
+  },
+  {
+   "title": "app.js hard-codes a group named 'Yearlings': real data without one hides the whole exception report",
+   "verdict": "confirmed",
+   "evidence": "B-03 gives page errors [\"Cannot read properties of undefined (reading 'adg')\"], tiles [], chips \"\" and 0 exception rows. app.js:48 does .find(g => g.group === 'Yearlings'), and line 225 calls tiles() before exceptionsTable().",
+   "corrections": "The trigger is wider than a missing group name. The same crash happens when Yearlings exist but have no weigh-ins yet. My VB-09 (weights.csv header only) gives page errors [\"Cannot read properties of undefined (reading 'adg')\"] and 0 rows. It also happens when Yearlings have a blank target. My VB-08 gives [\"gain.target.toFixed is not a function\"] and 0 rows. The proposed fix ('skip the tile when that group is absent') must check the gainStatus result (not groups.csv) and also check that the target is a finite number."
+  },
+  {
+   "title": "A tank silent for more than 7 days crashes the water charts and every section drawn after them",
+   "verdict": "confirmed",
+   "evidence": "B-04 gives page errors [\"Cannot read properties of undefined (reading 'time')\"], 10 exception rows including 'Serious Water Tank T6 (Cedar Draw) No reading for 240 hours; last level 100%', 0 water charts, grazing chart false, gain chart false, 0 budget table rows and 0 rules rows. Code at app.js:90-93 filters to 7 days and then reads last.time. The regression counts are right: 6 categories plus a header is 7 budget rows, and 11 rules plus a header is 12.",
+   "corrections": "Medium is fair. A sensor that stays dead for weeks is common on a ranch, so this is likely to happen."
+  },
+  {
+   "title": "No list of expected tanks: an empty water export, or a tank missing from the export, gives an all-clear",
+   "verdict": "design-limitation",
+   "evidence": "CSV-29 gives '(no alerts)'. CSV-30 gives only T2 and T4 water alerts, with T6 gone. B-05 gives the tile 'WATER TANKS OK / 0 of 0 / 0 need a look', chips 'Water (0)' and 7 rows. exceptions.js:39-52 builds tanks only from the rows that are present, and there is no tank registry anywhere in the data model.",
+   "corrections": "I agree it is a design limitation, not a code bug. A missing tank simply has no rows, so the code cannot know it exists."
+  },
+  {
+   "title": "A duplicated weigh-in for one animal (EID double read) erases or downgrades the group's gain alert",
+   "verdict": "confirmed",
+   "evidence": "CSV-32 gives '(no alerts)'. Committed data plus 'H001,Heifers,2026-09-15,1169' gives 'LOST serious|Gain|Heifers|0.44 lbs/day since 2026-07-20 vs 1.0 target' and 'NEW warning|Gain|32 heifers|Under 0.5 lbs/day: H002, H004, ...'. A weight of 1170 gives the same result. Mechanism: the last two rows share a date, so ADG = 0/0 (NaN) or x/0 (Infinity), and the group average becomes non-finite. The regression value checks out: 40/57 = 0.70.",
+   "corrections": "On the committed data the result is a downgrade (a serious group alert becomes a warning listing 32 heifers), not an erasure. Full erasure only happens in the 3-head fixture, where no animal is under 50%. There is another visible symptom: a duplicated final weigh-in for Y001 makes the browser tile read 'YEARLING GAIN / NaN lbs/day / target 2.0, since Sep 15'. Medium would be more consistent with finding 8, since gain alerts are not time-critical."
+  },
+  {
+   "title": "Other duplicate and contradictory records are not detected: false budget warnings, double alerts, a group shown in two pastures",
+   "verdict": "confirmed",
+   "evidence": "CSV-33 gives 'warning|Fuel|7% over season to date'. Hand check: budget 5\u00d72400 = 12,000 and actual 3\u00d72400 + 2\u00d72800 = 12,800, so 6.7% rounds to 7%. The true figures are 9,600 against 10,000 = 4.2%. Committed budget.csv appended to itself gives 'NEW serious|Budget|Fuel|21% over season to date ($4,080)' and Repairs '$3,600'. CSV-37 gives 'serious|Yearlings in South Divide|Day 36 of a 21-day plan (15 days over) || serious|Yearlings in Sand Hills|...'. Aug 25 to Sep 30 is 36 days.",
+   "corrections": ""
+  },
+  {
+   "title": "Dates are never validated; non-ISO formats (as US Excel re-saves them) mis-sort or shift by the time zone",
+   "verdict": "partially-confirmed",
+   "evidence": "Every code behaviour reproduces. CSV-40b gives 8 alerts of the form 'serious|Tank T1..T8|No reading for 516 hours'. CSV-41 gives 'Overdue by 14.791666666666666 days'. CSV-38 gives '(no alerts)'. CSV-39 gives 'Due in 1 day (2026-09-31)', and new Date('2026-09-31') gives '2026-10-01T00:00:00.000Z'. My own simulation of a US-Excel re-save converts only the date-only cells in health, moves and weights. Under TZ=America/Chicago it keeps all 10 alerts but prints 'Day 23.791666666666668 of a 21-day plan (2.791666666666668 days over)', 'Overdue by 14.791666666666666 days (due 9/15/2026)' and 'Due in 3.2083333333333335 days'. Under TZ=UTC it prints whole days. In CV-06 (M/D/YYYY weigh-ins with an October date) the output is 'adg 2.105 from 7/20/2026 to 9/15/2026'. The correct answer is 0.370 from 9/15/2026 to 10/12/2026, because (830-820)/27 = 0.370.",
+   "corrections": "The headline trigger is not supported. I have no Excel here to test it. As far as I know, Excel leaves 'YYYY-MM-DDTHH:MM' with a 'T' as text, so re-saving water.csv or meta.csv is unlikely to produce the CSV-40b result; that is an inference, not something I observed. What Excel does convert to M/D/YYYY is the date-only columns (health, moves, weights). On the committed data that only produces fractional-day wording in US time zones. Once dates cross into October, the string sort silently picks the wrong weigh-ins, so a steer gaining 0.37 lbs/day shows as 2.105, on target. High still holds, but for this corrected trigger, plus the silent drops from typos (CSV-38, CSV-42)."
+  }
+ ],
+ "missed": [
+  {
+   "title": "Doubled-CR line endings (\\r\\r\\n) silently disable the last column of every file",
+   "area": "CSV and input integrity",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "exceptions.js:23-24 (split(/\\r?\\n/) leaves a trailing \\r on every line and the header names are not trimmed), :30",
+   "repro": "node docs/audit/diagnostics/csv.verify.mjs (CV-01, CV-01b, CV-01c); node docs/audit/diagnostics/csv.verify.browser.mjs (VB-01, VB-02). Minimal case: the committed water.csv with text.replaceAll('\\r\\n','\\r\\r\\n'). parseCSV(moves) then has keys [\"group\",\"pasture_id\",\"in_date\",\"out_date\\r\"].",
+   "expected": "The same 10 alerts as the committed data (critical T2 'Down to 11.8% full', critical T4 'Dropped 46 points in 24 hours, now 10%', and so on).",
+   "actual": "CV-01b (water only): 'LOST critical|Tank T2 (Windmill)|Down to 11.8% full ; critical|Tank T4 ...|Dropped 46 points ...; NEW serious|Tank T6 (Cedar Draw)|No reading for 42 hours; last level undefined%'. VB-01 shows the tile 'WATER TANKS OK / 7 of 8 / 1 need a look' and chart heads 'T2 Windmillundefined%'. CV-01c (moves only): '30 alerts' including 'serious|Cows in North Flat|Day 121 of a 21-day plan (100 days over)', because every closed move now reads as current. VB-02 (all files): page errors [\"Cannot read properties of undefined (reading 'toFixed')\"] and 0 rows.",
+   "consequence": "A CSV written in text mode on Windows (for example Python csv without newline='') hides both critical water alerts and counts the low and leaking tanks as OK. In moves.csv it floods the report with false over-plan alerts. In health, budget, weights or groups it silently drops those alerts.",
+   "regression_test": "For each data file f, findExceptions over the committed data with f's text.replaceAll('\\r\\n','\\r\\r\\n') deep-equals the committed 10 alerts. Separately, assert.deepEqual(parseCSV('a,b\\r\\r\\n1,x\\r\\r\\n'), [{a:1,b:'x'}]).",
+   "proposed_fix": "Split lines on /\\r\\n|\\r|\\n/ and drop empty lines, which also fixes CR-only (CSV-08). Trim header names and string cells. This is the same trimming proposed in findings 6 and 8.",
+   "effort": "S"
+  },
+  {
+   "title": "Two exports joined with their headers: the repeated header row becomes data and crashes gain or the water charts",
+   "area": "CSV and input integrity",
+   "status": "confirmed",
+   "severity": "high",
+   "location": "exceptions.js:25 (a line identical to the header is accepted as a record), :69-70 (tag 'tag' has one row, so b is undefined); app.js:49 (budget tile reduce), :90-93 (water chart for a tank with no in-window rows)",
+   "repro": "node docs/audit/diagnostics/csv.verify.mjs (CV-02, CV-02b); node docs/audit/diagnostics/csv.verify.browser.mjs (VB-03, VB-04, VB-05). Fixture: the committed file with its header line inserted again halfway through the rows.",
+   "expected": "No crash and the same 10 alerts. 8 tanks. The spend tile reads '+1.0% / $89,303 of $88,400' (89303/88400 = 1.010).",
+   "actual": "CV-02 (weights) gives 'THROWS TypeError: Cannot read properties of undefined (reading 'date')'. VB-03 shows a blank page with 0 rows. CV-02b (water) gives '9 tanks [\"T1\",\"T2\",\"T3\",\"T4\",\"tank_id\",...]'. VB-04 shows the tile 'WATER TANKS OK / 6 of 9 / 3 need a look', page errors [\"Cannot read properties of undefined (reading 'time')\"], 0 water charts and 0 rules rows. VB-05 (budget) shows the tile 'SPEND VS BUDGET / +NaN% / $NaN of $NaN' and the budget row 'category $NaN $NaN $NaN'.",
+   "consequence": "Adding a new weigh-in export to the season's file (with cat, or by pasting it in with its header) blanks the whole report, both critical water alerts included. The same mistake in water.csv invents a ninth tank and removes the charts, budget and rules sections.",
+   "regression_test": "With weights.csv given a repeated header, findExceptions does not throw and returns the committed 10 alerts. With water.csv given a repeated header, waterStatus returns 8 tanks (T1-T8). With budget.csv given a repeated header, the browser tile reads '+1.0% / $89,303 of $88,400'.",
+   "proposed_fix": "In parseCSV, skip any data line whose trimmed cells equal the header names and report the count as a Data note. A typed schema would also reject the text values 'level_pct', 'weight_lbs' and 'budget'.",
+   "effort": "S"
+  },
+  {
+   "title": "Two physical tanks that share a tank_id in different pastures merge, and a critical low tank is hidden",
+   "area": "CSV and input integrity",
+   "status": "design-limitation",
+   "severity": "medium",
+   "location": "exceptions.js:41 (grouped by tank_id only), :47 (pasture taken from the last row)",
+   "repro": "node docs/audit/diagnostics/csv.verify.mjs (CV-03). Fixture: rows 'T1,P1,<t>,12' and 'T1,P3,<t>,90' at 2026-09-29T18:00, 09-30T00:00, 06:00, 12:00 and 18:00, interleaved.",
+   "expected": "critical | Tank T1 (North Flat) | Down to 12% full. 12 is below 25, and the P1 tank reads 12 at every time, so the drop is 0. Alternatively, a data error naming T1 in two pastures.",
+   "actual": "CV-03 gives '(no alerts)'. waterStatus gives [[\"T1\",\"P3\",90,0]].",
+   "consequence": "If tanks are numbered per pasture (each pasture's 'T1' or 'North'), a tank at 12% is hidden behind a full tank with the same name elsewhere. The page then reports no water problem. The water audit's W-11 (a tank changing pasture) shares the root cause but shows a different effect.",
+   "regression_test": "With the CV-03 fixture, findExceptions includes {severity:'critical', subject starting 'Tank T1 (North Flat', problem:'Down to 12% full'}, or a Data alert naming T1 with both P1 and P3.",
+   "proposed_fix": "Document tank_id as unique across the ranch. At load, flag a tank_id that has readings in two pastures at the same timestamp, since that means two physical tanks; a portable tank that moves has no overlapping times. Or key tanks by (pasture_id, tank_id).",
+   "effort": "S"
+  },
+  {
+   "title": "A missing or misnamed CSV is parsed as data from the 404 page: health silently shows no alerts",
+   "area": "CSV and input integrity",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "app.js:221 (res.ok and res.status are never checked before .text() and parseCSV)",
+   "repro": "node docs/audit/diagnostics/csv.verify.browser.mjs (VB-06: data/health.csv deleted, so python http.server answers 404); node docs/audit/diagnostics/csv.verify.mjs (CV-05). The render-area diagnostics (render.repro.mjs, render.browser.mjs) also exercise the 404 path.",
+   "expected": "A visible error naming data/health.csv.",
+   "actual": "VB-06 shows chips 'All (8) ... Health (0)', 8 rows and page errors []. CV-05 parses the 404 body into the header key [\"<!DOCTYPE HTML>\"] and reports 'LOST serious|Yearlings: Booster vaccine|Overdue by 15 days ... ; warning|Cows: Pinkeye check'. A missing budget.csv shows the tile 'SPEND VS BUDGET / \u2212NaN% / $NaN of $NaN'. A missing water.csv blanks the page.",
+   "consequence": "The README invites replacing the CSVs. A file named 'Health.csv' on a case-sensitive host, or 'health (1).csv' from a browser download, produces a clean-looking health section while a vaccination is 15 days overdue.",
+   "regression_test": "Playwright with data/health.csv absent: the body text contains 'health.csv', and there is no 'Health (0)' chip without an error. In node: a loader given a fetch stub {ok:false,status:404} rejects with a message matching /health\\.csv.*404/.",
+   "proposed_fix": "In the loader: if (!res.ok) throw new Error(`data/${f}.csv: HTTP ${res.status}`). Catch the error in startup and render it as the first row of the report.",
+   "effort": "S"
+  },
+  {
+   "title": "CSV saved by Excel as 'CSV (Comma delimited)' (Windows-1252) shows garbled names",
+   "area": "CSV and input integrity",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "app.js:221 (Response.text() always decodes UTF-8)",
+   "repro": "node docs/audit/diagnostics/csv.verify.browser.mjs (VB-07: pastures.csv written as latin1 bytes with 'La Pe\u00f1a' for P3); node docs/audit/diagnostics/csv.verify.mjs (CV-07, using TextDecoder('utf-8') as fetch does)",
+   "expected": "'Yearlings in La Pe\u00f1a', or a visible note that pastures.csv is not UTF-8.",
+   "actual": "VB-07 shows the row 'Serious Grazing Yearlings in La Pe\ufffda Day 24 of a 21-day plan (3 days over)' and the chart head 'T3 La Pe\ufffda91.5%'. CV-07 gives \"La Pe\ufffda\".",
+   "consequence": "This is cosmetic: lookups still match because every file decodes the same way. But Spanish pasture names are common in South Texas, and the replacement characters on a portfolio page undercut credibility.",
+   "regression_test": "Serve pastures.csv as Windows-1252 bytes containing 'La Pe\u00f1a'. The exception subject equals 'Yearlings in La Pe\u00f1a'.",
+   "proposed_fix": "Read arrayBuffer() and decode with new TextDecoder('utf-8', {fatal:true}). On failure, fall back to 'windows-1252' and show a Data note naming the file.",
+   "effort": "S"
+  }
+ ]
+}

@@ -1,0 +1,130 @@
+{
+ "verdicts": [
+  {
+   "title": "Yearling tile hard-codes the 'Yearlings' group; after the yearlings ship, the page crashes before the exception table draws",
+   "verdict": "confirmed",
+   "evidence": "Re-ran time.browser.mjs TB-03 myself (workdir in my scratch): 'exception rows 0 | tiles 0 | errors: Cannot read properties of undefined (reading 'adg')'. Independent node check (scratch v1.mjs) on the same data change: findExceptions returns 7 rows: 'critical|Tank T2 (Windmill)|Down to 11.8% full', 'critical|Tank T4 (Lone Tree, Heifers here now)|Dropped 46 points\u2026', 'serious|Fuel\u2026', 'serious|Repairs\u2026', 'serious|Heifers|0.44 lbs/day since 2026-07-20\u2026', 'serious|Tank T6 (Cedar Draw)|No reading for 42 hours\u2026', 'warning|Cows: Pinkeye check|Due in 3 days'. gainStatus(...).find(g=>g.group==='Yearlings') gives 'undefined', so app.js:56 throws, and app.js:225 calls tiles() before exceptionsTable(). Rename variant (Yearlings renamed 'Steers' in every file) also gives 'undefined', while findExceptions still yields 10 rows. Playwright screenshot of the crashed page: header shown; tiles, chips, table rows, all charts and the rules table are empty.",
+   "corrections": "The consequence 'The empty table reads like nothing needs attention' overstates it. In the screenshot every section is empty: no tiles, no filter chips, not even the 'Nothing in all needs attention' line, no charts, no rules. The page looks broken rather than like an all-clear, but no error message is shown. The trigger is wider than shipping: it fires for any groups.csv without a group named exactly 'Yearlings', for example an operation that calls them 'Steers'. Severity high stands, because the whole report is lost on a routine data change. Also reported by render R11 and gain GB-02."
+  },
+  {
+   "title": "Unparseable or day-first dates silently become NaN or the wrong month, and alerts vanish with no data error",
+   "verdict": "confirmed",
+   "evidence": "Re-ran TIME-07/08/09/19: '(no alert)', 'serious: Yearlings in Sand Hills: Day 113 of a 21-day plan (92 days over)', 'silentHours=NaN; (no alert)', '6 rows (critical 2, serious 3, warning 1); missing: T6, Yearlings in Sand Hills, Booster, Pinkeye'. Independent check on the committed data (not the minimal fixture): booster next_due '15/09/2026' leaves Health rows = only 'warning|Cows: Pinkeye check|Due in 3 days (2026-10-03)'. Move '06/09/2026' \u2192 'Day 113 of a 21-day plan (92 days over)'. as_of '30/09/2026 18:00' \u2192 6 rows. Extra: new Date('2026-13-01') = 'Invalid Date', but booster due '2026-09-31' \u2192 'warning: Yearlings: Booster vaccine: Due in 1 day (2026-09-31)' (V8 rolls it to Oct 1). Browser TB-09 (Chicago): 'Data as of Invalid Date. | 6 rows | \u2026 errors: Cannot read properties of undefined (reading 'time')'.",
+   "corrections": "'No message' holds for per-row dates in health, moves and water. It does not hold for as_of. In the browser the header reads 'Data as of Invalid Date.' and waterMultiples throws, so the water, grazing, gain, budget and rules sections are empty. The page is visibly broken, although the 6-row table still looks complete. The regression test should add an impossible day such as '2026-09-31' or '2026-02-30': V8 rolls these over silently, while '2026-13-01' is already Invalid Date. High severity is defensible for the silent per-row loss of an overdue health task. For a US operation the more likely spreadsheet format is M/D/YYYY (finding 6), which fails visibly with fractions rather than silently."
+  },
+  {
+   "title": "Budget 'season to date' sums every month in budget.csv, including months after as_of; blank future actuals turn totals into text",
+   "verdict": "confirmed",
+   "evidence": "Re-ran TIME-14/15 and TB-06/07 with identical output: '(no budget alerts); Fuel budget=14400 actual=11640 pct=-19.2%', 'Spend vs budget\u221232.7%$89,303 of $132,600', 'Fuel actual=\"11640\" (string)', '+2.1721372315837644e+23%'. Hand totals recomputed by script: fuel actual 11640 / budget 9600, repairs 9000 / 7200, all actual 89303 / budget 88400. With Oct\u2013Nov plan rows: [89303, 132600, '-32.7']. Blank variant: Fuel {budget 12000, actual '11640', pct -0.03}. exceptions.js:82-89 never reads r.month or as_of.",
+   "corrections": "The proposed fix is incomplete in two ways. (1) 'r.month <= asOf.slice(0,7)' does not exclude earlier seasons. Appending 2025-06..09 rows at 95% of budget gives 'warning: Fuel: 8% over season to date / warning: Repairs: 10% over season to date', and that filter keeps all 48 rows. A season start bound is needed, for example season_start in meta.csv. (2) If months are exported as first-of-month dates, '\"2026-09-01\" <= \"2026-09\"' is false (verified), so September would be dropped. Normalise with r.month.slice(0,7) after format validation. Severity medium is fair."
+  },
+  {
+   "title": "Rows dated after as_of are treated as current: future water readings hide a dead sensor, future weigh-ins replace the as-of gain, and a planned move hides an overstay",
+   "verdict": "confirmed",
+   "evidence": "Re-ran TIME-11/12/13. Independent node check: T6 silentHours -6 with no T6 row. Heifers adg 2.561 from 2026-09-15 to 2026-10-20 with the serious row gone. Current stays 'Yearlings:North Flat:-2' with no grazing rows. Stronger repro (time.verify.mjs F4+): committed data with as_of 2026-09-15T18:00 gives 'critical: Tank T2 (Windmill): Down to 11.8% full / critical: Tank T4 (Lone Tree, Heifers here now): Dropped 46 points in 24 hours, now 10%'. T2/T4 silentHours = -360, and the heifers are at Lone Tree on 'day -4'. Filtering rows to time <= as_of gives '(no water alerts)'.",
+   "corrections": "The TIME-11 wording 'a dead sensor reads as fresh' is wrong. A reading dated after as_of means T6 reported again (Oct 1 00:00, 97%), so it is not dead. The real defect is an inconsistent report: silentHours -6 under a header that says Sep 30 6 PM. The TIME-12 fixture (all 45 heifers at exactly 1,200 lbs) is artificial. A more realistic and stronger repro is re-running the report for an earlier date. As of Sep 15 the committed data shows two critical water alerts that only happened Sep 26\u201330, says 'Heifers here now' at Lone Tree before they arrived, and counts all of September's budget. Severity medium stands. Overlaps water W-06 and gain GN-12."
+  },
+  {
+   "title": "No timezone contract: date-only as_of or offset timestamps make silent-hours and the header depend on the viewer's timezone",
+   "verdict": "confirmed",
+   "evidence": "My own probe (v3probe.mjs, run under TZ=UTC, America/Chicago, America/Denver, Pacific/Auckland). Date-only as_of with reading 2026-09-29T06:00 gives 18 / 13 / 12 / 31 hours (only Auckland 'serious: No reading for 31 hours'). Reading '2026-09-29T20:00Z' against local as_of gives 22 / 27 serious / 28 serious / 9. Header for date-only as_of in Chicago: 'September 29, 2026 at 7:00 PM'. TB-01 reproduced in Playwright. Control: as_of '2026-09-30T18:00-05:00' with reading '2026-09-29T20:00Z' gives '27 serious: No reading for 27 hours' in all four zones, which matches the auditor's hand value of 27.",
+   "corrections": "When both stamps carry explicit offsets the result is the same for every viewer (verified), so the 'require full offsets' option fixes elapsed hours. It does not fix the calendar-day rules, which still cut an offset-bearing as_of with slice(0,10) and take the date in the string's own offset (see the missed item 'UTC-stamped as_of'). The fix must derive the as_of calendar date in the ranch's zone. Severity medium is fair."
+  },
+  {
+   "title": "Excel-style M/D/YYYY dates are accepted but read as local midnight, so day counts are fractional, printed unrounded, and severity flips by viewer timezone",
+   "verdict": "confirmed",
+   "evidence": "Probe under four TZs. '9/8/2026' move gives UTC 'Day 22 of a 21-day plan (1 day over)'; Chicago 'Day 21.791666666666668 of a 21-day plan (0.7916666666666679 days over)'; Denver 'Day 21.75 \u2026'; Auckland 'Day 22.5 \u2026 (1.5 days over)'. '9/30/2026' due gives UTC 'warning: Due in 0 days'; Chicago 'Due in 0.20833333333333334 days'; Denver 0.25; Auckland 'serious: Overdue by 0.5416666666666666 days'. Hand check: Sep 8 local midnight CDT = 05:00Z, so to Sep 30 00:00Z is 21 d 19 h = 21.79.",
+   "corrections": "Same root cause as finding 2 (no date validation), so it should be one fix. The result is correct under UTC, so CI passes. Severity medium and the consequence are fair."
+  },
+  {
+   "title": "Water readings are ordered by text comparison, so non-ISO timestamps pick the wrong 'latest' reading",
+   "verdict": "confirmed",
+   "evidence": "Independent fixture: M/D rows give 'lastTime 9/30/2026 18:00, level 45, silentHours 12, no rows'. The ISO-converted fixture gives 'critical: Tank T1 (North Flat): Down to 20% full'. exceptions.js:43 sorts with a.time.localeCompare(b.time). Extra (time.verify.mjs F7+): rows '2026-09-30T06:00 50', '2026-09-30T12:00 49', '2026-09-30 18:00 20' give 'last=2026-09-30T12:00 level=49; (no alert)'.",
+   "corrections": "A more realistic trigger than M/D/YYYY is ISO with a space instead of 'T', which many databases and Excel write. The space-separated newest row sorts first and its 20% reading is ignored (verified above). Same root cause as findings 2 and 6. Overlaps water W-05. Severity medium is fair because it can hide a critical tank."
+  },
+  {
+   "title": "'Dropped N points in 24 hours' compares with the latest reading at least 24h old, however old, giving a false leak alert after a gap",
+   "verdict": "confirmed",
+   "evidence": "Gap fixture (26 Sep 18:00 80, 30 Sep 12:00 50, 18:00 48) gives 'critical: Tank T1 (North Flat): Dropped 32 points in 24 hours, now 48%'. Contiguous fixture also gives critical 'Dropped 32 points'. I checked the proposed max-in-trailing-24h rule against the committed data at every reading in September. Worst drop per tank: T1 16.1, T2 15.3, T3 16.2, T4 46, T5 14.5, T6 12.4, T7 17.1, T8 18.2. So the fix adds no alerts on the committed data, and T4 stays at 46.",
+   "corrections": "One part of the fix needs changing. 'Require at least one reading 18\u201330 h old; otherwise skip the drop rule' would skip a tank whose sensor restarted less than 18 h ago even if it fell 45 points in that time (the water W-02 shape). Judge max-in-window minus last whenever the window has a reading, and add a coverage note instead of skipping. Duplicates water W-01/W-02. Severity medium is fair."
+  },
+  {
+   "title": "The water chart crashes when a tank has no reading in the last 7 days; every chart and the rules table vanish",
+   "verdict": "confirmed",
+   "evidence": "Re-ran TB-02: 'T6 row: Serious\u2026 No reading for 198 hours; last level 100% | water charts 0 | grazing false | gain false | budget rows 0 | rules rows 0 | errors: Cannot read properties of undefined (reading 'time')'. app.js:90-93: rows filtered to the window is empty, so last is undefined. Hand check: Sep 22 12:00 to Sep 30 18:00 = 8\u00d724 + 6 = 198 h. Expected budget rows (header + 6 = 7) and rules rows (header + 11 = 12) are right.",
+   "corrections": "Nothing to change on substance. The same crash happens whenever as_of leaves a tank with no rows in the window, for example the day-first as_of in TB-09. Duplicates render R13."
+  },
+  {
+   "title": "Group gain averages animals over different weigh-in periods, and the 'since' date comes from the first animal in file order",
+   "verdict": "partially-confirmed",
+   "evidence": "TIME-17 reproduced: 'adg 0.9977 from 2026-06-01 to 2026-07-20; warning: 1 heifers: Under 0.5 lbs/day: H001'. By hand: H001 23/57 = 0.4035 and H002 78/49 = 1.5918. Realistic case on committed data (time.verify.mjs F10+), with H001\u2013H003 missing the Sep 15 weigh-in: 'adg=0.456 from=2026-06-01 \u2026 serious: Heifers: 0.46 lbs/day since 2026-06-01 vs 1.0 target'. Independent Python: heifers Jun\u2013Jul mean 0.9170 and Jul\u2013Sep mean 0.4363; with 3 missed the mix is 0.4562; with 34 missed it is 0.8049, so the alert is lost. The node loop agrees: 'serious alert lost when 34 of 45 heifers miss Sep 15'.",
+   "corrections": "The mechanism is confirmed, but severity should be low, not medium, and the consequence 'missed serious alert' is overstated. In the 2-animal fixture one missed animal is half the group. On the committed heifers the serious alert survives until 34 of 45 (76%) miss the weigh-in. The realistic harm is a wrong period in the message: '0.46 lbs/day since 2026-06-01' instead of since 2026-07-20, with the figure blending two periods. Overlaps gain GN-07/GN-21."
+  },
+  {
+   "title": "On a DST change day, silent-hours and the 24-hour drop window follow the viewer's DST rules; Central/Mountain viewers miss a leak",
+   "verdict": "confirmed",
+   "evidence": "Probe. Spring-forward leak: UTC critical 'Dropped 32 points in 24 hours, now 48%'; Chicago '(none)'; Denver '(none)'; Auckland critical. Fall-back silence (Oct 31 19:00 to Nov 1 18:00): UTC '23 (none)'; Chicago '24 serious: No reading for 24 hours'; Denver 24 serious; Auckland 23. Real elapsed hours from new Date() differences: 24 in Chicago and Denver, 23 in UTC and Auckland. Extra check: a fall-back-day leak (Oct 31 18:00 80 to Nov 1 18:00 48) is critical in all four zones. TB-08 reproduced in Playwright.",
+   "corrections": "The TIME-02 framing needs a correction. In Central and Mountain the true elapsed time from Oct 31 19:00 CDT to Nov 1 18:00 CST is 24 h. For a ranch on Central time, the Chicago/Denver result ('No reading for 24 hours') is therefore physically correct, and the UTC/CI result is the one that is off. The defect is the dependence on the viewer, not a wrong Chicago answer. Fall-back day does not cause a missed leak. Severity low is fair."
+  },
+  {
+   "title": "Grazing chart month ticks are hard-coded to June\u2013September 2026",
+   "verdict": "confirmed",
+   "evidence": "Re-ran TB-04: 'ticks [{\"m\":\"Jun\",\"x\":-1358.9},{\"m\":\"Jul\",\"x\":-1240.9},{\"m\":\"Aug\",\"x\":-1118.9},{\"m\":\"Sep\",\"x\":-997}] | exception rows 10'. app.js:120 lists the four 2026 dates literally.",
+   "corrections": "None. Low severity is fair. Duplicates render R20."
+  },
+  {
+   "title": "The 'Water tanks OK' tile recovers tank ids by splitting the subject text",
+   "verdict": "confirmed",
+   "evidence": "Re-ran TB-05: 'Water tanks OK6 of 82 need a look | water rows: 3'. app.js:47 uses e.subject.split(' ')[1], so 'Tank W 2 (\u2026)' and 'Tank W 4 (\u2026)' both give 'W'.",
+   "corrections": "This is not a time defect; it belongs with tiles/render and duplicates render R17. Low severity is fair."
+  },
+  {
+   "title": "On the due day itself the text says 'Due in 0 days' / 'Planned move in 0 days'",
+   "verdict": "confirmed",
+   "evidence": "My fixture (Cows into North Flat 2026-09-09 on a 21-day plan, booster due 2026-09-30, as_of 2026-09-30T18:00) gives 'warning: Cows in North Flat: Planned move in 0 days' and 'warning: Cows: Booster: Due in 0 days (2026-09-30)'. exceptions.js:124 and :146.",
+   "corrections": "The expected wording differs between the finding ('Move planned for today') and the repro script ('Move planned today'); pick one. Overlaps healthbudget H-07. Low severity is fair."
+  },
+  {
+   "title": "Monthly budget rows can't be pro-rated for a mid-month as_of",
+   "verdict": "design-limitation",
+   "evidence": "TIME-D1 reproduced: 'warning: Fuel: 6% over season to date'. Hand check: 10140/9600 = +5.6%. Pro-rated: 10140/8400 = +20.7%. Closed months only: 8640/7200 = +20.0% (script: 19.999\u2026), which is above 10%, so serious. The regression test's values are right.",
+   "corrections": "Labelling it a design limitation is right: the code does what it says. A real choice is needed, because front-loaded monthly costs such as labour paid at month start would make naive pro-rating produce false alerts. Closed months only is the safer default."
+  },
+  {
+   "title": "as_of is typed by hand, separate from the data and the clock, with no staleness check and no zone in the header",
+   "verdict": "design-limitation",
+   "evidence": "TB-C1 header in all four zones: 'Data as of September 30, 2026 at 6:00 PM.' grep finds no Date.now(), new Date() or timezone reference in app.js or exceptions.js ('no clock reads in app.js/exceptions.js'; 'no timezone/min_rest references'). meta.csv is written by generate_data.py from the constant AS_OF. Freshness by hand: 2026-09-30T18:00 to 2026-10-15T12:00 = 14 d 18 h.",
+   "corrections": "Calling it a design limitation is right for the frozen demo. The more serious back-dated-as_of consequence belongs to finding 4, where rules use rows after as_of."
+  }
+ ],
+ "missed": [
+  {
+   "title": "A UTC-stamped as_of shifts every calendar-day count by one for evening exports (as_of.slice(0,10) takes the UTC date), the same for every viewer",
+   "area": "Time - timezone / calendar-day rules",
+   "status": "confirmed",
+   "severity": "medium",
+   "location": "exceptions.js:58 and :142 (asOf.slice(0, 10)); app.js:113 (grazing chart end = as_of.slice(0,10)); app.js:223 (header shows the local date)",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/time.verify.mjs (case MISSED-1; it re-runs itself under TZ=UTC, America/Chicago, Pacific/Auckland). The data change is the committed data with meta.csv set to 'as_of\\n2026-10-01T01:00Z' (= 2026-09-30 20:00 CDT). The control is the same instant written 'as_of\\n2026-09-30T20:00-05:00'. Browser: Playwright, timezone America/Chicago, same meta.csv.",
+   "expected": "The ranch calendar date is Sep 30, so the committed rows should appear: 'Yearlings in Sand Hills: Day 24 of a 21-day plan (3 days over)', 'Yearlings: Booster vaccine: Overdue by 15 days (due 2026-09-15)', 'Cows: Pinkeye check: Due in 3 days (2026-10-03)', 10 rows, overstay label '+3d'. This is exactly what the -05:00 control gives in all three zones.",
+   "actual": "Identical in UTC, Chicago and Auckland: 'serious: Yearlings in Sand Hills: Day 25 of a 21-day plan (4 days over) / serious: Yearlings: Booster vaccine: Overdue by 16 days (due 2026-09-15) / warning: Cows in South Divide: Planned move in 2 days / warning: Heifers in Lone Tree: Planned move in 2 days / warning: Cows: Pinkeye check: Due in 2 days (2026-10-03)'. Browser (Chicago): header 'September 30, 2026 at 8:00 PM.', 12 rows, overstay label '+4d'. Boundary fixture (a group on day 21 of a 21-day plan and a task due 2026-09-30): local as_of 2026-09-30T20:00 gives 'warning: Planned move in 0 days' and 'warning: Due in 0 days'. 2026-10-01T01:00Z gives 'serious: Day 22 of a 21-day plan (1 day over)' and 'serious: Overdue by 1 day (due 2026-09-30)'.",
+   "consequence": "Exports stamped in UTC after 7 PM Central (6 PM in winter) count from the next day. Groups are flagged over plan and health tasks overdue a day early, moving them from warning to serious. Two false 'Planned move in 2 days' warnings appear on the committed data, and the header's 'September 30' contradicts the Oct 1 arithmetic in the rows. Every viewer gets the same wrong answer, so testing across timezones will not catch it. The 'require full offsets' option in the timezone-contract fix does not fix it either.",
+   "regression_test": "Set meta to 'as_of\\n2026-10-01T01:00Z' with the ranch zone America/Chicago. Assert that the Grazing and Health rows equal the committed ones ('Day 24 of a 21-day plan (3 days over)', 'Overdue by 15 days (due 2026-09-15)', 'Due in 3 days (2026-10-03)') and that there are 10 rows in total. By hand: 01:00Z Oct 1 minus 5 h (CDT) = 20:00 Sep 30 local. Sep 6 to Sep 30 = 24 days, Sep 15 to Sep 30 = 15, Sep 30 to Oct 3 = 3. Run under TZ=UTC and TZ=America/Chicago. The -05:00 form must keep passing.",
+   "proposed_fix": "Compute the ranch calendar date of as_of once: asOfDate = new Intl.DateTimeFormat('en-CA', {timeZone: ranchTZ, year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date(as_of)), with ranchTZ from a new meta.csv column. Pass it to grazingStatus, the health rule and grazingTimeline instead of as_of.slice(0,10). Format the header with timeZone: ranchTZ and show the zone. Never slice an offset-bearing timestamp.",
+   "effort": "S"
+  },
+  {
+   "title": "Dollar amounts and acres follow the viewer's locale while dates are fixed to en-US: a German-locale viewer sees '$2.040' and '$89.303 of $88.400'",
+   "area": "Viewer environment - locale (sibling of the timezone checks; the auditor's browser runs all used locale en-US)",
+   "status": "confirmed",
+   "severity": "low",
+   "location": "exceptions.js:152 (b.variance.toLocaleString()); app.js:21 (money uses toLocaleString()); app.js:50/54 (head counts); app.js:223 (acres)",
+   "repro": "node /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/time.verify.mjs --browser (case MISSED-2): committed data, Playwright contexts with locale 'en-US' and 'de-DE', timezone America/Chicago. Node-level check: LANG=de_DE.UTF-8 LC_ALL=de_DE.UTF-8 node, importing exceptions.js and running findExceptions on the committed CSVs.",
+   "expected": "The same text for every viewer, since the page is in English, in US dollars, and already formats dates with 'en-US': '21% over season to date ($2,040)', 'Spend vs budget +1.0% $89,303 of $88,400', '4,300 acres'.",
+   "actual": "en-US: '21% over season to date ($2,040) | Spend vs budget+1.0%$89,303 of $88,400, season to date | 4,300 acres'. de-DE: '21% over season to date ($2.040) | Spend vs budget+1.0%$89.303 of $88.400, season to date | 4.300 acres', with budget table 'Fuel$9.600$11.640+$2.040'. The header date stays 'September 30, 2026 at 6:00 PM.' Node with LANG=de_DE.UTF-8: 'de-DE 21% over season to date ($2.040) | 25% over season to date ($1.800)'.",
+   "consequence": "The same CSVs read differently on different machines. A reader with a European-locale browser, such as an overseas hiring manager or consultant, sees '$2.040' in an English sentence, which a US reader takes as about two dollars, and the headline spend tile reads like cents. There is no operational risk for an en-US ranch crew, but it hurts the portfolio's credibility, and it is the same class of problem as the timezone dependence the audit checked with locale fixed.",
+   "regression_test": "In node, run findExceptions with LANG=de_DE.UTF-8 and LC_ALL=de_DE.UTF-8 and assert the Fuel problem is exactly '21% over season to date ($2,040)'. In Playwright with locale 'de-DE' and 'fr-FR', assert the spend tile contains '$89,303 of $88,400' and the header contains '4,300 acres'. All values match the en-US output, which was checked by hand earlier (Fuel 11,640 \u2212 9,600 = 2,040; totals 89,303 / 88,400; acres 640+560+720+480+400+600+700+200 = 4,300).",
+   "proposed_fix": "Use one fixed formatter, const NUM = new Intl.NumberFormat('en-US'), in money(), exceptions.js:152 and the head and acre counts. Alternatively format everything, dates included, with the viewer's locale; either way, be consistent.",
+   "effort": "S"
+  }
+ ]
+}

@@ -1,0 +1,250 @@
+{
+ "generated_note": "current output vs expected.json; expected.json describes Phase-1 behaviour",
+ "tz": "America/Chicago",
+ "modes": {
+  "node": [
+   {
+    "name": "01-planted-problems",
+    "rows": "10/10",
+    "unexpected": 0,
+    "absent": "15/15",
+    "areas": "5/5",
+    "tiles": "5/5",
+    "render": "-",
+    "global": "-",
+    "verdict": "MATCH",
+    "error": ""
+   },
+   {
+    "name": "02-healthy-operation",
+    "rows": "0/0",
+    "unexpected": 0,
+    "absent": "25/25",
+    "areas": "5/5",
+    "tiles": "3/3",
+    "render": "-",
+    "global": "-",
+    "verdict": "MATCH",
+    "error": ""
+   },
+   {
+    "name": "03-incomplete-and-stale",
+    "rows": "8/12",
+    "unexpected": 1,
+    "absent": "2/3",
+    "areas": "4/5",
+    "tiles": "0/2",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "04-irregular-sensor-readings",
+    "rows": "9/16",
+    "unexpected": 1,
+    "absent": "2/3",
+    "areas": "5/5",
+    "tiles": "0/1",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "05-missing-groups-and-pastures",
+    "rows": "0/12",
+    "unexpected": 0,
+    "absent": "n/a",
+    "areas": "0/5",
+    "tiles": "0/1",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": "TypeError: Cannot read properties of undefined (reading 'name') (at exceptions.js:59)"
+   },
+   {
+    "name": "06-sparse-and-conflicting-weigh-ins",
+    "rows": "0/13",
+    "unexpected": 0,
+    "absent": "n/a",
+    "areas": "0/5",
+    "tiles": "0/1",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": "TypeError: Cannot read properties of undefined (reading 'date') (at exceptions.js:70)"
+   },
+   {
+    "name": "07-zero-budgets-credits-future-months",
+    "rows": "8/11",
+    "unexpected": 1,
+    "absent": "4/5",
+    "areas": "5/5",
+    "tiles": "0/1",
+    "render": "-",
+    "global": "NaN,Infinity",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "08-historical-as-of-and-future-records",
+    "rows": "3/10",
+    "unexpected": 2,
+    "absent": "8/10",
+    "areas": "3/5",
+    "tiles": "0/2",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "09-exact-rule-boundaries",
+    "rows": "9/17",
+    "unexpected": 1,
+    "absent": "8/9",
+    "areas": "5/5",
+    "tiles": "1/2",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "10-malformed-and-hostile-csv",
+    "rows": "3/10",
+    "unexpected": 4,
+    "absent": "0/2",
+    "areas": "2/5",
+    "tiles": "0/2",
+    "render": "0/0",
+    "global": "NaN,undefined",
+    "verdict": "MISMATCH",
+    "error": ""
+   }
+  ],
+  "browser": [
+   {
+    "name": "01-planted-problems",
+    "rows": "10/10",
+    "unexpected": 0,
+    "absent": "15/15",
+    "areas": "5/5",
+    "tiles": "5/5",
+    "render": "-",
+    "global": "-",
+    "verdict": "MATCH",
+    "error": ""
+   },
+   {
+    "name": "02-healthy-operation",
+    "rows": "0/0",
+    "unexpected": 0,
+    "absent": "25/25",
+    "areas": "5/5",
+    "tiles": "3/3",
+    "render": "-",
+    "global": "-",
+    "verdict": "MATCH",
+    "error": ""
+   },
+   {
+    "name": "03-incomplete-and-stale",
+    "rows": "8/12",
+    "unexpected": 1,
+    "absent": "2/3",
+    "areas": "4/5",
+    "tiles": "0/2",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "04-irregular-sensor-readings",
+    "rows": "9/16",
+    "unexpected": 1,
+    "absent": "2/3",
+    "areas": "5/5",
+    "tiles": "0/1",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "05-missing-groups-and-pastures",
+    "rows": "0/12",
+    "unexpected": 0,
+    "absent": "n/a",
+    "areas": "0/5",
+    "tiles": "0/1",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": "TypeError: Cannot read properties of undefined (reading 'name') (at exceptions.js:59)"
+   },
+   {
+    "name": "06-sparse-and-conflicting-weigh-ins",
+    "rows": "0/13",
+    "unexpected": 0,
+    "absent": "n/a",
+    "areas": "0/5",
+    "tiles": "0/1",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": "TypeError: Cannot read properties of undefined (reading 'date') (at exceptions.js:70)"
+   },
+   {
+    "name": "07-zero-budgets-credits-future-months",
+    "rows": "8/11",
+    "unexpected": 1,
+    "absent": "4/5",
+    "areas": "5/5",
+    "tiles": "0/1",
+    "render": "-",
+    "global": "NaN,Infinity",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "08-historical-as-of-and-future-records",
+    "rows": "3/10",
+    "unexpected": 2,
+    "absent": "8/10",
+    "areas": "3/5",
+    "tiles": "0/2",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "09-exact-rule-boundaries",
+    "rows": "9/17",
+    "unexpected": 1,
+    "absent": "8/9",
+    "areas": "5/5",
+    "tiles": "1/2",
+    "render": "-",
+    "global": "-",
+    "verdict": "MISMATCH",
+    "error": ""
+   },
+   {
+    "name": "10-malformed-and-hostile-csv",
+    "rows": "2/10",
+    "unexpected": 4,
+    "absent": "0/2",
+    "areas": "2/5",
+    "tiles": "0/2",
+    "render": "0/3",
+    "global": "NaN,undefined",
+    "verdict": "MISMATCH",
+    "error": "TypeError: Cannot read properties of undefined (reading 'time') (at app.js:93)"
+   }
+  ]
+ }
+}

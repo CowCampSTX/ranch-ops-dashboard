@@ -1,0 +1,929 @@
+{
+ "topic": "gain (research-gain): weight gain on Northern/Central Plains summer grass and the dashboard's Gain rules (exceptions.js RULES.adgSerious=0.8, RULES.animalShare=0.5; groups.csv targets Yearlings 2.0, Heifers 1.0, Cows 0.0)",
+ "rules": [
+  {
+   "rule": "CURRENT: Group 'serious' when the mean of per-animal ADG since the last weigh-in is < 80% of the group's fixed target (exceptions.js: g.adg < g.target * R.adgSerious, adgSerious 0.8). Action text: 'Check forage quality and mineral; look for a health problem in the group'.",
+   "decision_supported": "Whether a grazing group needs a look at forage, supplement/mineral, water, health observations or weighing conditions before the next move, sale or supplement decision.",
+   "required_inputs": "Paired weights for the same animals over the same interval; weight basis (full / overnight-shrunk / pencil-shrunk) and gather time for both weigh-ins; interval length; period-specific expected ADG (not a whole-season target); inventory head to judge coverage; pasture/forage and precipitation context.",
+   "context": "Yearling steers and heifers on native range or cool-season pasture in the Northern/Central Great Plains, May-October. Gains fall in late summer as forage matures, and they vary a lot from year to year with precipitation.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "OBSERVED (node docs/audit/diagnostics/gain.evidence.research.mjs): 'Heifers: inventory 45, weighed 45 (100%), distinct intervals 1 [2026-07-20..2026-09-15], 57 d; mean ADG 0.44 ... group serious < 0.80'; 'Yearlings: ... mean ADG 1.94 ... group serious < 1.60'. Published period gains vs this threshold, from the same run: 'Yearlings 1.30 vs serious < 1.60: would be SERIOUS | [G02] 1994 season-long steers, late period 15 Jul-8 Sep (precip 44% of normal)'; 'Yearlings 1.46 ... would be SERIOUS | [G02] 1995 ... late period 4 Aug-26 Sep (precip 104% of normal)'; 'Yearlings 2.36 ... no group flag | [G02] 1994 season-long steers, whole season'; 'Yearlings 1.51 ... would be SERIOUS | [W22] HPAL crested wheatgrass, unsupplemented'. Grings et al. 2002 attribute the low late-season gains to forage quality that 'had substantially declined'. Currie et al. 1989 (daily automatic weights, 1986-87): predicted live weight peaked in late July to early August and declined through the end of the September grazing period in 1986. Manual weighings from 1983-87 showed lower gain in the second half of summer every year. UNL BeefWatch 2022: 'Forage quality and yearling rate of gain decline throughout the summer, particularly in cool season grasses.' Gillespie et al. 2014 (Sandhills): unsupplemented yearling heifers gained 1.17 lb/d in 2011 and 0.73 lb/d in the 2012 drought. Diet CP fell from 9.5% in May to 6.3% in August. Weighing-condition error, from the run: '[D14] Jun-Aug vs Sep overnight shrink gap (8.9% vs 7.1%) on a 780-lb yearling (lb) = 14.0 ... 57 d 0.25'; '[W12] mean full-weight offset, pasture steers (lb) = 37.0 ... 57 d 0.65'. Watson et al. 2013: 'handling cattle in a similar manner when weighing is more important than limiting intakes'.",
+   "limitations": "A fixed whole-season target applied to a late-summer interval (Jul 20-Sep 15 in the shipped data) flags normal seasonal decline as 'serious'. In Grings 2002 it would have fired in a near-normal precipitation year (1995). The 80% cut-off has no published basis. Nothing records whether both weigh-ins were taken under the same conditions, and a one-sided fill shift of 14-37 lb moves a 57-day group ADG by 0.25-0.65 lb/d. The mean of per-animal ADGs is not checked for mixed intervals or coverage (other auditors cover these code defects). The action text never says to check the weighing conditions.",
+   "configurable": "Yes. RULES.adgSerious and groups.csv target_adg_lbs are plain values. The 80% share should stay configurable because it is a management tolerance, but the target it multiplies should become period-specific (see the proposed period-expectation rule).",
+   "missing_data_blocks": "Do not give a confident group verdict when the weight basis or gather time of either weigh-in is unknown or differs between them, the interval is shorter than the ranch's minimum (see the interval rule), fewer than the configured share of inventory head have matched pairs, animals in the group have different intervals, or no period-specific expectation exists. Show 'gain not assessable' with the reason rather than silence or 'serious'.",
+   "recommendation": "Keep the rule but present it as a ranch-set tolerance against a period-specific expected ADG, preferably from the ranch's own past weigh-ins for that pasture and season. Show the ADG with the interval, coverage and weighing basis. Downgrade to 'below expected - verify' when weigh conditions differ or are unknown. Add 'confirm both weigh-ins used the same gather/shrink routine' to the action text. Do not describe 80% as an industry standard.",
+   "sources": [
+    {
+     "title": "Intensive-early stocking for yearling cattle in the Northern Great Plains (J. Range Manage. 55:135-138)",
+     "publisher": "Society for Range Management / USDA-ARS Fort Keogh (PDF hosted by USDA-ARS)",
+     "url": "https://ars.usda.gov/ARSUserFiles/30300500/Publications/JRM55-135-138.pdf",
+     "pub_date": "2002",
+     "data_years": "1993-1995",
+     "kind": "peer-reviewed",
+     "supports": "Table 6: season-long steers' late-period ADG was 1.11 kg/d (17 Sep-4 Oct 1993), 0.59 (15 Jul-8 Sep 1994, 44% of normal precipitation) and 0.66 (4 Aug-26 Sep 1995, 104% of normal). Whole-season ADG was 1.19, 1.07 and 1.11 kg/d. Late-season decline attributed to forage quality."
+    },
+    {
+     "title": "Growth patterns of yearling steers determined from daily live weights (J. Range Manage. 42:393-396)",
+     "publisher": "Society for Range Management (Univ. of Arizona repository)",
+     "url": "https://repository.arizona.edu/handle/10150/645028",
+     "pub_date": "1989",
+     "data_years": "1986-1987 (automatic weights); 1983-1987 (manual weights)",
+     "kind": "peer-reviewed",
+     "supports": "Weight peaked late July to early August and then declined through September in 1986. Gains were lower in the second half of summer in every year. Within-day weight variability among steers was substantial. Study location is not shown on the fetched page."
+    },
+    {
+     "title": "Supplementing Yearlings in the Summer Grazing Season: Is it Worth it?",
+     "publisher": "University of Nebraska-Lincoln BeefWatch",
+     "url": "https://beef.unl.edu/beefwatch/2022/supplementing-yearlings-summer-grazing-season-it-worth-it",
+     "pub_date": "2022-07-01",
+     "data_years": "price analysis 2012-2021; trial years not stated",
+     "kind": "extension",
+     "supports": "Unsupplemented yearlings on crested wheatgrass at High Plains Ag Lab (Sidney NE), late May-early Sep (~112 d), gained 1.51 lb/d. Supplemented yearlings gained about 2 lb/d. Forage quality and rate of gain decline through summer."
+    },
+    {
+     "title": "Replacement of Grazed Forage and Animal Performance when Distillers Grains are Fed in a Bunk or on the Ground on Summer Range (2014 Nebraska Beef Cattle Report pp. 34-35)",
+     "publisher": "University of Nebraska-Lincoln",
+     "url": "https://Beef.unl.edu/28d9d9d4-33f0-4075-b8ed-5a01a870ba0d.pdf",
+     "pub_date": "2014",
+     "data_years": "2011-2012",
+     "kind": "field-study",
+     "supports": "Control spayed yearling heifers on Sandhills range gained 1.17 lb/d (2011) and 0.73 lb/d (2012 drought). Diet CP fell from 9.5% (May) to 6.3% (Aug) in 2012."
+    },
+    {
+     "title": "Research Results are Dependent on Accurate Cattle Weights (2012 Nebraska Beef Cattle Report pp. 45-46)",
+     "publisher": "University of Nebraska-Lincoln",
+     "url": "https://Beef.unl.edu/7a4f176f-73e2-4fa9-b86c-ed95f8543602.pdf",
+     "pub_date": "2012",
+     "data_years": "not stated",
+     "kind": "field-study",
+     "supports": "Compared with limit-fed weights, full weights overstated ADG by 0.22 lb/d for pasture steers over 165 d and by 0.51 lb/d for pasture heifers over 20 d. Mean offsets were 37 lb and 10.2 lb. Individual full weights ranged from +99 to -86 lb against limit-fed weights."
+    },
+    {
+     "title": "Impacts of a limit-feeding procedure on variation and accuracy of cattle weights (J. Anim. Sci. 91:5507-5517)",
+     "publisher": "American Society of Animal Science (UNL Digital Commons record)",
+     "url": "https://digitalcommons.unl.edu/animalscifacpub/790",
+     "pub_date": "2013",
+     "data_years": "18 experiments; years not stated on page",
+     "kind": "peer-reviewed",
+     "supports": "Two-day full-fed weight differences ranged from -14 to +34 kg. Limit-fed vs full-fed ADG differed by -0.29 to +0.31 kg/d. 'handling cattle in a similar manner when weighing is more important than limiting intakes'."
+    },
+    {
+     "title": "Do Environmental Variables Influence Overnight Weight Loss of Yearling Steers in Semiarid Rangelands (SRM annual meeting abstract)",
+     "publisher": "Society for Range Management (Rangelands Gateway)",
+     "url": "https://rangelandsgateway.org/node/25589",
+     "pub_date": "2014",
+     "data_years": "2009-2012",
+     "kind": "field-study",
+     "supports": "Overnight shrink of yearling steers at CPER, Colorado, was about 8.8-9.0% in June-August and 7.1% in September (16 weighings), so fill differs between summer and September weigh-ins."
+    }
+   ]
+  },
+  {
+   "rule": "CURRENT: Individual 'warning' when an animal's ADG between its last two weigh-ins is < 50% of the group target (RULES.animalShare 0.5). Suppressed when the group is already serious. Action text: 'Pull and check these animals at the next gather'.",
+   "decision_supported": "Which individual animals to look at closely at the next gather (observation, records, escalation to the herd veterinarian when observations warrant).",
+   "required_inputs": "At least two (preferably three or more) weights per animal over an adequate span; weight basis and gather time; animal ID that is stable across weigh-ins (visual tag + EID); class and lactation status; observation notes.",
+   "context": "All weighed classes. The noise problem is worst for low-target classes (first-calf heifers at 1.0 lb/d) and for short intervals.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "OBSERVED (gain.evidence.research.mjs): 'Gap between target and the individual threshold: yearlings 1.00 lb/d, heifers 0.50 lb/d.' Individual worst cases at the shipped 57-d interval: '[W12] individual full vs limit-fed weight, high end (lb) 99 lb -> ... 57d 1.74'; '[W13] 2-day full-fed re-weigh difference, low end (-14 kg) -31 lb -> ... 57d -0.54'. Shipped data: 'Heifers ... animals under: 32' (of 45) and 'Yearlings ... animals under: 6'. The earlier sensitivity sweep (node docs/audit/diagnostics/gain.noise.research.mjs, assumed noise levels) printed 'interval 57 d, noise 2% BW: mean false individual flags per weigh-in = 2.0 of 150' and 'interval 28 d, noise 2% BW: ... 15.1 of 150'. BIF feed-efficiency guidelines (2019): 'a minimum of a 70-d test period is required to accurately compute average daily gain for individual animals', with two start and two end weights on separate days. Archer et al. 1997: a 70-d test with weights every 2 weeks was optimal for growth rate.",
+   "limitations": "A single full weight at each end of a 57-day interval can carry individual errors comparable to, or larger than, the 1.0 lb/d (yearling) or 0.5 lb/d (heifer) gap between target and threshold. Some flagged animals will be on target. The fixed 50% share has no published basis. Hiding individuals when the group is flagged also hides any animal that is actually losing weight (covered by another auditor as a design limit). 'Pull' implies sorting and handling. For range cattle a lower-cost first step is to observe and record at the next gather.",
+   "configurable": "Yes (RULES.animalShare). Also make these configurable: minimum interval, minimum number of weights, and whether lactating classes are included at all.",
+   "missing_data_blocks": "Do not list an individual as slow when the interval is under the configured minimum (BIF uses 70 d for individual ADG under controlled test conditions), when the animal has fewer than two valid weights or a weight is blank or implausible, when weigh conditions differ between the two weigh-ins, or for lactating first-calf heifers (use BCS instead).",
+   "recommendation": "Reword as 'Observe at next gather' and require persistence: slow in two consecutive intervals, or a regression over 3 or more weights spanning at least about 70 d. Alternatively rank the bottom X% within the group (relative to herd-mates weighed under the same conditions) rather than a fixed share of a fixed target. Record what was observed. Escalate to the herd veterinarian per the ranch's health plan. No diagnosis or treatment is implied by the list.",
+   "sources": [
+    {
+     "title": "Beef Improvement Federation Guidelines for Feed Efficiency Testing as of March 26th, 2019 (copy hosted by C-Lock Inc., a vendor)",
+     "publisher": "Beef Improvement Federation (hosted on docs.c-lockinc.com)",
+     "url": "https://docs.c-lockinc.com/Document - Beef Improvement Federation Guidelines for FE Testing.pdf",
+     "pub_date": "2019-03-26",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Test Period section: 70-d minimum to compute individual ADG accurately. Animals weighed twice (on separate days) at the start and end. Regression 'may enhance the accuracy' somewhat."
+    },
+    {
+     "title": "Optimum postweaning test for measurement of growth rate, feed intake, and feed efficiency in British breed cattle (J. Anim. Sci. 75:2024-2032)",
+     "publisher": "American Society of Animal Science (University of Adelaide repository)",
+     "url": "https://eres.library.adelaide.edu.au/dspace/handle/2440/13249",
+     "pub_date": "1997",
+     "data_years": "not stated on page",
+     "kind": "peer-reviewed",
+     "supports": "35 d was sufficient for feed intake, but 70 d was needed for growth rate. Weighing every 2 weeks lost little accuracy, while 5-week intervals reduced it."
+    },
+    {
+     "title": "Research Results are Dependent on Accurate Cattle Weights (2012 Nebraska Beef Cattle Report)",
+     "publisher": "University of Nebraska-Lincoln",
+     "url": "https://Beef.unl.edu/7a4f176f-73e2-4fa9-b86c-ed95f8543602.pdf",
+     "pub_date": "2012",
+     "data_years": "not stated",
+     "kind": "field-study",
+     "supports": "Individual full weights ranged from +99 to -86 lb relative to limit-fed weights."
+    },
+    {
+     "title": "Impacts of a limit-feeding procedure on variation and accuracy of cattle weights",
+     "publisher": "American Society of Animal Science (UNL Digital Commons)",
+     "url": "https://digitalcommons.unl.edu/animalscifacpub/790",
+     "pub_date": "2013",
+     "data_years": "not stated",
+     "kind": "peer-reviewed",
+     "supports": "Two consecutive-day full-fed weights differed by -14 to +34 kg for individual cattle."
+    },
+    {
+     "title": "Disease Screening, Treatment, and Surveillance in Beef Cattle (Merck Veterinary Manual, professional version)",
+     "publisher": "Merck & Co. (author J. Smith, Texas A&M)",
+     "url": "https://www.merckvetmanual.com/management-and-nutrition/preventative-health-care-and-husbandry-of-beef-cattle/disease-screening-treatment-and-surveillance-in-beef-cattle",
+     "pub_date": "reviewed 2023-07; modified 2024-09",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Records are 'essential to monitor the incidence of disease ... and impact of disease on performance'. Screening requires 'regular observation of the herd'. Records 'should be analyzed on a regular basis'. Cited only for observation and records practice, not for treatment."
+    }
+   ]
+  },
+  {
+   "rule": "CURRENT: Yearling steer target ADG = 2.0 lb/d, applied to any interval (groups.csv).",
+   "decision_supported": "Expected performance benchmark for yearlings on summer grass, used to judge group and individual gain.",
+   "required_inputs": "Forage type (native range vs. improved/introduced cool-season pasture), supplementation, grazing period dates, stocking rate, precipitation/forage outlook, ranch history for the pasture.",
+   "context": "Northern/Central Plains native range, roughly mid-May to early October. Published season-long gains in many years fall around 1.9-2.6 lb/d, but late-season and drought-year gains fall well below.",
+   "classification": "B-context-dependent",
+   "evidence": "OBSERVED (gain.evidence.research.mjs, kg x 2.2046): Grings 2002 whole-season 2.62 / 2.36 / 2.45 lb/d (1993-95), but late periods 2.45 / 1.30 / 1.46. Cheng et al. 2022 (CPER, Colorado, 2014-18): traditional management 0.86-1.14 kg/d = 1.90-2.51 lb/d, adaptive rotation 0.74-1.00 kg/d = 1.63-2.20 lb/d. HPAL crested wheatgrass unsupplemented 1.51 lb/d. Sandhills spayed yearling heifers 1.17 / 0.73 lb/d. Reeves et al. 2013 (Cheyenne WY, 1982-2011) found cattle not grazed in 1989, 2000 and 2002 because of drought. Reeves et al. 2014 (Mandan ND, 1936-2005) report that seasonal weather explained up to 74% (R2 0.44-0.74) of variation in steer beef production.",
+   "limitations": "2.0 lb/d is inside the published season-long range for good years. Applied flat to a single late-summer interval, it overstates expectations. It also ignores forage type, supplementation and year. Steer data are not directly transferable to heifers.",
+   "configurable": "Yes. It should be set per period (early/late season) and per pasture/forage type, ideally from the ranch's own records.",
+   "missing_data_blocks": "Without the period dates and forage/pasture context, label the comparison 'against a season-average target' rather than treating a shortfall as a problem.",
+   "recommendation": "Replace the single target with an expected-ADG table by period (for example turnout-mid July and mid July-removal) and pasture type. Seed it with the ranch's own history and show the source of each expectation. A flat 2.0 is acceptable for the fictional demo only if labelled as a season-average illustration.",
+   "sources": [
+    {
+     "title": "Intensive-early stocking for yearling cattle in the Northern Great Plains",
+     "publisher": "USDA-ARS / Society for Range Management",
+     "url": "https://ars.usda.gov/ARSUserFiles/30300500/Publications/JRM55-135-138.pdf",
+     "pub_date": "2002",
+     "data_years": "1993-1995",
+     "kind": "peer-reviewed",
+     "supports": "Season-long vs late-period steer ADG by year (Table 6 and text). Precipitation 169%, 44% and 104% of normal."
+    },
+    {
+     "title": "Evaluation of the APEX cattle weight gain component for grazing decision-support in the Western Great Plains (Rangeland Ecol. Manage. 82:1-11)",
+     "publisher": "Elsevier / Society for Range Management (PDF hosted by USDA-ARS)",
+     "url": "https://www.ars.usda.gov/ARSUserFiles/30123025/Publications/2022/Cheng%20et%20al%202022%20REM%20-%20APEX%20cattle%20weight%20gain%20component.pdf",
+     "pub_date": "2022",
+     "data_years": "2014-2018",
+     "kind": "peer-reviewed",
+     "supports": "Observed yearling steer ADG at CPER: traditional management 0.86-1.14 kg/d, CARM 0.74-1.00 kg/d. Steers weighed at the start and end of the season."
+    },
+    {
+     "title": "Adaptive, multipaddock rotational grazing management: a ranch-scale assessment of effects on vegetation and livestock performance in semiarid rangeland (Rangeland Ecol. Manage. 73:796-810)",
+     "publisher": "Elsevier / Society for Range Management (PDF hosted by USDA-ARS)",
+     "url": "https://www.ars.usda.gov/ARSUserFiles/51815/67. 2020 REM - CARM - adaptive multipaddock rotational grazing - vegetation and livestock responses.pdf",
+     "pub_date": "2020",
+     "data_years": "2013 (pretreatment), 2014-2018",
+     "kind": "peer-reviewed",
+     "supports": "CARM gains averaged 14.1% below traditional management (12-16% each year). Gains calculated from shrunk weights at mid-May and early October. Exact yearly ADG appears only in Fig. 9."
+    },
+    {
+     "title": "Supplementing Yearlings in the Summer Grazing Season: Is it Worth it?",
+     "publisher": "UNL BeefWatch",
+     "url": "https://beef.unl.edu/beefwatch/2022/supplementing-yearlings-summer-grazing-season-it-worth-it",
+     "pub_date": "2022-07-01",
+     "data_years": "not stated for trial",
+     "kind": "extension",
+     "supports": "1.51 lb/d unsupplemented on crested wheatgrass, and about 2.0 lb/d supplemented."
+    },
+    {
+     "title": "Temperature and precipitation affect steer weight gains differentially by stocking rate in northern mixed-grass prairie (Rangeland Ecol. Manage. 66:438-444)",
+     "publisher": "Society for Range Management (PDF hosted by USDA-ARS)",
+     "url": "https://ars.usda.gov/arsuserfiles/30300500/Publications/Uploaded1272012/REE66-438-444-Reeves-2013.pdf",
+     "pub_date": "2013",
+     "data_years": "1982-2011",
+     "kind": "peer-reviewed",
+     "supports": "Steer gains depended on spring and summer temperature and precipitation. No grazing in the 1989, 2000 and 2002 droughts. Steers held overnight without feed or water before weighing."
+    },
+    {
+     "title": "Seasonal weather influences on yearling beef steer production in C3-dominated Northern Great Plains rangeland (Agric. Ecosyst. Environ. 183:110-117)",
+     "publisher": "Elsevier (PDF hosted by USDA-ARS)",
+     "url": "https://www.ars.usda.gov/ARSUserFiles/30640500/HistoricalPasturePubs/51%20Reeves%20et%20al%20%20AGEE%202014.pdf",
+     "pub_date": "2014",
+     "data_years": "1936-2005",
+     "kind": "peer-reviewed",
+     "supports": "Weather models explained R2 0.44-0.74 of the variation in steer beef production at Mandan ND."
+    }
+   ]
+  },
+  {
+   "rule": "CURRENT: First-calf heifer target ADG = 1.0 lb/d over the summer (groups.csv Heifers, class 'first-calf heifers'), judged by the same 80%/50% rules.",
+   "decision_supported": "Whether young lactating cows are being fed well enough to keep growing and rebreed.",
+   "required_inputs": "BCS (1-9) at the standard scoring times; calving date and lactation status; pregnancy diagnosis; optional weight paired with BCS at weaning.",
+   "context": "2-year-old cows nursing their first calf on summer range, often during or just after the breeding season. The UNL BCS guide puts them at about 85% of mature weight at calving.",
+   "classification": "D-synthetic-demo",
+   "evidence": "No extension or research source located in this pass sets a summer ADG target for lactating first-calf heifers. The standard monitoring tool is BCS: UNL (2020) and SDSU (2022) both target BCS 6 for first-calf heifers (5 for mature cows). Published weight change of lactating young cows on Plains range, from gain.evidence.research.mjs: 'Heifers -0.15 vs serious < 0.80: would be SERIOUS | [L18] Sandhills 2-yr-old primiparous cows, ~5 Aug-pregnancy dx, unsupplemented'; 'Heifers 0.18 ... [L18] same, supplemented'. Pregnancy rate did not differ (75% vs 81%, P = 0.41; Lansford et al. 2018). Lactating cows (pairs) on native range at NDSU Dickinson 1983-86 gained 0.25-0.82 lb/d (mean 0.59). That class is not identical to first-calf heifers. Shipped data: 'Heifers ... mean ADG 0.44 ... group serious < 0.80' and 'animals under: 32'.",
+   "limitations": "With a 1.0 lb/d target, the rule flags weight changes that published Plains studies report as typical for lactating young cows (about -0.15 to +0.8 lb/d). An experienced ranch reader would see the planted 'heifers gaining well under target' alert as a likely false alarm, which hurts the portfolio's credibility. The individual threshold (0.5 lb/d) is inside weighing noise (see the individual rule).",
+   "configurable": "Yes. Better: make 'judged on ADG' a per-class switch and judge this class on BCS.",
+   "missing_data_blocks": "Without BCS, calving date and lactation status, do not issue a nutrition verdict on first-calf heifers from weights alone.",
+   "recommendation": "Set the first-calf heifer ADG target to 'not judged', like cows. Add BCS records with target BCS 6 at calving (configurable) and score at weaning, about 90 d pre-calving, at calving and at breeding start. Keep any weights as context, paired with BCS. If the demo must show a heifer alert, plant it as BCS below target before calving.",
+   "sources": [
+    {
+     "title": "Guide to Body Condition Scoring Your Beef Cow Herd",
+     "publisher": "Nebraska Extension (BeefWatch)",
+     "url": "https://beef.unl.edu/learning/condition1a.shtml",
+     "pub_date": "2020-02-02",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "1-9 BCS scale. Mature cows calve at BCS 5 or more. First-calf heifers at BCS 6 because they have only reached about 85% of mature weight. Scoring times: late summer/early fall, weaning, ~45 d after weaning, ~90 d before calving, calving, breeding start. Rumen fill and pregnancy can mislead visual scores."
+    },
+    {
+     "title": "Management of Body Condition Score Throughout the Year",
+     "publisher": "SDSU Extension",
+     "url": "https://extension.sdstate.edu/management-body-condition-score-throughout-year",
+     "pub_date": "updated 2022-09-09",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "'Mature cows should have a BCS of 5, with a BCS of 6 for first-calf heifers' to rebreed within 80-85 days of calving."
+    },
+    {
+     "title": "Effect of Supplementation during the Breeding Season on a May-calving Herd (2018 Nebraska Beef Cattle Report pp. 21-23)",
+     "publisher": "University of Nebraska-Lincoln",
+     "url": "https://Beef.unl.edu/documents/2018-beef-report/2018-06-Effect-of-Supplementation-during-the-Breeding-Season-on-a-May-calving-Herd.pdf",
+     "pub_date": "2018",
+     "data_years": "not stated for this phase",
+     "kind": "field-study",
+     "supports": "2-yr-old primiparous cows (n = 135) at Gudmundsen Sandhills Lab. ADG from prebreeding to pregnancy diagnosis was -0.15 lb/d unsupplemented and 0.18 supplemented. Pregnancy 75% vs 81% (P = 0.41)."
+    },
+    {
+     "title": "Complementary Rotation Grazing System in Western North Dakota (Project 1906; file named 'Pasture Management for Western North Dakota')",
+     "publisher": "NDSU Dickinson Research Extension Center",
+     "url": "https://www.ndsu.edu/agriculture/sites/default/files/2022-10/Pasture%20Management%20for%20Western%20North%20Dakota.pdf",
+     "pub_date": "undated",
+     "data_years": "1983-1986",
+     "kind": "field-study",
+     "supports": "Table 4: cow ADG on native range was 0.82, 0.25, 0.50 and 0.78 lb/d (mean 0.59) while nursing calves. Interval gains in 1986 swung from +4.88 to -2.11 lb/d between weigh periods."
+    }
+   ]
+  },
+  {
+   "rule": "CURRENT: Cows (cow-calf pairs) target 0.0, so the gain rules skip them ('if (!g.target) continue'). No other cow condition measure exists.",
+   "decision_supported": "Whether mature cows need nutritional attention ahead of calving or breeding.",
+   "required_inputs": "BCS (1-9) by cow or by sampled group, date, scorer; optional cow weight at weaning paired with BCS.",
+   "context": "Mature beef cows on Plains range. Weight swings with gut fill, pregnancy and lactation, so condition is tracked by BCS.",
+   "classification": "A-supported-general",
+   "evidence": "OBSERVED (gain.evidence.research.mjs): 'Cows: inventory 180, target 0 -> skipped by 'if (!g.target) continue'; weights.csv rows for Cows: 0; no BCS field exists in any CSV.' Extension sources monitor cows by BCS (UNL 2020; SDSU 2022). Breed-association recording pairs cow weight with BCS around weaning: Angus AHIR says 'Dams must be weighed 45 days before or after weaning a calf' and 'Dams should be scored 45 days before or after weaning'.",
+   "limitations": "Not judging cows on ADG is the supported practice. But the dashboard then has no cow condition signal at all, and 'target 0' reads as 'no gain expected' rather than 'judged on BCS'.",
+   "configurable": "Yes. Make it an explicit per-class 'metric: ADG | BCS | none' setting instead of overloading target 0.",
+   "missing_data_blocks": "Without a recent BCS (for example none since weaning, or none within ~90 d of calving), show 'condition not recorded', not 'no exceptions'.",
+   "recommendation": "Add a bcs.csv (group or tag, date, score, scorer). Add a rule that flags a group when its median or share-below-target BCS misses a ranch-set target at the standard scoring times (default 5 for mature cows, 6 for first-calf heifers).",
+   "sources": [
+    {
+     "title": "Guide to Body Condition Scoring Your Beef Cow Herd",
+     "publisher": "Nebraska Extension",
+     "url": "https://beef.unl.edu/learning/condition1a.shtml",
+     "pub_date": "2020-02-02",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "BCS targets and scoring times."
+    },
+    {
+     "title": "AHIR Guidelines (mature cow weight and BCS)",
+     "publisher": "American Angus Association",
+     "url": "https://aimsdata.angus.org/performance/AhirGuidelines",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Cow weight and BCS are recorded together within 45 d of weaning."
+    },
+    {
+     "title": "Management of Body Condition Score Throughout the Year",
+     "publisher": "SDSU Extension",
+     "url": "https://extension.sdstate.edu/management-body-condition-score-throughout-year",
+     "pub_date": "updated 2022-09-09",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "BCS 5 target for mature cows."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Weigh-condition consistency gate. Every weigh-in records its weight basis (full, overnight-shrunk, pencil shrink %), gather/weigh time and hours off feed/water. ADG is only compared across weigh-ins with the same basis and routine, or after a stated adjustment.",
+   "decision_supported": "Whether a change in weight reflects tissue gain or a change in gut fill and handling.",
+   "required_inputs": "weight_basis, pencil_shrink_pct, gather_time/weigh_time, hours_off_feed_water, handling notes per weigh session.",
+   "context": "All classes. Matters most for short intervals, lush versus mature forage, and lactating cows.",
+   "classification": "A-supported-general",
+   "evidence": "Watson et al. 2013: 'handling cattle in a similar manner when weighing is more important than limiting intakes'. Heitschmidt 1982 (Texas Experimental Ranch keyword, mature cows): early-morning weights were ~2.5% below late-morning weights, and cows lost 3.5% in the first 3 h, then ~1% every 3 h. OSU ANSI-3257: cattle gathered at 6 a.m. shrank 6.2% by 3 p.m. versus 3.3% when gathered at 9 a.m. Mississippi State P2577: ~1%/h for the first 3-4 h without feed and water, then ~0.25%/h; '2 percent to 4 percent pencil shrink' is common in sales. Derner et al. 2014: summer overnight shrink 8.8-9.0% vs 7.1% in September at CPER. Derner et al. 2016: shrink increased with air temperature and NDVI. OBSERVED consistency check: '[W12] pasture heifers, mean full-vs-limit-fed difference 10.2 lb over 20 d -> 0.51 lb/d (report states 0.51)'.",
+   "limitations": "Most of the shrink rates come from shipping/sale contexts or from other regions (Texas, Mississippi, Oklahoma). Magnitudes vary with forage, weather and handling, so no single pencil-shrink value applies to every weigh-in.",
+   "configurable": "Yes. The ranch picks a standard routine and an optional pencil shrink.",
+   "missing_data_blocks": "If the basis is unknown for either weigh-in, or differs between them, mark ADG 'unverified' and do not raise group-serious or individual flags from it.",
+   "recommendation": "Add weigh-session metadata. Show a 'weighing conditions differ' note beside any ADG.",
+   "sources": [
+    {
+     "title": "Diurnal Variation in Weight and Rates of Shrink of Range Cows and Calves (J. Range Manage. 35:717-720)",
+     "publisher": "Society for Range Management (Rangelands Gateway / Univ. of Arizona repository)",
+     "url": "https://rangelandsgateway.org/dlio/22019",
+     "pub_date": "1982",
+     "data_years": "not stated",
+     "kind": "peer-reviewed",
+     "supports": "Early vs late morning cow weights differ by ~2.5%. Shrink rates over time."
+    },
+    {
+     "title": "Managing Shrink and Weighing Conditions in Beef Cattle (ANSI-3257)",
+     "publisher": "Oklahoma State University Extension",
+     "url": "https://pods.okstate.edu/fact-sheets/ANSI-3257pod.pdf",
+     "pub_date": "undated (footer code 0607)",
+     "data_years": "cites studies 1972-1997",
+     "kind": "extension",
+     "supports": "Gather-time effect (6.2% vs 3.3%), ~1%/h then 0.25%/h, ~0.5% per 30 min of corral movement, and a 2-3% shrink assumption for cattle near the scales."
+    },
+    {
+     "title": "Understanding and Managing Cattle Shrink (P2577)",
+     "publisher": "Mississippi State University Extension",
+     "url": "https://extension.msstate.edu/publications/understanding-and-managing-cattle-shrink",
+     "pub_date": "undated (page code POD-12-23)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Fill vs tissue shrink, hourly shrink rates, and the common 2-4% pencil shrink."
+    },
+    {
+     "title": "Estimating Overnight Weight Loss of Corralled Yearling Steers in Semiarid Rangeland (Rangelands 38(3):101-104)",
+     "publisher": "Society for Range Management (Rangelands Gateway)",
+     "url": "https://rangelandsgateway.org/dlio/17936",
+     "pub_date": "2016",
+     "data_years": "four consecutive years (not named on page)",
+     "kind": "peer-reviewed",
+     "supports": "Percent overnight shrink rose with air temperature and NDVI. A prediction equation 'can provide temporal weight gain data within a grazing season'."
+    },
+    {
+     "title": "Do Environmental Variables Influence Overnight Weight Loss of Yearling Steers in Semiarid Rangelands",
+     "publisher": "Society for Range Management",
+     "url": "https://rangelandsgateway.org/node/25589",
+     "pub_date": "2014",
+     "data_years": "2009-2012",
+     "kind": "field-study",
+     "supports": "8.8-9.0% (Jun-Aug) vs 7.1% (Sep) overnight shrink."
+    },
+    {
+     "title": "Impacts of a limit-feeding procedure on variation and accuracy of cattle weights",
+     "publisher": "American Society of Animal Science (UNL Digital Commons)",
+     "url": "https://digitalcommons.unl.edu/animalscifacpub/790",
+     "pub_date": "2013",
+     "data_years": "not stated",
+     "kind": "peer-reviewed",
+     "supports": "Similar handling matters more than limit feeding."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Minimum interval / number of weights before ADG is judged. Individual ADG needs at least about 70 d, or a regression on 3 or more weights. Group ADG needs an interval long enough that a plausible one-sided weighing error stays under a chosen share of the expectation.",
+   "decision_supported": "Whether an ADG figure is precise enough to act on.",
+   "required_inputs": "Weigh dates; count of weights per animal; ranch-chosen tolerance; an estimate of the weighing error for its routine.",
+   "context": "All weighed classes, on any scale.",
+   "classification": "B-context-dependent",
+   "evidence": "BIF 2019: 70-d minimum for individual ADG with paired start and end weights on separate days. Archer 1997: 70 d with 2-week weights is optimal. OBSERVED (gain.evidence.research.mjs) minimum days for error within 10% / 20% of target: '[D14] ... yearlings(2.0): 10% 71 d, 20% 36 d | heifers(1.0): 10% 141 d, 20% 71 d'; '[W12] mean full-weight offset, pasture steers (lb) yearlings(2.0): 10% 185 d, 20% 93 d'. Error rows at 57 d: 0.18, 0.25, 0.48 and 0.65 lb/d for the four error sources. Augustine et al. 2022 (CPER) used ~53-60-d intervals with weights corrected for estimated overnight shrink.",
+   "limitations": "The error magnitudes used come from published studies under other conditions. A ranch should estimate its own, for example from repeat weights of the same animals. BIF test conditions (controlled diet) are stricter than pasture conditions.",
+   "configurable": "Yes: minimum days, minimum weights per animal, tolerance.",
+   "missing_data_blocks": "Below the minimum, show ADG as 'provisional' and raise no flag.",
+   "recommendation": "Add RULES.minIntervalDaysIndividual (default 70) and RULES.minIntervalDaysGroup (ranch-set; the README must state the basis). Prefer regression when 3 or more weights exist.",
+   "sources": [
+    {
+     "title": "Beef Improvement Federation Guidelines for Feed Efficiency Testing as of March 26th, 2019",
+     "publisher": "Beef Improvement Federation (vendor-hosted copy, C-Lock Inc.)",
+     "url": "https://docs.c-lockinc.com/Document - Beef Improvement Federation Guidelines for FE Testing.pdf",
+     "pub_date": "2019-03-26",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "70-d minimum for individual ADG."
+    },
+    {
+     "title": "Optimum postweaning test for measurement of growth rate, feed intake, and feed efficiency in British breed cattle",
+     "publisher": "American Society of Animal Science (University of Adelaide repository)",
+     "url": "https://eres.library.adelaide.edu.au/dspace/handle/2440/13249",
+     "pub_date": "1997",
+     "data_years": "not stated",
+     "kind": "peer-reviewed",
+     "supports": "70-d test, fortnightly weights."
+    },
+    {
+     "title": "Can measurements of foraging behaviour predict variation in weight gains of free-ranging cattle? (Animal Production Science)",
+     "publisher": "CSIRO Publishing (PDF hosted by USDA-ARS)",
+     "url": "https://www.ars.usda.gov/ARSUserFiles/30123025/Publications/2022/Augustine_2022_foraging%20behavior%20and%20weight%20gain.pdf",
+     "pub_date": "2022",
+     "data_years": "2019-2020",
+     "kind": "peer-reviewed",
+     "supports": "Rangeland research practice: interval ADG over ~53-60 d, weights corrected for estimated overnight shrink."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Period-specific expected ADG. The expectation used by the group rule depends on season segment, forage type, supplementation and the current year's forage outlook.",
+   "decision_supported": "Separating a management or health problem from normal seasonal and weather-driven decline.",
+   "required_inputs": "Expected ADG by period and pasture (ranch history); supplementation flag; Grass-Cast or drought status as context.",
+   "context": "Northern/Central Plains summer grazing.",
+   "classification": "B-context-dependent",
+   "evidence": "Grings 2002 late-period values (1.30, 1.46 lb/d in 1994 and 1995) versus whole-season values (2.36-2.62). Currie 1989 found a decline from late July to September. Gillespie 2014 found a 1.17 vs 0.73 lb/d year effect. Reeves 2014: weather explains R2 0.44-0.74. The Grass-Cast About page says it is 'updated every two weeks' at 10 km x 10 km, is experimental, and should not be the 'sole source for making management decisions'.",
+   "limitations": "Ranch-specific history is needed. Public forecasts are experimental and county or grid scale, so they cannot set a herd's expected ADG by themselves.",
+   "configurable": "Yes.",
+   "missing_data_blocks": "If no period expectation exists, compare only to the ranch's own prior years for the same period, or report the ADG without a verdict.",
+   "recommendation": "Replace groups.csv target_adg_lbs with an expectations table (group, pasture or forage type, start_date, end_date, expected_adg, source).",
+   "sources": [
+    {
+     "title": "About Our Maps (Grass-Cast)",
+     "publisher": "Grass-Cast (USDA-ARS, National Drought Mitigation Center, Colorado State Univ., Univ. of Arizona)",
+     "url": "https://grasscast.unl.edu/Outlook/About.aspx",
+     "pub_date": "undated",
+     "data_years": "38-year baseline",
+     "kind": "agency",
+     "supports": "Experimental, 10 km grid, updated every two weeks. Does not account for local management or species. Not to be used as a sole decision source."
+    },
+    {
+     "title": "Growth patterns of yearling steers determined from daily live weights",
+     "publisher": "Society for Range Management",
+     "url": "https://repository.arizona.edu/handle/10150/645028",
+     "pub_date": "1989",
+     "data_years": "1983-1987",
+     "kind": "peer-reviewed",
+     "supports": "Gains lower in the second half of summer every year."
+    },
+    {
+     "title": "Intensive-early stocking for yearling cattle in the Northern Great Plains",
+     "publisher": "USDA-ARS / SRM",
+     "url": "https://ars.usda.gov/ARSUserFiles/30300500/Publications/JRM55-135-138.pdf",
+     "pub_date": "2002",
+     "data_years": "1993-1995",
+     "kind": "peer-reviewed",
+     "supports": "Late-period vs whole-season ADG."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED (class not in current data): Replacement heifer target-weight rule. Required ADG = (target % of mature BW x mature BW - current BW) / days to breeding start. Flag when the projected breeding weight falls short of the ranch's target.",
+   "decision_supported": "Whether developing heifers will reach the ranch's chosen breeding weight in time.",
+   "required_inputs": "Mature cow weight estimate (own cows, weighed with BCS), target % (ranch choice), breeding start date, current weights.",
+   "context": "Yearling replacement heifers in winter and spring development, before a spring or summer breeding season.",
+   "classification": "B-context-dependent",
+   "evidence": "SDSU (Grussing, updated 2021-10-25): '55 - 65% of mature weight by breeding'. Worked example: a 1,400-lb mature cow and 60% gives an 840-lb target. A 600-lb heifer then needs 240 lb over 151 d (the article states 1.5 lb/d; 240/151 = 1.59). UNL BeefWatch 2024: GSL data 2005-2019 (1,434 heifers and cows) at 50-70% of mature BW. Heifers at 60-70% had higher initial and 2-yr-old pregnancy rates, with no effect at ages 3-5. UNL G2215 (2013): lower-input systems target 50-57% vs the traditional 60-65%. SDSU (Ricardo, updated 2026-07-10): about 65% at breeding and 80% by calving historically; lower-input 50-55% with ADG ~1.0-1.5 lb/d. MU G2091 (2021): 65% traditional; 1.5 lb/d during development.",
+   "limitations": "The target % is a ranch trade-off between cost and reproduction. Mature-weight estimates are uncertain.",
+   "configurable": "Yes: target %, mature weight, breeding date.",
+   "missing_data_blocks": "Without a mature-weight estimate and a breeding date, no projection.",
+   "recommendation": "Optional future feature. The repo's 'Heifers' group is first-calf heifers, so do not relabel it as replacements.",
+   "sources": [
+    {
+     "title": "Targeted Feeding for Heifer Development",
+     "publisher": "SDSU Extension",
+     "url": "https://extension.sdstate.edu/targeted-feeding-heifer-development",
+     "pub_date": "updated 2021-10-25",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "55-65% target and the required-ADG worked example."
+    },
+    {
+     "title": "Heifer percent mature body weight at breeding: What does it mean for pregnancy rates and calf performance?",
+     "publisher": "UNL BeefWatch",
+     "url": "https://beef.unl.edu/beefwatch/2024/heifer-percent-mature-body-weight-breeding-what-does-it-mean-pregnancy-rates-and-calf/",
+     "pub_date": "2024-01-17",
+     "data_years": "2005-2019",
+     "kind": "extension",
+     "supports": "50-70% comparison and pregnancy outcomes."
+    },
+    {
+     "title": "Reducing Replacement Heifer Development Costs Using a Systems Approach (G2215)",
+     "publisher": "University of Nebraska-Lincoln Extension",
+     "url": "https://extensionpubs.unl.edu/publication/g2215/2013/pdf/view/g2215-2013.pdf",
+     "pub_date": "2013-09",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "50-57% vs 60-65% of mature weight. BCS 5 or more at calving."
+    },
+    {
+     "title": "Developing Heifers to Fit Your Production Environment",
+     "publisher": "SDSU Extension",
+     "url": "https://extension.sdstate.edu/developing-heifers-fit-your-production-environment",
+     "pub_date": "updated 2026-07-10",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "65% / 80% historical benchmarks. Lower-input 50-55% at ~1.0-1.5 lb/d."
+    },
+    {
+     "title": "Nutritional Management of Developing Heifers: Intensive Versus Extensive Systems (G2091)",
+     "publisher": "University of Missouri Extension",
+     "url": "https://extension.missouri.edu/media/wysiwyg/Extensiondata/Pub/pdf/agguides/ansci/g02091.pdf",
+     "pub_date": "2021-09",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "65% traditional target. 1.5 lb/d during development."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Coverage and matched-interval gate for group ADG. Report weighed head / inventory head and the number of animals with both weigh-ins in the same interval. Withhold the group verdict below a ranch-set coverage share or when intervals are mixed.",
+   "decision_supported": "Whether the group figure represents the group.",
+   "required_inputs": "groups.csv head (inventory), per-animal weigh dates, weigh session ID.",
+   "context": "All groups. Relevant when only a sample ('tester' animals) is weighed or animals miss a gather.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "OBSERVED (gain.evidence.research.mjs): 'Heifers: inventory 45, weighed 45 (100%), distinct intervals 1'. Sampling precision at assumed SDs: 'SD 0.4 lb/d: n=10 SE 0.126, n=20 SE 0.089, ... n=150 SE 0.033'. A shared weighing-condition error is not reduced by n. No source located in this pass gives a recommended sample size for monitoring pasture gains, so the threshold is a ranch choice.",
+   "limitations": "The SD values are assumptions (the shipped data's SDs are synthetic: 0.16 heifers, 0.41 yearlings).",
+   "configurable": "Yes: minimum coverage share, minimum n.",
+   "missing_data_blocks": "Coverage below the threshold, or mixed intervals: 'group gain not assessable'.",
+   "recommendation": "Show coverage beside every group ADG.",
+   "sources": [
+    {
+     "title": "Data from: Can measurements of foraging behaviour predict variation in weight gains of free-ranging cattle?",
+     "publisher": "USDA-ARS (Data.gov)",
+     "url": "https://catalog.data.gov/dataset/data-from-can-measurements-of-foraging-behaviour-predict-variation-in-weight-gains-of-free",
+     "pub_date": "updated 2025-11-21",
+     "data_years": "2019-2020",
+     "kind": "agency",
+     "supports": "A public individual-steer ADG dataset that could be used to estimate realistic within-herd SD. Not downloaded or inspected in this pass."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Scale check per weigh session. Zero the scale and check it with a known weight at the start of each session (and after moving it). Record scale ID and the check result. Note that ranch management scales are not trade-certified.",
+   "decision_supported": "Whether a weigh session's numbers can be trusted.",
+   "required_inputs": "scale_id, check_weight_lbs, check_reading_lbs, zero_ok, session date and time.",
+   "context": "Portable load-bar scales at ranch working facilities.",
+   "classification": "B-context-dependent",
+   "evidence": "PAMI Evaluation Report 654 (July 1991) tested four livestock scales. One read 2% low to 1% high in final tests (about 2% high, or 20 lb on a 1,000-lb animal, initially). Re-zeroing was needed every ~15-50 cattle depending on model. Cold could cause a ~0.4% low reading. 9 CFR 201.72 requires scales used in trade under the Packers and Stockyards Act to be tested at least twice each calendar year, at least 120 days apart. The Gallagher load bar manual (Ed. 12, Mar 2014) states the product is 'not certified for trade use' and that uneven mounting 'may result in weighing errors'. The Tru-Test indicator info sheet (REV 12192023) gives no accuracy figure.",
+   "limitations": "PAMI tested 1991-era equipment. Current scales may perform differently, and no current independent test was located. 9 CFR 201.72 covers trade weighing, not ranch performance weighing.",
+   "configurable": "Yes: check-weight tolerance.",
+   "missing_data_blocks": "If no check is recorded for a session, mark its ADGs 'scale not checked' (informational, not blocking).",
+   "recommendation": "Add session metadata. Do not import vendor-computed ADG without the underlying weights.",
+   "sources": [
+    {
+     "title": "Livestock Scales (Evaluation Report 654)",
+     "publisher": "Prairie Agricultural Machinery Institute",
+     "url": "https://pami.ca/pdfs/reports_research_updates/(5e)%20Livestock%20Scales/654.PDF",
+     "pub_date": "1991-07",
+     "data_years": "test year not stated",
+     "kind": "field-study",
+     "supports": "Measured accuracy, zero drift and temperature effects of four livestock scales."
+    },
+    {
+     "title": "9 CFR 201.72 Scales; testing of",
+     "publisher": "eCFR (USDA AMS Packers and Stockyards regulations)",
+     "url": "https://www.ecfr.gov/current/title-9/chapter-II/part-201/subpart-K/section-201.72",
+     "pub_date": "most recent change 88 FR 62696, 2023-09-13",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Trade scales tested at least twice per calendar year, at least 120 d apart."
+    },
+    {
+     "title": "Load Bar User Manual 3E1045 Edition 12",
+     "publisher": "Gallagher (vendor; PDF hosted by Valley Vet)",
+     "url": "https://www.valleyvet.com/library/lib_19258_-Manual1.pdf",
+     "pub_date": "2014-03",
+     "data_years": "n/a",
+     "kind": "vendor",
+     "supports": "Not certified for trade use. Mounting affects accuracy (vendor statement, not independently verified)."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED wording for the slow-gainer follow-up: observation and escalation only. List the animals, observe them at the next gather, record what was seen, and refer to the herd veterinarian per the ranch's health plan. No diagnosis or treatment in the dashboard.",
+   "decision_supported": "Who to look at, and how the observation is recorded.",
+   "required_inputs": "Tag, date, observation note, observer, whether escalated.",
+   "context": "All classes.",
+   "classification": "A-supported-general",
+   "evidence": "Merck Veterinary Manual (reviewed 2023-07): screening relies on 'regular observation of the herd'. Records are 'essential to monitor the incidence of disease ... and impact of disease on performance' and should be 'analyzed on a regular basis'.",
+   "limitations": "A low ADG alone is not evidence of disease, because weighing noise and forage effects are larger in many cases (see the individual rule).",
+   "configurable": "Yes (the action text).",
+   "missing_data_blocks": "Not applicable. This rule only routes to observation.",
+   "recommendation": "Change 'Pull and check' to 'Look at these animals at the next gather and record what you see'. Link to a health observation record.",
+   "sources": [
+    {
+     "title": "Disease Screening, Treatment, and Surveillance in Beef Cattle",
+     "publisher": "Merck Veterinary Manual",
+     "url": "https://www.merckvetmanual.com/management-and-nutrition/preventative-health-care-and-husbandry-of-beef-cattle/disease-screening-treatment-and-surveillance-in-beef-cattle",
+     "pub_date": "reviewed 2023-07; modified 2024-09",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Observation and records practice."
+    }
+   ]
+  }
+ ],
+ "data_fields": [
+  {
+   "field": "weights.tag",
+   "meaning": "Animal ID that stays the same across weigh-ins (visual tag)",
+   "units_valid": "string, unique per animal; must not be reused",
+   "source_type": "ranch records",
+   "update_frequency": "per weigh-in",
+   "required": "required",
+   "missing_behavior": "Row rejected and counted in a data-issues line",
+   "supports": "Pairing weights for individual ADG",
+   "evidence_url": "https://docs.c-lockinc.com/Document - Beef Improvement Federation Guidelines for FE Testing.pdf"
+  },
+  {
+   "field": "weights.eid",
+   "meaning": "Electronic ID (RFID) read at the scale, used to match weights to animals",
+   "units_valid": "15-digit RFID string",
+   "source_type": "device",
+   "update_frequency": "per weigh-in",
+   "required": "optional",
+   "missing_behavior": "Fall back to tag",
+   "supports": "Reducing tag-entry errors at the chute",
+   "evidence_url": "https://www.agproud.com/ext/resources/directories/files/Datamars/Tru-Test_WeighIndicators_InfoSheet.pdf"
+  },
+  {
+   "field": "weights.group",
+   "meaning": "Management group at the time of this weighing",
+   "units_valid": "must match groups.csv",
+   "source_type": "ranch records",
+   "update_frequency": "per weigh-in",
+   "required": "required",
+   "missing_behavior": "Row excluded from group figures and reported",
+   "supports": "Group ADG attribution",
+   "evidence_url": "https://ars.usda.gov/ARSUserFiles/30300500/Publications/JRM55-135-138.pdf"
+  },
+  {
+   "field": "weights.date",
+   "meaning": "Weigh date",
+   "units_valid": "ISO YYYY-MM-DD",
+   "source_type": "ranch records",
+   "update_frequency": "per weigh-in",
+   "required": "required",
+   "missing_behavior": "Row rejected",
+   "supports": "Interval length, minimum-interval gate",
+   "evidence_url": "https://eres.library.adelaide.edu.au/dspace/handle/2440/13249"
+  },
+  {
+   "field": "weights.weigh_time",
+   "meaning": "Clock time the animal (or session) was weighed",
+   "units_valid": "HH:MM local, with a stated timezone",
+   "source_type": "device",
+   "update_frequency": "per weigh-in",
+   "required": "optional (recommended)",
+   "missing_behavior": "ADG marked 'conditions unknown'",
+   "supports": "Detecting time-of-day/fill differences between weigh-ins",
+   "evidence_url": "https://rangelandsgateway.org/dlio/22019"
+  },
+  {
+   "field": "weights.weight_lbs",
+   "meaning": "Scale weight",
+   "units_valid": "number, lb; plausible range per class (e.g. 300-1,000 yearlings, 700-1,600 cows); no thousands separators",
+   "source_type": "device",
+   "update_frequency": "per weigh-in",
+   "required": "required",
+   "missing_behavior": "Blank or implausible: row excluded and listed as a data issue (never coerced to 0)",
+   "supports": "ADG",
+   "evidence_url": "https://Beef.unl.edu/7a4f176f-73e2-4fa9-b86c-ed95f8543602.pdf"
+  },
+  {
+   "field": "weigh_sessions.weight_basis",
+   "meaning": "Fill state of the weights in this session",
+   "units_valid": "full | overnight_shrunk | limit_fed | pencil_shrunk",
+   "source_type": "ranch records",
+   "update_frequency": "per weigh session",
+   "required": "required for ADG verdicts",
+   "missing_behavior": "ADG shown as provisional; no serious or individual flags",
+   "supports": "Weigh-condition consistency gate",
+   "evidence_url": "https://digitalcommons.unl.edu/animalscifacpub/790"
+  },
+  {
+   "field": "weigh_sessions.pencil_shrink_pct",
+   "meaning": "Shrink deducted, if a pencil shrink is applied",
+   "units_valid": "0-10 %",
+   "source_type": "ranch records",
+   "update_frequency": "per weigh session",
+   "required": "optional",
+   "missing_behavior": "Treated as 0 and stated",
+   "supports": "Comparability across sessions",
+   "evidence_url": "https://rangelandsgateway.org/node/25589"
+  },
+  {
+   "field": "weigh_sessions.gather_time / hours_off_feed_water",
+   "meaning": "When cattle were gathered and how long they stood off feed and water before weighing",
+   "units_valid": "HH:MM; hours 0-24",
+   "source_type": "manual observation",
+   "update_frequency": "per weigh session",
+   "required": "optional (recommended)",
+   "missing_behavior": "'conditions unknown' note",
+   "supports": "Interpreting fill shifts",
+   "evidence_url": "https://pods.okstate.edu/fact-sheets/ANSI-3257pod.pdf"
+  },
+  {
+   "field": "weigh_sessions.scale_id, check_weight_lbs, check_reading_lbs, zeroed",
+   "meaning": "Which scale was used and the result of the zero/known-weight check",
+   "units_valid": "string; lb; lb; yes/no",
+   "source_type": "ranch records",
+   "update_frequency": "per weigh session",
+   "required": "optional",
+   "missing_behavior": "Informational 'scale not checked' note",
+   "supports": "Trust in session weights",
+   "evidence_url": "https://pami.ca/pdfs/reports_research_updates/(5e)%20Livestock%20Scales/654.PDF"
+  },
+  {
+   "field": "groups.head",
+   "meaning": "Current inventory head count",
+   "units_valid": "integer >= 0",
+   "source_type": "ranch records",
+   "update_frequency": "on any move, sale, death or purchase",
+   "required": "required",
+   "missing_behavior": "Coverage cannot be computed; group verdict withheld",
+   "supports": "Coverage gate",
+   "evidence_url": "https://catalog.data.gov/dataset/data-from-can-measurements-of-foraging-behaviour-predict-variation-in-weight-gains-of-free"
+  },
+  {
+   "field": "groups.gain_metric",
+   "meaning": "How the class is judged",
+   "units_valid": "ADG | BCS | none",
+   "source_type": "assumption",
+   "update_frequency": "per season",
+   "required": "required",
+   "missing_behavior": "Default by class: yearlings ADG; cows and first-calf heifers BCS",
+   "supports": "Choosing ADG vs BCS per class",
+   "evidence_url": "https://beef.unl.edu/learning/condition1a.shtml"
+  },
+  {
+   "field": "gain_expectations (group, pasture_or_forage_type, start_date, end_date, expected_adg_lbs, source)",
+   "meaning": "Expected ADG for a period of the season",
+   "units_valid": "lb/d, typically -0.5 to 3.0; dates ISO",
+   "source_type": "ranch records",
+   "update_frequency": "per season, revised with forage outlook",
+   "required": "required for group verdicts",
+   "missing_behavior": "Report ADG without verdict, or compare to ranch prior years",
+   "supports": "Group rule; period-specific expectation",
+   "evidence_url": "https://ars.usda.gov/ARSUserFiles/30300500/Publications/JRM55-135-138.pdf"
+  },
+  {
+   "field": "gain_expectations.supplemented",
+   "meaning": "Whether the group is receiving supplement in the period",
+   "units_valid": "yes/no plus type",
+   "source_type": "ranch records",
+   "update_frequency": "on change",
+   "required": "optional",
+   "missing_behavior": "Assume unknown; note it",
+   "supports": "Choosing the expectation",
+   "evidence_url": "https://beef.unl.edu/beefwatch/2022/supplementing-yearlings-summer-grazing-season-it-worth-it"
+  },
+  {
+   "field": "bcs.score",
+   "meaning": "Body condition score of a cow or first-calf heifer (or a group median from a sample)",
+   "units_valid": "1-9, half points allowed",
+   "source_type": "manual observation",
+   "update_frequency": "weaning, ~45 d after weaning, ~90 d before calving, calving, breeding start, late summer in drought",
+   "required": "required for cows and first-calf heifers",
+   "missing_behavior": "'Condition not recorded' shown; no 'all clear'",
+   "supports": "Cow and first-calf heifer condition rule",
+   "evidence_url": "https://beef.unl.edu/learning/condition1a.shtml"
+  },
+  {
+   "field": "bcs.target",
+   "meaning": "Ranch target BCS at a scoring point",
+   "units_valid": "1-9 (defaults: 5 mature at calving, 6 first-calf heifers)",
+   "source_type": "ranch records",
+   "update_frequency": "per season",
+   "required": "optional (defaults exist)",
+   "missing_behavior": "Use defaults and label them",
+   "supports": "BCS rule",
+   "evidence_url": "https://extension.sdstate.edu/management-body-condition-score-throughout-year"
+  },
+  {
+   "field": "calving.calving_date / lactation_status",
+   "meaning": "Calving date and whether the animal is nursing",
+   "units_valid": "ISO date; nursing | dry",
+   "source_type": "ranch records",
+   "update_frequency": "at calving and weaning",
+   "required": "optional",
+   "missing_behavior": "Weight-based verdicts suppressed for first-calf heifers",
+   "supports": "Interpreting weight change in lactating classes",
+   "evidence_url": "https://Beef.unl.edu/documents/2018-beef-report/2018-06-Effect-of-Supplementation-during-the-Breeding-Season-on-a-May-calving-Herd.pdf"
+  },
+  {
+   "field": "replacement.mature_weight_lbs, target_pct_mature, breeding_start",
+   "meaning": "Inputs for the replacement-heifer target-weight projection",
+   "units_valid": "lb; 50-70 %; ISO date",
+   "source_type": "ranch records",
+   "update_frequency": "per development season",
+   "required": "optional (future class)",
+   "missing_behavior": "No projection",
+   "supports": "Replacement heifer rule",
+   "evidence_url": "https://extension.sdstate.edu/targeted-feeding-heifer-development"
+  },
+  {
+   "field": "observations (tag, date, note, observer, escalated)",
+   "meaning": "What was seen when a slow animal was checked",
+   "units_valid": "free text plus yes/no",
+   "source_type": "manual observation",
+   "update_frequency": "as observed",
+   "required": "optional",
+   "missing_behavior": "Slow animal stays 'to observe'",
+   "supports": "Observation and escalation follow-up (no diagnosis)",
+   "evidence_url": "https://www.merckvetmanual.com/management-and-nutrition/preventative-health-care-and-husbandry-of-beef-cattle/disease-screening-treatment-and-surveillance-in-beef-cattle"
+  },
+  {
+   "field": "context.grasscast_pct_of_normal",
+   "meaning": "Grass-Cast forecast of rangeland production vs the long-term average for the ranch's grid cell, by precipitation scenario",
+   "units_valid": "% change in lb/acre (three scenarios)",
+   "source_type": "public dataset",
+   "update_frequency": "every two weeks in season (per Grass-Cast About page)",
+   "required": "optional",
+   "missing_behavior": "Context omitted; no effect on flags",
+   "supports": "Setting or adjusting period expectations (context only)",
+   "evidence_url": "https://grasscast.unl.edu/Outlook/About.aspx"
+  },
+  {
+   "field": "context.drought_category",
+   "meaning": "U.S. Drought Monitor category for the county",
+   "units_valid": "None, D0-D4 (% of area)",
+   "source_type": "public dataset",
+   "update_frequency": "weekly (release day not confirmed on the fetched page)",
+   "required": "optional",
+   "missing_behavior": "Context omitted",
+   "supports": "Explaining low-gain years",
+   "evidence_url": "https://droughtmonitor.unl.edu/DmData/DataDownload/ComprehensiveStatistics.aspx"
+  }
+ ],
+ "integrations": [
+  {
+   "name": "Chute scale indicator with EID reader (e.g. Datamars Tru-Test S3/ID5000/XR5000)",
+   "provides": "Per-animal weights matched to EID, with date and time; cloud upload",
+   "access": "Vendor app/cloud and device export. The CSV format was not confirmed in the fetched info sheet.",
+   "cost": "not verified",
+   "licensing": "proprietary vendor software",
+   "coverage": "any weigh session at the working facility",
+   "refresh": "per weigh session",
+   "failure_behavior": "Ingest only the raw weights. If the export is missing, accept manual CSV. Never trust a vendor-computed ADG without the underlying weights. Vendor 'Superdamp' stable-weight claims are not independently verified.",
+   "recommendation": "Use as the main data path. Define a minimal CSV contract (tag, eid, date, time, weight_lbs, session_id).",
+   "url": "https://www.agproud.com/ext/resources/directories/files/Datamars/Tru-Test_WeighIndicators_InfoSheet.pdf"
+  },
+  {
+   "name": "Gallagher load bars / weigh scale",
+   "provides": "Weights (load bar manual only reviewed)",
+   "access": "device",
+   "cost": "not verified",
+   "licensing": "proprietary",
+   "coverage": "working facility",
+   "refresh": "per session",
+   "failure_behavior": "The manual states 'not certified for trade use' and that uneven mounting causes errors (vendor statement)",
+   "recommendation": "Same CSV contract. Record scale checks per session.",
+   "url": "https://www.valleyvet.com/library/lib_19258_-Manual1.pdf"
+  },
+  {
+   "name": "In-pasture partial-body-weight / walk-over scales (e.g. C-Lock SmartScale)",
+   "provides": "Near-daily weights at water points",
+   "access": "vendor platform",
+   "cost": "not verified",
+   "licensing": "proprietary",
+   "coverage": "animals that visit the instrumented water point",
+   "refresh": "daily",
+   "failure_behavior": "Independent studies needed outlier cleaning (Brennan et al., Cottonwood SD, removed 1.6% of weights; 2-3 day rolling means). In an Australian walk-over study, weights read high by 10 kg (calves) and 21 kg (cows), RMSPE was 5.1-5.5%, and averaging 5 or more records improved accuracy (Simanungkalit et al. 2020).",
+   "recommendation": "Not needed for the portfolio. Mention as a future option with cleaning requirements. Independent sources: https://plf.tennessee.edu/wp-content/uploads/sites/229/2024/01/Implications-for-daily-body-weight-data-on-beef-cattle-grazing-extensive-rangelands.pdf and the Cambridge 'animal' 2020 article.",
+   "url": "https://cambridge.org/core/journals/animal/article/evaluation-of-remote-monitoring-units-for-estimating-body-weight-and-supplement-intake-of-grazing-cattle/C4A9621209F16D437CCE3202DF41B118"
+  },
+  {
+   "name": "Grass-Cast grassland productivity forecast",
+   "provides": "Forecast % change in rangeland production vs the long-term average, three precipitation scenarios",
+   "access": "public web maps",
+   "cost": "free",
+   "licensing": "public; the database on Data.gov is CC BY 4.0",
+   "coverage": "Great Plains, 10 km grid",
+   "refresh": "every two weeks in season",
+   "failure_behavior": "Experimental. Gray or white cells have no forecast. Not to be used as the sole decision source. If unavailable, show no context; never block or raise a flag.",
+   "recommendation": "Context panel beside gain expectations only",
+   "url": "https://grasscast.unl.edu/Outlook/About.aspx"
+  },
+  {
+   "name": "Grass-Cast database (includes Cattle_weight_gains.xlsx, 12 Great Plains sites, 1939-2018)",
+   "provides": "Long-term cattle weight gain, ANPP and NDVI records for benchmarking year-to-year variability",
+   "access": "Data.gov / figshare download",
+   "cost": "free",
+   "licensing": "CC BY 4.0",
+   "coverage": "12 sites, roughly 32.5-43.9 N",
+   "refresh": "static (modified 2025-11-21)",
+   "failure_behavior": "Download FAILED in this session: curl to ndownloader.figshare.com returned 'CONNECT tunnel failed, response 403', and the WebFetch redirect URL exceeded the proxy length limit. Contents not inspected.",
+   "recommendation": "Worth inspecting offline to calibrate the period expectations and variability cited in the README",
+   "url": "https://catalog.data.gov/dataset/grass-cast-database-data-on-aboveground-net-primary-productivity-anpp-climate-data-ndvi-an"
+  },
+  {
+   "name": "U.S. Drought Monitor statistics",
+   "provides": "Weekly drought category % by county",
+   "access": "CSV, XML and JSON download; REST services",
+   "cost": "free",
+   "licensing": "public (terms not reviewed)",
+   "coverage": "US counties",
+   "refresh": "weekly",
+   "failure_behavior": "Context only; omit on failure",
+   "recommendation": "Optional context next to the gain panel",
+   "url": "https://droughtmonitor.unl.edu/DmData/DataDownload/ComprehensiveStatistics.aspx"
+  },
+  {
+   "name": "USDA-ARS CPER foraging behaviour and ADG dataset",
+   "provides": "Individual yearling steer ADG with behaviour metrics, 2019-2020",
+   "access": "Data.gov CSV files",
+   "cost": "free",
+   "licensing": "public domain (usa.gov label)",
+   "coverage": "Central Plains Experimental Range, CO",
+   "refresh": "static",
+   "failure_behavior": "n/a",
+   "recommendation": "Use to set realistic within-herd ADG spread in the synthetic generator (not inspected in this pass)",
+   "url": "https://catalog.data.gov/dataset/data-from-can-measurements-of-foraging-behaviour-predict-variation-in-weight-gains-of-free"
+  },
+  {
+   "name": "Rangeland Analysis Platform (via the rapr R package)",
+   "provides": "Annual and 16-day herbaceous production estimates",
+   "access": "API / R package",
+   "cost": "free",
+   "licensing": "not reviewed",
+   "coverage": "US rangelands",
+   "refresh": "not verified",
+   "failure_behavior": "not evaluated",
+   "recommendation": "Considered only. The package README appeared in search results but was not fetched or evaluated.",
+   "url": "https://ftp.fau.de/cran/web/packages/rapr/readme/README.html"
+  }
+ ],
+ "feature_notes": "OBSERVED from my own runs (no repo files changed; git diff --stat is empty; the only new file is docs/audit/diagnostics/gain.evidence.research.mjs):\n1. Shipped gain output: Heifers 45/45 weighed, one interval 2026-07-20..2026-09-15 (57 d), mean ADG 0.44 against a 1.0 target, so serious (<0.80), with 32 of 45 under 0.50. Yearlings 150/150 weighed, mean 1.94 against 2.0 (no group flag), 6 under 1.00. Cows: 180 head, no weights and no BCS anywhere.\n\n2. Forage and season. Gains on Plains native range and cool-season pasture fall in late summer:\n- Grings 2002 (Fort Keogh MT): late-period ADG was 1.30 lb/d (1994, 44% of normal precipitation) and 1.46 lb/d (1995, 104% of normal), against 2.36-2.62 lb/d for the whole season.\n- Currie 1989: weights peaked late July to early August and then declined.\n- BeefWatch 2022: gain declines through summer, especially on cool-season grass.\n\n3. Year-to-year variation:\n- Gillespie 2014 (Sandhills): 1.17 vs 0.73 lb/d.\n- Cheng 2022 (CPER): 1.90-2.51 lb/d under traditional management.\n- Reeves 2014: weather explains up to 74% of the variation in beef production.\n- A rainfall or forage context field (Grass-Cast, USDM) would explain low-gain years. It should not drive alarms.\n\n4. Weighing practice is the biggest credibility gap:\n- No field records weight basis, gather time or shrink.\n- Published fill and shrink effects are 2.5% (time of morning), 6.2% vs 3.3% (gather time) and 8.8-9.0% vs 7.1% (summer vs September overnight shrink).\n- Watson 2012 measured full-vs-limit-fed ADG errors of 0.22-0.51 lb/d.\n- At the shipped 57-d interval these effects are 0.18-0.65 lb/d on a group mean and up to about 1.5-1.7 lb/d on an individual.\n\n5. Lactating first-calf heifers and cows: the standard tool is BCS (target 6 for first-calf heifers, 5 for mature cows). Published weight change for lactating 2-year-olds on Sandhills range was -0.15 / +0.18 lb/d. The planted 'heifers well under target' alert would likely read as a false alarm to an experienced manager.\n\n6. Replacement heifers (not in the data) are the class where ADG targets are well established: required ADG comes from a target % of mature weight (55-65%; lower-input 50-57%).\n\n7. The health follow-up should stay observation, records and escalation.\n\nFeature ideas, in order of credibility value:\n- Weigh-session metadata.\n- A per-class metric switch (ADG / BCS / none) with a bcs.csv.\n- A period-specific expectations table.\n- A minimum-interval gate.\n- Coverage shown beside each group ADG.\n- An 'observe at next gather' wording with observation records.\n\nOther topics (water, fence, calving, minerals, crew) are outside this topic and were not researched here.",
+ "caveats": "- Separating observed from inferred: published values are as reported by each source and fetched on 2026-10-16. kg values are converted at 2.2046 in the diagnostic. ADG-error tables are arithmetic (error / days) on published weight discrepancies. Applying the Heitschmidt mature-cow 2.5% to an 1,100-lb young cow is an extrapolation and is labelled as one. SDs in the sampling-precision table are assumptions.\n- Source regions: several weighing-practice sources come from outside the Northern Plains (Texas Experimental Ranch for Heitschmidt, Mississippi State, Oklahoma State, an Australian walk-over study, Missouri).\n- Cross-class comparisons:\n  - Manske's 1983-86 cows were cows in cow-calf pairs at NDSU Dickinson, not specifically first-calf heifers.\n  - Gillespie 2014 used spayed yearling heifers, not steers.\n  - The 'Pasture Management for Western North Dakota' PDF URL returned the 'Complementary Rotation Grazing System' report (Project 1906).\n- Missing details:\n  - Exact yearly ADG for Augustine 2020 and Reeves 2013/2014 appears only in figures and was not extracted.\n  - The location of Currie et al. 1989 is not shown on the fetched page.\n  - The Brennan et al. (Cottonwood SD) PDF does not give its journal or year in the fetched text.\n- Fetch failures:\n  - PMC pages (pmc.ncbi.nlm.nih.gov) returned a reCAPTCHA interstitial.\n  - The Grass-Cast cattle-gain spreadsheet download was blocked (proxy 403, then a URL-length rejection).\n  - extension.missouri.edu/g2091 errored; the PDF version worked.\n  - A journals.uair.arizona.edu article redirected away and was not read.\n  - The SDSU 'range roundup' and iGrow drought pages contained no animal gain numbers.\n- BIF test-length text comes from a copy hosted by C-Lock Inc. (a vendor). The official BIF guidelines wiki was not reached.\n- Vendor documents (Tru-Test, Gallagher) are vendor claims only. No current independent accuracy test of ranch scales was found; PAMI 1991 is old.\n- No source located gives a recommended monitoring sample size or a validated percent-of-target alarm level for pasture ADG. The 80% and 50% thresholds are management choices and are not validated anywhere.\n- An earlier research pass left docs/audit/diagnostics/gain.noise.research.mjs. Its source values were re-verified here, except 'Manske 0.62 lb/d, 4.5-mo twice-over', which I did not find. The verified figure used here is the 1983-86 native-range mean of 0.59 lb/d.\n- All repo data are fictional and must stay labelled fictional.\n- No treatment or diagnosis guidance is given.\n- Files: new diagnostic /home/claude/ranch-ops-dashboard/docs/audit/diagnostics/gain.evidence.research.mjs (run: node docs/audit/diagnostics/gain.evidence.research.mjs). Scratch dir /tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/research-gain/ (only an empty download folder, because the download failed)."
+}

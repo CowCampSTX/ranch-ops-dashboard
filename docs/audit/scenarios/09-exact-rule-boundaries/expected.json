@@ -1,0 +1,526 @@
+{
+ "scenario": "09-exact-rule-boundaries",
+ "title": "Exact rule boundaries",
+ "fictional": "All data is fictional (Example Ranch). Every threshold is a demonstration setting.",
+ "purpose": "Pins the comparison direction (< vs <=, > vs >=) and floating point at the demonstration thresholds. Hit exactly with a neighbour: tank level 25 (24.9, 25.0, 25.1) and 40 (39.9, 40.0); 24-hour drop 30 (29.9, 30.0); silence 24 h (23.9, 24.0); the planned move (1 day over, due today); the animal ADG line (0.982, 1.000); due within 7 days (7, 8) and overdue (1 day over, due today); the 5% and 10% budget lines (5.0%, 10.0%, 10.5%). Hit exactly without a neighbour: the 2-day grace (2 days left only) and the group ADG lines (exactly 0.8 x target, no group just under). Not at a boundary in any folder: the $500 line (only $480, below it), the $1,000 serious line, the $2,500 large-dollar line, the $250 unbudgeted line, the 45-day age limit, the 21-day interval and the 50% session share; the unit tests of 06-phase1-spec.md section 11.1 must cover them.",
+ "as_of": "2026-09-30T18:00 America/Chicago",
+ "files": {
+  "pastures": "copied unchanged",
+  "groups": "copied unchanged",
+  "moves": "changed",
+  "weights": "changed",
+  "water": "changed",
+  "health": "changed",
+  "budget": "changed",
+  "meta": "changed",
+  "tanks": "added"
+ },
+ "files_note": "tanks.csv (tank master list, WAT-02) and meta.csv's timezone column (TIME-02) are the Phase-1 additions the lead's defaults call for; the current code ignores both. health.csv carries HLTH-03's proposed generator fix (Cows Fly tag check: done 2026-09-01, next_due blank) unless the scenario says otherwise.",
+ "settings": "../settings.json",
+ "computed_by": "docs/audit/diagnostics/scenarios.build.py: Python arithmetic on this folder's CSV files. It never calls exceptions.js or app.js.",
+ "matching": "alerts_exact: every needs-attention row the implementation shows must be one of expected_rows (or allowed_extra_rows); data-issue and CAN'T TELL rows may carry extra wording. A row matches on area, kind and subject_key; state (or a listed alternative) and severity must agree; every key number must be shown, correctly rounded to the precision shown; key_dates may be ISO or 'Mon D'; key_tags must all appear; must_not_appear strings must not.",
+ "alerts_exact": true,
+ "expected_rows": [
+  {
+   "id": "T1",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T1",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "level_pct": 24.9
+   },
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-WAT-01"
+   ],
+   "arithmetic": "24.9 < 25: critical."
+  },
+  {
+   "id": "T2",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T2",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "level_pct": 25.0
+   },
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-WAT-01",
+    "RULE-WAT-02"
+   ],
+   "arithmetic": "25.0 is not < 25; 25.0 < 40: warning."
+  },
+  {
+   "id": "T3",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T3",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "level_pct": 25.1
+   },
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-WAT-02"
+   ],
+   "arithmetic": "25.1 < 40: warning."
+  },
+  {
+   "id": "T4",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T4",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "level_pct": 39.9
+   },
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-WAT-02"
+   ],
+   "arithmetic": "39.9 < 40: warning."
+  },
+  {
+   "id": "T6",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T6",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "drop_pts": 30.0,
+    "level_pct": 50.1
+   },
+   "must_not_appear": [],
+   "findings": [
+    "WAT-08"
+   ],
+   "rules": [
+    "RULE-WAT-03"
+   ],
+   "arithmetic": "Window [Sep 29 18:00, Sep 30 18:00] holds 80.1, 72.0, 64.0, 57.0, 50.1 (the 80.1 is exactly 24 h before the last reading, inside the window); 80.1 - 50.1 = 30.0 >= 30."
+  },
+  {
+   "id": "T9",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T9",
+   "state": "needs-attention",
+   "state_alternatives": [
+    "cant-tell"
+   ],
+   "severity": "serious",
+   "key_numbers": {
+    "silent_hours": 24,
+    "level_pct": 75.3
+   },
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-WAT-04"
+   ],
+   "arithmetic": "Last reading 2026-09-29T18:00 (75.3%); Sep 29 18:00 to Sep 30 18:00 = 24.0 hours >= 24."
+  },
+  {
+   "id": "COWS",
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Cows",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "days_left": 2
+   },
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-GRZ-02"
+   ],
+   "arithmetic": "South Divide since Sep 11: Sep 11 to Sep 30 = 19 days of 21; 2 days left, inside the 2-day grace."
+  },
+  {
+   "id": "HEIFERS",
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Heifers",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {},
+   "key_text_any": [
+    "today"
+   ],
+   "must_not_appear": [
+    "in 0 days"
+   ],
+   "findings": [
+    "UI-06"
+   ],
+   "rules": [
+    "RULE-GRZ-02"
+   ],
+   "arithmetic": "Lone Tree since Sep 16: Sep 16 to Sep 30 = 14 days of 14: the move is due today."
+  },
+  {
+   "id": "YEARLINGS",
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "days": 22,
+    "plan": 21,
+    "over": 1
+   },
+   "must_not_appear": [
+    "1 days"
+   ],
+   "findings": [],
+   "rules": [
+    "RULE-GRZ-01"
+   ],
+   "arithmetic": "Sand Hills since Sep 8: Sep 8 to Sep 30 = 22 days; 22 - 21 = 1 day over."
+  },
+  {
+   "id": "Y-ANIMALS",
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "count": 1,
+    "threshold": 1.0
+   },
+   "key_tags": [
+    "Y027"
+   ],
+   "must_not_appear": [
+    "1 yearlings",
+    "Y031"
+   ],
+   "findings": [
+    "GAIN-11",
+    "GAIN-12"
+   ],
+   "rules": [
+    "RULE-GAIN-02"
+   ],
+   "arithmetic": "Y027 gained 56 lbs in 57 days = 0.982 < 1.0: listed. Y031 gained 57 lbs in 57 days = 1.000, not under 1.0: not listed. Group pooled 13680 / 8550 = 1.6 = exactly 0.8 x 2.0, not under it."
+  },
+  {
+   "id": "BOOST",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Yearlings: Booster vaccine",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "overdue_days": 1
+   },
+   "key_dates": [
+    "2026-09-29"
+   ],
+   "must_not_appear": [
+    "1 days"
+   ],
+   "findings": [],
+   "rules": [
+    "RULE-HLTH-01"
+   ],
+   "arithmetic": "Due Sep 29; Sep 29 to Sep 30 = 1 day overdue."
+  },
+  {
+   "id": "DEWORM",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Yearlings: Deworm",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {},
+   "key_dates": [
+    "2026-09-30"
+   ],
+   "key_text_any": [
+    "today"
+   ],
+   "must_not_appear": [
+    "in 0 days"
+   ],
+   "findings": [
+    "UI-06"
+   ],
+   "rules": [
+    "RULE-HLTH-02"
+   ],
+   "arithmetic": "Due Sep 30, the as-of date: due today."
+  },
+  {
+   "id": "PINK",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Cows: Pinkeye check",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "due_in_days": 7
+   },
+   "key_dates": [
+    "2026-10-07"
+   ],
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-HLTH-02"
+   ],
+   "arithmetic": "Due Oct 7; Sep 30 to Oct 7 = 7 days, within 7 (inclusive)."
+  },
+  {
+   "id": "FEED",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Feed and mineral",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "pct_over": 10.0,
+    "usd_over": 2480
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-04",
+    "BUD-05",
+    "BUD-06"
+   ],
+   "rules": [
+    "RULE-BUD-02",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "27,280 vs 24,800: $2,480, 2,480 / 24,800 = 10.0%; 10.0% is not more than 10% (rule text), so warning; >= 5% and >= $500. The $2,500 large-dollar line cannot change this row (it only gives a warning); it is not tested in this folder."
+  },
+  {
+   "id": "LABOR",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Labor",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "pct_over": 5.0,
+    "usd_over": 1800
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-04",
+    "BUD-05",
+    "BUD-06"
+   ],
+   "rules": [
+    "RULE-BUD-02",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "37,800 vs 36,000: $1,800, 1,800 / 36,000 = 5.0%; exactly 5.0% and >= $500: warning (5% inclusive)."
+  },
+  {
+   "id": "REPAIRS",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Repairs",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "pct_over": 10.0,
+    "usd_over": 720
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-04",
+    "BUD-05",
+    "BUD-06"
+   ],
+   "rules": [
+    "RULE-BUD-02",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "7,920 vs 7,200: $720, 720 / 7,200 = 10.0%; 10.0% and $720: >= 5% and >= $500, warning; not serious (needs more than 10% and >= $1,000)."
+  },
+  {
+   "id": "VET",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Vet and health",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "pct_over": 10.5,
+    "usd_over": 630
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-04",
+    "BUD-05",
+    "BUD-06"
+   ],
+   "rules": [
+    "RULE-BUD-02",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "6,630 vs 6,000: $630, 630 / 6,000 = 10.5%; 10.5% is more than 10%, but $630 < $1,000: not serious; >= 5% and >= $500: warning."
+  }
+ ],
+ "expected_absent": [
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T5",
+   "reason": "40.0 is not < 40",
+   "findings": []
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T7",
+   "reason": "80.0 - 50.1 = 29.9 < 30; 50.1 >= 40",
+   "findings": []
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T8",
+   "reason": "last reading Sep 29 18:06: 23.9 hours < 24; level 70.2",
+   "findings": []
+  },
+  {
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Heifers",
+   "reason": "pooled 2052 / 2565 = 0.8 = exactly 0.8 x 1.0, not under it",
+   "findings": [
+    "GAIN-12"
+   ]
+  },
+  {
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Yearlings",
+   "reason": "pooled 13680 / 8550 = 1.6 = exactly 0.8 x 2.0",
+   "findings": [
+    "GAIN-12"
+   ]
+  },
+  {
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Heifers",
+   "reason": "slowest heifer 45/57 = 0.789 >= 0.5",
+   "findings": []
+  },
+  {
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Heifers: Pregnancy check",
+   "reason": "due Oct 8: 8 days, outside 7",
+   "findings": []
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Fuel",
+   "reason": "10,080 vs 9,600: $480, 480 / 9,600 = 5.0%: exactly 5.0% but $480 < $500",
+   "findings": []
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Water and fencing",
+   "reason": "5,035 vs 4,800: $235, 235 / 4,800 = 4.9%: under 5%",
+   "findings": []
+  }
+ ],
+ "allowed_extra_rows": [],
+ "area_states": {
+  "Water": "needs-attention",
+  "Grazing": "needs-attention",
+  "Gain": "needs-attention",
+  "Health": "needs-attention",
+  "Budget": "needs-attention"
+ },
+ "tile_expectations": [
+  {
+   "tile": "water",
+   "ok": 3,
+   "of": 9,
+   "need_look": 6,
+   "note": "OK: T5, T7, T8."
+  },
+  {
+   "tile": "budget",
+   "pct": 7.1776,
+   "actual_usd": 94745,
+   "budget_usd": 88400
+  }
+ ],
+ "open_decisions": [
+  "Feed and mineral is exactly 10.0% over with $2,480. Under the current rule text and BUD-05 ('serious above 10%') it is a warning. RULE-BUD-03's formula ('serious if p >= seriousPct AND V >= seriousUsd') makes it serious. Pick one and update this expected row if it is RULE-BUD-03's. Settled by 05-roadmap.md decision D2: serious needs more than 10%, so this row stays a warning.",
+  "The 80.1 reading at exactly last - 24 h is inside the window here ([last - 24 h, last], WAT-03's fix). RULE-WAT-03's phase note ('the reading about 24 h before the latest, within one reporting interval') gives the same 30.0 for this series. Settled by 05-roadmap.md decision D5: Phase 1 uses the maximum drawdown inside [last - 24 h, last], which also gives 30.0 here."
+ ],
+ "computed": {
+  "heifers": {
+   "lbs": 2052,
+   "n": 45,
+   "animal_days": 2565
+  },
+  "heifers_adg": 0.8,
+  "yearlings": {
+   "lbs": 13680,
+   "n": 150,
+   "animal_days": 8550
+  },
+  "yearlings_adg": 1.6,
+  "budget_totals": [
+   88400,
+   94745
+  ]
+ },
+ "findings": [
+  "WAT-08",
+  "GAIN-11",
+  "GAIN-12",
+  "BUD-04",
+  "BUD-05",
+  "BUD-06",
+  "UI-06",
+  "TEST-01",
+  "TEST-02"
+ ],
+ "rules": [
+  "RULE-WAT-01",
+  "RULE-WAT-02",
+  "RULE-WAT-03",
+  "RULE-WAT-04",
+  "RULE-GRZ-01",
+  "RULE-GRZ-02",
+  "RULE-GAIN-01",
+  "RULE-GAIN-02",
+  "RULE-HLTH-01",
+  "RULE-HLTH-02",
+  "RULE-BUD-02",
+  "RULE-BUD-03"
+ ],
+ "must_not_appear_anywhere": [
+  "NaN",
+  "Infinity",
+  "undefined",
+  "[object Object]"
+ ]
+}

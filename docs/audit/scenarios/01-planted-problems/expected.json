@@ -1,0 +1,484 @@
+{
+ "scenario": "01-planted-problems",
+ "title": "The ten planted problems on the committed data",
+ "fictional": "All data is fictional (Example Ranch). Every threshold is a demonstration setting.",
+ "purpose": "The committed data/ files, byte for byte. Expected = the 10 rows the dashboard shows today, with the same severities (the Phase 1 acceptance bar, findings.json policies.phase_1_acceptance).",
+ "as_of": "2026-09-30T18:00 (no time zone in meta.csv)",
+ "files": {
+  "pastures": "copied unchanged",
+  "groups": "copied unchanged",
+  "moves": "copied unchanged",
+  "weights": "copied unchanged",
+  "water": "copied unchanged",
+  "health": "copied unchanged",
+  "budget": "copied unchanged",
+  "meta": "copied unchanged",
+  "tanks": "absent"
+ },
+ "files_note": "The committed data/ files, byte for byte.",
+ "settings": "../settings.json",
+ "computed_by": "docs/audit/diagnostics/scenarios.build.py: Python arithmetic on this folder's CSV files. It never calls exceptions.js or app.js.",
+ "matching": "alerts_exact: every needs-attention row the implementation shows must be one of expected_rows (or allowed_extra_rows); data-issue and CAN'T TELL rows may carry extra wording. A row matches on area, kind and subject_key; state (or a listed alternative) and severity must agree; every key number must be shown, correctly rounded to the precision shown; key_dates may be ISO or 'Mon D'; key_tags must all appear; must_not_appear strings must not.",
+ "alerts_exact": true,
+ "expected_rows": [
+  {
+   "id": "T2",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T2",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "level_pct": 11.8
+   },
+   "must_not_appear": [],
+   "findings": [
+    "WAT-01"
+   ],
+   "rules": [
+    "RULE-WAT-01"
+   ],
+   "arithmetic": "T2's last reading 2026-09-30T18:00 is 11.8%; 11.8 < 25 (demo critical line)."
+  },
+  {
+   "id": "T4",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T4",
+   "state": "needs-attention",
+   "severity": "critical",
+   "key_numbers": {
+    "drop_pts": 46.0,
+    "level_pct": 10.0
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the real span of the fall in hours (WAT-03)",
+    "'unexplained fall; leak not confirmed' wording (RULE-WAT-03 phase note)"
+   ],
+   "findings": [
+    "WAT-03",
+    "WAT-08"
+   ],
+   "rules": [
+    "RULE-WAT-03"
+   ],
+   "arithmetic": "Readings in [2026-09-30T18:00 - 24 h, 2026-09-30T18:00]: 56.0, 44.5, 33.0, 21.5, 10.0; highest 56.0 - last 10.0 = 46.0 points >= 30."
+  },
+  {
+   "id": "T6",
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T6",
+   "state": "needs-attention",
+   "state_alternatives": [
+    "cant-tell"
+   ],
+   "severity": "serious",
+   "key_numbers": {
+    "silent_hours": 42.0,
+    "level_pct": 98.5
+   },
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "the tank's level is CAN'T TELL; the row says to check it by eye (RULE-WAT-04 phase note)"
+   ],
+   "findings": [
+    "TIME-01"
+   ],
+   "rules": [
+    "RULE-WAT-04"
+   ],
+   "arithmetic": "Last reading 2026-09-29T00:00 (98.5%); 2026-09-30T18:00 - 2026-09-29T00:00 = 42 hours >= 24."
+  },
+  {
+   "id": "GRZ",
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "days": 24,
+    "plan": 21,
+    "over": 3
+   },
+   "key_text_any": [
+    "Sand Hills"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GRZ-01"
+   ],
+   "rules": [
+    "RULE-GRZ-01"
+   ],
+   "arithmetic": "Open stay in P3 Sand Hills since 2026-09-06; Sep 6 to Sep 30 = 24 days; plan 21; 24 - 21 = 3 days over."
+  },
+  {
+   "id": "GAIN-H",
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Heifers",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "adg": 0.43625730994152045,
+    "target": 1.0
+   },
+   "key_dates": [
+    "2026-07-20"
+   ],
+   "must_not_appear": [],
+   "also_expected_in_phase_1": [
+    "coverage 45 of 45 weighed (GAIN-07)",
+    "both weigh dates, Jul 20 and Sep 15 (GAIN-11)"
+   ],
+   "findings": [
+    "GAIN-03",
+    "GAIN-11",
+    "GAIN-07"
+   ],
+   "rules": [
+    "RULE-GAIN-01",
+    "RULE-GAIN-04"
+   ],
+   "arithmetic": "Pooled gain Jul 20 to Sep 15 (57 days) over 45 heifers: 1119 lbs / 2565 animal-days = 0.4363 lb/day; 0.8 x 1.0 = 0.8; 0.4363 < 0.8."
+  },
+  {
+   "id": "GAIN-Y",
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "count": 6,
+    "threshold": 1.0
+   },
+   "key_tags": [
+    "Y027",
+    "Y031",
+    "Y058",
+    "Y082",
+    "Y129",
+    "Y132"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "GAIN-11"
+   ],
+   "rules": [
+    "RULE-GAIN-02",
+    "RULE-GAIN-03"
+   ],
+   "arithmetic": "Yearlings pooled 16608 / 8550 = 1.9425 lb/day, not under 0.8 x 2.0 = 1.6, so no group row. Animals under 0.5 x 2.0 = 1.0 lb/day over the 57 days: Y027 0.474, Y031 0.579, Y058 0.667, Y082 0.772, Y129 0.404, Y132 0.509."
+  },
+  {
+   "id": "BOOST",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Yearlings: Booster vaccine",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "overdue_days": 15
+   },
+   "key_dates": [
+    "2026-09-15"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "HLTH-01"
+   ],
+   "rules": [
+    "RULE-HLTH-01"
+   ],
+   "arithmetic": "Open, next_due 2026-09-15; Sep 15 to Sep 30 = 15 days overdue."
+  },
+  {
+   "id": "PINK",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Cows: Pinkeye check",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "due_in_days": 3
+   },
+   "key_dates": [
+    "2026-10-03"
+   ],
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-HLTH-02"
+   ],
+   "arithmetic": "Open, next_due 2026-10-03; Sep 30 to Oct 3 = 3 days, within 7."
+  },
+  {
+   "id": "FUEL",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Fuel",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 21.25,
+    "usd_over": 2040
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04",
+    "BUD-05"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 11,640 vs budget 9,600: 11,640 - 9,600 = $2,040; 2,040 / 9,600 = 21.25% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "REPAIRS",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Repairs",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 25.0,
+    "usd_over": 1800
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04"
+   ],
+   "rules": [
+    "RULE-BUD-01",
+    "RULE-BUD-03"
+   ],
+   "arithmetic": "Jun-Sep actual 9,000 vs budget 7,200: $1,800; 1,800 / 7,200 = 25.00% (> 10% and >= $1,000)."
+  }
+ ],
+ "expected_absent": [
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T1",
+   "reason": "healthy tank in the committed data",
+   "findings": []
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T3",
+   "reason": "healthy tank in the committed data",
+   "findings": []
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T5",
+   "reason": "healthy tank in the committed data",
+   "findings": []
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T7",
+   "reason": "healthy tank in the committed data",
+   "findings": []
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T8",
+   "reason": "healthy tank in the committed data",
+   "findings": []
+  },
+  {
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Yearlings",
+   "reason": "pooled 1.9425 lb/day is not under 1.6",
+   "findings": []
+  },
+  {
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Heifers",
+   "reason": "the group-wide row already covers the heifers (RULE-WF-19)",
+   "findings": []
+  },
+  {
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Cows",
+   "reason": "day 18 of 21: 3 days left, outside the 2-day grace",
+   "findings": []
+  },
+  {
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Heifers",
+   "reason": "day 11 of 14: 3 days left",
+   "findings": []
+  },
+  {
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Heifers: Pregnancy check",
+   "reason": "due 2026-10-25, 25 days away",
+   "findings": []
+  },
+  {
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Yearlings: Deworm",
+   "reason": "due 2026-11-01, 32 days away",
+   "findings": []
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Feed and mineral",
+   "reason": "under budget season to date",
+   "findings": []
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Vet and health",
+   "reason": "under budget season to date",
+   "findings": []
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Labor",
+   "reason": "under budget season to date",
+   "findings": []
+  },
+  {
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Water and fencing",
+   "reason": "under budget season to date",
+   "findings": []
+  }
+ ],
+ "allowed_extra_rows": [
+  {
+   "id": "X-HLTH03",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Cows: Fly tag check",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "contradiction",
+   "key_numbers": {},
+   "must_not_appear": [],
+   "findings": [
+    "HLTH-03"
+   ],
+   "rules": [],
+   "arithmetic": "",
+   "note": "Allowed only until HLTH-03's generator fix: the committed row is done, last_done 2026-06-05, next_due 2026-09-01."
+  },
+  {
+   "id": "X-TZ",
+   "area": "Data",
+   "kind": "file",
+   "subject_key": "meta.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "no-timezone",
+   "key_numbers": {},
+   "must_not_appear": [],
+   "findings": [
+    "TIME-02"
+   ],
+   "rules": [
+    "RULE-WF-14"
+   ],
+   "arithmetic": "",
+   "note": "Allowed until the generator writes meta.timezone. data-fields.json says that without a zone the time-based rules are CAN'T TELL; if Phase 1 does that, this folder must first be regenerated with the zone (see scenario.md)."
+  },
+  {
+   "id": "X-TANKS",
+   "area": "Water",
+   "kind": "file",
+   "subject_key": "tanks.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "no-tank-list",
+   "key_numbers": {},
+   "must_not_appear": [],
+   "findings": [
+    "WAT-02"
+   ],
+   "rules": [],
+   "arithmetic": "",
+   "note": "Allowed until the generator writes tanks.csv: 'tank list not provided' (data-fields.json tanks.csv)."
+  }
+ ],
+ "area_states": {
+  "Water": "needs-attention",
+  "Grazing": "needs-attention",
+  "Gain": "needs-attention",
+  "Health": "needs-attention",
+  "Budget": "needs-attention"
+ },
+ "tile_expectations": [
+  {
+   "tile": "needs_attention",
+   "critical": 2,
+   "serious": 6,
+   "warning": 2,
+   "total": 10
+  },
+  {
+   "tile": "water",
+   "ok": 5,
+   "of": 8,
+   "need_look": 3
+  },
+  {
+   "tile": "gain",
+   "renders": true,
+   "contains_any": [
+    "1.94",
+    "0.44"
+   ],
+   "note": "Today the tile shows Yearlings only; Phase 1 must not hard-code a group (LOAD-03)."
+  },
+  {
+   "tile": "budget",
+   "pct": 1.0,
+   "actual_usd": 89303,
+   "budget_usd": 88400
+  },
+  {
+   "tile": "head",
+   "value": 375,
+   "note": "UI-18 (phase 2) may change how pairs are counted."
+  }
+ ],
+ "findings": [
+  "LOAD-01",
+  "HLTH-03",
+  "TIME-02",
+  "WAT-02"
+ ],
+ "rules": [
+  "RULE-WF-21"
+ ],
+ "must_not_appear_anywhere": [
+  "NaN",
+  "Infinity",
+  "undefined",
+  "[object Object]"
+ ]
+}

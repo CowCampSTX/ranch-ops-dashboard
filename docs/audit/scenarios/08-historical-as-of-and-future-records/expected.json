@@ -1,0 +1,396 @@
+{
+ "scenario": "08-historical-as-of-and-future-records",
+ "title": "Historical reporting and future records",
+ "fictional": "All data is fictional (Example Ranch). Every threshold is a demonstration setting.",
+ "purpose": "as_of moved back to 2026-09-27T18:00-05:00 while the files run to Sep 30; a planned out_date and a planned next stay after as_of; a heifer re-weigh after as_of.",
+ "as_of": "2026-09-27T18:00-05:00 (ranch zone America/Chicago; 18:00 CDT)",
+ "files": {
+  "pastures": "copied unchanged",
+  "groups": "copied unchanged",
+  "moves": "changed",
+  "weights": "changed",
+  "water": "copied unchanged",
+  "health": "changed",
+  "budget": "copied unchanged",
+  "meta": "changed",
+  "tanks": "added"
+ },
+ "files_note": "tanks.csv (tank master list, WAT-02) and meta.csv's timezone column (TIME-02) are the Phase-1 additions the lead's defaults call for; the current code ignores both. health.csv carries HLTH-03's proposed generator fix (Cows Fly tag check: done 2026-09-01, next_due blank) unless the scenario says otherwise.",
+ "settings": "../settings.json",
+ "computed_by": "docs/audit/diagnostics/scenarios.build.py: Python arithmetic on this folder's CSV files. It never calls exceptions.js or app.js.",
+ "matching": "alerts_exact: every needs-attention row the implementation shows must be one of expected_rows (or allowed_extra_rows); data-issue and CAN'T TELL rows may carry extra wording. A row matches on area, kind and subject_key; state (or a listed alternative) and severity must agree; every key number must be shown, correctly rounded to the precision shown; key_dates may be ISO or 'Mon D'; key_tags must all appear; must_not_appear strings must not.",
+ "alerts_exact": true,
+ "expected_rows": [
+  {
+   "id": "GRZ-TODAY",
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {},
+   "key_text_any": [
+    "today"
+   ],
+   "must_not_appear": [
+    "in 0 days"
+   ],
+   "also_expected_in_phase_1": [
+    "day 21 of a 21-day plan"
+   ],
+   "findings": [
+    "GRZ-01",
+    "UI-06",
+    "TIME-01"
+   ],
+   "rules": [
+    "RULE-GRZ-02"
+   ],
+   "arithmetic": "The Sand Hills row has out_date 2026-10-03, after the as-of date, so it is still the current stay. Sep 6 to Sep 27 = 21 days of a 21-day plan: the move is due today (0 days left)."
+  },
+  {
+   "id": "GRZ-FUTURE",
+   "area": "Grazing",
+   "kind": "record",
+   "subject_key": "Yearlings",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "future",
+   "key_numbers": {},
+   "key_dates": [
+    "2026-10-03"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "TIME-01",
+    "GRZ-01"
+   ],
+   "rules": [],
+   "arithmetic": "'Yearlings,P2,2026-10-03,' starts after the as-of date: not judged, reported."
+  },
+  {
+   "id": "GAIN-H",
+   "area": "Gain",
+   "kind": "group",
+   "subject_key": "Heifers",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "adg": 0.43625730994152045,
+    "target": 1.0
+   },
+   "key_dates": [
+    "2026-07-20"
+   ],
+   "must_not_appear": [
+    "since 2026-09-15"
+   ],
+   "findings": [
+    "TIME-01",
+    "GAIN-03"
+   ],
+   "rules": [
+    "RULE-GAIN-01"
+   ],
+   "arithmetic": "The Sep 29 re-weigh is after as_of and is left out. Jul 20 to Sep 15: 1119 / 2565 = 0.4363 < 0.8."
+  },
+  {
+   "id": "GAIN-Y",
+   "area": "Gain",
+   "kind": "animals",
+   "subject_key": "Yearlings",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "count": 6,
+    "threshold": 1.0
+   },
+   "key_tags": [
+    "Y027",
+    "Y031",
+    "Y058",
+    "Y082",
+    "Y129",
+    "Y132"
+   ],
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-GAIN-02"
+   ],
+   "arithmetic": "Unchanged from the committed data: the same six yearlings under 1.0 lb/day."
+  },
+  {
+   "id": "W-FUTURE",
+   "area": "Gain",
+   "kind": "file",
+   "subject_key": "weights.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "future",
+   "key_numbers": {
+    "count": 10
+   },
+   "key_dates": [
+    "2026-09-29"
+   ],
+   "must_not_appear": [],
+   "findings": [
+    "TIME-01"
+   ],
+   "rules": [],
+   "arithmetic": "H001-H010 weighed 2026-09-29, after the as-of date: 10 rows left out and reported."
+  },
+  {
+   "id": "WATER-FUTURE",
+   "area": "Water",
+   "kind": "file",
+   "subject_key": "water.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "future",
+   "key_numbers": {
+    "count": 89
+   },
+   "must_not_appear": [],
+   "findings": [
+    "TIME-01"
+   ],
+   "rules": [],
+   "arithmetic": "Readings after 2026-09-27T18:00: 12 per tank for the 7 tanks reporting to Sep 30 18:00 (7 x 12 = 84) + 5 for T6 (to Sep 29 00:00) = 89."
+  },
+  {
+   "id": "BOOST",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Yearlings: Booster vaccine",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "overdue_days": 12
+   },
+   "key_dates": [
+    "2026-09-15"
+   ],
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-HLTH-01"
+   ],
+   "arithmetic": "Due 2026-09-15; Sep 15 to Sep 27 = 12 days overdue."
+  },
+  {
+   "id": "PINK",
+   "area": "Health",
+   "kind": "task",
+   "subject_key": "Cows: Pinkeye check",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "due_in_days": 6
+   },
+   "key_dates": [
+    "2026-10-03"
+   ],
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [
+    "RULE-HLTH-02"
+   ],
+   "arithmetic": "Due 2026-10-03; Sep 27 to Oct 3 = 6 days."
+  },
+  {
+   "id": "FUEL",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Fuel",
+   "state": "needs-attention",
+   "severity": "serious",
+   "key_numbers": {
+    "pct_over": 20.0,
+    "usd_over": 1440
+   },
+   "must_not_appear": [
+    "2,040"
+   ],
+   "findings": [
+    "BUD-01"
+   ],
+   "rules": [
+    "RULE-BUD-03",
+    "RULE-BUD-05"
+   ],
+   "arithmetic": "Closed months Jun-Aug: 8,640 vs 3 x 2,400 = 7,200; $1,440; 1,440 / 7,200 = 20.0% (> 10% and >= $1,000)."
+  },
+  {
+   "id": "REPAIRS",
+   "area": "Budget",
+   "kind": "category",
+   "subject_key": "Repairs",
+   "state": "needs-attention",
+   "severity": "warning",
+   "key_numbers": {
+    "pct_over": 13.333333333333334,
+    "usd_over": 720
+   },
+   "must_not_appear": [],
+   "findings": [
+    "BUD-01",
+    "BUD-04"
+   ],
+   "rules": [
+    "RULE-BUD-03",
+    "RULE-BUD-05"
+   ],
+   "arithmetic": "Closed months Jun-Aug: 6,120 vs 3 x 1,800 = 5,400; $720; 720 / 5,400 = 13.3%. Over 10% but $720 < $1,000, so not serious; >= 5% and >= $500, so a warning."
+  }
+ ],
+ "expected_absent": [
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T1",
+   "reason": "as of Sep 27 18:00 every tank is above 40% with no 30-point fall",
+   "findings": [
+    "TIME-01"
+   ]
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T2",
+   "reason": "as of Sep 27 18:00 every tank is above 40% with no 30-point fall",
+   "findings": [
+    "TIME-01"
+   ]
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T3",
+   "reason": "as of Sep 27 18:00 every tank is above 40% with no 30-point fall",
+   "findings": [
+    "TIME-01"
+   ]
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T4",
+   "reason": "as of Sep 27 18:00 every tank is above 40% with no 30-point fall",
+   "findings": [
+    "TIME-01"
+   ]
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T5",
+   "reason": "as of Sep 27 18:00 every tank is above 40% with no 30-point fall",
+   "findings": [
+    "TIME-01"
+   ]
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T6",
+   "reason": "as of Sep 27 18:00 every tank is above 40% with no 30-point fall",
+   "findings": [
+    "TIME-01"
+   ]
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T7",
+   "reason": "as of Sep 27 18:00 every tank is above 40% with no 30-point fall",
+   "findings": [
+    "TIME-01"
+   ]
+  },
+  {
+   "area": "Water",
+   "kind": "tank",
+   "subject_key": "T8",
+   "reason": "as of Sep 27 18:00 every tank is above 40% with no 30-point fall",
+   "findings": [
+    "TIME-01"
+   ]
+  },
+  {
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Cows",
+   "reason": "day 15 of 21",
+   "findings": []
+  },
+  {
+   "area": "Grazing",
+   "kind": "stay",
+   "subject_key": "Heifers",
+   "reason": "day 8 of 14",
+   "findings": []
+  }
+ ],
+ "allowed_extra_rows": [
+  {
+   "id": "X-BUDGET-OPEN",
+   "area": "Budget",
+   "kind": "file",
+   "subject_key": "budget.csv",
+   "state": "data-issue",
+   "severity": null,
+   "topic": "future",
+   "key_numbers": {},
+   "must_not_appear": [],
+   "findings": [],
+   "rules": [],
+   "arithmetic": "",
+   "note": "A note that September is not yet closed is allowed; it is not an error."
+  }
+ ],
+ "area_states": {
+  "Water": "ok",
+  "Grazing": "needs-attention",
+  "Gain": "needs-attention",
+  "Health": "needs-attention",
+  "Budget": "needs-attention"
+ },
+ "tile_expectations": [
+  {
+   "tile": "water",
+   "ok": 8,
+   "of": 8,
+   "need_look": 0
+  },
+  {
+   "tile": "budget",
+   "pct": -1.4072,
+   "actual_usd": 65367,
+   "budget_usd": 66300,
+   "note": "Jun-Aug only."
+  }
+ ],
+ "open_decisions": [
+  "Repairs is a warning here only because of RULE-BUD-03's $1,000 serious line. The same Jun-Aug arithmetic is what the committed data gives on Sep 30 if books_closed_through defaults to the month before as_of (RULE-BUD-05, data-fields.json): Repairs would then drop from serious to warning on the committed data and break the Phase 1 acceptance bar. Decide the closed-month convention (BUD-01: a month closes on its last day) before adopting both rules. Settled by 05-roadmap.md decisions D1, D2 and D16: the generator writes books_closed_through = 2026-09, so the committed Repairs row stays serious; this folder keeps no books_closed_through and tests the default, so Repairs stays a warning here."
+ ],
+ "findings": [
+  "TIME-01",
+  "TIME-02",
+  "GRZ-01",
+  "BUD-01",
+  "UI-06"
+ ],
+ "rules": [
+  "RULE-WF-14",
+  "RULE-BUD-03",
+  "RULE-BUD-05"
+ ],
+ "must_not_appear_anywhere": [
+  "NaN",
+  "Infinity",
+  "undefined",
+  "[object Object]"
+ ]
+}

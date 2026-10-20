@@ -1,0 +1,987 @@
+{
+ "topic": "Herd health task scheduling, observation, record keeping and veterinarian escalation for the fictional ranch-ops-dashboard (Health area: exceptions.js lines 140-146, RULES.dueSoonDays=7, data/health.csv). Scope is limited to observation, scheduling, records and escalation. It includes no treatment protocols and no diagnosis.",
+ "rules": [
+  {
+   "rule": "CURRENT: An open health task past its next_due date is 'serious', and the action reads 'Schedule it this week' (exceptions.js:140-144; app.js:211 rules row 'An open health task is past its due date').",
+   "decision_supported": "Whether a scheduled herd-health job (vaccination, parasite control, exam or observation) needs attention now.",
+   "required_inputs": "group, task, next_due (YYYY-MM-DD), status=='open', as_of date.",
+   "context": "Treats every task type, cattle class and season the same way. One date per row; there is no window, no source for the date and no task type.",
+   "classification": "D-synthetic-demo",
+   "evidence": "OBSERVED (node docs/audit/diagnostics/health.schedule.research.mjs): 'serious | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15) | action: \"Schedule it this week\"'. OBSERVED: 'Booster: last_done 2026-06-02 -> next_due 2026-09-15 = 105 days apart'. SOURCES: the BQA National Manual says 'almost all products recommend a second vaccination two (2) to four (4) weeks after the initial vaccination' and 'Follow all FDA/USDA/EPA guidelines and label directions'. UC Davis (Maas 2008) says booster needs are reviewed by USDA at licensing and 'will therefore, be on the label and should be followed', and that without the timed second dose the vaccine 'will probably not stimulate an effective immune response'. INFERENCE: lateness that matters for a label-driven booster is lateness against the label or vet window, not against a ranch-entered date. A 105-day gap does not fit the 2-4 week primary-series pattern. Either the row is a different kind of revaccination or the date is not from a label, and the data cannot show which.",
+   "limitations": "No task type, so a missed observation check and a missed label booster window get the same severity and the same action. No window_end or schedule_source, so 'Overdue' cannot say whether the label window is gone. The status match is exact: healthbudget.repro.mjs H-01 OBSERVED that status 'Open', 'OPEN' and 'open ' all give '(no alerts)' on a task 15 days late. 'Schedule it this week' implies a late booster can simply be given, which is a label and veterinarian question. None of the fetched sources gives a general rule on whether a late dose still counts.",
+   "configurable": "Partly. Keep an overdue flag. Severity and wording should depend on task_type and schedule_source (product_label / vet_plan / ranch_plan) rather than being one global rule.",
+   "missing_data_blocks": "Without window_end and schedule_source the dashboard must not word a vaccination row as if the window is still usable. Without task_type it must not reuse vaccination wording for observation checks.",
+   "recommendation": "Compute overdue against window_end rather than a single next_due. For vaccination or parasite tasks whose window came from the label or vet plan and has passed: 'The window on the [label/vet plan] closed N days ago. Check the label and ask your veterinarian how to proceed before scheduling.' For ranch-plan tasks: 'Past the planned date. Reschedule with [responsible].' For observation tasks: 'No check recorded since [date]. Look the group over on the next pasture check and record what you see.' The rules table and README should say the threshold is a demonstration setting.",
+   "sources": [
+    {
+     "title": "Beef Quality Assurance National Manual (bqa_manual_final.pdf)",
+     "publisher": "Beef Quality Assurance program (NCBA, contractor to the Beef Checkoff)",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+     "pub_date": "undated (no date in fetched text; an updated manual was announced 2025-01-06, but it is not confirmed that this PDF is that edition)",
+     "data_years": "cites the 2016 National Beef Quality Audit",
+     "kind": "standard",
+     "supports": "Sec. 4.4 Vaccinations (p.47 per fetch): 'almost all products recommend a second vaccination two (2) to four (4) weeks after the initial vaccination'. p.42: 'Follow all FDA/USDA/EPA guidelines and label directions for each product.' p.44: booster vaccinations follow the herd health plan."
+    },
+    {
+     "title": "Booster Vaccines (UC Davis Vet Views, cca0810)",
+     "publisher": "UC Davis School of Veterinary Medicine Extension (J. Maas), in California Cattlemen's Magazine",
+     "url": "https://vetext.vetmed.ucdavis.edu/sites/g/files/dgvnsk5616/files/local_resources/pdfs/pdfs_beef/cca0810-booster-vaccines.pdf",
+     "pub_date": "2008-10",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Booster need is on the label and should be followed. Without the timed second dose the vaccine 'will probably not stimulate an effective immune response'. 'The best source of vaccine information is from your cattle veterinarian.'"
+    },
+    {
+     "title": "Springtime Vaccines: Tools For Healthy Summer Calves",
+     "publisher": "SDSU Extension (R. Daly)",
+     "url": "https://extension.sdstate.edu/springtime-vaccines-tools-healthy-summer-calves",
+     "pub_date": "2020-06-10 (updated)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "'Some vaccines, especially killed vaccines, require booster doses'. Follow label instructions. Getting calves back off pasture for boosters is a practical challenge. Consult the local veterinarian before changing a program."
+    }
+   ]
+  },
+  {
+   "rule": "CURRENT: An open health task due within RULES.dueSoonDays = 7 days is a 'warning', and the action reads 'Plan it with the next gather' (exceptions.js:13, 145-146).",
+   "decision_supported": "When to start planning a gather, crew, products or a veterinarian visit for an upcoming task.",
+   "required_inputs": "next_due, status, as_of, and the dueSoonDays setting.",
+   "context": "The same 7-day lead applies to every task. Vet-dependent work (pregnancy check), crew and gather work (boosters) and pasture observation (eye checks) all get one horizon and one action.",
+   "classification": "D-synthetic-demo",
+   "evidence": "OBSERVED: 'warning | Cows: Pinkeye check | Due in 3 days (2026-10-03) | action: \"Plan it with the next gather\"'. OBSERVED (healthbudget.repro.mjs HB-C3): due in 7 days gives a warning and due in 8 days gives nothing. The code comment reads 'health task due within a week' and cites no source. SOURCES: NDSU 2025 says to check cattle closely in pasture for early pinkeye signs and that dust and crowding (tail switching) irritate eyes. That describes observation in place, not gathering. NDSU 2020 ties pregnancy-check timing to the breeding season and says to consult the veterinarian on method. SDSU 2020 notes the difficulty of getting cattle back off pasture for boosters, which argues for matching tasks to gathers well ahead.",
+   "limitations": "One horizon does not fit vet booking or a crew gather. The 'next gather' wording is wrong for observation tasks. No responsible person is shown, so nobody owns the warning.",
+   "configurable": "Yes. Lead time should be a per-task-type setting (for example observation 0 days, gather tasks about 7 days, vet-dependent tasks longer). Values are a ranch choice and should be labelled as such.",
+   "missing_data_blocks": "Without task_type and vet_needed the dashboard cannot choose the right lead time or wording. Without responsible it should say 'Unassigned'.",
+   "recommendation": "Warn when window_start is within the task type's lead time. Use action text by type: observation 'Look the group over on the next pasture check\u2026'; gather task 'Plan it with the next gather ([responsible])'; vet-dependent 'Confirm the date with your veterinarian and plan the gather.' Label 7 days as a demonstration setting in the rules table.",
+   "sources": [
+    {
+     "title": "Summer brings raised pinkeye concerns in cowherds",
+     "publisher": "NDSU Agriculture Communication (J. Galbreath, L. Quail)",
+     "url": "https://www.ag.ndsu.edu/news/newsreleases/2025/july/summer-brings-raised-pinkeye-concerns-in-cowherds",
+     "pub_date": "2025-07-02",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Check cattle closely in pasture and drylot for early signs. Dust and crowding (tail switching) irritate eyes. Treatment decisions are made 'in consultation with their veterinarian'."
+    },
+    {
+     "title": "Consider Pregnancy Testing Beef Cattle Early",
+     "publisher": "NDSU Agriculture Communication (J. Block, K. Hoppe, G. Stokka)",
+     "url": "https://www.ag.ndsu.edu/news/newsreleases/2020/july-6-2020/consider-pregnancy-testing-beef-cattle-early",
+     "pub_date": "2020-07-06 (URL) / 2020-07-09 (byline)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Pregnancy testing 'as early as 30 to 45 days after the end of the breeding season'. Method timing differs (ultrasound about 30 d, palpation 1-2 weeks later, blood test 25-30 d post-breeding and 60-90 d post-calving depending on test). Consult the veterinarian on method."
+    },
+    {
+     "title": "Springtime Vaccines: Tools For Healthy Summer Calves",
+     "publisher": "SDSU Extension (R. Daly)",
+     "url": "https://extension.sdstate.edu/springtime-vaccines-tools-healthy-summer-calves",
+     "pub_date": "2020-06-10 (updated)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Branding or turnout is a natural time to work calves. Bringing calves back off pasture for boosters is a challenge."
+    }
+   ]
+  },
+  {
+   "rule": "CURRENT: An open task with a blank next_due is skipped silently (exceptions.js:141 'if (h.status !== \"open\" || !h.next_due) continue'). Statuses other than the exact string 'open' are also skipped silently.",
+   "decision_supported": "Whether an outstanding health task is visible to the manager at all.",
+   "required_inputs": "status, next_due",
+   "context": "Any data entry or spreadsheet export.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "OBSERVED (healthbudget.repro.mjs): H-03 open task with blank next_due gives '(no alerts)'. H-04 next_due 'TBD' gives '(no alerts)'. H-02 status 'in progress' etc. on a task due Sep 15 gives '(no alerts)'. H-05 is the committed row 'Cows,Fly tag check,2026-06-05,2026-09-01,done', whose next_due passed with last_done still June 5, and it is not surfaced. In the committed data the only blank next_due is on a 'done' row (Heifers Pre-breeding vaccine), so the demo output is unaffected today.",
+   "limitations": "Health data appears nowhere else on the page, so a skipped row means the task is invisible. A single row mixes schedule (next_due) with history (last_done), which makes 'done' ambiguous for recurring tasks.",
+   "configurable": "No for the visibility principle. Yes for the severity given to 'unscheduled' rows.",
+   "missing_data_blocks": "An open task with no usable date or an unknown status must not be treated as 'nothing due'. Show it as a data issue.",
+   "recommendation": "Normalise status (trim, lower-case) and accept a fixed set (open, done, cancelled, deferred). Show an unknown status or an open task with no date as a row such as 'No due date recorded. Set one with [responsible] or your veterinarian.' Split the schedule (planned tasks with windows) from completion records (append-only).",
+   "sources": [
+    {
+     "title": "Beef Quality Assurance National Manual (bqa_manual_final.pdf)",
+     "publisher": "Beef Quality Assurance program (NCBA / Beef Checkoff)",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+     "pub_date": "undated (no date in fetched text)",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Sec. 4.3 Herd Health Planning: 'Keep records of all products administered including date, animal identification, product used'. Records support a herd health plan, which is the basis for not dropping outstanding tasks."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: For vaccination and parasite-control tasks, evaluate against a window (window_start..window_end) recorded from the product label or the veterinarian's plan, with schedule_source stored. Warning when window_start is within the lead time. Serious when window_end has passed, with an escalate-to-vet action.",
+   "decision_supported": "Whether a booster or revaccination can still be done inside its label or vet window, or needs veterinarian input first.",
+   "required_inputs": "task_type, window_start, window_end, schedule_source, product name (record only), as_of, responsible.",
+   "context": "All classes. Windows are product-specific and come from the label or the herd veterinarian. The dashboard never computes them.",
+   "classification": "B-context-dependent",
+   "evidence": "BQA Manual: 'Always read and follow label directions'; almost all products recommend the second dose 2-4 weeks after the first. BQA Field Guide: boosters given when the label calls for them. BCRC/University of Calgary clostridial guideline: 'Vaccines should always be given according to label instructions' and 'Specific recommendations for your operation should be discussed with your veterinarian.' UC Davis 2008: booster need is on the label. OBSERVED with SYNTHETIC window values: 'Yearlings: Booster vaccine | window 2026-06-16..2026-06-30 (product_label) \u2026 -> serious: label window passed | \"Window from the product label closed 92 days ago. Check the label and ask your veterinarian how to proceed before scheduling.\"'",
+   "limitations": "The window values in the fictional data would themselves be synthetic and must be labelled so. No fetched source gives a general rule for what happens after a missed booster (restart or not). That is left to the label and the veterinarian, and the dashboard must not decide it.",
+   "configurable": "Yes. Window dates are data, not code. Lead time per task type is a ranch setting.",
+   "missing_data_blocks": "If window_end or schedule_source is missing on a vaccination task, show 'Window not recorded. Check the label or vet plan' instead of a confident overdue or OK.",
+   "recommendation": "Add window_start, window_end and schedule_source to the health schedule. Keep next_due only as a planned date inside the window. Never print a dose or product instruction.",
+   "sources": [
+    {
+     "title": "Beef Quality Assurance National Manual (bqa_manual_final.pdf)",
+     "publisher": "Beef Quality Assurance program (NCBA / Beef Checkoff)",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+     "pub_date": "undated (no date in fetched text)",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Label directions govern (p.42, p.44). Second vaccination 2-4 weeks after the initial for almost all products (p.47)."
+    },
+    {
+     "title": "BQA Field Guide (bqa_field-_guide.pdf)",
+     "publisher": "Beef Quality Assurance program",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_field-_guide.pdf",
+     "pub_date": "undated (only year shown is a 1996 NRC table credit)",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Vaccines follow label directions including 21- or 60-day withdrawal. Boosters are given when the label calls for them."
+    },
+    {
+     "title": "BCRC Vaccine Project - Clostridial Vaccination Guidelines",
+     "publisher": "University of Calgary Faculty of Veterinary Medicine / Beef Cattle Research Council (per title and URL; not named in fetched text)",
+     "url": "https://vet.ucalgary.ca/sites/default/files/teams/9/BCRC%20Vaccine%20Project%20-%20Clostridial%20Vaccination%20Guidelines.pdf",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "'Vaccines should always be given according to label instructions'. Operation-specific recommendations are to be discussed with the veterinarian. Does not say what to do when an interval is exceeded."
+    },
+    {
+     "title": "Booster Vaccines (UC Davis Vet Views, cca0810)",
+     "publisher": "UC Davis School of Veterinary Medicine Extension",
+     "url": "https://vetext.vetmed.ucdavis.edu/sites/g/files/dgvnsk5616/files/local_resources/pdfs/pdfs_beef/cca0810-booster-vaccines.pdf",
+     "pub_date": "2008-10",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Booster need is on the label and should be followed. The veterinarian is the best source of vaccine information."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: In fly season, each pastured group gets a recurring eye and condition observation. Warn when a group has no recorded check in N days (N is a ranch setting). When an observation records animals with watery eyes, squinting or a cloudy eye, show 'N head with eye signs recorded. Call your veterinarian' and schedule a recheck within a few days. The current one-off 'Pinkeye check' row and its 'Plan it with the next gather' action become this.",
+   "decision_supported": "Early detection and timely veterinarian contact for eye problems during face-fly season, without the dashboard diagnosing.",
+   "required_inputs": "observation records (date, group, observer, head_with_signs, sign codes), fly-season start/end dates (ranch-entered), optional fly counts.",
+   "context": "Pastured cow-calf and yearling groups, summer into early fall in the Northern and Central Plains. Face flies peak late July to early September (UNL), and populations peak in late summer (NDSU 2024).",
+   "classification": "B-context-dependent",
+   "evidence": "NDSU 2025: early signs are 'watery eyes or face staining from excess tear production', squinting, and a cloudy spot. 'The first signs of pinkeye occur 12 to 72 hours after exposure.' Progression 'can take place over just a few days'. Treat in consultation with the veterinarian. 'Records of affected cattle should be kept so that any potential retained breeding stock can be evaluated.' OSU VTMD-9128: 'Pinkeye rarely affects just one animal, but spreads throughout the herd'. Keep current health records. UNL 2021: act on tearing, squinting and blinking 'immediately'. Fly tags work best applied near fly season. UNL 2023: face flies peak late July, August and early September, and aggregate to overwinter as day length falls below 12.5 h. NDSU 2024: tags when flies near the economic threshold, which the article gives as '200 flies per animal'. Remove tags when no longer effective. OBSERVED (computed, astronomy only): day length 2026-09-30 is Pierre SD 11.83 h, North Platte NE 11.86 h, Bismarck ND 11.81 h, all under 12.5 h. INFERENCE: the committed Oct 3 'Pinkeye check' falls at the tail of face-fly season. That is plausible (an NDSU release dated 2017-09-25 reported pinkeye 'infecting cattle in some herds') but it is an observation job, not a gather job.",
+   "limitations": "Recheck interval and N are management choices. Season dates vary by year and location. The day-length cue is a seasonal indicator, not a fly count. Eye signs can have causes other than pinkeye (UNL 2023 notes face-fly lesions 'mimic the symptoms of bovine pinkeye'), so the dashboard must record signs, not name a disease.",
+   "configurable": "Yes: fly-season dates, observation interval, and the head count that triggers 'call your veterinarian' (default: any).",
+   "missing_data_blocks": "No observation records means the dashboard shows 'No eye check recorded since [date]' rather than implying the group is clear.",
+   "recommendation": "Replace the dated 'Pinkeye check' task with an observation log and a fly-season window. Wording: 'Look the group over on the next pasture check; record animals with watery eyes, squinting or a cloudy eye and call your veterinarian if you see any.' Add an end-of-season 'fly tag removal' task (NDSU 2024) instead of a 'done' fly tag row whose next_due has passed (H-05).",
+   "sources": [
+    {
+     "title": "Summer brings raised pinkeye concerns in cowherds",
+     "publisher": "NDSU Agriculture Communication",
+     "url": "https://www.ag.ndsu.edu/news/newsreleases/2025/july/summer-brings-raised-pinkeye-concerns-in-cowherds",
+     "pub_date": "2025-07-02",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Signs to observe, 12-72 h onset, progression over a few days, keep records of affected cattle, involve the veterinarian, check cattle closely in pasture."
+    },
+    {
+     "title": "Pinkeye (VTMD-9128)",
+     "publisher": "Oklahoma State University Extension (Boileau, Lalman, Whitworth)",
+     "url": "https://extension.okstate.edu/fact-sheets/pinkeye",
+     "pub_date": "2016-10",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "'excessive tearing and squinting are the initial clinical signs'. It rarely affects one animal. Up to 80% of a herd at the peak of an outbreak. Incubation 2-3 days. Maintain health records."
+    },
+    {
+     "title": "Do not let Pinkeye Decrease Efficiencies in Summer Grazing",
+     "publisher": "Nebraska Extension BeefWatch (C. Biehler)",
+     "url": "https://beef.unl.edu/beefwatch/2021/do-not-let-pinkeye-decrease-efficiencies-summer-grazing",
+     "pub_date": "2021-08-01",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Act on early signs immediately. Season rises in spring, peaks in summer and declines in fall. Fly-tag timing relative to routine processing. Discuss vaccine timing with the veterinarian well in advance."
+    },
+    {
+     "title": "Face Flies on Pastured Cattle",
+     "publisher": "Nebraska Extension BeefWatch (D. Boxler)",
+     "url": "https://beef.unl.edu/beefwatch/2023/face-flies-pastured-cattle",
+     "pub_date": "2023-06-01",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Face flies peak late July to early September and aggregate to overwinter when day length is under 12.5 h. Face-fly lesions mimic pinkeye."
+    },
+    {
+     "title": "Controlling flies on cattle requires proper timing",
+     "publisher": "NDSU Extension and Ag Research News (Stokka, Tobin, Hoppe)",
+     "url": "https://www.ag.ndsu.edu/news/newsreleases/2024/may/controlling-flies-on-cattle-requires-proper-timing",
+     "pub_date": "2024-05-22",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Horn and face flies are not present at turnout. Tags go in when populations near the threshold, typically mid-June to July. Threshold given as 200 flies per animal. Remove tags when no longer effective. Scout and monitor."
+    },
+    {
+     "title": "Pinkeye Infecting Some N.D. Cattle",
+     "publisher": "NDSU Agriculture Communication (Stokka, Webb, Dyer)",
+     "url": "https://www.ag.ndsu.edu/news/newsreleases/2017/sept-25-2017/pinkeye-infecting-some-n-d-cattle",
+     "pub_date": "2017-09-25 (URL) / 2017-09-27 (footer)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Pinkeye was reported in ND herds at the end of September 2017. Signs include teary eyes, squinting and aversion to light. 'Producers should contact their veterinarian or the VDL'."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: A health task can be marked done only with a BQA-style completion record: date, group or animal ID, product and lot/serial (product tasks), route and location, withdrawal clear date, person administering, and head count worked. Missing items show as 'record incomplete'.",
+   "decision_supported": "Whether the ranch can show what was done, to which animals, by whom, and when they clear withdrawal (BQA compliance and marketing).",
+   "required_inputs": "done_date, group/animal_id, product, lot_serial, route_location, withdrawal_clear_date, done_by, head_done.",
+   "context": "Every product given to cattle. Observation-only tasks need date, observer and findings only.",
+   "classification": "A-supported-general",
+   "evidence": "BQA Manual, Record Keeping (p.15 per fetch): treatment records must include 'Individual animal identification', 'Date treated', 'Product administered and manufacturer's lot/serial number', 'Dosage', 'Route and location of administration', 'Earliest date animal will have cleared the withdrawal period', 'Name of individual administering the treatment'. Group treatments need a group or lot ID plus the same items. Kansas BQA Processing/Treatment Map form includes 'No. of Head', 'Lot or Serial #', 'Route of Admin', 'Withdrawal Time (WD)' and 'Crew Initials'. OBSERVED (health.research.mjs): 'health.csv columns: group, task, last_done, next_due, status', with lot/serial, route and location, withdrawal clear date, person, head count, window and schedule source all MISSING.",
+   "limitations": "The dashboard needs only some of these to make decisions (date, head count, withdrawal clear date, person). Dose, route and lot are for the record, and the page should not display them as instructions.",
+   "configurable": "No for the BQA fields. Yes for which fields the page displays.",
+   "missing_data_blocks": "A 'done' status without done_date and head_done should not count as complete. Show 'record incomplete'.",
+   "recommendation": "Add an append-only health_records.csv. Keep health.csv as the schedule. The dashboard reads both. Record dose and route but do not surface them in exception text.",
+   "sources": [
+    {
+     "title": "Beef Quality Assurance National Manual (bqa_manual_final.pdf)",
+     "publisher": "Beef Quality Assurance program (NCBA / Beef Checkoff)",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+     "pub_date": "undated (no date in fetched text)",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Required treatment-record items (p.15). Group records need a group or lot ID. Processing map records where and how much was given (Ch.1)."
+    },
+    {
+     "title": "KS-BQA record keeping forms (Processing/Treatment Map etc.)",
+     "publisher": "Kansas Livestock Association / Kansas BQA (per URL and form text)",
+     "url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "The processing map records date and time, 'No. of Head', group number, product, 'Lot or Serial #', 'Route of Admin', dose, 'Withdrawal Time (WD)', 'Crew Initials', and owner and veterinarian signatures."
+    },
+    {
+     "title": "Health treatment record (Oklahoma BQA form)",
+     "publisher": "Oklahoma State University Extension, Oklahoma BQA (per URL; not named in fetched text)",
+     "url": "https://extension.okstate.edu:443/programs/beef-extension/oklahoma-beef-quality-assurance/site-files/documents/health-treatment-record.pdf",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Columns include ID/Group Description, Date of Treatment, Product Used Lot Numbers, Serial/Route and Location, Date of Withdrawal, Person Giving Treatment."
+    },
+    {
+     "title": "Beef Herd Health Record V2",
+     "publisher": "University of Arkansas System Division of Agriculture (from nondiscrimination notice)",
+     "url": "https://www.uaex.uada.edu/farm-ranch/animals-forages/beef-cattle/Beef%20Herd%20Health%20Record_V2.pdf",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Treatment record columns Group and/or Individual, Date, ID, Purpose, Product Name, Lot, Expiration, Dose, Withdrawal. Header includes BQA Number and Premise ID."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Coverage gap. When head_done is less than the group's head count for a group task, show a warning 'N head not yet worked (done X of Y on [date])'.",
+   "decision_supported": "Whether animals missed at a gather (strays, cut-backs, late arrivals) still need the task.",
+   "required_inputs": "head_done, head_planned or groups.csv head, done_date, group.",
+   "context": "Group processing events. Most useful for vaccination and parasite-control tasks with label windows.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "The KS-BQA processing map records 'No. of Head'. OBSERVED with a SYNTHETIC record: 'Yearlings Booster vaccine: 142/150 head worked on 2026-10-02 -> 8 head still to do'. OBSERVED: health.csv has no head-count column. groups.csv head counts are Cows 180, Heifers 45, Yearlings 150.",
+   "limitations": "Group head counts change (sales, deaths, purchases), so the denominator must be the count at the time of the task. The tolerance (exact match or a few head) is a ranch choice.",
+   "configurable": "Yes (tolerance, and whether the gap is warning or info).",
+   "missing_data_blocks": "Without head_done the dashboard cannot claim the group is covered. Show 'head count not recorded'.",
+   "recommendation": "Record head_done on every group completion and compare it with the group head at that date.",
+   "sources": [
+    {
+     "title": "KS-BQA record keeping forms",
+     "publisher": "Kansas Livestock Association / Kansas BQA",
+     "url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "'No. of Head' is a field on the Processing/Treatment Map."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Serious when a recorded withdrawal clear date falls after the group's planned ship or sale date. Action: 'Do not ship before [clear date]. Talk with your veterinarian.'",
+   "decision_supported": "Marketing timing that avoids residues: whether a group can leave on its planned date.",
+   "required_inputs": "withdrawal_clear_date per completion record (from the label, or from the veterinarian for extralabel use), planned_ship_date per group.",
+   "context": "Any class marketed or culled, especially fall-shipped yearlings and cull cows.",
+   "classification": "A-supported-general",
+   "evidence": "BQA Manual: records must include the 'Earliest date animal will have cleared the withdrawal period'. Most vaccines have a 21- or 60-day withdrawal (p.45 per fetch). BQA Field Guide: consult pharmaceutical, veterinary or screening experts on high-risk animals before sale. FDA: extralabel use requires a VCPR. FARAD (AABP 2021) answers withdrawal-interval requests from veterinarians. OBSERVED with SYNTHETIC values: 'withdrawal 21 d -> clear 2026-10-23; planned ship 2026-10-15 -> CONFLICT: ship date is before the withdrawal clear date'.",
+   "limitations": "The dashboard must use the clear date recorded from the label or the vet. It must not compute withdrawal for extralabel use. groups.csv has no planned ship date today.",
+   "configurable": "No for the rule. Lead time for the warning before a ship date is configurable.",
+   "missing_data_blocks": "A product task without a withdrawal_clear_date should block a 'clear to ship' reading. Show 'withdrawal not recorded'.",
+   "recommendation": "Add planned_ship_date to groups and withdrawal_clear_date to completion records. Flag conflicts as serious.",
+   "sources": [
+    {
+     "title": "Beef Quality Assurance National Manual (bqa_manual_final.pdf)",
+     "publisher": "Beef Quality Assurance program (NCBA / Beef Checkoff)",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+     "pub_date": "undated (no date in fetched text)",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Withdrawal clear date is a required record item. Vaccines carry 21- or 60-day withdrawals."
+    },
+    {
+     "title": "FARAD: How we respond to withdrawal inquiries",
+     "publisher": "American Association of Bovine Practitioners Conference Proceedings (Maunsell et al.)",
+     "url": "https://bovine-ojs-tamu.tdl.org/AABP/article/view/8283",
+     "pub_date": "2021-10-09",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "Veterinarians request withdrawal-interval advice after extralabel use. FARAD cannot give one where the FDA prohibits the extralabel use."
+    },
+    {
+     "title": "Veterinarian-Client-Patient Relationships, Prescribing/Dispensing Animal Drugs, and Telemedicine",
+     "publisher": "U.S. FDA Center for Veterinary Medicine",
+     "url": "https://www.fda.gov/animal-veterinary/product-safety-information/veterinarian-client-patient-relationships-prescribingdispensing-animal-drugs-and-telemedicine",
+     "pub_date": "content current as of 2024-09-04",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Extralabel use and VFDs require a VCPR."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Handling-day heat check. For a gather or processing task planned in warm weather, warn when the forecast THI for the planned work period reaches 84. Suggest finishing early in the morning and keeping cattle in holding pens only briefly.",
+   "decision_supported": "Picking a day and time to gather and work cattle that keeps heat and handling stress low.",
+   "required_inputs": "planned work date and start/end time, location, hourly forecast temperature and relative humidity (or dewpoint), and THI computed from them.",
+   "context": "Summer handling (branding, preg check in hot falls, yearling processing). Not relevant in cold months.",
+   "classification": "B-context-dependent",
+   "evidence": "BQA Manual (p.27 per fetch): 'a general rule is to work them before the temperature humidity index (THI) reaches 84'. Avoid handling when heat-stress risk is high. Work heat-prone cattle first or earlier. UNL BeefWatch 2018 (Eirich, Woolsoncroft): 'Plan to handle cattle before 8:00 a.m. and never after 10:00 a.m. during summer months'. Core temperature peaks about 2 h after air temperature and takes 4-6 h to return. Keep holding to about 30 minutes or less. UNL IANR 2016 gives the same 8 a.m. / 10 a.m. guidance and says 'Work cattle slowly and use low-stress handling techniques.' USDA ARS MARC heat-stress forecast maps use NWS 7-day forecasts and are framed for feedlot cattle.",
+   "limitations": "THI leaves out wind and solar load. The ARS model is for feedlot cattle and estimates general trends, not individual animals. Forecasts are uncertain. The two UNL summaries differed on evening handling, so no evening rule is proposed.",
+   "configurable": "Yes: THI cut-off, time window, whether to use a forecast at all.",
+   "missing_data_blocks": "With no forecast available, show 'no forecast: check conditions on the day' and do not label the day safe.",
+   "recommendation": "Optional phase-2 feature using the NWS API. For the static demo, any forecast must be clearly labelled synthetic.",
+   "sources": [
+    {
+     "title": "Beef Quality Assurance National Manual (bqa_manual_final.pdf)",
+     "publisher": "Beef Quality Assurance program (NCBA / Beef Checkoff)",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+     "pub_date": "undated (no date in fetched text)",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Work cattle before THI reaches 84 (Ch.2 Temperature Conditions, p.27 per fetch). Low-stress handling (p.44)."
+    },
+    {
+     "title": "Heat Stress: Handling Cattle Through High Heat Humidity Indexes",
+     "publisher": "University of Nebraska-Lincoln BeefWatch (Eirich, Woolsoncroft)",
+     "url": "https://newsroom.unl.edu/announce/beef/8200/47172",
+     "pub_date": "2018-08-01 (archived story)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Handle before 8 a.m. and never after 10 a.m. in summer. Core temperature lag and 4-6 h recovery. Small groups with holding of about 30 minutes or less."
+    },
+    {
+     "title": "Extension educator offers tips on handling cattle in hot weather",
+     "publisher": "University of Nebraska-Lincoln IANR News (R. Eirich)",
+     "url": "https://ianrnews.unl.edu/extension-educator-offers-tips-handling-cattle-hot-weather",
+     "pub_date": "2016-05-31",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Handle before 8 a.m. Low-stress handling. Process in small batches."
+    },
+    {
+     "title": "Forecasting heat stress (USMARC heat stress maps)",
+     "publisher": "USDA ARS U.S. Meat Animal Research Center, Clay Center NE",
+     "url": "https://www.ars.usda.gov/plains-area/clay-center-ne/marc/documents/heat-stress/forecastingheatstress/",
+     "pub_date": "last modified 2016-08-12",
+     "data_years": "model papers 2005; sample data 2001-07-05",
+     "kind": "agency",
+     "supports": "7-day maps from NWS forecasts with categories Normal (<90 bpm), Alert, Danger and Emergency (>130 bpm). Framed for feedlot cattle. Does not predict individual animals."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Low-stress timing for sensitive groups. When a handling task is planned for females in early pregnancy (inside a configurable number of days after bull turn-in), show a note: 'Early-pregnant females: keep handling, transport and heat stress low. Confirm timing with your veterinarian.' Pregnancy-check windows are derived from breeding-season dates.",
+   "decision_supported": "Whether to combine, delay or move a gather for bred heifers or cows. When to book the pregnancy check.",
+   "required_inputs": "bull_in_date, bull_out_date per group, planned task dates, vet-chosen method.",
+   "context": "Bred heifers and cows. Northern Plains spring-calving herds that breed in summer.",
+   "classification": "B-context-dependent",
+   "evidence": "NDSU 2020: 'producers should minimize handling, transportation, and heat stress' for cows in early pregnancy. Pregnancy testing 'as early as 30 to 45 days after the end of the breeding season'. Consult the veterinarian on method. UW-Madison Extension summary of peer-reviewed work: Reinhardt, Busby & Corah 2009 J. Anim. Sci. 87:3030 (more than 20,000 cattle, 2002-2006) linked excitable disposition with lower ADG and carcass merit. Dewell et al. 2019 Bovine Practitioner: low-stress-handled cattle gained 2.92 vs 2.70 lb/d. These are associations or single trials, cited second-hand.",
+   "limitations": "The days-after-turn-in cut-off is a ranch and vet choice. The peer-reviewed results come from feeder and feedlot settings and were read through an extension summary, not the papers.",
+   "configurable": "Yes (days after turn-in, which groups).",
+   "missing_data_blocks": "Without breeding dates the dashboard cannot derive the preg-check window or flag early pregnancy. Show 'breeding dates not recorded'.",
+   "recommendation": "Add bull_in and bull_out to groups. Derive a suggested preg-check window (end of breeding plus a vet-set offset) and show it as 'confirm with your veterinarian'.",
+   "sources": [
+    {
+     "title": "Consider Pregnancy Testing Beef Cattle Early",
+     "publisher": "NDSU Agriculture Communication",
+     "url": "https://www.ag.ndsu.edu/news/newsreleases/2020/july-6-2020/consider-pregnancy-testing-beef-cattle-early",
+     "pub_date": "2020-07-06 (URL) / 2020-07-09 (byline)",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Minimize handling, transport and heat stress in early pregnancy. Timing of methods after breeding. A follow-up check before winter feeding."
+    },
+    {
+     "title": "Cattle handling and stockmanship influence on animal performance",
+     "publisher": "University of Wisconsin-Madison Division of Extension (B. Halfman)",
+     "url": "https://livestock.extension.wisc.edu/articles/cattle-handling-and-stockmanship-influence-on-animal-performance",
+     "pub_date": "undated (image uploaded 2022-07; not confirmed as article date)",
+     "data_years": "cites Reinhardt et al. 2009 (data 2002-2006), Dewell et al. 2019, Woiwode et al. 2016",
+     "kind": "extension",
+     "supports": "Summarises peer-reviewed evidence that calm handling and disposition are associated with gain and carcass merit."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Escalate-to-veterinarian triggers from observation records. (a) Any death without a known cause gives 'Call your veterinarian about a necropsy'. (b) Abortions or late pregnancy losses above the herd's own baseline give 'Call your veterinarian'. (c) Signs recorded in more than one animal of a group, or the same sign recurring, give 'Call your veterinarian'. Reportable diseases are left to the veterinarian, who reports to the state.",
+   "decision_supported": "When the manager should bring in the herd veterinarian, worded as observations, not diagnoses.",
+   "required_inputs": "death records (date, group, ID, found-dead flag), abortion and loss records, herd baseline loss rate from past years, observation sign counts, herd vet contact.",
+   "context": "All classes and seasons. Baselines come from the herd's own records.",
+   "classification": "B-context-dependent",
+   "evidence": "eXtension Beef Cattle: 'it is very important that any time an animal dies a necropsy is performed'. Without necropsy clues 'more animals may die'. UNL 2023 (Hille, Steffen): about 2-2.5% mid-to-late-term abortions expected in an average Nebraska herd. Published thresholds range from about 2% to 8%, so set your own from past records. 'If in doubt, call and discuss the situation with your veterinarian.' Keep the fetus and placenta cool. Record breeding, pregnancy and birth dates. SD ARSD 12:68:03:09: reportable diseases are reported 'immediately by telephone, fax, or writing' by licensed accredited veterinarians and diagnostic labs, not by producers. OSU and NDSU: pinkeye spreads through a herd within days.",
+   "limitations": "Thresholds for (b) and (c) are herd-specific and set with the veterinarian. The dashboard must not name a disease. The 'every death' necropsy guidance is strong, and some ranches will use judgment on cost.",
+   "configurable": "Yes (baseline rate, sign-count trigger). The 'call your veterinarian' wording should stay fixed.",
+   "missing_data_blocks": "Without past-year loss records there is no baseline. Show raw counts and 'set a baseline with your veterinarian' instead of 'normal'.",
+   "recommendation": "Add deaths.csv or loss records and observation logs. The only action the dashboard gives on a health finding is 'record it and call your veterinarian'.",
+   "sources": [
+    {
+     "title": "What is causing my cattle to die suddenly?",
+     "publisher": "eXtension Beef Cattle (beef-cattle.extension.org)",
+     "url": "https://beef-cattle.extension.org/what-is-causing-my-cattle-to-die-suddenly",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Necropsy any time an animal dies. A veterinarian combines necropsy with history to reach a diagnosis."
+    },
+    {
+     "title": "Investigating the cause of cattle abortions: When to involve your veterinarian and what happens next",
+     "publisher": "Nebraska Extension BeefWatch (M. Hille, D. Steffen)",
+     "url": "https://beef.unl.edu/beefwatch/2023/investigating-cause-cattle-abortions-when-involve-your-veterinarian-and-what-happens/",
+     "pub_date": "2023-11-01",
+     "data_years": "n/a",
+     "kind": "extension",
+     "supports": "Baseline about 2-2.5% in Nebraska. Thresholds from 2-8%. Use the herd's own records. Call the vet when in doubt. What to save and record."
+    },
+    {
+     "title": "SD Admin. Rules 12:68:03:09 List of reportable diseases",
+     "publisher": "Justia (reproducing South Dakota Administrative Rules)",
+     "url": "https://regulations.justia.com/states/south-dakota/title-12/article-12-68/chapter-12-68-03/section-12-68-03-09",
+     "pub_date": "current through SD Register Vol. 51 p.149, 2025-06-23",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Licensed accredited veterinarians and diagnostic labs report listed diseases immediately. The board publishes the list each July 1."
+    },
+    {
+     "title": "SD Animal Industry Board - Veterinarians",
+     "publisher": "South Dakota Animal Industry Board",
+     "url": "https://aib.sd.gov/veterinarians.html",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Links the reportable disease list and gives the state veterinarian's contact. No producer reporting procedure on the page."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Wording rule for every Health row. Describe what is scheduled or what was observed, and who to call. Never state a diagnosis, cause, drug, dose or treatment. Also reword the related Gain action 'look for a health problem in the group' (exceptions.js:132).",
+   "decision_supported": "Keeping the dashboard inside the manager's role (observe, schedule, record, escalate) and the veterinarian's role (diagnose, prescribe).",
+   "required_inputs": "Action strings in exceptions.js and the rules table in app.js.",
+   "context": "All Health and Gain rows.",
+   "classification": "A-supported-general",
+   "evidence": "21 CFR 530.3(i): a valid VCPR is one in which 'A veterinarian has assumed the responsibility for making medical judgments regarding the health of (an) animal(s) and the need for medical treatment', with 'sufficient knowledge of the animal(s) \u2026 to initiate at least a general or preliminary diagnosis'. BQA Manual: 'A valid VCPR is required for all prescription medications, extra-label use of non-prescription medications,' (VFD feeds per field guide). FDA: a VCPR cannot be established by telemedicine alone. OBSERVED: current Health actions 'Schedule it this week' and 'Plan it with the next gather' contain no diagnosis words (health.research.mjs section 4 'ok'). The Gain action 'Check forage quality and mineral; look for a health problem in the group' was flagged NOTE because it asks the manager to find a health problem.",
+   "limitations": "Task names such as 'Pinkeye check' name a disease as the target of an observation, which is acceptable as a schedule label. Exception text about findings should list signs, not conditions.",
+   "configurable": "No.",
+   "missing_data_blocks": "n/a",
+   "recommendation": "Use templates. Scheduled: '[Task] for [group]: due [window]. Owner: [responsible].' Observed: '[N] head in [group] with [signs] recorded [date]. Call your veterinarian.' Gain: 'Check forage and mineral; watch the group for illness or lameness and call your veterinarian if you see any.'",
+   "sources": [
+    {
+     "title": "21 CFR 530.3 Definitions (paragraph (i) veterinarian-client-patient relationship)",
+     "publisher": "Cornell Legal Information Institute (reproducing the Code of Federal Regulations)",
+     "url": "https://www.law.cornell.edu/cfr/text/21/530.3",
+     "pub_date": "undated on page",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "The three VCPR conditions. Medical judgments and diagnosis rest with the veterinarian. Requires recent examination or timely premises visits."
+    },
+    {
+     "title": "Beef Quality Assurance National Manual (bqa_manual_final.pdf)",
+     "publisher": "Beef Quality Assurance program (NCBA / Beef Checkoff)",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+     "pub_date": "undated (no date in fetched text)",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Sec. 4.5: a valid VCPR is required for prescription and extra-label use. 'A VCPR cannot exist based solely on phone, video, or other telemedical interactions.' Treatment protocols should define when to seek professional help (p.49)."
+    },
+    {
+     "title": "Veterinarian-Client-Patient Relationships, Prescribing/Dispensing Animal Drugs, and Telemedicine",
+     "publisher": "U.S. FDA Center for Veterinary Medicine",
+     "url": "https://www.fda.gov/animal-veterinary/product-safety-information/veterinarian-client-patient-relationships-prescribingdispensing-animal-drugs-and-telemedicine",
+     "pub_date": "content current as of 2024-09-04",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "VCPR required for extralabel use and VFDs. Telemedicine alone cannot establish a federal VCPR. States may add requirements."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Herd veterinarian and VCPR currency. Store the herd veterinarian's name and contact and the date of the vet's last visit to the premises. Show an info row when no visit is recorded within a ranch-set period. Escalation text uses the stored contact.",
+   "decision_supported": "Whether the ranch has a working vet relationship to escalate to and to authorize prescription, extralabel or VFD products.",
+   "required_inputs": "vet_name, vet_phone, last_vet_premises_visit, state.",
+   "context": "All operations. What counts as 'timely' is defined by the state.",
+   "classification": "C-ranch-management-choice",
+   "evidence": "21 CFR 530.3(i): the relationship 'can exist only when the veterinarian has recently seen and is personally acquainted with the keeping and care of the animal(s)\u2026 by medically appropriate and timely visits to the premises'. AVMA page: states may define 'timely', and the AVMA Model Act definition differs from the federal one. NAHMS Beef 2017 Report 2: 80.7% of cow-calf operations used a veterinarian for their cattle in 2017 (large operations 98.4%), so about 1 in 5 did not. The dashboard should not assume one.",
+   "limitations": "The dashboard cannot judge whether a VCPR is legally valid. It can only show the recorded facts.",
+   "configurable": "Yes (reminder period).",
+   "missing_data_blocks": "No vet contact recorded means escalation rows say 'Call your veterinarian (no contact recorded)'.",
+   "recommendation": "Add a small config entry. Never present a VCPR as 'valid'. Present it as 'last vet visit recorded [date]'.",
+   "sources": [
+    {
+     "title": "21 CFR 530.3 Definitions",
+     "publisher": "Cornell Legal Information Institute (reproducing the CFR)",
+     "url": "https://www.law.cornell.edu/cfr/text/21/530.3",
+     "pub_date": "undated on page",
+     "data_years": "n/a",
+     "kind": "agency",
+     "supports": "Recent examination or timely premises visits are a condition of a VCPR."
+    },
+    {
+     "title": "The veterinarian-client-patient relationship (VCPR)",
+     "publisher": "American Veterinary Medical Association (atwork.avma.org; page does not name a publisher)",
+     "url": "https://atwork.avma.org/resources-tools/pet-owners/petcare/veterinarian-client-patient-relationship-vcpr",
+     "pub_date": "undated (mentions Model Act revisions 2003 and 2012)",
+     "data_years": "n/a",
+     "kind": "other",
+     "supports": "VCPR elements including records and follow-up availability. The Model Act differs from 21 CFR 530.3(i). States may define 'timely'."
+    },
+    {
+     "title": "Beef Cow-calf Health and Management Practices in the United States, 2017 (Beef 2017 Report 2)",
+     "publisher": "USDA APHIS VS CEAH, National Animal Health Monitoring System",
+     "url": "https://www.aphis.usda.gov/sites/default/files/beef-2017-part2.pdf",
+     "pub_date": "2021-05 (cover; suggested citation lists 2020)",
+     "data_years": "calendar year 2017; 24 states",
+     "kind": "agency",
+     "supports": "80.7% of operations used a veterinarian in 2017 (Sec. I.D.4). 74.5% vaccinated any cattle (I.B.1.a). 20.8% vaccinated any cattle against pinkeye (Table I.B.1.c)."
+    }
+   ]
+  },
+  {
+   "rule": "PROPOSED: Keep completion history append-only and retain it for at least 2 years (longer where law requires). Do not overwrite last_done on a single schedule row.",
+   "decision_supported": "Audit trail for BQA and buyers. Recurring-task scheduling. Telling 'done this cycle' apart from 'done last cycle'.",
+   "required_inputs": "completion records with done_date, linked to task_id.",
+   "context": "All records.",
+   "classification": "A-supported-general",
+   "evidence": "BQA Manual: 'Keep records for a minimum of two years or longer as required by laws/regulations' (two fetches gave the same sentence). BQA Field Guide: keep herd health records at least two years from when cattle are transferred or sold. OBSERVED: the committed row 'Cows,Fly tag check,2026-06-05,2026-09-01,done' cannot show whether the Sep 1 occurrence was done (healthbudget.repro.mjs H-05 shows no Health row for it).",
+   "limitations": "The demo stores data as static CSV. Retention is a ranch process, not a page feature.",
+   "configurable": "Retention period: at least 2 years per BQA.",
+   "missing_data_blocks": "A recurring task with no completion record for the current cycle is outstanding, not done.",
+   "recommendation": "Use health.csv as the schedule (task_id, window, owner, source) and health_records.csv as append-only completions.",
+   "sources": [
+    {
+     "title": "Beef Quality Assurance National Manual (bqa_manual_final.pdf)",
+     "publisher": "Beef Quality Assurance program (NCBA / Beef Checkoff)",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf",
+     "pub_date": "undated (no date in fetched text)",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Record retention minimum of two years (Ch.6, p.15 per fetch). VFD records two years (p.42)."
+    },
+    {
+     "title": "BQA Field Guide (bqa_field-_guide.pdf)",
+     "publisher": "Beef Quality Assurance program",
+     "url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_field-_guide.pdf",
+     "pub_date": "undated",
+     "data_years": "n/a",
+     "kind": "standard",
+     "supports": "Keep herd health records at least two years from transfer or sale. Record date, animal ID, serial/lot, dose, route, person and withdrawal."
+    }
+   ]
+  }
+ ],
+ "data_fields": [
+  {
+   "field": "task_id",
+   "meaning": "Stable ID of a scheduled health task, so completions can link to it",
+   "units_valid": "string, unique",
+   "source_type": "ranch records",
+   "update_frequency": "when a task is planned",
+   "required": "required",
+   "missing_behavior": "Reject the row with a visible data-issue message. Do not drop it silently.",
+   "supports": "Linking schedule to completion history; recurring tasks",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "group",
+   "meaning": "Group or lot the task applies to (existing column)",
+   "units_valid": "must match groups.csv group",
+   "source_type": "ranch records",
+   "update_frequency": "per task",
+   "required": "required",
+   "missing_behavior": "Show 'group not recorded' row (HB-C4 observed that unknown groups are still reported, which is correct)",
+   "supports": "BQA group or lot ID; head-count denominator",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "animal_ids",
+   "meaning": "Individual IDs when the task or record is for specific animals (official 840 EID where applicable)",
+   "units_valid": "list of IDs; official ID format per APHIS for covered cattle",
+   "source_type": "ranch records",
+   "update_frequency": "per record",
+   "required": "optional (required for individual treatment records)",
+   "missing_behavior": "Treat the record as a group record",
+   "supports": "BQA individual records; traceability",
+   "evidence_url": "https://www.govinfo.gov/content/pkg/FR-2024-05-09/html/2024-09717.htm"
+  },
+  {
+   "field": "task_type",
+   "meaning": "Kind of job; sets lead time, severity and wording",
+   "units_valid": "vaccination | parasite_control | fly_control | observation | vet_exam (pregnancy check, BSE) | other",
+   "source_type": "ranch records",
+   "update_frequency": "per task",
+   "required": "required",
+   "missing_behavior": "Use neutral wording ('Past planned date') and no vaccination or observation wording",
+   "supports": "Correct action text; per-type lead time",
+   "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2025/july/summer-brings-raised-pinkeye-concerns-in-cowherds"
+  },
+  {
+   "field": "task",
+   "meaning": "Free-text task label (existing column)",
+   "units_valid": "text; schedule label only, never a finding",
+   "source_type": "ranch records",
+   "update_frequency": "per task",
+   "required": "required",
+   "missing_behavior": "Show task_type as the label",
+   "supports": "Display",
+   "evidence_url": "https://www.law.cornell.edu/cfr/text/21/530.3"
+  },
+  {
+   "field": "schedule_source",
+   "meaning": "Who set the timing",
+   "units_valid": "product_label | vet_plan | ranch_plan",
+   "source_type": "ranch records",
+   "update_frequency": "per task",
+   "required": "required for vaccination and parasite_control",
+   "missing_behavior": "Show 'window source not recorded: check label or vet plan'. No confident overdue wording.",
+   "supports": "Escalate-to-vet wording when a label or vet window has passed",
+   "evidence_url": "https://vetext.vetmed.ucdavis.edu/sites/g/files/dgvnsk5616/files/local_resources/pdfs/pdfs_beef/cca0810-booster-vaccines.pdf"
+  },
+  {
+   "field": "window_start",
+   "meaning": "Earliest acceptable date (from label, vet plan, or derived from breeding dates)",
+   "units_valid": "YYYY-MM-DD (date-only, as health dates already are; HB-C8 observed these are zone-safe)",
+   "source_type": "ranch records",
+   "update_frequency": "per task",
+   "required": "optional (required for label-driven boosters)",
+   "missing_behavior": "Warn from window_end minus lead time",
+   "supports": "Warning timing",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "window_end",
+   "meaning": "Latest acceptable date. Replaces the single next_due as the overdue test.",
+   "units_valid": "YYYY-MM-DD, at or after window_start",
+   "source_type": "ranch records",
+   "update_frequency": "per task",
+   "required": "required for open tasks",
+   "missing_behavior": "Show 'No due date recorded' row (current code skips it: H-03/H-04 observed '(no alerts)')",
+   "supports": "Serious or overdue test",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "responsible",
+   "meaning": "Person or role who owns the task (crew lead, herd vet)",
+   "units_valid": "text",
+   "source_type": "ranch records",
+   "update_frequency": "per task",
+   "required": "required for open tasks",
+   "missing_behavior": "Show 'Unassigned' in the row",
+   "supports": "Crew accountability; who to call",
+   "evidence_url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf"
+  },
+  {
+   "field": "vet_needed",
+   "meaning": "Task needs the veterinarian present or booked (preg check, BSE, prescription product)",
+   "units_valid": "true | false",
+   "source_type": "ranch records",
+   "update_frequency": "per task",
+   "required": "optional",
+   "missing_behavior": "Assume false; use the default lead time",
+   "supports": "Longer lead time; 'confirm with your veterinarian' wording",
+   "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2020/july-6-2020/consider-pregnancy-testing-beef-cattle-early"
+  },
+  {
+   "field": "status",
+   "meaning": "Task state",
+   "units_valid": "open | done | cancelled | deferred (trim and lower-case before matching)",
+   "source_type": "ranch records",
+   "update_frequency": "on change",
+   "required": "required",
+   "missing_behavior": "Unknown values become a data-issue row (current code drops them: H-01/H-02 observed '(no alerts)')",
+   "supports": "Which tasks are judged",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "done_date",
+   "meaning": "Date the task was completed (completion record, append-only)",
+   "units_valid": "YYYY-MM-DD, not after as_of",
+   "source_type": "ranch records",
+   "update_frequency": "per completion",
+   "required": "required to mark done",
+   "missing_behavior": "'done' without done_date shows as 'record incomplete'",
+   "supports": "BQA record; recurring-cycle logic",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "done_by",
+   "meaning": "Person administering or performing the task",
+   "units_valid": "name or initials",
+   "source_type": "ranch records",
+   "update_frequency": "per completion",
+   "required": "required for product tasks",
+   "missing_behavior": "'record incomplete'",
+   "supports": "BQA required item",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "head_done",
+   "meaning": "Number of head actually worked or treated",
+   "units_valid": "integer 0..group head",
+   "source_type": "ranch records",
+   "update_frequency": "per completion",
+   "required": "required for group tasks",
+   "missing_behavior": "'head count not recorded'. Do not claim full coverage.",
+   "supports": "Coverage-gap warning",
+   "evidence_url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf"
+  },
+  {
+   "field": "head_planned",
+   "meaning": "Group head count at the time of the task",
+   "units_valid": "integer > 0",
+   "source_type": "ranch records",
+   "update_frequency": "per task (head changes with sales and deaths)",
+   "required": "optional (default from groups.csv head)",
+   "missing_behavior": "Use groups.csv head and note that it is the current count",
+   "supports": "Coverage-gap denominator",
+   "evidence_url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf"
+  },
+  {
+   "field": "product_and_lot",
+   "meaning": "Product name and manufacturer lot/serial number (record only, never shown as an instruction)",
+   "units_valid": "text",
+   "source_type": "ranch records",
+   "update_frequency": "per completion",
+   "required": "required for product tasks (BQA)",
+   "missing_behavior": "'record incomplete'",
+   "supports": "BQA compliance; recall tracing",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "route_location",
+   "meaning": "Route and injection site (record only)",
+   "units_valid": "text",
+   "source_type": "ranch records",
+   "update_frequency": "per completion",
+   "required": "required for product tasks (BQA record); not used by rules",
+   "missing_behavior": "'record incomplete'",
+   "supports": "BQA compliance only",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "withdrawal_clear_date",
+   "meaning": "Earliest date the animals clear withdrawal (from label, or from the veterinarian for extralabel use)",
+   "units_valid": "YYYY-MM-DD",
+   "source_type": "ranch records",
+   "update_frequency": "per completion",
+   "required": "required for product tasks",
+   "missing_behavior": "Block any 'clear to ship' reading; show 'withdrawal not recorded'",
+   "supports": "Withdrawal vs ship-date conflict (serious)",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_manual_final.pdf"
+  },
+  {
+   "field": "planned_ship_date",
+   "meaning": "Planned sale, shipping or cull date per group",
+   "units_valid": "YYYY-MM-DD",
+   "source_type": "ranch records",
+   "update_frequency": "as marketing plans change",
+   "required": "optional",
+   "missing_behavior": "Skip the conflict check and say so",
+   "supports": "Withdrawal conflict rule",
+   "evidence_url": "https://WWW.BQA.ORG/Media/BQA/Docs/bqa_field-_guide.pdf"
+  },
+  {
+   "field": "observation log (obs_date, group, observer, head_with_signs, sign_code, notes)",
+   "meaning": "What was seen on a pasture check, recorded as signs, not diagnoses",
+   "units_valid": "sign_code from a fixed list (watery_eyes, squinting, cloudy_eye, lame, off_feed, found_dead, abortion, other); head_with_signs integer >= 0",
+   "source_type": "manual observation",
+   "update_frequency": "every pasture check; at least the ranch-set interval in fly season",
+   "required": "optional (required for the observation and escalation rules)",
+   "missing_behavior": "'No check recorded since [date]'. Never 'group clear'.",
+   "supports": "Eye-observation rule; escalate-to-vet triggers; records of affected cattle",
+   "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2025/july/summer-brings-raised-pinkeye-concerns-in-cowherds"
+  },
+  {
+   "field": "fly_season_start / fly_season_end",
+   "meaning": "Ranch-entered dates bounding face- and horn-fly season for observation cadence and fly-tag in and out tasks",
+   "units_valid": "YYYY-MM-DD",
+   "source_type": "assumption",
+   "update_frequency": "yearly (adjust in-season)",
+   "required": "optional",
+   "missing_behavior": "Do not run the fly-season observation rule; show a note",
+   "supports": "Observation cadence; fly-tag removal task",
+   "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2024/may/controlling-flies-on-cattle-requires-proper-timing"
+  },
+  {
+   "field": "fly_count_per_animal",
+   "meaning": "Scouted fly count (horn flies per animal)",
+   "units_valid": "integer >= 0",
+   "source_type": "manual observation",
+   "update_frequency": "weekly in season (ranch choice)",
+   "required": "optional",
+   "missing_behavior": "Ignore",
+   "supports": "Fly-tag timing near the about 200 flies/animal threshold reported by NDSU",
+   "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2024/may/controlling-flies-on-cattle-requires-proper-timing"
+  },
+  {
+   "field": "bull_in_date / bull_out_date",
+   "meaning": "Breeding-season dates per group",
+   "units_valid": "YYYY-MM-DD",
+   "source_type": "ranch records",
+   "update_frequency": "per breeding season",
+   "required": "optional (required to derive a preg-check window)",
+   "missing_behavior": "'breeding dates not recorded'. No derived window.",
+   "supports": "Pregnancy-check window; early-pregnancy handling note",
+   "evidence_url": "https://www.ag.ndsu.edu/news/newsreleases/2020/july-6-2020/consider-pregnancy-testing-beef-cattle-early"
+  },
+  {
+   "field": "loss records (death_date, group, id, cause_known, abortion flag) and baseline_loss_rate",
+   "meaning": "Deaths and pregnancy losses, plus the herd's own historical rate",
+   "units_valid": "dates, IDs; baseline as % per season",
+   "source_type": "ranch records",
+   "update_frequency": "as events occur; baseline yearly",
+   "required": "optional",
+   "missing_behavior": "Show counts only and 'set a baseline with your veterinarian'",
+   "supports": "Escalate-to-vet triggers (necropsy, abortion investigation)",
+   "evidence_url": "https://beef.unl.edu/beefwatch/2023/investigating-cause-cattle-abortions-when-involve-your-veterinarian-and-what-happens/"
+  },
+  {
+   "field": "vet_name / vet_phone / last_vet_premises_visit",
+   "meaning": "Herd veterinarian contact and last recorded premises visit",
+   "units_valid": "text; YYYY-MM-DD",
+   "source_type": "ranch records",
+   "update_frequency": "on change; per visit",
+   "required": "optional (recommended)",
+   "missing_behavior": "Escalation reads 'Call your veterinarian (no contact recorded)'",
+   "supports": "Escalation wording; VCPR currency info row",
+   "evidence_url": "https://www.law.cornell.edu/cfr/text/21/530.3"
+  },
+  {
+   "field": "planned_work_start / planned_work_end",
+   "meaning": "Planned gather or processing time for a task day",
+   "units_valid": "local datetime with a stated time zone (meta.csv as_of has no zone today)",
+   "source_type": "ranch records",
+   "update_frequency": "per scheduled gather",
+   "required": "optional",
+   "missing_behavior": "Skip the heat check",
+   "supports": "Heat and handling-time check",
+   "evidence_url": "https://newsroom.unl.edu/announce/beef/8200/47172"
+  },
+  {
+   "field": "forecast_thi_hourly",
+   "meaning": "Temperature-humidity index computed from hourly forecast temperature and RH or dewpoint for the ranch location",
+   "units_valid": "THI unitless; BQA rule of thumb 84",
+   "source_type": "public dataset",
+   "update_frequency": "several times daily (NWS forecast); fetch the day before and the morning of work",
+   "required": "optional",
+   "missing_behavior": "'No forecast: check conditions on the day'. Never mark the day as safe.",
+   "supports": "Heat check for handling days",
+   "evidence_url": "https://www.weather.gov/documentation/services-web-API"
+  }
+ ],
+ "integrations": [
+  {
+   "name": "NOAA National Weather Service API (api.weather.gov)",
+   "provides": "7-day hourly point forecasts (forecastHourly, forecastGridData) used to compute THI for planned handling days",
+   "access": "HTTPS JSON. GET /points/{lat},{lon}, then the forecast URLs. A User-Agent header with contact is required. An API key is planned for the future.",
+   "cost": "Free",
+   "licensing": "Open data, 'free to use for any purpose' (per documentation page); disclaimer at weather.gov/disclaimer",
+   "coverage": "United States, including SD, NE and ND",
+   "refresh": "Update frequency not stated on the docs page. Cache-friendly. Grid office and x/y can change, so re-check /points periodically. Rate limit not public; retry after about 5 s.",
+   "failure_behavior": "Show 'no forecast available' and leave the day unclassified. A static portfolio demo must not call it live; use a labelled synthetic forecast file.",
+   "recommendation": "Optional phase 2 for the heat check only. Do not add to the static demo without clear 'live data' labelling.",
+   "url": "https://www.weather.gov/documentation/services-web-API"
+  },
+  {
+   "name": "USDA ARS USMARC heat stress forecast maps",
+   "provides": "Daily maps of predicted peak heat-stress category (Normal / Alert / Danger / Emergency by breathing rate) from NWS 7-day forecasts",
+   "access": "Web maps. The fetched page mentions no data feed or API.",
+   "cost": "Free",
+   "licensing": "US government work (not stated on page)",
+   "coverage": "Not specified on the fetched page. The model is framed for feedlot cattle.",
+   "refresh": "Not stated. Page last modified 2016-08-12, and a banner says the site is being updated.",
+   "failure_behavior": "Not applicable (link only)",
+   "recommendation": "Link from the help text only. Do not integrate. It is feedlot-framed and has no feed.",
+   "url": "https://www.ars.usda.gov/plains-area/clay-center-ne/marc/documents/heat-stress/forecastingheatstress/"
+  },
+  {
+   "name": "FARAD (Food Animal Residue Avoidance Databank)",
+   "provides": "Withdrawal-interval advice after extralabel drug use, answered to veterinarians",
+   "access": "Veterinarian requests to FARAD call centers (per AABP 2021 proceedings)",
+   "cost": "Not stated in fetched source",
+   "licensing": "n/a",
+   "coverage": "US food animals",
+   "refresh": "Per inquiry",
+   "failure_behavior": "n/a",
+   "recommendation": "Do not integrate. Record the withdrawal_clear_date the veterinarian provides. The dashboard never computes extralabel withdrawal.",
+   "url": "https://bovine-ojs-tamu.tdl.org/AABP/article/view/8283"
+  },
+  {
+   "name": "CattleMax herd software (vendor)",
+   "provides": "Per the vendor help article, group treatments compute booster dates (Booster tab) and withdrawal periods (Withdrawal tab) from entered day counts",
+   "access": "Vendor SaaS. The fetched article does not mention CSV export or an API.",
+   "cost": "Not stated in fetched article",
+   "licensing": "Proprietary",
+   "coverage": "Vendor customers",
+   "refresh": "User-entered",
+   "failure_behavior": "Unknown",
+   "recommendation": "Vendor specification only, not independently verified. Use it as evidence that commercial tools model booster and withdrawal as day counts from a treatment date. Consider a CSV import only if export is documented.",
+   "url": "https://help.cattlemax.com/article/546-herd-health-preset-treatments-booster-and-withdrawal"
+  },
+  {
+   "name": "iCalendar RFC 5545 VTODO export",
+   "provides": "Standard to-do items with DTSTART, DUE, COMPLETED and STATUS that crew phones and calendars can subscribe to",
+   "access": "Generate a .ics file from health.csv (window_start maps to DTSTART, window_end to DUE, done_date to COMPLETED)",
+   "cost": "Free",
+   "licensing": "IETF standard",
+   "coverage": "Any calendar client",
+   "refresh": "Regenerated with the data",
+   "failure_behavior": "Static file; no runtime failure",
+   "recommendation": "Optional low-cost feature that puts the schedule in front of the responsible person. Not needed for the core audit.",
+   "url": "https://icalendar.org/iCalendar-RFC-5545/3-6-2-to-do-component.html"
+  },
+  {
+   "name": "USDA APHIS Animal Disease Traceability EID rule",
+   "provides": "Official ID requirement: visually and electronically readable eartags for covered cattle moving interstate (effective 2024-11-05)",
+   "access": "Federal Register rule text",
+   "cost": "Free",
+   "licensing": "US government",
+   "coverage": "US interstate movement; sexually intact cattle 18 months or older, dairy, rodeo and exhibition",
+   "refresh": "Rule changes only",
+   "failure_behavior": "n/a",
+   "recommendation": "No live integration. Let animal_ids accept official IDs so individual records match BQA and traceability practice.",
+   "url": "https://www.govinfo.gov/content/pkg/FR-2024-05-09/html/2024-09717.htm"
+  },
+  {
+   "name": "South Dakota Animal Industry Board reportable disease list",
+   "provides": "Annual reportable-disease list and state veterinarian contacts. Veterinarians and labs report immediately.",
+   "access": "PDF linked from aib.sd.gov/veterinarians.html",
+   "cost": "Free",
+   "licensing": "State government",
+   "coverage": "South Dakota",
+   "refresh": "Published each July 1 (per ARSD 12:68:03:09)",
+   "failure_behavior": "n/a",
+   "recommendation": "Reference in help text only. The dashboard's escalation is 'call your veterinarian', who handles any state reporting.",
+   "url": "https://aib.sd.gov/veterinarians.html"
+  },
+  {
+   "name": "BQA record forms (KS-BQA, Oklahoma BQA, Arkansas herd health record)",
+   "provides": "Field lists for processing, treatment and herd-health records",
+   "access": "PDF forms",
+   "cost": "Free",
+   "licensing": "Not stated",
+   "coverage": "US BQA programs",
+   "refresh": "Undated",
+   "failure_behavior": "n/a",
+   "recommendation": "Use them to shape health_records.csv columns so records can be audited against BQA without re-keying.",
+   "url": "https://www.kla.org/Media/KLA/Docs/bqarecordkeeping.pdf"
+  }
+ ],
+ "feature_notes": "What was observed (commands run from /home/claude/ranch-ops-dashboard; the app files were confirmed identical to cfd77e5 with 'git diff --stat cfd77e5 HEAD -- exceptions.js app.js index.html data scripts tests README.md .github', which returned no diff):\n\n1. `node docs/audit/diagnostics/health.research.mjs`: health.csv has only the columns group, task, last_done, next_due, status. These BQA items are MISSING: lot/serial, route and location, withdrawal clear date, person administering, head count worked, label/vet window, and schedule source. The current Health rows are 'serious | Yearlings: Booster vaccine | Overdue by 15 days (due 2026-09-15) | Schedule it this week' and 'warning | Cows: Pinkeye check | Due in 3 days (2026-10-03) | Plan it with the next gather'. No diagnosis words appear in the Health text. The Gain action 'look for a health problem in the group' is flagged NOTE.\n\n2. `node docs/audit/diagnostics/healthbudget.repro.mjs` (Health cases):\n   - Status 'Open', 'OPEN' and 'open ' all give '(no alerts)'.\n   - 'in progress' and other unknown statuses give '(no alerts)'.\n   - A blank or 'TBD' next_due gives '(no alerts)'.\n   - A due-today task reads 'Due in 0 days'.\n   - A next_due of '2026-09-30 00:00:00' gives fractional days, and its severity flips by time zone: Chicago warning versus Berlin serious.\n   - Date-only health dates are zone-safe (HB-C8 MATCH).\n\n3. NEW diagnostic I wrote, `node docs/audit/diagnostics/health.schedule.research.mjs`. All enrichment values in it are labelled SYNTHETIC.\n   - The booster row's last_done to next_due gap is 105 days. The BQA manual's generalisation is 2-4 weeks.\n   - A window-based reading turns the booster into 'serious: label window passed' with escalate-to-vet wording.\n   - The pinkeye row becomes an observation instruction rather than a gather instruction.\n   - A vet-dependent preg check warns 20 days out.\n   - A synthetic completion of 142/150 head shows '8 head still to do'.\n   - A 21-day withdrawal against a 2026-10-15 ship date shows 'CONFLICT'.\n   - Day length on 2026-09-30 is 11.83 h at Pierre SD, 11.86 h at North Platte NE and 11.81 h at Bismarck ND. All are below the 12.5 h at which UNL (Boxler 2023) says face flies aggregate to overwinter. So the committed Oct 3 'Pinkeye check' sits at the tail of face-fly season. That is plausible, but it is an observation job.\n\nCandidate features, in order of portfolio credibility:\n   - (a) Split schedule from records: health.csv becomes a schedule with task_type, window_start/end, schedule_source, responsible and vet_needed. A new append-only health_records.csv holds done_date, head_done, done_by, product/lot, route, and withdrawal_clear_date.\n   - (b) Fixed, non-diagnostic wording templates that end in 'call your veterinarian'.\n   - (c) An observation log with sign codes and an in-season 'no check recorded in N days' warning.\n   - (d) Withdrawal-clear vs planned ship-date conflict, which needs planned_ship_date in groups.csv.\n   - (e) Breeding dates that drive a suggested preg-check window plus an early-pregnancy handling note.\n   - (f) Optional heat check for handling days against BQA's THI 84 rule of thumb and UNL's 'before 8 a.m., never after 10 a.m.' summer guidance.\n   - (g) A rules table and README that label 7 days and the overdue severity as demonstration settings rather than validated thresholds.\n\nCrew tasks: every open task should carry a responsible person. BQA records require the person administering, and the KS-BQA map uses 'Crew Initials'.\n\nContext data: NAHMS Beef 2017 (data year 2017, 24 states) found that 80.7% of cow-calf operations used a veterinarian and 20.8% vaccinated any cattle against pinkeye.\n\nAll demo values must remain fictional and labelled.",
+ "caveats": "- **Fetch method.** All web content came through WebFetch, which summarises pages with a small model. Quoted phrases are as that summariser returned them.\n- **BQA manual checks.** The key BQA manual claims were cross-checked with two separate fetches, which returned the same sentences: the 2-4 week second dose, the two-year retention, THI 84, the VCPR wording and the record items. Page numbers come from the fetch and are not independently verified.\n- **BQA PDF download failed.** A direct download for text extraction (`curl` to bqa.org) failed with 'CONNECT tunnel failed, response 403'. A follow-up look at the proxy README was denied by the permission classifier, so I did not pursue it.\n- **BQA dates.** The BQA manual PDF and the BQA field guide are undated in the fetched text. Beef Magazine (2025-01-06) reports that NCBA released an updated manual, but I could not confirm that `bqa_manual_final.pdf` is that edition.\n- **Failed fetches:**\n  - MSU 'Are booster vaccinations needed for beef calves?' returned only an Incapsula bot-check, with no content.\n  - Oklahoma Farm Report BQA news returned a cross-host redirect to http, which I did not follow.\n  - producer.com 'lapses in vaccination programs' returned a fetch error.\n  - The Missouri deworming article was fetched but does not support vet-set deworming timing, so it is not cited.\n- **Peer-reviewed handling studies are second-hand.** Reinhardt et al. 2009, Dewell et al. 2019 and Woiwode et al. 2016 were cited through a UW-Madison Extension summary. I did not fetch the papers.\n- **NAHMS figures.** These are as returned for Report 2 (published May 2021, data year 2017). The operation count the summary gave (262) was not cross-checked.\n- **Conflicting UNL summaries.** The 2016 and 2018 UNL summaries differed on evening handling, so no evening rule is proposed.\n- **No source covers a missed booster.** None of the fetched sources gives a general rule on whether a late booster counts or the series must restart. The recommendation leaves that to the label and the veterinarian.\n- **Proposed numbers are not validated.** Lead times, N-day observation intervals, sign-count triggers and loss baselines are ranch or veterinarian choices (C), not validated thresholds. The current 7-day and 'overdue = serious' settings are demonstration values (D).\n- **Northern Plains coverage.** Sources are from NDSU, SDSU and UNL where available. Oklahoma, Arkansas, Kansas, UC Davis, Calgary/BCRC and Wisconsin sources are used where Plains sources were not found.\n- **Scope.** This covers observation, scheduling, records and escalation only. No treatment protocol, product or dose is recommended.\n- **Repo state.**\n  - HEAD is bff0ba9, two audit commits on top of cfd77e5. App and data files are identical to cfd77e5, as confirmed by `git diff`.\n  - Untracked files from other workers are present.\n  - I created exactly one new file, `/home/claude/ranch-ops-dashboard/docs/audit/diagnostics/health.schedule.research.mjs`. It is read-only against the repo and its enrichment values are labelled SYNTHETIC.\n  - No existing repo file was modified, nothing was committed, and no branch was changed.\n  - The scratch dir is `/tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/research-health/dl`. It was created for the failed download and is empty."
+}

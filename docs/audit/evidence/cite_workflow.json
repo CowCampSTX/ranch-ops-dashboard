@@ -1,0 +1,282 @@
+{
+ "checked": [
+  {
+   "url": "https://www.w3.org/TR/WCAG22/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 1 (SC 1.4.1). Page status reads 'W3C Recommendation 12 December 2024', which matches pub_date 2024-12-12. SC 1.4.1 is Level A and reads verbatim: 'Color is not used as the only visual means of conveying information, indicating an action, prompting a response, or distinguishing a visual element.' The fetch was truncated at 100000 of 104477 chars."
+  },
+  {
+   "url": "https://www.w3.org/TR/WCAG22/",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 3 (SC 1.4.13, Level AA). The Dismissible, Hoverable and Persistent text matches. However, the Dismissible bullet carries an exception the research leaves out: 'unless the additional content communicates an input error or does not obscure or replace other content'. So the research's claim that 'The Escape failure is unambiguous' holds only if the pointer-following tooltip actually obscures other content. The research does not show that."
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page reads 'Updated 16 September 2025', which matches. It says 'an additional visual indicator will be required regardless of the contrast ratio between those colors', with the green-valid/red-invalid outline example. Sufficient techniques: Situation A G14, G205, G182, G183; Situation B G111, G14. Failures: F13, F73, F81. G14, G111, G205 and F81 are all present, as cited."
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page reads 'Updated 11 May 2026', which matches. SC 2.1.1 is Level A: 'All functionality of the content is operable through a keyboard interface'. F54 is titled 'Failure of Success Criterion 2.1.1 due to using only pointing-device-specific event handlers'. The page does not mention tooltips or hover, which matches the research's own limitation that applying F54 to tooltips is an inference."
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Used in rules 2 and 3. Page reads 'Updated 12 July 2026', which matches. It says verbatim: 'Content which can be triggered via pointer hover should also be able to be triggered by keyboard focus', and cross-references 2.1.1. F95 is titled 'Failure of Success Criterion 1.4.13 due to content shown on hover not being hoverable'. Title-attribute tooltips are excluded ('completely controlled by the user agent'). Note 2 covers 'Custom tooltips, sub-menus, and other nonmodal popups'. The non-dismissible and non-persistent failures are listed only as 'Potential future technique' with no ID."
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page reads 'Updated 06 September 2026', which matches. Charts fall under 'Situation B: If a short description can not serve the same purpose and present the same information' ('(e.g., a chart or diagram)'). Verbatim: 'The longer description identifies the type of chart.' and 'Where possible and practical, the actual data is provided in a table.'"
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page reads 'Updated 11 May 2026', which matches. SC 4.1.3 is Level AA. The page includes the example '5 results returned' (and '18 results returned' and 'No results returned' in Intent). ARIA22 is titled 'Using role=status to present status messages'. The failure, marked future link, is 'Using role=\"alert\" or aria-live=\"assertive\" on content which is not important and time-sensitive'. That failure covers alert and assertive, not role=status on a tooltip, so calling the tooltip's role=status a misuse is the researcher's inference, not the source's."
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page reads 'Updated 11 May 2026', which matches. SC 2.5.8 is Level AA: 'The size of the target for pointer inputs is at least 24 by 24 CSS pixels, except when:'. The page lists the Spacing, Equivalent, Inline, User Agent Control and Essential exceptions verbatim, and describes the 24 CSS px diameter circle test ('centered on the target's bounding box')."
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Page reads 'Updated 06 September 2026', which matches. The page lists G165 as sufficient: 'Using the default focus indicator for the platform so that high visibility default focus indicators will carry over'. It lists F78 ('...due to styling element outlines and borders...'). SC 2.4.7 is Level AA. The research's limitation 'Understanding 2.4.7 says defaults must be highly visible' is NOT on the page: it never uses 'highly visible' and never says defaults must be. The closest lines are 'user agents which may not always show a focus indicator' and 'Authors are responsible for providing at least one mode of operation where the focus is visible.'"
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page reads 'Updated 15 June 2026', which matches. SC 2.4.11 is Level AA: 'the component is not entirely hidden due to author-created content.' It names 'sticky footers, sticky headers, and non-modal dialogs' as typical overlaps (F110). C43 is 'Using CSS scroll-padding to un-obscure content'. On tooltips it says 'Such non-persistent disclosures do not fail this SC'."
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 7 (chip state and boundary). Page reads 'Updated 06 September 2026', which matches. State information must be 3:1 ('must also ensure that the information used to identify the control in that state has a minimum 3:1 contrast ratio'). Verbatim: 'This success criterion does not require that controls have a visual boundary indicating the hit area'. The Figure 1 caption says 'the button's text is sufficient to indicate the presence of the control'. This supports the claim about the unpressed chip border."
+  },
+  {
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 8 (chart marks). It supports 3:1 for graphical objects needed to understand the content, and the exception 'A graphic with text embedded or overlaid conveys the same information, such as labels and values on a chart.' The page never uses the word 'gridline'. However, Figure 20 (a line graph) says 'To perceive the values of each line along the chart you need to discern the grey lines marking the graduated 100 value increments... The graphical objects are the lines in the graph, including the background lines for the values... The lines should have 3:1 contrast against their background'. That cuts against the research's 'Gridlines are not needed to read the values... Leave the gridlines faint' unless the value labels can be shown to do the gridlines' job."
+  },
+  {
+   "url": "http://www.exida.com/articles/ALARM-MANAGEMENT-AND-ISA-18-A-JOURNEY-NOT-A-DESTINATION.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Used in rules 9, 10, 13 and 19 and the severity data field. Authors are 'Todd Stauffer, Nicholas P. Sands, Donald G. Dunn'. The copyright line reads 'Copyright \u00a9 exida.com LLC 2018-2020'. The paper says 'Presented at the 2010 Texas A&M Instrumentation Symposium', so the date inconsistency is real and was disclosed. The alarm definition ends '...abnormal condition requiring a response.' MISQUOTE: the research quotes 'If the operator does not need to respond, there should be no alarm.' The paper says 'This means if the operator does not need to respond, then there should not be an alarm.' Priority: 'Alarm priority should be set based on the severity of the consequences and the time to respond'; 'no more than three or four different alarm priorities'; '3 priorities: ~80% Low, ~15% Medium, ~5% High'. Table 1 is 'Based upon at least 30 days of data', with ~150/day 'Very Likely to be Acceptable' and ~300/day 'Maximum Manageable' (~1 and ~2 per 10 min). Stale Alarms: 'Less than 5 present on any day, with action plans to address.' The 10 lifecycle stages include MOC and Audit."
+  },
+  {
+   "url": "http://www.exida.com/articles/ALARM-MANAGEMENT-AND-ISA-18-A-JOURNEY-NOT-A-DESTINATION.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Used in rules 12, 20 and 21 and the shelved_* data field. Shelving is confirmed: 'Alarms that are shelved will reappear after a preset time period'. Out-of-service is 'an administrative process of suppressing (bypassing) an alarm using a permit system', which 'may be severe enough to require management approval'. The research's single quote 'zero alarm suppressions or attribute changes outside approved methods or management of change' merges two Table 1 rows. The actual rows are 'Zero alarms suppressed outside of controlled or approved methodologies' and 'Zero alarm attribute changes outside of approved methodologies or MOC'. Nothing in the paper requires a shelve to carry a reason or a named person. Rule 20 attributes 'suppression by design' to exida in quotation marks, but the phrase does not appear (no 'by design' found). The paper describes 'advanced alarm design, like using process or equipment state to automatically suppress an alarm'."
+  },
+  {
+   "url": "http://www.exida.com/articles/ALARM-MANAGEMENT-AND-ISA-18-A-JOURNEY-NOT-A-DESTINATION.pdf",
+   "reachable": "yes",
+   "claim_supported": "no",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 14 (as_of freshness and staleness) and as the evidence_url for data field source_last_update. A targeted fetch found nothing on data timestamps, data freshness, stale or bad instrument values, or operators needing trustworthy current alarm states. 'Stale alarms' in the paper means long-standing active alarms, not stale data. The Monitoring and Assessment stage is described as 'comparison of the alarm system performance against the stated performance goals in the philosophy', which concerns alarm-system KPIs, not data age. The paper does not support this rule or this field."
+  },
+  {
+   "url": "https://www.hse.gov.uk/pubns/chis6.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Title 'Better alarm handling', Chemicals Sheet No 6, 'current at 3/00', which matches 2000-03. Verbatim: 'Have a defined response to each alarm'; 'eliminate/review alarms with no defined operator response'; '(Note: process status indicators should not be designated as alarms.)'; 'Prioritise proportionately, eg 5% high priority, 15% medium, and 80% low', based on 'the potential consequences if the operator fails to respond'. Milford Haven 1994: 'In the last 11 minutes before the explosion the two operators had to recognise, acknowledge and act on 275 alarms.' Nuisance sign: 'large numbers of alarms acknowledged in quick succession, or are audible alarms regularly turned off?' The sheet lists 'suppress alarms from out-of-service plant' as a quick fix, says to 'reduce the number of standing alarms', and calls for 'a mechanism for regular review and alarm change-control', 'formal audits and reviews', and 'How many new alarms did your last HAZOP produce and how were they justified?' Caveat for rule 11: 'acknowledging is distinct from acting' is implied only by 'recognise, acknowledge and act'."
+  },
+  {
+   "url": "https://www.hse.gov.uk/pubns/chis6.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Used as the evidence_url for data fields first_seen_at, out_of_service and rule_basis/rule_change_log. The sheet supports measuring and reducing standing alarms, suppressing out-of-service plant, and alarm change-control. It says nothing about first-seen timestamps, per-asset changed_by/at/reason audit fields, or a per-rule change log schema. Those field designs are the researcher's."
+  },
+  {
+   "url": "https://docs.inductiveautomation.com/docs/8.1/platform/alarming",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 11. The page reads 'Last updated on Apr 17, 2026 by ia-nboehnke', which matches. Four states are listed after 'The two conditions above are combined to form one of four possible states of an event'. Verbatim: 'Alarm events never transition from Cleared to Active.' A new event is created 'should the value on a tag meet the alarm criteria'. Acknowledgement is 'a flag that can be marked on an alarm event'. The page does NOT say that acknowledging leaves Active/Cleared unchanged; it is implied only because Cleared is defined by the source value. The research disclosed this."
+  },
+  {
+   "url": "https://docs.inductiveautomation.com/docs/8.1/platform/alarming",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 12 and the SCADA reference integration. Verbatim: 'There is always a duration associated with a shelved alarm'; 'new alarm events for this alarm are temporarily prevented'; 'At the end of the shelving period, the alarm will evaluate its source tag, potentially creating a new alarm event.'"
+  },
+  {
+   "url": "https://docs.inductiveautomation.com/docs/8.1/platform/alarming",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Used as the evidence_url for data fields exception_id, cleared_at and ack_by/ack_at. The page supports separate event states and new events on recurrence. It does NOT mention recording the acknowledging user, the acknowledgement time, or a note tied to acknowledgement; notes appear only in the intro list 'filtering, shelving, notes, and separate pipelines'. It gives no deterministic ID scheme. The ack_by/ack_at and exception_id designs are not sourced here."
+  },
+  {
+   "url": "https://www.isa.org/standards-and-publications/isa-standards/isa-18-series-of-standards",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Title 'ISA-18 Series of Standards'. The page is undated apart from a '\u00a9 2026 International Society of Automation' footer, so 'undated' is correct. It lists 'ANSI/ISA-18.2-2016, Management of Alarm Systems for the Process Industries'. Shelving appears in the description of 'ISA-TR18.2.3-2024, Basic Alarm Design' ('...advanced alarm techniques such as dynamic alarming and alarm shelving...'). Monitoring and audit: 'ISA-TR18.2.5-2022, Alarm System Monitoring, Assessment and Auditing'. The research omitted the TR years and titles; they should be added."
+  },
+  {
+   "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 15. The page reads 'last modified on Oct 12, 2026', which matches. Verbatim: 'localStorage data is specific to the protocol of the document' (http vs https return different objects); 'the stored data is saved across browser sessions'; '...is cleared when the last \"private\" tab is closed'. SecurityError is thrown when the 'request violates a policy decision' (e.g. persistence blocked). The page does not mention cross-device sync, as the research disclosed."
+  },
+  {
+   "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage",
+   "reachable": "yes",
+   "claim_supported": "no",
+   "metadata_correct": "unverifiable",
+   "notes": "Used as the evidence_url for data field 'as_of (with UTC offset) and as_of_tz'. The page has nothing about timestamps, ISO 8601 offsets, time zones or data freshness. This is a mismatched citation. The field's rationale (JS Date parses offset-less strings as local time) needs a source such as the MDN Date / Date.parse page or ECMA-262, or should be labelled an observation or inference."
+  },
+  {
+   "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Used in the localStorage integration. SecurityError is confirmed. The page names only SecurityError; it does NOT mention QuotaExceededError or full storage, which comes from WHATWG. The LRU-eviction and Safari 7-day points in failure_behavior come from the MDN quotas page, not this URL."
+  },
+  {
+   "url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 15 and the persist integration. The page reads 'last modified on Jan 5, 2026', which matches. 'In most cases, browsers manage stored data per origin.' It defines best-effort (the default) and persistent storage, and LRU eviction ('The data from the least recently used origin is deleted'). Verbatim: 'Browsers can store up to 5 MiB of local storage, and 5 MiB of session storage per origin' (also 'limited to 10 MiB of data maximum'). Safari: 'If an origin has no user interaction... in the last seven days of browser use, its data created from script will be deleted' when cross-site tracking prevention is on. persist(): Firefox shows a prompt, while Safari and Chromium auto-approve or deny, which supports 'browser may prompt or decide'. When used as the evidence_url for last_review_at, it supports only per-device storage. Calling localStorage 'acceptable' for conveniences is the researcher's judgement."
+  },
+  {
+   "url": "https://html.spec.whatwg.org/multipage/webstorage.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page reads 'Living Standard \u2014 Last Updated 14 October 2026', which matches. Verbatim: 'Each site has its own separate storage area.' and 'User agents may, possibly in a manner configured by the user, automatically delete stored data after a period of time.' setItem 'Throws a QuotaExceededError if the new value couldn't be set'. The spec gives no 5 MiB figure."
+  },
+  {
+   "url": "https://www.bqa.org/Media/BQA/Docs/bqa-cow-calf-assessment-cover-fy26.pdf",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 16, the visual_check_* data field and the feature notes. The document title reads 'Assessor's Guide to a Beef Quality Assurance (BQA) Cow-Calf Assessment', with no date or FY marking in the text, so 'undated' is correct. The daily inspection appears ONLY in a sample 'Water Tank Protocol' template with fill-in placeholders: '4. (\"X\" crew) will monitor water tank function and cleanliness daily by visually inspecting the tanks and reporting any problems immediately to (the operation's manager).' The guide calls its templates samples to 'use as their own or to use as a base document'. The assessment's own Water point asks only whether 'an adequate water supply' and 'a plan' are in place. So 'the BQA Cow-Calf Assessment expects water tanks to be visually inspected daily' overstates the source: daily is a suggested value in a sample protocol, not an assessment requirement. The guide also does not say 'reported to management'. Cleaning 'at least every (two weeks)' is a fill-in. 'Water is the most important nutrient for general animal well-being.' is verbatim. The guide says nothing about sensors."
+  },
+  {
+   "url": "https://www.bqa.org/Media/BQA/Docs/bqa-cow-calf-assessment-cover-fy26.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Used in rule 17 (training plan and records; treatment record fields). Verbatim: 'A documented training plan and records are in place'. 'Record all treatments: Product, date; animal ID; dose given; route of administration; the person who...' is followed by the administering person and withdrawal time. 'Operations should have a written emergency action plan.'"
+  },
+  {
+   "url": "https://www.bqa.org/Media/BQA/Docs/bqa-field-guide-2026.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "The front matter reads 'BEEF QUALITY ASSURANCE FIELD GUIDE' / 'BQA PRODUCER FIELD GUIDE', with no revision or copyright date, so 'undated' is correct. Under 'CHAPTER 2 RECORD KEEPING' (p. 8): 'The BQA program recommends keeping records for a minimum of two years, or longer as required by laws/regulations.' 'Pesticide records should be kept for three years.' 'Veterinary Feed Directive records should be kept for two years.' The recommendation applies to records generally (herd health, biosecurity, worker training, nutrition, production costs), not specifically to acknowledgement or notes logs. p. 18: 'Record training and education activities.' p. 23: 'For feedlots and stocker/backgrounder operations, daily monitoring is recommended...' When used as the evidence_url for ack_note, it supports record keeping only. The ~280-character limit and 'no treatment details' are not in the source."
+  },
+  {
+   "url": "https://extension.sdstate.edu/event/coffee-cottonwood-digital-record-keeping-electronic-identification",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Title is verbatim. The page shows 'Friday, January 22', 9:00 a.m., at SDSU Cottonwood Field Station, 23738 Fairview Road, Philip, SD 57567, hosted by SDSU Extension. The description says digital record systems and RFID EID tags 'can simplify livestock records and improve animal-level data collection'. The page text has no year, as the research said. The robots meta 'unavailable_after: Friday, 22-Jan-27 12:00:00 CST', plus 22 Jan 2027 falling on a Friday, imply the event is 2027-01-22 (inference). It is an upcoming single event, not evidence of an established program."
+  },
+  {
+   "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Printing",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "The page reads 'last modified on Nov 7, 2025', which matches. It covers @media print ('The print media type sets the styles for printed media'), @page ('page's dimensions, orientation, and margins') and 'Browsers send beforeprint and afterprint events'. The Chromium page counts and contrasts in the integration row are the researcher's observations, not this source."
+  },
+  {
+   "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/print-color-adjust",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "The page reads 'last modified on Aug 27, 2026', which matches. economy: 'when printing, a browser might opt to leave out all background images and to adjust text colors to be sure the contrast is optimized for reading on white paper. This is the default.' Usage note: 'there isn't any guarantee that print-color-adjust will do anything.'"
+  },
+  {
+   "url": "https://bpb-us-e1.wpmucdn.com/blogs.cornell.edu/dist/7/8192/files/2018/03/SOPManual-1-2drpn48.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'STANDARD OPERATING PROCEDURES: A Writing Guide', by Richard Stup ('senior extension associate, Human Resources, Penn State Dairy Alliance'). The cover reads 'COLLEGE OF AGRICULTURAL SCIENCES / AGRICULTURAL RESEARCH AND COOPERATIVE EXTENSION', '\u00a9 The Pennsylvania State University 2001'. Verbatim: 'Preferably, the workplace copy of the procedure should be printed in text large enough for workers to review while completing their work.'; 'it may be helpful to laminate the workplace copy'; pictures 'are helpful regardless of the literacy level or native language of a worker'; 'Write steps as short sentences.'; 'Write steps in SOPs as imperative sentences.'; training plus 'regular performance feedback'. The guide contains no sentence about translation. When used as the evidence_url for crew_roster (language preference), support is therefore only partial; translation comes from Skellie."
+  },
+  {
+   "url": "https://bpb-us-e1.wpmucdn.com/blogs.cornell.edu/dist/7/8192/files/2019/07/Make-SOPS-Available-to-Employees.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Make SOPs Available to Employees', 'By Jessica Skellie, Farm Management Specialist', 'July 18, 2019', with a Cornell University header. Verbatim: '...should be hung up on a wall in plain view'; 'For a group of procedures, such as health protocols, a binder of documents in the herd office may be appropriate.'; 'All SOP documents should be laminated.'; 'SOPs also may need to be translated.'; 'Take photos of each step.' Minor point: the document does not say 'frequently used' procedures; its examples are milking procedure, wash station and pasteurizer."
+  },
+  {
+   "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0110274",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Drew BJ, Harris P, Z\u00e8gre-Hemsey JK, Mammone T, Schindler D, Salas-Boni R, Bai Y, Tinoco A, Ding Q, Hu X. PLoS ONE 9(10): e110274, published October 22, 2014. Confirmed: 2,558,760 alarms over 31 days in March 2013; 461 patients; 5 adult ICUs; 77 beds; 187 audible alarms per bed per day (381,560 audible); 12,671 annotated arrhythmia alarms, 88.8% false positive. Verbatim: 'Devices should provide prompts to aide in more appropriate tailoring of alarm settings to individual patients'; 'delays for ST-segment and other parameter alarms should be configurable'; 'a complex interplay of inappropriate user settings, patient conditions, and algorithm deficiencies'."
+  },
+  {
+   "url": "https://agworkforce.cals.cornell.edu/onboarding/",
+   "reachable": "yes",
+   "claim_supported": "no",
+   "metadata_correct": "unverifiable",
+   "notes": "Used as the evidence_url for data field 'owner (assigned_to) and due_by'. The page is 'Onboarding Farm Employees' (Cornell Agricultural Workforce Development; metadata shows it first published May 10, 2019 and modified Aug 31, 2026). It covers job descriptions, SOPs and safety training. It contains nothing about assigning an owner or due date to a task, daily briefings, or crew coordination, so it does not support the field. The research gave no title or date for this source."
+  },
+  {
+   "url": "https://support.google.com/docs/answer/183965",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "unverifiable",
+   "notes": "Page title is 'Make Google Docs, Sheets, Slides & Forms public' (the research gave none). Verbatim: 'File owners and editors can publish files.' Visibility can be 'everyone on the web, everyone in your organization, or a group of people in your organization'. 'The automatic update might take a few minutes.' 'Be careful when publishing private or sensitive info.' The page names no formats (no CSV), which matches the research's disclosure."
+  },
+  {
+   "url": "https://www.bqa.org/resources/templates-assessments",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "All of these are PDFs: ANIMAL HEALTH PRODUCT INVENTORY LOG (2022; Spanish 2026), ANIMAL HEALTH PRODUCT TEMPERATURE LOG (2022), VCPR form (2025), BQA CATTLE CARE TOOL KIT (2023), plus the cow-calf (fy26) and feedyard (2026) assessments. The years come from filenames only; some Spanish files carry no year. 'Files dated 2022-2026' is consistent with this."
+  }
+ ],
+ "classification_disputes": [
+  "Rule 'acknowledgement and notes log is an operational record... append-only, exportable, retain at least 2 years... keep treatment details out' is classified A-supported-general. That is too generous. The BQA Field Guide's 2-year recommendation (p. 8) covers producer records in general. Applying it to a dashboard acknowledgement log is the researcher's extension, and 'append-only', 'exportable' and 'keep treatment details out of this dashboard' are design or management choices no cited source states. It should be B (2-year retention by analogy to BQA records) or C (append-only and the exclusion of treatment data).",
+  "Rule 'sensor readings supplement, and do not replace, a daily eyes-on check' (B) rests on an overstated reading of the BQA Cow-Calf guide. 'Daily' appears only in a sample Water Tank Protocol template with fill-in placeholders ('(\"X\" crew) will monitor... daily'). The assessment's own Water point asks only for an adequate water supply and a plan. The guide says nothing about sensors, so 'the principle that a sensor is not a substitute for a visual check [is] not configurable' is the researcher's inference and should be labelled C or inference, not presented as BQA-backed. The feature-notes sentence 'The BQA Cow-Calf Assessment expects water tanks to be visually inspected daily' should be corrected to 'a BQA sample protocol suggests daily visual checks'.",
+  "Rule 'the page must state when the data is from (with a time zone)... flag stale data' (B) cites only the exida white paper, and the paper has nothing on data timestamps or freshness ('stale alarms' there means long-standing alarms). The rule is effectively unsourced. The observation and the JS Date parsing behaviour are fine as OBSERVED or INFERENCE, but the rule should either cite a real source (e.g. MDN Date.parse / ECMA-262 for offset-less parsing) or be labelled a design inference. The data_fields evidence_url for as_of (the MDN localStorage page) is likewise irrelevant.",
+  "Rule 'acknowledgements... cannot live only in localStorage; use localStorage only for per-device conveniences' (A) is mildly generous. The storage facts (per-origin, eviction, private-mode clearing, Safari 7-day deletion) are A. But the conclusion that shared state cannot live there, and the 'saved on this device only' labelling policy, rest on an inference no source states (the research admits none mentions cross-device sync). A is defensible for the facts; the prescriptive half is B.",
+  "Rule on 1.4.11 chart marks (B): the recommendation 'Leave the gridlines faint' and the claim 'Gridlines are not needed to read the values' conflict with the closest example in the cited Understanding page. Figure 20 says the 'background lines for the values' are graphical objects that 'should have 3:1 contrast against their background'. That judgement needs to be shown (e.g. every value is labelled) or the recommendation should be dropped.",
+  "Rule 'tooltip must be dismissible with Escape' (A): the A classification of SC 1.4.13 is fine, but 'The Escape failure is unambiguous' overstates. The normative Dismissible clause exempts content that 'does not obscure or replace other content'. Whether the pointer-following tooltip fails depends on showing that it covers chart data.",
+  "Rule 'shelving must have a reason, a person and an expiry' (B): only the expiry or duration is sourced (exida's 'preset time period'; Ignition's 'always a duration'). Requiring a reason and a named person, and 'Critical cannot be shelved', are ranch or design choices (C). exida attaches permits and management approval to out-of-service, not to shelving.",
+  "Rule 'duplicate and stale rows are suppressed by design' (B): the research attributes the phrase 'suppression by design' to exida in quotation marks, but the phrase is not in the paper. Only 'advanced alarm design, like using process or equipment state to automatically suppress an alarm' is. The classification is acceptable; the quotation is not.",
+  "Data fields: 'owner (assigned_to) and due_by' cites Cornell's onboarding page, which has nothing on task owners or due dates. ack_by/ack_at cites an Ignition page that never mentions an acknowledging user or time. These fields are design assumptions and should carry source_type 'assumption' with no supporting evidence_url."
+ ],
+ "summary": "I checked all 27 distinct URLs in the research (one integration lists 'n/a (repo-local file)', which is not a URL). All were reachable through WebFetch. Direct curl through the agent proxy was refused for every host (CONNECT 403; DNS failure for exida), so every check rests on WebFetch's small-model extraction of verbatim quotes, not on raw page bytes. Where a claim looked shaky I ran targeted re-fetches.\n\nACCURATE: all ten W3C pages (every 'Updated' date matches: 16 Sep 2025; 11 May 2026 \u00d73; 12 Jul 2026; 15 Jun 2026; 06 Sep 2026 \u00d73; WCAG 2.2 TR 12 Dec 2024), the SC text and technique IDs (G14/G111/G205/F81, F54, F95, ARIA22, C43, G165/F78), MDN localStorage (Oct 12 2026), MDN quotas (Jan 5 2026; 5 MiB local + 5 MiB session; Safari 7-day), WHATWG (14 Oct 2026), MDN Printing (Nov 7 2025), print-color-adjust (Aug 27 2026), HSE CHIS6 (3/00; 5/15/80; 275 alarms in 11 min), the Ignition page (Apr 17 2026; four states; 'never transition from Cleared to Active'; shelving duration), the ISA page (18.2-2016; TR18.2.3-2024 covers shelving; TR18.2.5-2022 covers audit), PLOS Drew 2014 (every number confirmed: 2,558,760; 31 days; 461 patients; 77 beds; 187/bed/day; 12,671; 88.8%), the BQA Field Guide (2 years p. 8; pesticide 3 years; VFD 2 years; p. 18 and p. 23 quotes), Stup 2001 and Skellie 2019-07-18, Google Sheets publish, and the BQA templates.\n\nPROBLEMS FOUND:\n1. The BQA cow-calf 'daily visual tank inspection' comes from a sample protocol template with fill-in placeholders, not an assessment requirement. The assessment's Water point asks only for an adequate supply and a plan.\n2. exida is cited for data freshness (rule 14 and source_last_update) but contains nothing on it. Its 'stale alarms' means standing alarms.\n3. The MDN localStorage page is cited as evidence for the as_of time-zone field, but it is irrelevant to that field.\n4. The Cornell onboarding page is cited for owner/due_by but says nothing about owners or due dates.\n5. exida is misquoted three times. The paper says 'then there should not be an alarm', not 'there should be no alarm'. 'suppression by design' is not in the paper. Two Table 1 metrics were merged into one quote.\n6. Understanding 2.4.7 never says defaults 'must be highly visible'.\n7. Understanding 1.4.11 Figure 20 treats value gridlines as graphical objects needing 3:1, which contradicts 'leave gridlines faint'.\n8. The Ignition page never mentions the acknowledging user or time, and does not literally say acknowledgement leaves Active/Cleared unchanged (the research disclosed the second point).\n9. The MDN localStorage page names only SecurityError. QuotaExceededError is in WHATWG.\n10. The SC 1.4.13 Dismissible exception for content that does not obscure other content is omitted, so the 'unambiguous' failure claim is overstated.\n11. Skellie does not say 'frequently used', and Stup has no translation advice.\n12. The SDSU event year can be pinned to 2027-01-22 from the robots unavailable_after meta (an inference).\n\nCLASSIFICATIONS: the BQA retention and append-only log rule (A) is too generous. The localStorage policy rule (A) is mildly generous. The sensor-vs-eyes-on 'not configurable' principle and the shelving reason/person requirements are design choices presented as sourced. The as_of rule is effectively unsourced.\n\nNo repo files were modified. Scratch dir created at /tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/cite-workflow/raw; it stays empty because curl was blocked."
+}

@@ -1,0 +1,164 @@
+{
+ "note": "Demonstration settings used to write the expected Phase-1 results. None is a validated operating value; each is to be tuned per ranch. Class D = synthetic demonstration setting, C = ranch-specific management choice (docs/audit/data/rules-index.json legend). 'scenario assumption' marks a value the registries do not give; it was chosen here only so a fixture has one expected answer. These are the settings the folders were built with, before Phase 1. Where docs/audit/06-phase1-spec.md section 9 differs (24-hour drop formula, coverage minimum, individual gain interval, closed months), the setting carries a phase_1 note; 06 section 11.2 shows that none of these differences changes an expected row once decision D16's inputs are added.",
+ "settings": [
+  {
+   "name": "waterCriticalPct",
+   "value": 25,
+   "comparison": "critical when the latest valid level < 25",
+   "class": "C",
+   "basis": "RULE-WAT-01 (current value, demo setting)"
+  },
+  {
+   "name": "waterLowPct",
+   "value": 40,
+   "comparison": "warning when the latest valid level < 40",
+   "class": "C",
+   "basis": "RULE-WAT-02"
+  },
+  {
+   "name": "waterDropPts",
+   "value": 30,
+   "comparison": "critical when (highest level in [last - 24 h, last]) - last level, rounded to 0.1, >= 30",
+   "class": "D",
+   "basis": "RULE-WAT-03; window per WAT-03's proposed fix (02-findings.md 7.2 item 6 records the alternative); rounding per WAT-08",
+   "phase_1": "Phase 1 uses the maximum drawdown inside the same window (the largest fall from an earlier to a later reading; 05-roadmap.md decision D5, 06-phase1-spec.md section 5.2). Only the drawdown sees a fall that refilled inside the window (W-03: 40 points, where this formula gives 90 - 86 = 4). On these folders both give the same verdict for every tank (06 section 11.2)."
+  },
+  {
+   "name": "dropWindowMinReadings",
+   "value": 2,
+   "comparison": "fewer than 2 valid readings in [last - 24 h, last]: the 24-hour change is CAN'T TELL ('not enough recent history'), the level is still judged",
+   "class": "D",
+   "basis": "WAT-03 proposed fix; lead default 'bounded 24-hour drop window'"
+  },
+  {
+   "name": "sensorSilentHours",
+   "value": 24,
+   "comparison": "serious when as_of - last reading >= 24 h; level and drop not judged",
+   "class": "C",
+   "basis": "RULE-WAT-04 (measured against as_of)"
+  },
+  {
+   "name": "graceDays",
+   "value": 2,
+   "comparison": "serious when days in pasture - planned_graze_days > 0; warning when it is between -2 and 0 inclusive ('due today' at 0)",
+   "class": "D",
+   "basis": "RULE-GRZ-01, RULE-GRZ-02, UI-06"
+  },
+  {
+   "name": "plannedGrazeDays",
+   "value": "per pasture (pastures.csv)",
+   "comparison": "",
+   "class": "C",
+   "basis": "RULE-GRZ-01 (the ranch's plan; class as in 06-phase1-spec.md section 9)"
+  },
+  {
+   "name": "adgSerious",
+   "value": 0.8,
+   "comparison": "serious when pooled group ADG < 0.8 x target (strict)",
+   "class": "C",
+   "basis": "RULE-GAIN-01; pooled sum(lbs)/sum(days) per GAIN-03 and GAIN-12"
+  },
+  {
+   "name": "animalShare",
+   "value": 0.5,
+   "comparison": "warning when an animal's ADG < 0.5 x target (strict), only if the group is not already serious",
+   "class": "C",
+   "basis": "RULE-GAIN-02, RULE-WF-19"
+  },
+  {
+   "name": "targetAdgLbs",
+   "value": "Heifers 1.0, Yearlings 2.0, Cows 0.0 (not judged)",
+   "comparison": "",
+   "class": "D",
+   "basis": "RULE-GAIN-03, RULE-GAIN-04, RULE-GAIN-05, GAIN-13"
+  },
+  {
+   "name": "gainMinIntervalDays",
+   "value": 21,
+   "comparison": "the two weigh sessions compared must be at least 21 days apart; used for the group and, in these fixtures, for the individual rule too",
+   "class": "D",
+   "basis": "GAIN-03's example demo value. RULE-GAIN-07 recommends a separate 70-day individual default that the committed 57-day interval does not meet (02-findings.md 7.2 item 5); these fixtures do not adopt it",
+   "phase_1": "Settled by 05-roadmap.md decision D6: 21 days for the group, 42 days for individual animals (both demo settings, D). No change here: every judged pair in these folders is 57 days apart."
+  },
+  {
+   "name": "weighSessionShare",
+   "value": 0.5,
+   "comparison": "a weigh session is a date on which at least half of the group's head (groups.csv) crossed the scale",
+   "class": "D",
+   "basis": "scenario assumption, from GAIN-03's 'dates when most of the group crossed the scale'"
+  },
+  {
+   "name": "gainMaxAgeDays",
+   "value": 45,
+   "comparison": "CAN'T TELL when the group's latest weigh session is more than 45 days before the as-of date",
+   "class": "D",
+   "basis": "GAIN-08 (demo limit)"
+  },
+  {
+   "name": "gainMinCoverage",
+   "value": 0.5,
+   "comparison": "CAN'T TELL when animals weighed at both sessions / head < 0.5",
+   "class": "D",
+   "basis": "scenario assumption; RULE-GAIN-10 and GAIN-07 call for a labelled minimum but give no number. In scenario 06 only 3 of 45 heifers (6.67%) were weighed on Sep 15, below the 23-head session minimum (weighSessionShare 0.5), so Sep 15 is not a heifer session and the heifers are CAN'T TELL on age (Jul 20 to Sep 30 = 72 > 45 days) at any coverage minimum. No folder tests gainMinCoverage",
+   "phase_1": "Phase 1 uses 0.8 (06-phase1-spec.md section 9, demo setting D). No folder changes: wherever a group is judged, every animal is matched (45 of 45, 150 of 150)."
+  },
+  {
+   "name": "dueSoonDays",
+   "value": 7,
+   "comparison": "warning when 0 <= days to next_due <= 7 ('due today' at 0); serious when next_due is before the as-of date",
+   "class": "D",
+   "basis": "RULE-HLTH-01, RULE-HLTH-02, UI-06"
+  },
+  {
+   "name": "healthStatuses",
+   "value": "open, done, cancelled (trimmed, lower case)",
+   "comparison": "any other value is a data issue and is treated as open",
+   "class": "C",
+   "basis": "HLTH-01, RULE-HLTH-03"
+  },
+  {
+   "name": "budgetWarn",
+   "value": "5% and $500",
+   "comparison": "warning when percent over >= 5% and dollars over >= $500",
+   "class": "D",
+   "basis": "RULE-BUD-03 demo values; BUD-05 inclusive 5% bound"
+  },
+  {
+   "name": "budgetSerious",
+   "value": "more than 10% and $1,000",
+   "comparison": "serious when percent over > 10% (strict, as the rules table says 'more than 10%') and dollars over >= $1,000",
+   "class": "D",
+   "basis": "RULE-BUD-03 dollar line; BUD-05 and the current rule text for the strict 10% bound. RULE-BUD-03's own formula says p >= 10%",
+   "phase_1": "Settled by 05-roadmap.md decision D2: serious needs more than 10% (strict) and at least $1,000, as here; scenario 09's Feed and mineral (exactly 10.0%) stays a warning."
+  },
+  {
+   "name": "budgetLargeUsd",
+   "value": 2500,
+   "comparison": "warning when dollars over >= $2,500 whatever the percent",
+   "class": "D",
+   "basis": "RULE-BUD-03"
+  },
+  {
+   "name": "unbudgetedUsd",
+   "value": 250,
+   "comparison": "a category with a zero budget and spending >= $250 gives a warning in dollars, never a percent",
+   "class": "D",
+   "basis": "RULE-BUD-06 (the dollars-only structure is a ranch choice, C; the $250 value is a demo setting, D, as in 06-phase1-spec.md section 9); severity 'warning' as in budget.materiality.research.mjs S4 (quoted in rules.json RULE-BUD-06 evidence)"
+  },
+  {
+   "name": "monthClosed",
+   "value": "a month counts when the ranch as-of date is on or after its last day",
+   "comparison": "as_of 2026-09-30T18:00 closes September",
+   "class": "C",
+   "basis": "BUD-01 (assumption listed in findings.json unresolved_assumptions). RULE-BUD-05 and data-fields.json default books_closed_through to the month before as_of",
+   "phase_1": "Settled by 05-roadmap.md decisions D1 and D16: Phase 1 reads meta.csv books_closed_through (default: the month before as_of, labelled 'assumed'). D16 adds books_closed_through = 2026-09 to every folder dated 2026-09-30, which gives the same months as this convention; folder 08 (as of 2026-09-27) keeps none and so tests the default."
+  },
+  {
+   "name": "ranchTimeZone",
+   "value": "America/Chicago",
+   "comparison": "meta.csv timezone for every new fixture; readings are ranch wall-clock time",
+   "class": "D",
+   "basis": "TIME-02 (example zone); data-fields.json meta.timezone"
+  }
+ ]
+}

@@ -1,0 +1,369 @@
+{
+ "checked": [
+  {
+   "url": "https://droughtmonitor.unl.edu/?stream=top",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page says 'The data cutoff for Drought Monitor maps is each Tuesday at 8 a.m. EDT.' and maps 'are released each Thursday at 8:30 a.m. Eastern Time.' Shows 'Map released: October 15, 2026' and 'Data valid: October 13, 2026'. It supports the weekly cadence that the 9.1-day bound is derived from, but says nothing about holidays or staleness. As the evidence URL for meta.as_of it only shows indirectly why a time zone is needed."
+  },
+  {
+   "url": "https://usdmdataservices.unl.edu/api/CountyStatistics/GetDroughtSeverityStatisticsByAreaPercent?aoi=46065&startdate=9/1/2026&enddate=10/15/2026&statisticsType=1",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "CSV header MapDate,FIPS,County,State,None,D0,D1,D2,D3,D4,ValidStart,ValidEnd,StatisticFormatID. Rows match the research exactly: '20260929,46065,Hughes County,SD,68.45,31.55,0.00,...,2026-09-29,2026-10-05,1' and '20260922,...,91.73,8.27,...,2026-09-22,2026-09-28,1'. The latest row is 20261013 (valid 2026-10-13 to 2026-10-19). Historical weeks can be retrieved after the fact, so pinning to as_of is feasible."
+  },
+  {
+   "url": "https://www.drought.gov/drought/data-maps-tools/current-conditions",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page says 'released every Thursday morning, with data valid through Tuesday at 7 am Eastern' and, elsewhere, '7 a.m. EST'. USDM 'Data Valid' reads 10/13/26. The page gives only 'Thursday morning', not 08:30 ET. The data_field usdm_valid_date/released_at cites this page for the 08:30 release time, which comes from the USDM and SD DANR pages instead. Its 7 a.m. wording conflicts with USDM's '8 a.m. EDT', as the research notes."
+  },
+  {
+   "url": "https://danr.sd.gov/AboutDANR/drought.aspx",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Verbatim: 'The data cutoff for Drought Monitor maps is Tuesday at 7 a.m. Eastern Time.' The page also gives the release as Thursday 8:30 a.m. ET. The wording conflict with USDM is confirmed."
+  },
+  {
+   "url": "https://services5.arcgis.com/0OTVzJS4K09zlixn/ArcGIS/rest/services/USDM_current/FeatureServer/0",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Layer page: 'Last Edit Date: 10/1/2026 12:32:12 PM'. Fields include MapDate, ReleaseDate, ValidStart and ValidEnd; maxRecordCount 2000; formats JSON, geoJSON, PBF; credit 'Map courtesy of NDMC.' The layer time extent reads 5/18/2021-8/9/2021, which further shows the metadata is stale. A /query fetch returned MapDate 1791876600000, ReleaseDate 1792049400000 and ValidEnd 1792411200000. I converted these with node: 2026-10-13T07:30Z, 2026-10-15T07:30Z (3:30 AM ET) and 2026-10-19T12:00Z. This confirms the 07:30 UTC claim."
+  },
+  {
+   "url": "https://mesonet.agron.iastate.edu/json/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Disclaimer: 'All of these services are provided as-is and without warranty', 'You are free to use these services for any lawful purpose', 'bugs happen'. The page lists 'US Drought Monitor' (geojson/usdm.py?help) and 'PRISM' (json/prism.py?help). Footer: 'Copyright \u00a9 2001-2026'. I separately fetched geojson/usdm.py and the features carry \"date\": \"2026-10-13\", which matches the research. The page says nothing about CORS."
+  },
+  {
+   "url": "https://www.fsa.usda.gov/resources/programs/livestock-forage-disaster-program-lfp",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page says 'Payments will now trigger after four consecutive weeks of qualifying severe drought', replacing eight weeks. Tiers: 'D2 ... at least four consecutive weeks \u2013 One monthly payment'; 'D2 ... seven out of eight consecutive weeks \u2013 Two'; 'D3 ... at any time - Three'; 'D3 ... at least four weeks or D4 ... at any time - Four'; 'D4 ... for four weeks (not necessarily consecutive) - Five'. The page gives no effective or updated date, though it links a news release whose URL contains 07-08-2026. 'Normal grazing period' is mentioned but not defined. The D4 tiers look internally inconsistent on the page itself."
+  },
+  {
+   "url": "https://droughtmonitor.unl.edu/DmData/DataDownload/WebServiceInfo.aspx",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Supported: County, State and HUC statistics endpoints; statistics types Area, Percent of Area, Population, Percent of Population and DSCI. 'By default the data are output in CSV format'; XML, CSV or JSON via the ACCEPT header; no API key mentioned; ConsecutiveNonConsecutiveStatistics endpoints exist (aoi takes state abbreviations); '\u00a92026'. NOT supported: the data_field claim 'CSV values may contain thousands separators in area mode' appears nowhere on this page."
+  },
+  {
+   "url": "https://www.nass.usda.gov/Statistics_by_State/Kansas/Publications/Crop_Progress_and_Condition/2026/KS-weekly0706.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Week ending July 5, 2026, released July 6, 2026. 'Pasture and range conditions rated 5% very poor, 10% poor, 29% fair, 46% good, and 10% excellent.' Data 'provided at the county level by USDA Farm Service Agency ... KSU Extension Service, and other reporters'. Pasture condition is statewide only, with no district row. The PDF does not state the 4:00 pm ET release time cited in the data_field; that comes from the 2007 ESMIS document."
+  },
+  {
+   "url": "https://www.nass.usda.gov/Statistics_by_State/South_Dakota/Publications/Crop_Progress_&_Condition/2022/SD-weekly0912.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Week ending September 11, 2022, released September 12, 2022. 'Pasture and range conditions rated 24% very poor, 29% poor, 31% fair, 15% good, and 1% excellent.' Topsoil moisture: 26% very short, 40% short, 32% adequate, 2% surplus. Data provided 'at the county level by USDA Farm Service Agency, SDSU Extension Service and other reporters'."
+  },
+  {
+   "url": "https://esmis.nal.usda.gov/sites/default/release-files/8336h188j/sx61dn51w/m039k649s/CropProg-11-26-2007.txt",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Contains 'released after 4:00 pm ET on the first business day of the week' and 'will be released after 4:00 p.m. each Monday, except for holidays.' Dated November 26, 2007. Caveat: this is a 19-year-old document applied to the 2026 schedule. The Monday 2026-07-06 KS release date is consistent with it, but the release time was not confirmed from a current source."
+  },
+  {
+   "url": "https://www.NASS.USDA.gov/Surveys/Program_Review/2019/Crop-Progress-and-Condition-Program.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Verbatim: 'Each state maintains a list of reporters, largely extension agents and Farm Service Agency staff'. Dated 'April 2019'. The category definitions are crop-condition definitions in terms of yield potential (e.g., Very Poor: 'Extreme degree of loss to yield potential'), not pasture-specific definitions."
+  },
+  {
+   "url": "https://docs.ropensci.org/rnassqs/articles/rnassqs.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "no",
+   "notes": "Page says 'the QuickStats API requires authentication' and 'The API only returns queries that return 50,000 or less records.' Metadata: the research lists it as undated, but the page shows rnassqs version 0.6.4 dated 2026-09-29. This is a third-party R package vignette, not NASS documentation; the NASS Quick Stats page itself was not read."
+  },
+  {
+   "url": "https://grasscast.unl.edu/Outlook/About.aspx",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page says 'Grass-Cast is updated every two weeks to incorporate newly observed weather data'; cells are '10 km x 10km, or ~ 6 miles x 6 miles'; uses 'the grid-cell's 38-year average' ('almost 40 years', with no years named); 'Producers should not rely on Grass-Cast as a sole source for making management decisions'; 'Grass-Cast cannot tell the difference between desirable forage species and undesirable species'. It gives three MJJA precipitation scenarios and example maps from April 29, 2019. The page does not state the Aug 31 season end, which comes from the home page. The 'field-study' kind label is wrong: this is a product documentation page."
+  },
+  {
+   "url": "https://grasscast.unl.edu/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Verbatim: 'As of August 31, 2026, all relevant precipitation data have been observed for the 2026 Grass-Cast season.' Also 'no precipitation scenarios were used to construct this final map' and '\u00a92026'. The 'field-study' kind label is wrong (product page)."
+  },
+  {
+   "url": "https://grasscast.unl.edu/Data.aspx",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Downloads: Great Plains annual grid 1982-2019 (XLSX), historical average grid 1981-2018 (CSV), county 1981-2018 (CSV), Southwest sets 1982-2019, a 10 km grid shapefile, and a link to the model data on the USDA data portal. No current forecast data and no API. No license statement, only '\u00a92026'. The rule says 'Downloadable CSVs ... annual grid 1982-2019', but the annual grid file is XLSX. The integration's claim that a 'related research database on data.gov is CC BY 4.0 (data 1939-2018)' is not on this page and is unverified."
+  },
+  {
+   "url": "https://grasscast.unl.edu/FAQ.aspx",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Verbatim: 'Grass-Cast's production estimates are most accurate in grid cells that are dominated by grass species.' Also 'an estimate of vegetation production in GENERAL'. The FAQ gives 'cropland (dryland or irrigated), shrublands, and forests' as excluded examples."
+  },
+  {
+   "url": "https://www.climatehubs.usda.gov/hubs/northern-plains/tools/grass-cast-grassland-productivity-forecast",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page says 'first published in the spring (typically beginning in late April)' and 'Grass-Cast provides forecast information only for vegetation quantity, not quality'. Public land managers 'should not use Grass-Cast as a sole source of information for setting stocking rates'. Baseline: 'over 30 years of historical or simulated data (1982-present)'. No page date."
+  },
+  {
+   "url": "https://grasscast.unl.edu/docs/Examples-of-Total-Production-vs-Grazing-Production.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "The PDF says Grass-Cast 'knows Total Production Loss', not 'Grazing Loss', and lists 'Accuracy = 60 \u2013 80%' without defining the metric, test period or test region; it also says it 'Works better in some places than others'. Worked example: 1,000 lbs/acre, 'Take \u00bd, but half of that gets trampled', leaving about 250 lbs. The 25% figure is implied, not stated. No date or author. Treat the 60-80% figure as an unqualified developer claim."
+  },
+  {
+   "url": "https://rangelands.app/support/71-api-documentation",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Endpoint https://us-central1-rap-data-365417.cloudfunctions.net/productionV3, POST with the GeoJSON in the body. The actual wording is 'Valid years are 1986 through the previous year'; the research's quote 'Valid years run from...' is not verbatim but has the same meaning. 'Endpoints return a weighted mean derived from the fraction of each pixel covered'; units 'lbs/acre'; a 'mask' property excludes cropland, development and water; tile URLs listed. No date. The integration's quote 'freely available for use by the public' is on the /products page, not this one."
+  },
+  {
+   "url": "https://rangelands.app/products",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page says '16-day production estimates for the current year are provisional and will be recalculated at the end of the year.' Production 'not to be used in agricultural lands, i.e., croplands' and 'traditional error metrics (e.g., MSE, RMSE) are not available'. 30 m cover MAE: tree 2.6%, perennial forb/grass 10.2%, annual 7.0%, shrub 6.2%, bare 6.5%. Disclaimer: 'The Rangeland Analysis Platform is freely available for use by the public.' The 10 m product covers the western US from 2018."
+  },
+  {
+   "url": "https://rangelands.app/tos/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'Last updated: September 11, 2024'. 'The Service is provided on an \"AS IS\" and \"AS AVAILABLE\" basis', 'without warranties of any kind'. The TOS does not contain the 'freely available' statement, which is on /products."
+  },
+  {
+   "url": "https://cran.r-project.org/web/packages/rapr/readme/README.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "rapr 1.1.0, citation 'Brown A' (2025). Biomass in lbs/acre. rap-30m covers 1986 to present; rap-10m (Sentinel-2) covers cover products from 2018 to present."
+  },
+  {
+   "url": "https://www.ars.usda.gov/plains-area/clay-center-ne/marc/documents/heat-stress/forecastingheatstress/",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Equation: 'Breathing Rate = (2.83 x Temperature) + (0.58 x Humidity) - (0.76 x Wind Speed) + (0.039 x Solar Radiation) - 196.4', 'For temperatures higher than 80\u00b0F'. Units: \u00b0F, % RH, mph, W/m2. Categories: Normal 'Less than 90', Alert 'From 90 - 110', Danger 'From 110 - 130', Emergency 'Above 130'. 110 appears in two categories, confirming the ambiguity. Page says 'a good number to use is about 1000 Watts/meter2'; the maps are 'an estimate of general trends' and 'cannot predict individual animal stress levels'. Last Modified 8/12/2016. Solar example 'Clay Center, NE on July 5, 2001'. Cites Brown-Brandl et al. 2005 and Eigenberg et al. 2005 (Biosystems Engineering)."
+  },
+  {
+   "url": "https://www.ars.usda.gov/plains-area/clay-center-ne/marc/documents/heat-stress/indexregion",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Six regional maps plus ConUS; 'Click on a region for the 7 day forecast'; the forecast date appears only as an image; Last Modified July 26, 2017; banner 'Some updates may be temporarily unavailable'; a 'Download Map Data' link exists. NOT supported: the integration's 'Daily intent per press (2020)'. Farm Progress states no update frequency, and Drovers says 'The weekly forecasts are produced as a partnership of the USDA-ARS'."
+  },
+  {
+   "url": "https://www.farmprogress.com/weather/usda-issues-heat-stress-forecasts",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'USDA issues heat stress forecasts', July 8, 2020; no author listed (credits ARS). Uses 'the seven-day forecasts of four heat stress parameters' (temperature, humidity, wind speed, cloud cover) 'from the National Weather Service'. Does not state update frequency. Its advice centres on feedlots."
+  },
+  {
+   "url": "https://www.drovers.com/markets/worried-about-potential-heat-stress-consult-these-forecast-maps",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "By Rhonda Brooks, Nov 12, 2020. Lists 'recent rains, high overnight lows (above 70 F), low or no air movement, high relative humidity' as risk factors and advises 'not moving cattle' before or during a heat stress event. Seven-day forecasts in six regions. Also says 'designed specifically for cattle feeders' and 'The weekly forecasts...', which contradicts the integration's daily-update claim."
+  },
+  {
+   "url": "https://www.weather.gov/documentation/services-web-API",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Page says 'A User Agent is required to identify your application', which 'will be replaced with an API key in the future'. The API is 'intended to be open data, free to use for any purpose'. Rate-limited requests 'may be retried after the limit clears (typically within 5 seconds)'. forecastHourly covers 'the next seven days'. 'Observations may be delayed up to 20 minutes'. Known Issues 'Updated 3/24/2026'. CORS is not mentioned. The '~2.5 km grids' claim was not confirmed in this fetch."
+  },
+  {
+   "url": "https://www.wpc.ncep.noaa.gov/heatrisk/overview.html",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "HeatRisk 'provides a forecast of the potential level of risk for heat-related impacts to occur over a 24-hour period'. It is aimed at heat-sensitive people (elderly, very young, homeless, outdoor workers, those without cooling); horizon is today plus 7 days. 'available in the Western United States since 2014', CONUS from 2024. No mention of livestock or animals. The 0-4 scale is not stated on this page."
+  },
+  {
+   "url": "https://www.wpc.ncep.noaa.gov/heatrisk/pdf/HeatRisk-v2.5-Overview.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'HeatRisk is an experimental product, which means that there is no guarantee of timely availability.' Human focus: 'protect lives and property', heat-sensitive groups. No livestock mention. No date or version on the document beyond the filename."
+  },
+  {
+   "url": "https://www.weather.gov/media/safety/NWS-HeatRisk-X3-2024.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'HeatRisk is divided into 5 categories'; 'Available May 2024'; aimed at 'decision makers and heat-sensitive populations'. No livestock or animal mention."
+  },
+  {
+   "url": "https://ndawn.info/agriculture_cci.html",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Supported: CCI 'is calculated by adjusting the air temperature using relative humidity, wind speed, and solar radiation'; it 'does not take into account precipitation' and 'is not designed to predict apparent temperature for animals with wet hair coats'; 'Non-acclimated or sick animals should be evaluated using the Newborn CCI'. Bands: Adult Cold Moderate -4 to 13 F; Newborn Cold Moderate 23 to 31 F. Cites Mader et al. 2010, J Anim Sci 88(6):2153-2165; Today/Tomorrow forecast maps; no download or API; \u00a92026 NDSU. NOT on this page: the integration's '245 stations (181 ND, 58 MN, 6 MT) plus 12 rain-gauge sites' and the rule's '6 MT stations exist'. The page has only NDAWN and Minnesota map tabs and no mention of Montana."
+  },
+  {
+   "url": "https://academic.oup.com/jas/article-abstract/88/6/2153/4779866?redirectedFrom=fulltext",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Mader, Johnson and Gaughan, J. Anim. Sci. 88(6):2153-2165, 2010, doi 10.2527/jas.2009-2586. The abstract describes RH (exponential), wind speed (exponential/log) and radiation (direct plus ground surface, linear) adjustments. Data came from 9 summer periods with heat stress events and 6 winter periods. I read the abstract only."
+  },
+  {
+   "url": "https://www.kfyrtv.com/2026/02/19/online-index-helps-producers-keep-cattle-warm-during-cold-temperatures/",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "By Lindsey Miller, Feb 19, 2026. It quotes Lacey Quail, 'livestock management specialist', whose employer the article does not name. She describes using NDAWN's index to plan feeding and moving cattle near shelter. The research's 'Extension specialist' and 'reports NDAWN promoting it' are not established by the article: NDAWN is not quoted, and her Extension affiliation is not stated."
+  },
+  {
+   "url": "https://ranchdrought.unl.edu/Plan.aspx",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "All quoted phrases are present: 'Setting dates on the calendar when specific conditions warrant action' (Worksheet 8); 'helps you decide when it is time to act' and 'the earliest possible indicators of pending forage or water deficits' (Worksheet 9); 'Upgrading or adding stock water tanks can improve grazing distribution and livestock health during drought' and 'Adding flexibility to the operation's forage/feed resources' (Part 3); Worksheet 3 is an inventory of resources; there are no numeric thresholds; \u00a92026. However, the crew_task data_field cites this page for 'Closing the loop on exceptions', and the page says nothing about crew task tracking. Its support for feed inventory is generic (a resource inventory, not a feed/mineral count)."
+  },
+  {
+   "url": "https://ranchdrought.unl.edu/Monitor.aspx",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Verbatim: 'If you suspect you may not produce enough forage to meet your herd's needs this year, it's time to take action'. Tools listed: USDM, NWS precipitation vs normal, Drought Outlook, CPC outlooks, Grass-Cast, VegDRI, CoCoRaHS, condition monitoring reports. The page shows datestamp 20260908; the research lists it as undated. It does not mention ranch rain gauges, only the CoCoRaHS volunteer network, so its support for the rain_gauge field is indirect."
+  },
+  {
+   "url": "https://www.prism.oregonstate.edu/documents/PRISM_downloads_web_service.pdf",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'document last updated 26 Mar 2025'. Daily grids are updated 'eight times, before becoming stable'; 'Data older than six months are considered stable'; 'if a file is downloaded twice in a 24-hour period, no more downloads of that file will be allowed'; IP blocking 'at our discretion'. COG default (nc, asc, bil optional); 400m (not yet implemented), 800m and 4km; daily from 19810101, monthly from 189501. The commercial-use prohibition and '800 m free since March 2025' (integration entry) are NOT in this PDF; they are on the /orders page."
+  },
+  {
+   "url": "https://prism.oregonstate.edu/orders",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'As of March 2025, the PRISM 800m data is available at no charge to the public'; 'commercial use is strictly prohibited unless you have made special arrangements in advance'. Purchase options from $2000 base."
+  },
+  {
+   "url": "https://www.ndsu.edu/agriculture/extension/publications/livestock-water-requirements",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "AS1763 by Meehan, Galbreath and Mostrom; originally April 1, 2021, revised February 2026. Table 1 is 'Adapted from Nutrient Requirements of Beef Cattle: Eighth Revised Edition: Updated 2016, NRC'. Lactating cows 900 lb: 11.4 (40F), 16.9 (70F), 17.9 (80F), 16.2 (90F). Growing cattle 600 lb: 12.7 at 90F. Bleach '2 to 3 ounces per 50 gallons of tank capacity', 5.25% sodium hypochlorite, 'applied weekly'. Cleaning itself is only 'frequently', with no interval. The page does not cover tank capacity or refill, although the tanks.* data_field cites it."
+  },
+  {
+   "url": "https://guidelines.beefimprovement.org/index.php/Pregnancy_Data",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Status 'should be recorded on each breeding female that was exposed to a bull'. Palpation 'After 35 days post breeding'; rectal ultrasonography 'After 27 days post breeding'; blood tests 'As early as 30 days after insemination'; 'should be conducted by trained personnel'. Last edited 27 March 2026. Note: BIF says 'post breeding'. The rule's 'after bull removal' is the research's own conservative derivation, not BIF wording."
+  },
+  {
+   "url": "https://guidelines.beefimprovement.org/index.php/Exposure_Data",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Verbatim: 'producers should indicate breeding season start and end dates'. Last edited 12 April 2021."
+  },
+  {
+   "url": "https://guidelines.beefimprovement.org/index.php/Body_Condition_Scores",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Scale 1-9. 'Ideally, scores should be recorded 60-90 days pre-calving, at calving and at weaning.' Last edited 2 June 2022."
+  },
+  {
+   "url": "https://sdmdataaccess.nrcs.usda.gov/WebServiceHelp.aspx",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Endpoint 'https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest'; 'Request parameters must be submitted via POST'; 'These methods cannot be invoked by a URL submitted via a web browser'; 'A maximum of 100,000 rows may be returned'; XML (default) or JSON. No API key and no CORS mentioned. The page does not itself describe ecological site IDs or reference production."
+  },
+  {
+   "url": "https://edit.sc.egov.usda.gov",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "EDIT is a collaboration of NRCS, ARS Jornada and NMSU and is described as the 'primary repository' of NRCS ecological site information. Access is by web catalog search only; no API is mentioned. The landing page has no date and does not mention the April 2026 move, which is on the Jornada page."
+  },
+  {
+   "url": "https://jornada.nmsu.edu/edit/catalogs/esd",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'The Ecosystem Dynamics Interpretive Tool (EDIT) has moved!'; NRCS 'assumed hosting and administration ... as of April 2026'; redirects to https://edit.sc.egov.usda.gov."
+  },
+  {
+   "url": "https://droughtmonitor.unl.edu/About/Permission.aspx",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "'If you reproduce the U.S. Drought Monitor map, please use this wording' ... 'Map courtesy of NDMC.' \u00a92026. The guidance covers maps only; the page says nothing about reusing tabular statistics. Using it as the attribution source for data rows (source_provenance) is an extension that the page does not state."
+  },
+  {
+   "url": "https://climate.sdstate.edu/request/daily/",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "Supported: 'Redistribution of these data is not allowed.'; 'Commercial use of these data is not allowed.'; 'Data from the automated data request system are provisional.'; not QC'd and not for legal or research use until expert review; 'All use of SDSU Mesonet data must be credited'; years 2015-2026; CSV. NOT on this page: the integration's 'updating every 5 min' (no update frequency stated) and 'Small non-QC requests free; custom services priced on request' (no cost statements). The station dropdown lists 126 stations, which is consistent with '100+'."
+  },
+  {
+   "url": "https://nemesonet.unl.edu/coming-soon",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Heading 'Coming Soon!'. A data access page for downloading current and historical data is described as 'currently in progress'. No API is mentioned; \u00a92026 Nebraska Mesonet."
+  },
+  {
+   "url": "https://research.unl.edu/blog/nebraska-mesonet-launches-improved-real-time-weather-data/",
+   "reachable": "yes",
+   "claim_supported": "partly",
+   "metadata_correct": "yes",
+   "notes": "'Nebraska Mesonet launches improved, real-time weather data' by Cara Pesek, Dec 16, 2024. Supported: '74 automated weather monitoring stations' and updates 'every minute'; it also mentions a planned 'robust data access tool'. NOT on this page: \"'Request Data' by contact\" and \"Data Access page 'Coming Soon'\" (the latter is on nemesonet.unl.edu/coming-soon). The 'NSCO page says 63' has no cited URL and is unverifiable."
+  },
+  {
+   "url": "https://www.ncei.noaa.gov/cdo-web/webservices",
+   "reachable": "yes",
+   "claim_supported": "yes",
+   "metadata_correct": "yes",
+   "notes": "Lists API v2 (JSON), the Search Service API (JSON) and the Data Service API (CSV, JSON, PDF). The research names only two of the three. Nothing about tokens, rate limits or terms appears on the page, which is consistent with the research saying these were not verified."
+  },
+  {
+   "url": "https://www.rcc-acis.org/docs_webservices.html",
+   "reachable": "yes",
+   "claim_supported": "unverifiable",
+   "metadata_correct": "unverifiable",
+   "notes": "The fetch returned only the title 'RCC-ACIS' and the heading 'ACIS Web Services', with no body. The research's own statement that the page rendered empty is confirmed. The integration's descriptions (StnData, GridData, JSON, free, daily) cannot be verified from this URL."
+  }
+ ],
+ "classification_disputes": [
+  "Rule 2 (USDM stale if more than ~9.1 days) is labelled A-supported-general. The principle 'a missing or failed fetch is never no drought' is fine as A. The 9.1-day number is not published anywhere: it is the research's own derivation from the normal Tuesday-to-Thursday schedule. The cited USDM page says nothing about holidays, and the research admits holiday shifts are not modelled, so a holiday-delayed release would wrongly trip the stale flag. The numeric threshold should be B or C (configurable, with a holiday allowance), not A.",
+  "Rule 14 (breeding/calving scheduling) is labelled A-supported-general. Only the recording elements are A: record breeding start/end, preg status for every exposed female, and BCS at the three points. BIF says palpation 'After 35 days post breeding'. The rule's 'no earlier than 35 days after bull removal' is a derivation, and BIF gives earliest detectability for genetic-evaluation recording, not a recommended schedule; the research itself says 'the timing is a minimum, not an optimum'. The 'BCS 60-90 days before calving' prompt needs a calving date from an unsourced gestation length. When to schedule preg checks and BCS prompts is a ranch and veterinarian choice, so B or C.",
+  "Rule 7 (ARS breathing-rate heat outlook) is labelled B-context-dependent. Drovers says the maps were 'designed specifically for cattle feeders', and the equation's references (Brown-Brandl 2005; Eigenberg 2005) are feedlot-oriented. Applying them to pasture or range cattle is extrapolation. The trigger 'warn when a planned gather or move falls on a Danger or worse day' is a ranch management choice (C), not published guidance. B fits only the category display, not the warning rule.",
+  "Rule 11 (water days of supply) is labelled B. Only the intake-by-class-and-temperature input is sourced (NDSU AS1763 / NRC 2016). The formula itself (usable fraction, refill over the period, head at the tank) and the warning threshold are unsourced engineering or ranch choices. The rule as a whole should read as 'C rule using B inputs'. The research's configurable field partly says this, but the headline classification overstates it.",
+  "Rule 9 (CCI cold-stress prompt) has a minor evidence problem rather than a classification problem. The B label for the bands is fair, but the evidence says KFYR 'reports NDAWN promoting it'. The article quotes a 'livestock management specialist' (Lacey Quail) whose employer is not named, so it is not evidence of Extension or NDAWN endorsement."
+ ],
+ "summary": "I fetched all 51 unique URLs cited in the research with WebFetch. All were reachable. curl through the proxy was refused ('CONNECT tunnel failed, response 403'), so every check relies on WebFetch's model-summarised page text, and quotes are as the summariser returned them. I also fetched two related URLs that are not in the citation list: the ArcGIS /query, whose epochs I converted with node to 2026-10-13T07:30Z and 2026-10-15T07:30Z (3:30 AM ET), and IEM geojson/usdm.py, which returned date 2026-10-13. Both confirm the research's observations.\n\nCore numbers verified exactly:\n- USDM schedule and wording: '8 a.m. EDT' cutoff on USDM versus '7 a.m. Eastern Time' on SD DANR and '7 am Eastern' / '7 a.m. EST' on drought.gov; Thursday 8:30 ET release.\n- Hughes County rows: 20260929 at 68.45/31.55 and 20260922 at 91.73/8.27.\n- LFP tiers: 4 consecutive weeks of D2 gives 1 payment; D3 at any time gives 3; D4 for 4 weeks gives 5.\n- NASS reports: KS 5/10/29/46/10 and SD 24/29/31/15/1.\n- ARS equation and categories: 2.83/0.58/-0.76/0.039/-196.4, T>80F, units F/%/mph/W/m2.\n- NDAWN CCI bands: Adult Cold Moderate -4 to 13 F; Newborn Cold Moderate 23 to 31 F.\n- NDSU AS1763 intakes: 11.4/16.9/17.9/16.2 and 12.7; bleach 2-3 oz per 50 gal, weekly.\n- BIF timings: 35/27 days, 60-90 days pre-calving.\n- Also confirmed: PRISM (8 updates, 6 months, twice in 24 h); SDA (POST-only, 100,000 rows); RAP (1986 to previous year; MAE 2.6-10.2%; TOS 2024-09-11); Grass-Cast (biweekly, 10 km, 38-year average, 'As of August 31, 2026', 60-80% stated without a metric).\n\nProblems found, all in integration or data_field details rather than the core rules:\n- **ARS heat maps:** 'Daily intent per press (2020)' is unsupported. Farm Progress gives no frequency and Drovers says 'weekly forecasts'.\n- **NDAWN:** station counts (245/181/58/6 MT) are not on the cited CCI page, which shows only NDAWN and Minnesota maps.\n- **SD Mesonet:** '5-minute updates' and the cost statements are not on the cited page.\n- **Nebraska Mesonet:** the 'NSCO page says 63' has no URL. 'Request Data by contact' and 'Coming Soon' are not on the cited blog.\n- **USDM web service:** 'thousands separators in area mode' is not on WebServiceInfo.\n- **Grass-Cast Data:** the data.gov CC BY 4.0 claim is not on Data.aspx, and the annual grid file is XLSX, not CSV.\n- **Data-field evidence URLs:** the crew_task field cites the NDMC Plan page, which says nothing about crew tasks. The tanks capacity/refill field cites NDSU, which covers intake only.\n- **KFYR:** the article does not name the specialist's employer, and NDAWN itself is not quoted.\n- **Metadata:** the rnassqs vignette is dated 2026-09-29 (v0.6.4), not undated. Grass-Cast and PRISM documentation pages are mislabelled 'field-study'.\n- **Minor wording:** the RAP quote 'Valid years run from...' is actually 'Valid years are 1986 through the previous year' (same meaning).\n- **Map attribution:** 'Map courtesy of NDMC' is map-only guidance, extended by the research to data rows.\n- **ACIS:** the docs page rendered empty, so nothing there is verifiable.\n- **NASS release time:** the 4:00 pm ET release time comes from a 2007 document and was not confirmed by a current source.\n\nClassification disputes: rule 2's 9.1-day threshold (A is too generous because the number is derived and breaks on holiday weeks), rule 14 (A applies to the recording elements only; the scheduling lead times are ranch or veterinarian choices), rule 7 (feedlot-designed model; the move warning is a C choice), and rule 11 (C rule using B inputs). Rules 1, 8 and 18 at A are adequately supported by explicit publisher statements.\n\nNo repo files were modified. I created only the scratch folder /tmp/claude-0/-home-claude-ranch-ops-dashboard/c61c6ab5-2745-59d3-9dda-44a2053cd423/scratchpad/audit/cite-context/dl, which is empty because the curl downloads were blocked."
+}
