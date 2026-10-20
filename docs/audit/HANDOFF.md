@@ -5,26 +5,30 @@ For the developer who builds Phase 1 ("Fix now") of the Ranch Operations Dashboa
 must not change.
 
 - **Reviewed commit:** `cfd77e50a050163b542cadfc6b38882c0341e99d` (main). **Branch:** `claude/project-thread-nu46kf`.
+- **Audit merged** into main in pull request #1 (merge commit `71f3492`). **Redesign:** pull request #2 from the same
+  branch, commit `f9ef651`.
 - **No PROJECT_CONTEXT.md or AGENTS.md** exists in the repository; the audit and this handoff are the guidance.
 - **The dashboard is not production-ready**, and finishing Phase 1 will not make it so. The audit changed no production
   code.
 
-## Read this first: the redesign commit
+## Read this first: the redesign
 
-The same pull request carries a **separate commit** that replaces `index.html` and `app.js` (plus the README
-screenshots) with the owner's visual redesign: black background, green accent, charts drawn at their real width,
-keyboard and touch chart reading, phone layouts. `exceptions.js`, `data/`, `tests/` and `scripts/` are unchanged by it,
-and every number on the page is meant to stay identical.
+Pull request #2 replaces `index.html` and `app.js` (plus the README's chart text and screenshots) with the owner's
+visual redesign: black background, green accent, charts drawn at their real width, keyboard and touch chart reading,
+phone layouts. `exceptions.js`, `data/`, `tests/` and `scripts/` are unchanged by it, and every number on the page stays
+identical.
 
 - **Start Phase 1 from the redesigned `app.js`**, not from `cfd77e5`.
 - **`app.js` and `index.html` line numbers in the findings and the specification refer to `cfd77e5`.** Read the old
   code with `git show cfd77e5:app.js`, then find the matching code in the redesign. Example: the nine `innerHTML`
   places of [SEC-01](02-findings.md#sec-01) are listed by their `cfd77e5` lines in
   [06 section 7](06-phase1-spec.md#7-safe-rendering).
-- [08-redesign-coverage.md](08-redesign-coverage.md) (written separately) maps which findings the redesign already
-  addresses. Use it to find work already done, but count a finding as fixed only when its acceptance test passes.
-- If the redesign replaced hover tooltips with keyboard or touch readouts, the safe-rendering tests must cover every
-  place that now shows CSV text.
+- [08-redesign-coverage.md](08-redesign-coverage.md) maps which findings the redesign already addresses. Use it to
+  find work already done, but count a finding as fixed only when its acceptance test passes.
+- The redesign added keyboard and touch readouts (`#tip`), so the safe-rendering tests must cover every place that now
+  shows CSV text, including those readouts.
+- Its "Can't tell" and "No plan" labels are the page's own placeholders. Once the rules return CAN'T TELL rows, take
+  those states from the rules ([08 section 3.3](08-redesign-coverage.md#33-not-addressed)).
 
 ## Before writing code
 
@@ -32,8 +36,8 @@ and every number on the page is meant to stay identical.
    (T6), OQ-04 (budget dollar lines) and OQ-05 (closed months) change Phase 1 output; OQ-10 (test-only Playwright
    dependency) changes CI; OQ-11 covers README edits.
 2. Run Codex Checkpoint 1 ([CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md)) and act on its required changes.
-3. Agree with the owner whether this pull request is merged first or Phase 1 stacks on it (OQ-13). Nothing is merged
-   or deployed without the owner.
+3. Agree with the owner whether the redesign pull request (#2) is merged first or Phase 1 stacks on it (OQ-13).
+   Nothing is merged or deployed without the owner.
 
 ## Build order
 
@@ -109,8 +113,9 @@ defect is present.
 
 **Against the reviewed commit.** Node-only scripts that import only `exceptions.js` should give the same results on the
 redesign, because `exceptions.js` and `data/` are unchanged. `render.repro.mjs` (which imports `app.js`) and the browser
-scripts exercise the page, and they were written for `cfd77e5`'s page; on the redesign they may need their selectors
-adapted before their output means anything. To reproduce a finding as recorded, run the scripts against an extracted
+scripts exercise the page, and they were written for `cfd77e5`'s page; on the redesign they need their selectors
+adapted before their output means anything ([08 section 5](08-redesign-coverage.md#5-audit-scripts-on-the-redesigned-page)
+maps them). `node docs/audit/redesign/coverage.mjs` checks the redesign itself. To reproduce a finding as recorded, run the scripts against an extracted
 copy of the reviewed commit (the scripts find the code relative to their own folder):
 
 ```bash

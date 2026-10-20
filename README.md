@@ -41,16 +41,19 @@ Some design choices:
 
 | Chart | What it shows |
 |---|---|
-| Water tanks, last 7 days | One small chart per tank with the 40% and 25% lines; a silent sensor shows where data stops |
-| Grazing rotation | Each group's pasture moves for the season, with days past the planned move marked |
-| Daily gain | One dot per animal against the group's target, so the stragglers stand out |
-| Spending against budget | Percent over or under by category, with the dollar table beside it |
+| Water tanks, last 7 days | One chart per tank with shaded bands under 40% and 25%, the latest level and a status label; a silent sensor shows where data stops |
+| Grazing rotation | Each group's pasture moves for the season, the days each plan has left and any days past the planned move, plus where each group is grazing now |
+| Daily gain | One dot per animal against the group's target and its 80% and 50% lines, with the animals the report flags highlighted |
+| Spending against budget | One table: each category's percent over or under as a bar, beside its budget, actual and difference |
 
 ![Water tank levels](docs/water.png)
 ![Grazing rotation and daily gain](docs/grazing-gain.png)
 
-Every chart has hover details, the page uses a dark theme and works on a phone, and it has no dependencies or
-build step.
+Every chart can be read with a mouse, a tap or the keyboard (focus a chart and use the arrow keys), and each is drawn
+at the size it's shown, so its text stays readable on a phone. On a phone the report turns into cards and the tables
+fit the screen. The page uses a dark theme, and it has no dependencies or build step.
+
+<img src="docs/phone.png" alt="The dashboard on a phone" width="320">
 
 ## The example data
 
