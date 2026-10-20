@@ -28,10 +28,13 @@ These are recommendations. The finding IDs (for example `LOAD-01`) are the stabl
    (P1-06, P1-07; [LOAD-01](02-findings.md#load-01), [LOAD-02](02-findings.md#load-02),
    [LOAD-03](02-findings.md#load-03), [LOAD-04](02-findings.md#load-04), [WAT-02](02-findings.md#wat-02)). At the
    reviewed commit `cfd77e5`, of 32 single-file failure cases, 8 showed the affected area as clear and the other 24
-   left a blank page. On main (`0315d09`, Playwright Chromium, 2026-10-20), 20 of the 32 show "The report didn't load"
-   with a retry button, which names no file and hides the whole report. The other 12, a garbled or header-only
-   `groups`, `moves`, `weights`, `water`, `health` or `budget` file, draw the report with the affected area's count at
-   0 ([08 section 3.2](08-redesign-coverage.md#32-partly-addressed)).
+   left a blank page. On main (`0315d09`, Playwright Chromium, 2026-10-20, `diagnostics/states-check.mjs`), 23 of the
+   32 show "The report didn't load", which names no file and hides the whole report: 18 of them (every 404 or aborted
+   file, and a garbled or header-only `meta.csv`) offer a "Try again" button, and 5 (a garbled or header-only
+   `pastures.csv`, or a garbled `moves`, `weights` or `water` file) say the report "couldn't be worked out", with no
+   button. The other 9, a garbled or header-only `groups`, `health` or `budget` file or a header-only `moves`,
+   `weights` or `water` file, draw the report with the affected area's count at 0
+   ([08 section 3.2](08-redesign-coverage.md#32-partly-addressed)).
 2. **Read real exports correctly, and show what cannot be read.** Replace the CSV reader with one that handles quotes,
    line endings and blank rows, and give every file a data contract (blank means missing, IDs stay text, required
    columns, references, duplicates) whose violations appear as visible data-issue rows (P1-01, P1-02, P1-04;

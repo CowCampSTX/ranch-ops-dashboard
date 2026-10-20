@@ -135,7 +135,7 @@ tests, no framework, no backend, no paid service and no AI feature.
 
 ### 1.3 Order of work
 
-Phase 1 starts from main at `0315d09`, which carries the redesigned page (pull request #2), and only after the
+Phase 1 starts from main, whose page files are the redesigned page of `0315d09` (pull request #2), and only after the
 documentation pull request that brings this roadmap and [06-phase1-spec.md](06-phase1-spec.md) in line with that page
 has been reviewed (Checkpoint 1b in `CODEX_REVIEW_PROMPT.md`) and merged by the owner. That pull request changes no
 page code. Every step below keeps what the redesigned page already does
@@ -666,7 +666,7 @@ after the input update of decision D16.
   and shows "'6 of 8 2 need a look'" when names share a first word (UI-04); month ticks are fixed to June-September 2026
   (UI-05).
 - **Proposed behaviour:** the exception table draws first. Tiles read the structured results (per-tank, per-group,
-  per-category states), not alert text and not a fixed group name; the gain tile falls back to "No weigh-ins yet", and
+  per-category states), not alert text and not a fixed group name; the gain tile falls back to "No weigh-ins yet" (under "Can't tell" when weights.csv has no rows), and
   a group with head 0 never supplies its figure ([06 section 5.4](06-phase1-spec.md#54-gain)). A tank with no recent
   readings keeps its tank card and draws an empty chart marked "no readings in the last 7 days" (or the shorter text the
   redesign draws on a narrow card). Month ticks come from the loaded season, on a chart still drawn at its card's width.
@@ -680,7 +680,8 @@ after the input update of decision D16.
   in water.csv and tanks.csv) gives a water tile, found by its label, reading "Sensors normal", "5 of 8" and "3 need a
   look"; month labels for grazing.repro:GB-09 to GB-12 and time.browser:TB-04 equal the hand-worked sets and lie inside
   the chart's plot area as measured on the page at 1280 x 900 and at 390 x 844 (the chart is drawn at its card's width,
-  so the bounds are read from the chart, not fixed); with no weigh-ins the gain tile reads "No weigh-ins yet"; with
+  so the bounds are read from the chart, not fixed); with a header-only weights.csv the gain tile reads "Can't tell"
+  with "No weigh-ins yet"; with
   every group that has a gain target at head 0 it reads "Not judged" or "Can't tell", never "No weigh-ins yet" or a
   figure. Full list: [06 section 12, P1-14](06-phase1-spec.md#p1-14).
 
@@ -1058,7 +1059,7 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
   `coverage.mjs`), and that each budget name fits its cell. New in P2-06: "The Heifers row contains 'Jul 20'; the
   health rows contain 'Sep 15' and 'Oct 3'" (UI-13); and UI-17 restated for the budget table: with M1's data
   (committed plus `2026-09,Hay,500,1500`, +200%) the bar scale stops at +-100%, Hay's bar is clipped and keeps its
-  "+200%" label, no two scale labels overlap, and the Fuel bar (+21%) is at least 21% of its track's half width
+  "+200.0%" label (one decimal, [06 section 5.6](06-phase1-spec.md#56-budget)), no two scale labels overlap, and the Fuel bar (+21%) is at least 21% of its track's half width
   (UI-17's "at least 39 px" of a 183 px half plot); with AB-09's data no value label covers a category name (the AB-09
   case was not run on the redesign). On main `0315d09` with M1's data (Playwright Chromium, 2026-10-20) the scale runs
   to +-200% and Fuel's bar is 24.9 of 234 px at 1280 x 900, so the cap and the Fuel width are new in P2-06; the three

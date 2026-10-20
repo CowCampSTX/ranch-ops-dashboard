@@ -8,7 +8,8 @@ must not change.
   **Branch:** `claude/project-thread-nu46kf`.
 - **Audit merged** into main in pull request #1 (merge commit `71f3492`). **Redesign merged** into main in pull
   request #2 from the same branch (redesign commit `f9ef651`, merge commit `0315d09`, 2026-10-20).
-- **Starting point for Phase 1:** main at `0315d09`, with the redesign. Phase 1 has not started.
+- **Starting point for Phase 1:** `origin/main` once the Checkpoint 1b documentation pull request is merged. Its page
+  files are those of `0315d09` (the redesign); `redesign/preserve.mjs` is not in `0315d09`. Phase 1 has not started.
 - **No PROJECT_CONTEXT.md or AGENTS.md** exists in the repository; the audit and this handoff are the guidance.
 - **The dashboard is not production-ready**, and finishing Phase 1 will not make it so. The audit changed no production
   code.
@@ -96,8 +97,9 @@ measurement).
 6. The preserve checks KEEP-01 to KEEP-34 pass against the Phase 1 page (06 section 11.4 item 6), ported into
    `tests/browser/smoke.mjs` or run from the reference script [redesign/preserve.mjs](redesign/preserve.mjs), so
    nothing listed in [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign) is
-   removed or weakened. A check changes only where a Phase 1 item changes the behaviour it tests, and the pull request
-   says which and why.
+   removed or weakened. A check changes only where a Phase 1 item changes the behaviour it tests, or where the pull
+   request is the fix for the colour-only marks (06 section 15; KEEP-24 may then count the new mark), and the pull
+   request says which and why.
 7. CI runs the generator check (including new untracked files), the three-zone suite and the smoke test with the
    preserve checks ([06 section 11.5](06-phase1-spec.md#115-ci-changes-githubworkflowstestyml)).
 8. The generator's random draws are unchanged, the six unchanged data files are byte-identical to the reviewed commit,

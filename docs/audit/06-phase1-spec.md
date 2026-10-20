@@ -12,11 +12,11 @@ observation, scheduling, records and escalation to a veterinarian.
 
 | Item | Value |
 |---|---|
-| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit was written). Phase 1 starts from main at `0315d09`, which adds the redesigned `index.html` and `app.js` (pull request #2); see [section 1.2](#12-non-goals) and [section 6.3](#63-accessibility-and-layout-kept-from-the-redesign). |
+| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit was written). Phase 1 branches from main after the documentation pull request that adds this section and `docs/audit/redesign/preserve.mjs` is merged; its page files are those of `0315d09`, which adds the redesigned `index.html` and `app.js` (pull request #2); see [section 1.2](#12-non-goals) and [section 6.3](#63-accessibility-and-layout-kept-from-the-redesign). |
 | Built from | [05-roadmap.md](05-roadmap.md) (work items and decisions D1-D16), `docs/audit/data/findings.json`, `rules.json`, `data-fields.json`, `integrations.json`, the code at the reviewed commit, and [02-findings.md](02-findings.md) / [03-research-and-data.md](03-research-and-data.md). The page terms and the keep-list come from the redesigned page on main at `0315d09`, [08-redesign-coverage.md](08-redesign-coverage.md) and the preserve checks in `docs/audit/redesign/preserve.mjs`. |
 | Project guidance files | None. The repository has no PROJECT_CONTEXT.md or AGENTS.md. |
 | Scenario files | `docs/audit/scenarios/`: 10 end-to-end folders (01-planted-problems to 10-malformed-and-hostile-csv), each with CSV files, `expected.json` and `scenario.md`, plus `settings.json`. A parallel audit step wrote them while this specification was being finished; they are committed on the work branch only in the work-in-progress commit `b548e4f` and were read on 2026-10-19. The 2026-10-19 review fixes then revised `expected.json` in 03, 04, 06, 08 and 09 and `settings.json` (no CSV changed; see `data/registry-changelog.md`, "Review fixes"). Section 11.2 says how Phase 1 runs them, which inputs must be added first (decision D16), and where their settings differ from section 9. The audit's single-change test cases (W-02, GN-07 ...) are built under `tests/fixtures/`. |
-| Not verified | The published GitHub Pages site (proxy 403). Only Chromium was used in the audit. Nothing in this document has been implemented. The selectors and values that describe the redesigned page (sections 6.3, 11.4 and 12) were measured with Playwright Chromium on main at `0315d09` on 2026-10-20; real phones, screen readers, Firefox and WebKit were not tested. |
+| Not verified | The published GitHub Pages site (proxy 403). Only Chromium was used in the audit. Nothing in this document has been implemented. The selectors and values that describe the redesigned page (sections 5.1 to 5.6, 6.1 to 6.3, 7, 10.2, 11.4 and 12; the `app.js` function names and line numbers are from reading the code on main) were measured with Playwright Chromium on main at `0315d09` on 2026-10-20; real phones, screen readers, Firefox and WebKit were not tested. |
 
 Statement types follow the roadmap: **verified findings** carry a finding ID and quoted evidence; **research
 conclusions** carry a RULE ID and class; everything else here is a **recommendation**; open points are in
@@ -755,10 +755,12 @@ in place of the redesign's "No group with a gain target has two weigh-ins yet.",
 0 has two weigh-ins. The chart heading reads "Daily gain between the last two weigh-ins".
 
 **Gain tile.** Built from the results, never from a fixed group name ([LOAD-03](02-findings.md#load-03)): the
-judged group furthest below its target, as "{G} lbs/day {group} (target {target})". A group with head 0 is never
-chosen. When some group has a gain target, no group has a figure and the head-0 cases below do not apply, it reads "No
-weigh-ins yet" if no group with a gain target has a weigh-in on or before D, and otherwise "Can't tell" with "{groups}
-can't be judged on gain", naming the groups with a gain target and no figure. With weights.csv missing, failed, empty
+judged group with the lowest ratio of G to its target (ties: the first in groups.csv), as "{G} lbs/day {group}
+(target {target})". A group with head 0 is never chosen. When weights.csv has usable rows, some group has a gain
+target, no group has a figure and the head-0 cases below do not apply, it reads "No weigh-ins yet" if no group with a
+gain target has a weigh-in on or before D, and otherwise "Can't tell" with "{groups} can't be judged on gain", naming
+the groups with a gain target and no figure, except a group with head 0 and no weigh-in within `gainMaxAgeDays`, which
+is not judged (step 2) and is not named. With weights.csv missing, failed, empty
 or header-only, the tile is section 6.2's "Can't tell" with its reason; for an empty or header-only weights.csv that
 reason is "No weigh-ins yet" (P1-14 item 4). When at least one group has a gain target and every such group has
 head 0, the tile reads "Not judged" with "Head 0 in groups.csv: {groups}"; when any of those groups has a weigh-in
@@ -904,7 +906,7 @@ Findings: [LOAD-01](02-findings.md#load-01), [LOAD-02](02-findings.md#load-02), 
 | Situation | Banner | Area state | Exception table | Tiles and charts |
 |---|---|---|---|---|
 | All files load, valid data | none | per rules | rows, sorted | drawn |
-| A file 404, failed or aborted | "{file} could not be loaded ({status})." | areas needing it: CAN'T TELL | one area-level CAN'T TELL row per affected area, plus rows from other areas; the Health chip's badge reads "can't tell" | that area's tile "Can't tell" with the reason; its chart (for Budget, the budget table) replaced by the reason; others drawn |
+| A file 404, failed or aborted | "{file} could not be loaded ({status})." | areas needing it: CAN'T TELL | one area-level CAN'T TELL row per affected area, plus rows from other areas; each affected area's chip badge (`.n`) reads "can't tell", not "0" (for health.csv, the Health chip) | that area's tile "Can't tell" with the reason; its chart (for Budget, the budget table) replaced by the reason; others drawn |
 | A file empty or header-only | "{file} has no rows." | as above | as above | as above, never "0 of 0" or "NaN" |
 | A required column missing | "{file}: column {name} not found." | as above | as above | as above |
 | Some rows invalid | none (data checks panel lists them) | per rules on the valid rows, CAN'T TELL where a subject depends on a bad value | rows, including CAN'T TELL rows | drawn from valid rows |
@@ -965,7 +967,8 @@ Basis column) fit at 320 px without sideways scroll. The banner uses `role="aler
 - The whole-page failed-load state, and the uncaught page error it throws today, are replaced by section 6.2's
   per-file states; P1-06 item 8 asks for no `pageerror`.
 
-**Kept, but not asserted by a preserve check:** the "Try again" button (measured at 44 px); the gain chart's "Under 80%
+**Kept, but not asserted by a preserve check:** the "Try again" button (measured at 44 px); a budget row with no bar
+when the category is exactly on budget (the committed data has no such row); the gain chart's "Under 80%
 of target" group badge; the gain chart's target, 80% and 50% lines and its "Not shown" note; the grazing chart's "days
 past plan" label and triangle; the grazing chart's days-left shading and planned-move tick (P1-08 item 7 allows them
 past the Today line but does not require them); the chip group's "Filter by area" label; the ellipsis on long chart
@@ -1136,6 +1139,7 @@ not show the thresholds are right." ([RULE-WF-20](03-research-and-data.md#rule-w
 | Water subject | "Heifers here now" | "Heifers there as of 2026-09-30" |
 | Gain period | "since 2026-07-20" | "between the 2026-07-20 and 2026-09-15 weigh-ins" ([GAIN-11](02-findings.md#gain-11)) |
 | Gain chart heading | "Daily gain since the last weigh-in" | "Daily gain between the last two weigh-ins" |
+| Gain tile | "Yearling gain", "1.94 lbs/day", "Target 2.0, since Jul 20" (Yearlings when they have a target, else the first group with one) | the judged group with the lowest G / target, "{G} lbs/day {group} (target {target})": on the committed data "0.44 lbs/day Heifers (target 1.0)" (section 5.4) |
 | Gain chart note | "One dot per animal against the group's target." The hint above the charts reads "Hover, tap or focus a chart and use the arrow keys to read each reading.", or "Tap a chart, or slide a finger along it, to read each reading." on a touch screen | unchanged: the page already gives chart readings by touch and keyboard (section 6.3) |
 | Grazing chart reading, current stay | "{n} days", "{group} in {pasture id} {name}", "{in date} to now · plan {p} days" (`app.js:398` on main; `app.js:143` at `cfd77e5`) | "{in date} to {as-of date} (as of) · plan {p} days"; the value stays first |
 | Grazing note | "Each group's pasture moves this season. A current stay shows the days left on its plan, or the days past it." | "Each group's pasture moves this season. Only the current stay shows the days left on its plan, or the days past it; earlier stays are not marked." ([GRZ-06](02-findings.md#grz-06)) |
@@ -1385,10 +1389,13 @@ or looks like a finding ID, it is written with its script: `csv.repro:CSV-07` (C
 CSV-10 and higher in csv.repro.mjs, G- in grazing.repro.mjs, GN- in gain.repro.mjs, M5 in gain.missed.mjs, R in
 render.repro.mjs, TB- in time.browser.mjs.
 
-Phase-wide (all items): the committed data gives exactly the 10 rows of section 5.7 and no issue; the suite passes
-under TZ=UTC, America/Chicago and Pacific/Auckland; the browser smoke test has no `pageerror` and passes its keyboard,
-touch, 390 x 844 and 320 x 640 checks and the preserve checks (section 11.4). No item may remove or weaken what section
-6.3 keeps, such as the chart readings by keyboard and touch or the phone layout that the redesigned page already has.
+Phase-wide (all items): the committed data gives the 10 planted problems with their severities, each row in the
+wording of section 5.7 once the items in its "Changed by" column ([05 section 3.1](05-roadmap.md#31-phase-1-acceptance-bar))
+have landed, and, when Phase 1 is complete, exactly the 10 rows of section 5.7 and no issue; the suite passes under
+TZ=UTC, America/Chicago and Pacific/Auckland; the preserve checks pass (section 11.4 item 6; until P1-17 part b adds
+the smoke test, by running `docs/audit/redesign/preserve.mjs` against the served page); once the smoke test exists, it
+has no `pageerror` and passes its keyboard, touch, 390 x 844 and 320 x 640 checks. No item may remove or weaken what
+section 6.3 keeps, such as the chart readings by keyboard and touch or the phone layout that the redesigned page already has.
 
 Page terms in **[browser]** criteria name elements of the redesigned page (main at `0315d09`, after pull request #2).
 Exception rows are `#exceptions tbody tr`. An area chip is `#chips button[data-a="Health"]` (and so on); it shows its
@@ -1542,7 +1549,8 @@ Loading, errors, three states, section isolation ([LOAD-01](02-findings.md#load-
    chip shows its count in `.n`, so the text "Health (0)" can no longer appear); the other 8 rows are present in
    `#exceptions`.
 2. [browser] water.csv header-only: a banner names water.csv; the water tile (label "Sensors normal") does not read
-   "0 of 0"; `#tanks .tank` has 8 cards, T1 to T8 from tanks.csv, and the text of every card matches `/no readings/i`.
+   "0 of 0"; `#tanks .tank` has 8 cards, T1 to T8 from tanks.csv, and each card's `svg.chart` text matches `/no readings/i` (section 5.2: "No readings in the last 7 days", or
+   "No readings this week" on a narrow card).
 3. [browser] moves.csv header-only: Grazing shows CAN'T TELL: the Grazing chip (`#chips button[data-a="Grazing"]`)
    badge `.n` reads "can't tell", not "0" (restated from "not Grazing (0)": the chip shows its count in `.n`).
 4. [unit] `loadAll` with a fetch stub answering `{ ok: false, status: 404 }` for health.csv resolves (never rejects)
@@ -1625,7 +1633,8 @@ Grazing ([GRZ-01](02-findings.md#grz-01), [GRZ-02](02-findings.md#grz-02), [GRZ-
    P3 planned_graze_days: a CAN'T TELL row "No usable plan for Sand Hills".
 7. [browser] At 1280 x 900 and at 390 x 844, every stay bar on the grazing chart (`#grazing svg.chart rect[rx='4']`:
    current, earlier and past-plan bars) has a finite x and width and ends (x + width) at or before the x of the Today
-   line, which marks the as-of date (the `line` drawn at the x of the "Today" label). A current stay's days-left shading
+   line, which marks the as-of date (the `line` whose x1 equals the "Today" label's `x` attribute; the label is
+   end-anchored at the line near the right edge, so its box is not centred on it). A current stay's days-left shading
    (`rect` with fill `var(--s1-soft)`) and its planned-move tick may run past the Today line, up to the planned move
    date (section 5.3).
 8. [scenario] The Cows' open South Divide stay given out_date 2026-09-20 (no later Cows stay): no Cows Grazing row, one
@@ -1817,8 +1826,9 @@ Tiles and charts from structured results ([LOAD-03](02-findings.md#load-03), [LO
 3. [browser] Yearlings shipped (removed from groups, moves, weights, weigh_sessions and health): `#exceptions tbody` has
    7 rows (T2, T4, T6, Fuel, Repairs, Heifers gain, Cows pinkeye).
 4. [browser] A blank Yearlings target, and separately a header-only weights.csv: the exception table draws
-   (`#exceptions tbody tr`); with no weigh-ins the gain tile (the `#tiles .tile` whose label ends in "gain", "Daily
-   gain" on the redesigned page when no group has a figure) reads "No weigh-ins yet".
+   (`#exceptions tbody tr`); with the header-only weights.csv the gain tile (the `#tiles .tile` whose label ends in
+   "gain", "Daily gain" on the redesigned page when no group has a figure) reads "Can't tell" with the reason "No
+   weigh-ins yet" (sections 5.4 and 6.2), never a figure, "0" or "NaN".
 5. [browser] T6 rows filtered to time <= 2026-09-22T12:00: no `pageerror`; 8 tank cards (`#tanks .tank`); the T6 card's
    chart says it has no readings in the last 7 days (restated from "no signal"): "No readings in the last 7 days" at
    1280 x 900, or the shorter "No readings this week" that the redesign draws on a narrow card, as at 390 x 844
@@ -1952,6 +1962,7 @@ replaces them moves each caller to `evaluate` in the same pull request and keeps
 **Strings that change on the page** (and in any screenshot or README text that quotes them): "Water tanks OK" →
 "Sensors normal"; "here now" → "there as of {date}"; "21% over season to date" → "21.3% over budget, season to date
 through 2026-09"; "since 2026-07-20 vs 1.0 target" → "between the 2026-07-20 and 2026-09-15 weigh-ins (target 1.0)";
+the gain tile "Yearling gain 1.94 lbs/day" → the Heifers figure "0.44 lbs/day Heifers (target 1.0)";
 "Schedule it this week" → the new first step; "Pull and check these animals at the next gather" → "Look at these
 animals at the next gather and record what you see"; the T6 row gains "at 2026-09-29 00:00" and the CAN'T TELL marker.
 The README screenshots (`docs/screenshot.png`, `docs/water.png`, `docs/grazing-gain.png`, `docs/phone.png`) should be
@@ -2005,7 +2016,8 @@ D9 weigh basis in Phase 1; D10 health status list; D11 `planned_out_date`; D14 I
 D16 scenario-folder inputs updated to the data contract. Each can be reversed by the lead or owner; the affected acceptance criteria are the ones marked "(restated)".
 
 **Starting point** (owner, 2026-10-20). Phase 1 starts from main with the redesign merged (pull request #2, merge
-commit `0315d09`) and keeps what section 6.3 lists. Only enhancements the redesign does not ship stay deferred
+commit `0315d09`), once the documentation pull request that adds `docs/audit/redesign/preserve.mjs` is merged, and
+keeps what section 6.3 lists. Only enhancements the redesign does not ship stay deferred
 (section 14). The preserve checks behind section 6.3 are kept in `docs/audit/redesign/preserve.mjs` and run by the
 smoke test (section 11.4 item 6).
 
@@ -2016,7 +2028,11 @@ the flag), and the meters on the gain and spend tiles, both noted in the review 
 repository. A separate pull request fixes them. Phase 1 adds no mark like them, and does not count them as features to
 keep (section 6.3). A budget category with a long unbroken run of characters widens `#budgetTable` past a phone
 window, and a group with a gain target but no weigh-ins is in neither the gain chart nor its "Not shown" note; the
-same separate pull request fixes both.
+same separate pull request fixes both. That pull request delivers no P1 item and is reviewed with Checkpoint 2 against
+this list: each flagged gain dot differs from the other dots by more than colour, and KEEP-24 is changed to count that
+mark; the gain and spend tile meters no longer carry a state by colour alone; at 390 x 844 a budget category of 60
+characters with no space leaves `document.documentElement.scrollWidth <= clientWidth`; a group with a gain target and
+no weigh-ins is named in `#gain p.hint`; KEEP-01 to KEEP-34 otherwise pass unchanged.
 
 **Choices made in this specification** (recommendations, not evidence):
 
@@ -2026,7 +2042,8 @@ same separate pull request fixes both.
 - One area-level CAN'T TELL row when a whole file or column is unusable, instead of one row per subject.
 - A gain session is a date with at least half the group weighed (`max(1, ceil(0.5 x head))`); averaging two same-day
   weights; months before a budget category's first row count as "not started".
-- The gain tile shows the judged group furthest below its target (the redesign prefers Yearlings, then the first group
+- The gain tile shows the judged group with the lowest ratio of G to its target, ties going to the first in groups.csv
+  (the redesign prefers Yearlings, then the first group
   with a target; `cfd77e5` hard-coded Yearlings, [LOAD-03](02-findings.md#load-03)).
 - Head 0 means groups.csv records no animals in the group now. With no weigh-in in the last `gainMaxAgeDays` (45, D),
   the group's gain is not judged: a note and the gain line say so, the weigh-ins stay in the file as history, and the
@@ -2053,8 +2070,9 @@ from every file; BUD-04's cases use one closed month per category. The audit's s
 group files were not re-read for this specification. If a fixture differs, the criterion should be adjusted to the
 fixture, not the rule.
 
-**Not verified.** Nothing here was implemented. The statements about the redesigned page (sections 6.3, 11.4 and 12)
-were measured with Playwright Chromium on main at `0315d09` on 2026-10-20, at 1280 x 900, at 390 x 844 with touch, and
+**Not verified.** Nothing here was implemented. The statements about the redesigned page (sections 5.1 to 5.6, 6.1
+to 6.3, 7, 10.2, 11.4 and 12; the `app.js` function names and line numbers are from reading the code on main) were
+measured with Playwright Chromium on main at `0315d09` on 2026-10-20, at 1280 x 900, at 390 x 844 with touch, and
 at 320 x 640 where stated; the new P1-10 and P1-14 head-count criteria are expectations derived from section 5.7 and
 have not been run. The browser behaviour of Firefox, WebKit, real phones and screen readers, and the GitHub Pages
 deployment, remain untested (the site returned 403 through the proxy). The values in

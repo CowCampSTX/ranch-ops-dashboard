@@ -31,9 +31,10 @@
 // page URL (in servers mode, also at a case folder): a set-up problem, not a result about the page, reported on one
 // line that starts "ENVIRONMENT:". The recorded runs are in docs/audit/08-redesign-coverage.md section 2.
 //
-// Odd-data cases (gap, t6old, longnames, hostile, zerobudget, allzerobudget, singleweigh, missing) are built by default
-// in the browser from the page's own committed data (page.route edits each CSV by column name), so they test whatever
-// code the page serves, Phase 1 code included. PRESERVE_CASES=servers loads prebuilt case folders instead, from two
+// Odd-data cases (gap, gap12, gap18, t6old, longnames, hostile, zerobudget, allzerobudget, singleweigh, missing) are
+// built by default in the browser from the page's own committed data (page.route edits each CSV by column name), so
+// they test whatever code the page serves, Phase 1 code included. gap12 and gap18 are always built that way.
+// PRESERVE_CASES=servers loads prebuilt case folders for the others instead, from two
 // more arguments: node preserve.mjs [page] [cases-a] [cases-b] (defaults http://localhost:8800/cases/ for zerobudget,
 // allzerobudget, missing and singleweigh, and http://localhost:8801/cases/ for gap, hostile, longnames and t6old). The
 // audit used that mode once, on its own machine, to confirm that both modes measure the same.
@@ -80,6 +81,9 @@ const LONG = "Yearling steers on the north lease";
 const GROUP_FILES = ["groups", "moves", "weights", "health", "weigh_sessions"];
 const CASES = {
   gap: { water: { fn: (r) => (r.tank_id === "T1" && r.time >= "2026-09-26T00:00" && r.time <= "2026-09-27T12:00" ? null : r) } },
+  // T1 reads every 6 hours: one reading out leaves a 12-hour gap (no break), two leave 18 hours (a break)
+  gap12: { water: { fn: (r) => (r.tank_id === "T1" && r.time === "2026-09-26T06:00" ? null : r) } },
+  gap18: { water: { fn: (r) => (r.tank_id === "T1" && (r.time === "2026-09-26T06:00" || r.time === "2026-09-26T12:00") ? null : r) } },
   t6old: { water: { fn: (r) => (r.tank_id === "T6" && r.time > "2026-09-22T12:00" ? null : r) } },
   longnames: { ...Object.fromEntries(GROUP_FILES.map((f) => [f, { fn: swap({ Yearlings: LONG }) }])), budget: { fn: swap({ "Water and fencing": "Water development and fencing repairs" }) } },
   hostile: { pastures: { fn: (r) => (r.pasture_id === "P2" ? { ...r, name: '<img src=x onerror="window.__xss=1">' } : r.pasture_id === "P4" ? { ...r, name: "Lone Tree <A" } : r) },
@@ -239,10 +243,10 @@ const money = (s) => { const m = String(s).replace(/−/g, "-").match(/(-?)\$([\
 let sweep1280 = null;
 await guard(["KEEP-01", "KEEP-02", "KEEP-03", "KEEP-04"], async () => {
   const { page, errs, close } = await open(PAGE);
-  // KEEP-01: every chart with readings is in the tab order, labelled, and described by the chart hint
+  // KEEP-01: every chart with readings is in the tab order, labelled, and described by the chart hint (#chart-help)
   const a = await page.evaluate(() => [...document.querySelectorAll("svg.chart")].map((s) => {
     const d = s.getAttribute("aria-describedby"), help = d && document.getElementById(d);
-    return { tab: s.getAttribute("tabindex"), label: s.getAttribute("aria-label") ?? "", role: s.getAttribute("role"), rd: s.getAttribute("aria-roledescription"), help: help ? help.textContent.trim().length : 0 };
+    return { tab: s.getAttribute("tabindex"), label: s.getAttribute("aria-label") ?? "", role: s.getAttribute("role"), rd: s.getAttribute("aria-roledescription"), help: d === "chart-help" && help ? help.textContent.trim().length : 0 };
   }));
   const reached = [];
   for (let i = 0; i < 90; i++) {
@@ -255,7 +259,7 @@ await guard(["KEEP-01", "KEEP-02", "KEEP-03", "KEEP-04"], async () => {
   const t6c = await t6.page.evaluate(() => { const s = [...document.querySelectorAll("#tanks svg.chart")].find((x) => /^Tank T6 /.test(x.getAttribute("aria-label"))); return { exists: !!s, tab: s?.getAttribute("tabindex") ?? null, focusable: document.querySelectorAll("svg.chart[tabindex='0']").length }; });
   await t6.close();
   check("KEEP-01", a.length === 10 && a.every((c) => c.tab === "0" && c.label && c.rd && c.help > 0) && reached.length === a.length && inOrder && t6c.exists && t6c.tab === null && t6c.focusable === 9,
-    `${a.length} charts; tabindex=0 on ${a.filter((c) => c.tab === "0").length}; aria-label on ${a.filter((c) => c.label).length}; role ${[...new Set(a.map((c) => c.role))]}; aria-roledescription on ${a.filter((c) => c.rd).length}; aria-describedby -> hint with text on ${a.filter((c) => c.help).length}; Tab from the top reaches ${reached.length} charts in document order ${inOrder}; t6old case: T6 chart with no readings has tabindex ${t6c.tab} and ${t6c.focusable} charts stay focusable`);
+    `${a.length} charts; tabindex=0 on ${a.filter((c) => c.tab === "0").length}; aria-label on ${a.filter((c) => c.label).length}; role ${[...new Set(a.map((c) => c.role))]}; aria-roledescription on ${a.filter((c) => c.rd).length}; aria-describedby="chart-help" with text on ${a.filter((c) => c.help).length}; Tab from the top reaches ${reached.length} charts in document order ${inOrder}; t6old case: T6 chart with no readings has tabindex ${t6c.tab} and ${t6c.focusable} charts stay focusable`);
 
   // KEEP-02: keyboard focus shows a reading in #tip (role=status, polite), value first, and a highlight on the chart
   await page.reload({ waitUntil: "networkidle" }); await settle(page);
@@ -354,7 +358,7 @@ await guard(["KEEP-34"], async () => {
 // ================================================================ touch
 await guard(["KEEP-06"], async () => {
   const { page, ctx, errs, close } = await open(PAGE, { w: 390, h: 844, touch: true });
-  const hint = await page.evaluate(() => { const f = document.querySelector("#chart-help .h-fine"), t = document.querySelector("#chart-help .h-touch"); return { fine: f && getComputedStyle(f).display, touch: t && getComputedStyle(t).display, ta: getComputedStyle(document.querySelector("svg.chart")).touchAction }; });
+  const hint = await page.evaluate(() => { const f = document.querySelector("#chart-help .h-fine"), t = document.querySelector("#chart-help .h-touch"); return { fine: f && getComputedStyle(f).display, touch: t && getComputedStyle(t).display, ta: [...new Set([...document.querySelectorAll("svg.chart")].map((s) => getComputedStyle(s).touchAction))].join() }; });
   const center = (sel) => page.evaluate((sel) => { const e = document.querySelector(sel); e.scrollIntoView({ block: "center", behavior: "instant" }); const b = e.getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height / 2 }; }, sel);
   const tapAt = async (p) => { await page.touchscreen.tap(p.x, p.y); await settle(page, 200); return snap(page); };
   const tank = await tapAt(await center("#tanks .tank svg.chart circle[r='4']"));
@@ -371,9 +375,9 @@ await guard(["KEEP-06"], async () => {
   const s2 = await snap(page);
   await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] }); await settle(page, 150);
   const s3 = await snap(page);
-  const ok = hint.fine === "none" && hint.touch !== "none" && inside(tank) && /%/.test(tank.first) && inside(gainDot) && gainDot.text !== tank.text && inside(grazBar) && grazBar.text !== gainDot.text && mark === 1 && off.hidden && !s1.hidden && !s2.hidden && s2.text !== s1.text && !s3.hidden && !errs.length;
+  const ok = hint.fine === "none" && hint.touch !== "none" && hint.ta === "pan-y" && inside(tank) && /%/.test(tank.first) && inside(gainDot) && gainDot.text !== tank.text && inside(grazBar) && grazBar.text !== gainDot.text && mark === 1 && off.hidden && !s1.hidden && !s2.hidden && s2.text !== s1.text && !s3.hidden && !errs.length;
   check("KEEP-06", ok,
-    `390x844 hasTouch: hint shows its touch line (fine ${hint.fine}, touch ${hint.touch}); charts touch-action ${hint.ta}; tap a tank's latest point -> readout "${tank.text.slice(0, 34)}" inside window ${inside(tank)}; tap a gain dot -> "${gainDot.text.slice(0, 30)}" inside ${inside(gainDot)}; tap a grazing bar -> "${grazBar.text.slice(0, 30)}" inside ${inside(grazBar)}, one highlight ${mark}; tap outside any chart hides it ${off.hidden}; slide a finger 80 px left along a tank chart: readout changes ${s2.text !== s1.text} ("${s1.text.slice(0, 22)}" -> "${s2.text.slice(0, 22)}") and stays after lifting ${!s3.hidden}; page errors ${errs.length}`);
+    `390x844 hasTouch: hint shows its touch line (fine ${hint.fine}, touch ${hint.touch}); touch-action on every chart: ${hint.ta}; tap a tank's latest point -> readout "${tank.text.slice(0, 34)}" inside window ${inside(tank)}; tap a gain dot -> "${gainDot.text.slice(0, 30)}" inside ${inside(gainDot)}; tap a grazing bar -> "${grazBar.text.slice(0, 30)}" inside ${inside(grazBar)}, one highlight ${mark}; tap outside any chart hides it ${off.hidden}; slide a finger 80 px left along a tank chart: readout changes ${s2.text !== s1.text} ("${s1.text.slice(0, 22)}" -> "${s2.text.slice(0, 22)}") and stays after lifting ${!s3.hidden}; page errors ${errs.length}`);
   await close();
 });
 
@@ -532,7 +536,7 @@ await guard(["KEEP-13"], async () => {
       return {
         state: [...c.classList].filter((x) => x !== "tank"), id: c.querySelector(".tank-name span")?.textContent.trim(), name: c.querySelector(".tank-name b")?.textContent.trim(),
         pill: pill ? [...pill.classList].filter((x) => x !== "pill") : null, icon: !!pill?.querySelector("svg"), word: pill?.textContent.trim() ?? "",
-        level: lvl?.textContent.trim() ?? "", charts: c.querySelectorAll("svg.chart").length, nameH: Math.round(c.querySelector(".tank-name b")?.getBoundingClientRect().height ?? 0),
+        level: lvl?.textContent.trim() ?? "", when: c.querySelector(".tank-level span")?.textContent.trim() ?? "", charts: c.querySelectorAll("svg.chart").length, nameH: Math.round(c.querySelector(".tank-name b")?.getBoundingClientRect().height ?? 0),
       };
     }));
     const list = await listRows(page);
@@ -543,10 +547,10 @@ await guard(["KEEP-13"], async () => {
     const orderOk = known.every((c, i) => i === 0 || rank[st(c)] >= rank[st(known[i - 1])]) && cards.every((c, i) => st(c) in rank || cards.slice(0, i).every((p) => st(p) !== "good"));
     const tieOk = cards.every((c, i) => i === 0 || st(c) !== st(cards[i - 1]) || cards[i - 1].id.localeCompare(c.id, "en", { numeric: true }) < 0);
     const notGood = new Set(cards.filter((c) => st(c) !== "good").map((c) => c.id));
-    const ok = cards.length === ids.size && new Set(cards.map((c) => c.id)).size === cards.length && cards.every((c) => ids.has(c.id) && c.name && c.pill && c.icon && c.word && c.pill.join() === c.state.join() && /^(\d+(\.\d+)?%|\S+)$/.test(c.level) && !/NaN|undefined/.test(c.level) && c.charts === 1)
+    const ok = cards.length === ids.size && new Set(cards.map((c) => c.id)).size === cards.length && cards.every((c) => ids.has(c.id) && c.name && c.pill && c.icon && c.word && c.pill.join() === c.state.join() && /^(\d+(\.\d+)?%|\S+)$/.test(c.level) && !/NaN|undefined/.test(c.level) && /^(at |last heard )\S/.test(c.when) && c.charts === 1)
       && orderOk && tieOk && [...notGood].sort().join() === [...named].sort().join() && new Set(cards.map((c) => c.nameH)).size === 1;
     all &&= ok;
-    lines.push(`${w}px: ${cards.length} cards for ${ids.size} tank ids in the data; order ${cards.map((c) => `${c.id}:${st(c)}`).join(" ")}; worst first ${orderOk}, same state by tank number ${tieOk}; pills with icon and word ${cards.filter((c) => c.icon && c.word).length}/${cards.length} (${[...new Set(cards.map((c) => c.word))].join(", ")}), pill state = card state ${cards.every((c) => c.pill?.join() === c.state.join())}; levels ${cards.map((c) => c.level).join(" ")}; one chart per card ${cards.every((c) => c.charts === 1)}; cards not OK ${[...notGood].sort()} = tanks named in Water rows ${[...named].sort()}; tank names one line ${new Set(cards.map((c) => c.nameH)).size === 1}`);
+    lines.push(`${w}px: ${cards.length} cards for ${ids.size} tank ids in the data; order ${cards.map((c) => `${c.id}:${st(c)}`).join(" ")}; worst first ${orderOk}, same state by tank number ${tieOk}; pills with icon and word ${cards.filter((c) => c.icon && c.word).length}/${cards.length} (${[...new Set(cards.map((c) => c.word))].join(", ")}), pill state = card state ${cards.every((c) => c.pill?.join() === c.state.join())}; levels ${cards.map((c) => c.level).join(" ")}; times ${cards.map((c) => c.when).join(", ")}; one chart per card ${cards.every((c) => c.charts === 1)}; cards not OK ${[...notGood].sort()} = tanks named in Water rows ${[...named].sort()}; tank names one line ${new Set(cards.map((c) => c.nameH)).size === 1}`);
     await close();
   }
   check("KEEP-13", all, lines.join("; "));
@@ -695,7 +699,11 @@ await guard(["KEEP-23"], async () => {
   await g.page.setViewportSize({ width: 390, height: 844 }); await settle(g.page, 450);
   const c = await count(g.page);
   await g.close(); await base.close();
-  check("KEEP-23", a.n === 2 && b.n === 1 && c.n === 2 && a.gap > 0 && c.gap > 0, `gap case (T1 silent Sep 26 00:00 to Sep 27 12:00): T1 line in ${a.n} pieces with a ${a.gap} px break at 1280 (chart ${a.w} wide) and ${c.n} pieces with a ${c.gap} px break at 390; committed data: ${b.n} piece`);
+  // the 12-hour threshold: built in the browser in either mode (no prebuilt folder)
+  const g12 = await open(PAGE, { route: routeEdits(CASES.gap12) }), g18 = await open(PAGE, { route: routeEdits(CASES.gap18) });
+  const d = await count(g12.page), e = await count(g18.page);
+  await g12.close(); await g18.close();
+  check("KEEP-23", a.n === 2 && b.n === 1 && c.n === 2 && a.gap > 0 && c.gap > 0 && d.n === 1 && e.n === 2, `gap case (T1 silent Sep 26 00:00 to Sep 27 12:00): T1 line in ${a.n} pieces with a ${a.gap} px break at 1280 (chart ${a.w} wide) and ${c.n} pieces with a ${c.gap} px break at 390; committed data: ${b.n} piece; a 12-hour gap (gap12): ${d.n} piece(s), expected 1; an 18-hour gap (gap18): ${e.n} piece(s), expected 2`);
 });
 
 // KEEP-24: animals the warning rule flags are marked on the gain chart, and their readouts say so with an icon and words

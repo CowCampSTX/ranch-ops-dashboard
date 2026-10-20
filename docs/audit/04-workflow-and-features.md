@@ -154,8 +154,9 @@ export disappears, and a header-only water.csv gives "WATER TANKS OK / 0 of 0 / 
   last 24 h; weigh-in Sep 15; budget through Sep". Add the age check against the clock with a demo flag, so the
   fictional page says "example data" rather than raising a false alarm ([LOAD-05](02-findings.md#load-05)). Add the
   "sensor late" warning for a tank that stopped reporting less than 24 hours ago ([WAT-05](02-findings.md#wat-05);
-  demo setting 12 hours; each tank card already shows the time of its shown level since the redesign). Show weighed
-  head against inventory head beside every group gain figure (`RULE-GAIN-10`, class C, Phase 1; on the committed data
+  demo setting 12 hours; each tank card already shows the time of its shown level since the redesign, by code reading
+  of `app.js` on main `0315d09`, [08 section 3.2](08-redesign-coverage.md#32-partly-addressed)). Show weighed head
+  against inventory head beside every group gain figure (`RULE-GAIN-10`, class C, Phase 1; on the committed data
   "45 of 45 heifers, 150 of 150 yearlings").
 
 ### Step 2. New or changed, worst first (about 35 seconds)

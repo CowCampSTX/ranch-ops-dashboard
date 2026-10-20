@@ -262,7 +262,16 @@ from the redesigned app.js, so match code by what it does, not by line number. T
 fictional data and is not production-ready; every threshold is a demonstration setting or ranch choice.
 If the pull request is Phase 2 or Phase 3 work, review it against that item's acceptance criteria in
 docs/audit/05-roadmap.md instead of 06 section 12, and allow only the data changes the item names (for example, P2-08
-changes moves.csv). Everything else below still applies.
+changes moves.csv). Everything else below still applies, except that a planted problem the item adds on purpose (05
+section 4, "Phase 2 rule for the committed data") may add its row in task 3 and its entry in PLANTED in task 6 when it
+is listed in PLANTED and the README, and a preserve check may change under that item as task 2 allows for a P1 item.
+If the pull request is the follow-up to the redesign named in 06 section 15, it delivers no P1 item: review it against
+that section's list, the preserve checks (KEEP-24 may change to count the new mark) and tasks 2 to 7.
+Phase 1 lands one step of HANDOFF.md's build order at a time. Tasks 3, 5 and 6 describe the finished Phase 1: for a
+pull request before the last step, require them only for the P1 items already merged and the ones it delivers (05
+section 3.1's "Changed by" column names the items behind each row's wording). For everything else, the page must be no
+worse than on main: the same 10 problems with the same severities, and no new NaN, Infinity, blank section or uncaught
+page error.
 
 TASKS
 1. Scope. Say which P1 items the pull request claims to deliver. Read the diff against 06 for those items. For each of
@@ -283,8 +292,8 @@ TASKS
    - the preserve checks KEEP-01 to KEEP-34 (06 sections 6.3 and 11.4), if the smoke test does not carry them yet:
      serve the pull request head (python3 -m http.server 8766 --bind 127.0.0.1) and run
      node docs/audit/redesign/preserve.mjs http://localhost:8766/ (recorded on main at 0315d09: 34 PASS). A FAIL is
-     BLOCKING unless the pull request changes that behaviour on purpose, under a P1 item or as the fix for the
-     colour-only marks (06 section 15), and says which and why.
+     BLOCKING unless the pull request changes that behaviour on purpose, under the work item it delivers (a P1 item,
+     or the 05 item for Phase 2 or 3) or as the fix for the colour-only marks (06 section 15), and says which and why.
    Also check that CI passed on the pull request.
    If a command fails because of your set-up rather than the code (see "Before running the review scripts" in
    docs/audit/README.md), list it under Environment problems, not as an issue.
