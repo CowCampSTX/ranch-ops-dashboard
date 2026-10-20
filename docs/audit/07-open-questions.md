@@ -24,7 +24,7 @@ demonstration on fictional data whatever the answers; none of them makes it prod
 | [OQ-10](#oq-10-a-test-only-browser-dependency) | May CI use a pinned, test-only Playwright dependency? | Yes / no | Yes |
 | [OQ-11](#oq-11-readme-edits-in-phase-1) | May Phase 1 pull requests edit README.md and retake its screenshots? | Yes / show me first | Yes, only the changes listed in 06 section 10.2 |
 | [OQ-12](#oq-12-fictional-demo-only-or-real-data-later) | Public fictional demo only, or might it run on a real ranch's data later? | Demo only / real later | Demo only |
-| [OQ-13](#oq-13-merging-this-pull-request) | Merge this pull request (audit plus redesign) before Phase 1 starts? | Yes / not yet | Phase 1 waits for the first Codex review and your merge |
+| [OQ-13](#oq-13-merging-the-redesign-pull-request) | Merge the redesign pull request (#2) before Phase 1 starts? | Yes / not yet | Phase 1 waits for the first Codex review and your merge |
 
 ## Data and time
 
@@ -201,14 +201,14 @@ the plan defers: shared records, access control and private hosting
 **Default.** Public fictional demo only. If the answer is "real data later", those needs get their own plan; nothing
 in Phases 1 to 3 adds a backend or a shared store.
 
-### OQ-13: Merging this pull request
+### OQ-13: Merging the redesign pull request
 
-**Question.** Will you merge this pull request (the audit plus the separate redesign commit) into main before Phase 1
-starts?
+**Question.** The audit was merged in pull request #1. Will you merge the redesign pull request (#2) into main before
+Phase 1 starts?
 
 **Why it matters.** Phase 1 work must start from the redesigned `app.js` ([HANDOFF.md](HANDOFF.md)). Nothing is merged
 or deployed without you.
 
 **Default.** Phase 1 waits for the first Codex review ([CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md), Checkpoint 1)
 and your merge, then each Phase 1 pull request branches from main. If you would rather not merge yet, Phase 1 branches
-from the redesign commit on this branch and its pull requests stack on it.
+from the redesign pull request's branch and its pull requests stack on it.

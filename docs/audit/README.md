@@ -12,11 +12,11 @@ production code**: every file it added is under `docs/audit/`.
 |---|---|
 | Repository | CowCampSTX/ranch-ops-dashboard |
 | Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main), "Switch the dashboard to a black theme with green accents" |
-| Work branch | `claude/project-thread-nu46kf` (the pull request from this branch into main) |
+| Work branch | `claude/project-thread-nu46kf`. The audit was merged into main in pull request #1 (merge commit `71f3492`). |
 | When | Baseline run 2026-10-15; registries built 2026-10-16; documents reviewed and fixed 2026-10-19 |
 | Project guidance files | **There is no PROJECT_CONTEXT.md and no AGENTS.md in the repository.** The audit judged the code against README.md, the code itself, the committed fictional data and the project's stated purpose. |
 | Blocked checks | The published GitHub Pages site could not be reached (the environment's proxy answered 403), so the live deployment is unverified. Only Playwright Chromium, with phone and touch emulation, was run: no real phones, screen readers, Firefox or WebKit. No user testing was done. |
-| Separate commit in the same pull request | A visual redesign of `index.html` and `app.js` that the owner asked for. It is not part of the audit; see [The redesign commit](#the-redesign-commit). |
+| Separate pull request | A visual redesign of `index.html` and `app.js` that the owner asked for, in pull request #2 from the same branch. It is not part of the audit; see [The redesign](#the-redesign). |
 
 ## The five improvements most likely to make the dashboard more reliable and useful
 
@@ -71,8 +71,8 @@ Also in this folder:
   run the checks, the constraints).
 - [CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md): two ready-to-paste prompts for an independent review by OpenAI
   Codex, one before any production code and one for each implementation pull request.
-- [08-redesign-coverage.md](08-redesign-coverage.md): which findings the redesign commit already addresses. It is being
-  written separately and is not part of this audit's evidence.
+- [08-redesign-coverage.md](08-redesign-coverage.md): which findings the redesign already addresses, written with the
+  redesign's pull request (#2). It is not part of this audit's evidence.
 
 Supporting folders:
 
@@ -157,28 +157,27 @@ The dashboard is not production-ready today, and completing Phase 1, or the whol
 - **It has no shared records.** A static site cannot store acknowledgements, owners or crew notes that others can
   see; those stay deferred.
 
-**This audit changed no production code.** Every audit commit on the work branch touches only files under
-`docs/audit/`. When this page was written, before the redesign commit was added,
-`git diff --stat cfd77e5 HEAD -- . ':(exclude)docs/audit'` printed nothing: `index.html`, `app.js`, `exceptions.js`,
-`data/`, `scripts/`, `tests/`, `README.md` and `.github/` were exactly as reviewed. The redesign commit described
-below is separate from the audit; it is the one commit in the pull request meant to change production files.
+**This audit changed no production code.** Every audit commit touches only files under `docs/audit/`. For the merged
+audit, `git diff --stat cfd77e5 71f3492 -- . ':(exclude)docs/audit'` prints nothing: `index.html`, `app.js`,
+`exceptions.js`, `data/`, `scripts/`, `tests/`, `README.md` and `.github/` were exactly as reviewed. The redesign
+described below is separate from the audit and is the only change meant to touch production files.
 
-## The redesign commit
+## The redesign
 
-The same pull request also carries a **separate commit** that replaces `index.html` and `app.js` (and the README
-screenshots) with a visual redesign the owner asked for: black background, green accent, charts drawn at their real
-width, keyboard and touch chart reading, and phone layouts.
+A **separate pull request** (#2, after the audit's #1) replaces `index.html` and `app.js`, the README's chart text and
+the screenshots in `docs/` with a visual redesign the owner asked for: black background, green accent, charts drawn at
+their real width, keyboard and touch chart reading, and phone layouts.
 
 - `exceptions.js`, `data/`, `tests/` and `scripts/` are unchanged by it, and every number on the page is meant to stay
   identical.
 - **Line numbers in the findings refer to the reviewed commit `cfd77e5`, not to the redesign.** For example,
   [SEC-01](02-findings.md#sec-01)'s nine `innerHTML` places (`app.js:28, :54, :68, :82, :104, :143, :170, :194, :198`)
   are positions in `cfd77e5`'s `app.js`. Read them with `git show cfd77e5:app.js`.
-- Where 01-06 say the work branch "adds only `docs/audit/` files", they describe the branch before the redesign commit.
-- Which findings the redesign already addresses is mapped in [08-redesign-coverage.md](08-redesign-coverage.md),
-  written separately. A finding counts as fixed only when its acceptance test passes, not because the mapping says so.
+- Where 01-06 say the work branch "adds only `docs/audit/` files", they describe the audit's pull request (#1).
+- Which findings the redesign already addresses is mapped in [08-redesign-coverage.md](08-redesign-coverage.md). A
+  finding counts as fixed only when its acceptance test passes, not because the mapping says so.
 - **Phase 1 work starts from the redesigned `app.js`.**
-- The first Codex review checks the redesign commit on its own
+- The first Codex review checks the redesign pull request on its own
   ([CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md)).
 
 ## Scope limits that apply everywhere

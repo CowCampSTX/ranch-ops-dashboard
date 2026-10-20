@@ -10,13 +10,14 @@ How to use: copy everything inside the grey box, paste it into Codex, and replac
 pull request link. Codex only reviews. It must not merge, deploy, push or edit the dashboard's files; you decide what
 happens next.
 
-**About the redesign commit.** The audit's pull request also carries a separate commit that replaces `index.html` and
-`app.js` (plus the README screenshots) with a visual redesign the owner asked for: black background, green accent,
-charts drawn at their real width, keyboard and touch chart reading, phone layouts. `exceptions.js`, `data/`, `tests/`
-and `scripts/` are unchanged by it, and every number on the page is meant to stay identical. Line numbers in the
-findings refer to the reviewed commit `cfd77e5`, not to the redesign.
-[08-redesign-coverage.md](08-redesign-coverage.md) maps which findings the redesign already addresses. Checkpoint 1
-reviews the redesign commit on its own; Phase 1 work starts from the redesigned `app.js`.
+**About the redesign.** The audit was merged into main in pull request #1 (merge commit `71f3492`). A second pull
+request (#2) carries the visual redesign the owner asked for. It replaces `index.html` and `app.js`, the README's chart
+text and the screenshots in `docs/`: black background, green accent, charts drawn at their real width, keyboard and
+touch chart reading, phone layouts. `exceptions.js`, `data/`, `tests/` and `scripts/` are unchanged by it, and every
+number on the page is meant to stay identical. Line numbers in the findings refer to the reviewed commit `cfd77e5`,
+not to the redesign. [08-redesign-coverage.md](08-redesign-coverage.md) maps which findings the redesign already
+addresses. Checkpoint 1 reviews the audit and the redesign pull request; Phase 1 work starts from the redesigned
+`app.js`. Paste the link to pull request #2 into Checkpoint 1.
 
 ## Checkpoint 1: audit review, before any production code
 
@@ -27,9 +28,10 @@ index.html, app.js, exceptions.js, data/, scripts/, tests/, README.md, .github/.
 repository for anything you write. If you cannot run or reach something, say "can't verify" and why; do not guess.
 
 REPOSITORY: CowCampSTX/ranch-ops-dashboard
-PULL REQUEST: [paste the pull request link here]. It is the pull request from branch
+PULL REQUEST: [paste the link to the redesign pull request, #2, here]. It is the open pull request from branch
 claude/project-thread-nu46kf into main (gh pr list --head claude/project-thread-nu46kf).
-REVIEWED COMMIT: cfd77e50a050163b542cadfc6b38882c0341e99d (main, "cfd77e5").
+REVIEWED COMMIT: cfd77e50a050163b542cadfc6b38882c0341e99d ("cfd77e5"), the code the audit reviewed.
+AUDIT MERGED: pull request #1, merge commit 71f3492 on main.
 
 WHAT THE PROJECT IS: a static ranch operations dashboard (plain HTML and JavaScript ES modules, no build step) that
 answers "What needs my attention today, why, and what should happen next?". It is a portfolio demonstration on
@@ -37,8 +39,8 @@ FICTIONAL data (Example Ranch). It is NOT production-ready. Every threshold in i
 in 24 h, 24 h sensor silence, planned graze days, 2-day grace, 80%/50% of target gain, 2.0/1.0 lb/day targets,
 7 days to due, 5%/10% over budget) is a demonstration setting or ranch choice, not validated guidance.
 
-WHAT THE PULL REQUEST CONTAINS:
-1. An audit under docs/audit/. Start at docs/audit/README.md. Deliverables: 01-baseline.md (current state and test
+WHAT TO REVIEW:
+1. The audit under docs/audit/, already on main (pull request #1). Start at docs/audit/README.md. Deliverables: 01-baseline.md (current state and test
    results), 02-findings.md (83 findings with stable IDs such as LOAD-01; the registry is data/findings.json),
    03-research-and-data.md (98 rules classed A-D, 247 sources), 04-workflow-and-features.md, 05-roadmap.md (work items
    P1-01..P1-17, P2-01..P2-11, P3-01..P3-03; decisions D1-D16), 06-phase1-spec.md (Phase 1 specification; acceptance
@@ -46,10 +48,13 @@ WHAT THE PULL REQUEST CONTAINS:
    citation-check records), diagnostics/ (repro scripts), scenarios/ (10 fictional data sets with expected.json).
    Classes: A supported general guidance; B context-dependent guidance; C ranch-specific management choice;
    D synthetic demonstration setting.
-2. A SEPARATE redesign commit that replaces index.html and app.js (plus the README screenshot images) with a visual
-   redesign: black background, green accent, charts drawn at their real width, keyboard/touch chart reading, phone
-   layouts. exceptions.js, data/, tests/ and scripts/ are meant to be unchanged by it, and every number on the page is
-   meant to stay identical. docs/audit/08-redesign-coverage.md claims which findings it already addresses.
+2. Pull request #2, with two kinds of commit. The redesign commit replaces index.html and app.js, the README's chart
+   text and the screenshots docs/screenshot.png, docs/water.png, docs/grazing-gain.png and the new docs/phone.png:
+   black background, green accent, charts drawn at their real width, keyboard/touch chart reading, phone layouts.
+   exceptions.js, data/, tests/ and scripts/ are meant to be unchanged by it, and every number on the page is meant
+   to stay identical. The docs commit adds docs/audit/08-redesign-coverage.md (which findings the redesign claims to
+   address) and docs/audit/redesign/coverage.mjs, and updates the audit's README, HANDOFF.md, 07-open-questions.md
+   and this prompt to say the redesign is in #2.
 IMPORTANT: app.js and index.html line numbers in the findings refer to cfd77e5, not to the redesign.
 
 SETUP: Node 22 and python3; Playwright with Chromium for browser scripts. Run commands from the repository root.
@@ -62,10 +67,11 @@ scripts were written for cfd77e5's page; on the redesign they may need selectors
 an element on the redesign is not evidence either way.
 
 TASKS
-A. Commit hygiene. List the pull request's commits and the files each one touches. Confirm that every commit except
-   the redesign commit touches only docs/audit/, and that the redesign commit touches only index.html, app.js and the
-   README screenshot images. Flag anything else, especially any change to exceptions.js, data/, tests/, scripts/ or
-   .github/.
+A. Commit hygiene. Confirm that the merged audit changed nothing outside docs/audit/
+   (git diff --stat cfd77e5 71f3492 -- . ':(exclude)docs/audit' prints nothing). List pull request #2's commits and
+   the files each one touches. Confirm that the redesign commit touches only index.html, app.js, README.md and
+   docs/*.png, and that every other commit touches only docs/audit/. Flag anything else, especially any change to
+   exceptions.js, data/, tests/, scripts/ or .github/.
 B. Re-run the recorded checks and compare with what the documents quote:
    - node --test tests/exceptions.test.mjs (recorded: 8 pass, 0 fail), at the pull request head and in $REF;
    - python3 scripts/generate_data.py && git diff --exit-code data/ (recorded: no difference);
@@ -95,7 +101,9 @@ G. Check docs/audit/05-roadmap.md and docs/audit/06-phase1-spec.md for: contradi
 H. Check claims across docs/audit/: nothing says the dashboard is production-ready, that a threshold is validated, that
    the morning review takes two minutes, or that Example Ranch is real; health text stays on observation, scheduling,
    records and calling the veterinarian, with no diagnosis, treatment or dose; no investment or ROI economics.
-I. Review the redesign commit on its own:
+I. Review the redesign on its own:
+   - Run node docs/audit/redesign/coverage.mjs at the pull request head (recorded: 23 PASS, 0 FAIL) and say whether
+     each check tests what docs/audit/08-redesign-coverage.md says it tests.
    - Numbers identical. Serve $REF and the pull request head on two ports
      (python3 -m http.server PORT --bind 127.0.0.1 --directory DIR) and compare on the committed data: the as-of line;
      the tiles (recorded at cfd77e5: "Needs attention 10" with 2 critical, 6 serious, 2 warning; "Head on grass 375";
@@ -103,7 +111,9 @@ I. Review the redesign commit on its own:
      "Water (3)", "Grazing (1)", "Gain (2)", "Health (2)", "Budget (2)"); the 10 exception rows word for word; the
      budget table; the chart headings; and the chart details for T4, animal H026, Repairs and the Yearlings' Sand Hills
      stay (recorded: "Sep 30, 6 PM: 10%"; "0.11 lbs/day, Jul 20 to Sep 15 / Now 1136 lbs"; "Budget $7,200 / Actual
-     $9,000 / Over by $1,800"; "Sep 6 to now (24 days) / Plan: 21 days").
+     $9,000 / Over by $1,800"; "Sep 6 to now (24 days) / Plan: 21 days"). The redesign changes the wording, order
+     and layout of some of these on purpose; 08 section 4 lists every intended difference. Any number that differs,
+     or any difference not in that list, is a finding.
    - No new console errors, page errors or failed requests at 1280x900 and 390x844 (recorded at cfd77e5: none).
    - CSV text escaped. In a copy of the site (or with request interception), put <img src=x onerror="window.__xss=1">,
      <b>x</b> and a plain "<A" into a pasture name, tank ID, ear tag, group, health task and budget category. Check
@@ -119,7 +129,7 @@ OUTPUT, in this order:
 3. Classification disagreements.
 4. Roadmap and specification issues: contradiction, missing coverage, untestable criterion or phase dependency, each
    with file and section.
-5. Redesign commit: numbers identical (yes / no, listing every difference), console errors, escaping, and the 08 claims.
+5. Redesign: numbers identical (yes / no, listing every difference), console errors, escaping, and the 08 claims.
 6. New issues not in docs/audit/data/findings.json, each with a way to reproduce it.
 7. GO or NO-GO for starting Phase 1, with the required changes before GO (blocking) listed separately from
    suggestions (non-blocking).
