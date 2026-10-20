@@ -68,9 +68,10 @@ scripts/                 generate_data.py (fixed seed, same output every run)
 tests/                   node:test unit tests; browser tests go in tests/browser/
 .github/workflows/       CI: generator check and unit tests
 docs/
-  README.md              index of all documentation, and the Google Drive layout
+  README.md              index of all documentation, and the matching Google Drive folders
   project/               living project files: STATUS.md, DECISIONS.md
-  reviews/               independent review records (Codex checkpoints)
+  reviews/               independent review reports (Codex checkpoints)
+    prompts/             the prompt given to the reviewer for each report
   screenshots/           images used by the README
   audit/                 the October 2026 audit and the Phase 1 plan: specification, roadmap, handoff, open
                          questions, review prompts and the preserve checks
@@ -78,12 +79,17 @@ AGENTS.md                this file
 CLAUDE.md                imports this file for Claude
 ```
 
-Where new files go:
+Every folder under `docs/` has a `README.md` saying what belongs in it (the ten scenario data folders are described
+by `docs/audit/scenarios/README.md`, because a script rebuilds them). Where new files go:
 
-- A new specification, such as Phase 2: `docs/specs/<topic>.md` (create the folder with the first one).
-- A review report: `docs/reviews/YYYY-MM-DD-<reviewer>-<checkpoint>.md`, listed in `docs/reviews/README.md`.
+- A new specification, such as Phase 2: `docs/specs/<topic>.md` (create the folder, with its `README.md`, with the
+  first one).
+- A review report: `docs/reviews/YYYY-MM-DD-<reviewer>-<checkpoint>.md`, listed in `docs/reviews/README.md`, with the
+  prompt given to the reviewer in `docs/reviews/prompts/` under the same name ending in `.txt`.
 - A decision: a dated entry in `docs/project/DECISIONS.md`.
 - Browser tests: `tests/browser/`.
+- A new kind of material: a new folder under `docs/` with its `README.md`, the same folder in Drive, and a row in
+  `docs/README.md`.
 - Files under `docs/audit/` keep their paths, because reviews, prompts and thousands of links point at them. Add new
   material elsewhere and link to it.
 
@@ -118,22 +124,50 @@ means a set-up problem, not a result about the page.
 - Specification pull requests before a phase starts: a checkpoint like 1b in the same file.
 - To start a review, give the reviewer the checkpoint and the pull request, for example: "Run Checkpoint 2 from
   docs/audit/CODEX_REVIEW_PROMPT.md on the pull request's branch, for <pull request link>." The prompt text lives in
-  this repository, so any agent can read it. Paste-ready copies in Drive (`04-reviews`) are a convenience for people.
-- Save each review report in `docs/reviews/`.
+  this repository, so any agent can read it. A prompt filled in for one pull request is saved in
+  `docs/reviews/prompts/`, where the reviewer can read it from the pull request's branch.
+- A review is review only. The reviewer edits no repository file, pushes nothing and writes its working files outside
+  the repository, so the rule below about saving work before a session ends does not apply to it. Its report goes to
+  the owner.
+- The owner passes the report to the builder. The builder saves it in `docs/reviews/`, replacing local folder paths
+  with placeholders, lists it in `docs/reviews/README.md` and fixes what it asks for, in the pull request it reviewed
+  if that is still open, otherwise in the next one.
 
 ## GitHub and Google Drive
 
-- Everything the project needs lives in this repository or in the Drive folder, so Claude and Codex always work from
-  the same files. Nothing important lives only in a chat, a session or a local machine: before a session ends, push
-  the work to a branch, or save it to Drive when it cannot go to GitHub yet.
-- This repository is the source of truth for code, data, specifications, decisions, status and review records.
-- The owner's Google Drive folder `ranch-ops-dashboard` is the project hub for people: a "Start here" document,
-  copies of this file and the project files for reading on a phone, review prompts, uploads, media, and work that
-  cannot go to GitHub yet (code may go there when needed). Its layout is in
-  [docs/README.md](docs/README.md#google-drive).
-- An agent that can reach Drive may read it and add files there. An agent that cannot loses nothing it needs to
-  build: everything required is in this repository.
-- When a Drive copy and GitHub disagree, GitHub is right. Refresh the copy.
+Everything the project needs lives in this repository or in the project's Drive folder, so Claude and Codex always work
+from the same files. Nothing important lives only in a chat, a session or a local machine: before a session ends, push
+the work to a branch, or save it to Drive when it cannot go to GitHub yet. (A review-only task is the exception; see
+Reviews.)
+
+- **GitHub is the source of truth** for code, data, specifications, decisions, status and review records. The
+  repository is public, so nothing private goes in it.
+- **Google Drive** is the owner's My Drive, folder `ranch-ops-dashboard`: the account the owner also uses with Google
+  Drive for desktop. It holds readable copies of the documentation, private records and work that cannot go to GitHub
+  yet. Change the repository first, then refresh the copy. When a copy and GitHub disagree, GitHub is right.
+- A Drive connector can be signed in to a different Google account. Before writing through one, check that it shows
+  this project's folder with `Docs index.md` at its top. If it does not, write nothing and tell the owner.
+- An agent that cannot reach Drive loses nothing it needs to build: everything required is in this repository.
+
+Filing rules for Drive:
+
+1. Everything for this project lives inside `ranch-ops-dashboard`: never at the top of My Drive, loose anywhere else,
+   or in another project's folder (such as `Ranch Tech ROI`).
+2. Material that more than one project uses lives in My Drive outside the project folders. The folders that use it
+   link to it from their `README.md`; do not copy it into a project folder.
+3. The folders mirror `docs/` with the same names: `project`, `reviews` (with `prompts`), `screenshots` and `audit`.
+   Only `AGENTS.md`, `README.md` (the repository's front page) and `Docs index.md` (a copy of `docs/README.md`) sit at
+   the top. [docs/README.md](docs/README.md#google-drive) says which files are copied.
+4. Two folders exist only in Drive. `archive` holds superseded copies and private records, such as the original
+   handoff note, which names personal details. `work-in-progress` holds work that cannot go to GitHub yet, one dated
+   subfolder per piece; it moves to `archive` once the work is on GitHub.
+5. Every folder and subfolder, in Drive and under `docs/`, has a `README.md` saying what belongs in it. A new kind of
+   material gets a new folder in both places, with its `README.md`, and a row in `docs/README.md`.
+6. Dated material is named `YYYY-MM-DD-what`.
+7. Nothing in Drive is deleted or trashed without the owner's OK. A connector cannot change a file's content, so to
+   refresh a copy through one, move the old copy to `archive`, renamed `YYYY-MM-DD-<name>` with the date it was
+   replaced, then add the new copy. On the owner's PC, copying a file over the old one in the Google Drive for
+   desktop folder refreshes it in place and keeps its link.
 
 ## Writing style
 

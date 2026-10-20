@@ -10,6 +10,14 @@ is. Detailed design decisions live with the documents they shape:
 Add a new entry at the top when the owner decides something. Do not rewrite old entries; add a new one that replaces
 them and say which.
 
+## 2026-10-20: How files are filed in Drive
+
+Owner. Each project has its own folder in My Drive, and everything for this project lives inside
+`ranch-ops-dashboard`, filed by kind in subfolders with a `README.md` in every folder, as the Ranch Tech ROI project's
+folder is. Material that more than one project uses lives in My Drive outside the project folders. Every file the
+agents need is in GitHub or in Drive; Drive may hold code when it is needed there. The rules are in
+[AGENTS.md](../../AGENTS.md#github-and-google-drive).
+
 ## 2026-10-20: One instruction file for both agents, and a Drive hub
 
 Owner. Claude and Codex both work on the project. `AGENTS.md` at the repository root holds the shared instructions,

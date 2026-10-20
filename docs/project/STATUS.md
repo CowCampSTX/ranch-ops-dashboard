@@ -8,18 +8,19 @@ Last updated 2026-10-20 by Claude. Update this file whenever a pull request open
 |---|---|
 | `main` | `0315d09`: the visual redesign (pull request #2) on top of the audit (pull request #1, `71f3492`) |
 | Live page | https://cowcampstx.github.io/ranch-ops-dashboard/, served from `main` |
-| Phase 1 ("Fix now") | Not started. Waits for pull request #3 to be reviewed and merged |
+| Phase 1 ("Fix now") | Not started. Waits for the owner to merge pull request #3 (Codex Checkpoint 1b: GO) |
 | Checks on `main` (2026-10-20, Linux, Chromium) | Unit tests 8 of 8 pass; preserve checks 34 of 34 pass. Firefox, WebKit, real phones and screen readers not tested |
 
 ## Open pull requests
 
 | Pull request | What it does | Waiting on |
 |---|---|---|
-| [#3](https://github.com/CowCampSTX/ranch-ops-dashboard/pull/3) | Documentation only: the Phase 1 specification keeps the redesign's keyboard, touch and phone features, with browser checks for the tank cards, budget table and responsive charts; adds `AGENTS.md`, `CLAUDE.md` and this `docs/` layout | Codex Checkpoint 1b review, then the owner's merge |
+| [#3](https://github.com/CowCampSTX/ranch-ops-dashboard/pull/3) | Documentation only: the Phase 1 specification keeps the redesign's keyboard, touch and phone features, with browser checks for the tank cards, budget table and responsive charts; adds `AGENTS.md`, `CLAUDE.md`, this `docs/` layout and the Drive filing rules | The owner's merge |
 
-The Checkpoint 1b prompt is in
-[CODEX_REVIEW_PROMPT.md](../audit/CODEX_REVIEW_PROMPT.md#checkpoint-1b-specification-follow-up-before-phase-1); a copy
-ready to paste, with the pull request link filled in, is in the Drive folder `04-reviews`.
+Codex reviewed #3 at `fc2328e` with Checkpoint 1b and said GO, with no blocking issue
+([report](../reviews/2026-10-20-codex-checkpoint-1b.md), [prompt](../reviews/prompts/2026-10-20-codex-checkpoint-1b.txt)).
+The four small documentation fixes it asked for were made in #3 after the review, with the review record and the
+Drive filing rules.
 
 ## Next, in order
 
@@ -31,6 +32,12 @@ ready to paste, with the pull request link filled in, is in the Drive folder `04
    per step, each reviewed with Codex Checkpoint 2. Step 1 is P1-17 part a (boundary tests) with P1-13 (safe
    rendering).
 3. **Visual polish pass** after Phase 1, so the dashboard looks its best (the owner's request).
+
+## Where the files are
+
+GitHub holds everything an agent needs ([docs/README.md](../README.md)). The owner's Google Drive folder
+`ranch-ops-dashboard` holds readable copies, private records and work that is not on GitHub yet
+([AGENTS.md](../../AGENTS.md#github-and-google-drive)).
 
 ## Open questions for the owner
 

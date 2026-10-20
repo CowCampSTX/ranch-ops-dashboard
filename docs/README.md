@@ -1,17 +1,20 @@
 # Documentation
 
-Where everything about the Ranch Operations Dashboard lives. Agents start with [AGENTS.md](../AGENTS.md); people can
-start here.
+Everything about the Ranch Operations Dashboard beyond the page code. Agents start with [AGENTS.md](../AGENTS.md);
+people can start here. GitHub is the source of truth. The owner's Google Drive holds readable copies in folders with
+the same names (My Drive > `ranch-ops-dashboard`). Change a file here first, then refresh the Drive copy.
 
-## In this repository
+## Folders
 
-| Folder or file | What it holds | Changes |
+| Folder | What is in it | In Drive (`ranch-ops-dashboard/...`) |
 |---|---|---|
-| [project/STATUS.md](project/STATUS.md) | What is merged, what is open, what comes next | Updated with every merge or new pull request |
-| [project/DECISIONS.md](project/DECISIONS.md) | Dated decisions by the owner, and where the detailed ones are recorded | A new entry per decision |
-| [reviews/](reviews/README.md) | Independent review reports (Codex checkpoints) | A new file per review |
-| [audit/](audit/README.md) | The October 2026 audit of the dashboard and the Phase 1 plan | Paths stay fixed; files are revised in place |
-| [screenshots/](screenshots/) | The images on the project README | Retaken when the page changes |
+| [project/](project/README.md) | [STATUS.md](project/STATUS.md): what is merged, what is open, what comes next. [DECISIONS.md](project/DECISIONS.md): the owner's decisions, newest first | `project`: every file |
+| [reviews/](reviews/README.md) | Independent review reports (Codex checkpoints), one file each; [prompts/](reviews/prompts/README.md) holds the prompt given to the reviewer for each one | `reviews` and `reviews/prompts`: every file |
+| [screenshots/](screenshots/README.md) | The images on the repository's front page | `screenshots`: every file |
+| [audit/](audit/README.md) | The October 2026 audit of the dashboard and the Phase 1 plan: baseline, findings, research, workflow, roadmap, specification, open questions, coverage of the redesign, the handoff and the review prompts | `audit`: the documents (`README.md`, `01` to `08`, `HANDOFF.md`, `CODEX_REVIEW_PROMPT.md`). Its subfolders (`data`, `diagnostics`, `evidence`, `redesign`, `scenarios`, `screenshots`) hold scripts and machine-readable records and stay on GitHub only |
+
+Every folder here has a `README.md` saying what belongs in it. The ten scenario data folders are described by
+[audit/scenarios/README.md](audit/scenarios/README.md) instead, because a script rebuilds them.
 
 The most used files in `audit/`:
 
@@ -24,29 +27,29 @@ The most used files in `audit/`:
 | [audit/CODEX_REVIEW_PROMPT.md](audit/CODEX_REVIEW_PROMPT.md) | The prompts for each independent review checkpoint |
 | [audit/redesign/preserve.mjs](audit/redesign/preserve.mjs) | The preserve checks KEEP-01 to KEEP-34 |
 
-When the project grows:
+Adding material: put it in the folder it belongs to.
 
-- A new specification goes in `docs/specs/<topic>.md`.
-- A review report goes in `docs/reviews/YYYY-MM-DD-<reviewer>-<checkpoint>.md`.
-- A decision goes in `docs/project/DECISIONS.md`.
+- A new specification, such as Phase 2: `docs/specs/<topic>.md`. Create the folder with the first one, with its
+  `README.md`, the same folder in Drive, and a row above.
+- A review report: `docs/reviews/YYYY-MM-DD-<reviewer>-<checkpoint>.md`, and its prompt in `docs/reviews/prompts/`
+  with the same name ending in `.txt`.
+- A decision: a dated entry at the top of `docs/project/DECISIONS.md`.
+- Any other new kind of material: a new folder, here and in Drive, with a `README.md` and a row above. Name dated
+  material `YYYY-MM-DD-what`.
 
 ## Google Drive
 
-The owner's Drive folder [ranch-ops-dashboard](https://drive.google.com/drive/folders/1CpX3CHkWxbXsJHb_VNAh_uLJTCrzX8Hz)
-is the project hub for people. It is private to the owner. GitHub stays the source of truth: when a copy in Drive and
-a file here disagree, the file here is right.
+The owner's Drive folder `ranch-ops-dashboard` sits at the top of My Drive, next to the folders of the owner's other
+projects. It is private to the owner. The filing rules are in [AGENTS.md](../AGENTS.md#github-and-google-drive).
 
-| Drive folder | What goes there |
+| In Drive | What it is |
 |---|---|
-| `00-start-here` | The "Start here" document: what the project is, where things are, what to do next |
-| `01-agent-instructions` | Copies of `AGENTS.md` and `CLAUDE.md` |
-| `02-project-status` | Copies of `STATUS.md` and `DECISIONS.md` |
-| `03-plans-and-specs` | Copies of the handoff and open questions, links to the full specification and roadmap, and work in progress that is not on GitHub yet (one subfolder per piece of work) |
-| `04-reviews` | Review prompts ready to paste into Codex, and the review reports |
-| `05-design-and-media` | Screenshots, design references and other media |
-| `06-inbox` | Files the owner drops in for an agent to sort |
-| `99-archive` | Superseded files, kept for reference |
+| `AGENTS.md` | A copy of [AGENTS.md](../AGENTS.md), the instructions for every agent |
+| `README.md` | A copy of the repository's front page, [README.md](../README.md) |
+| `Docs index.md` | A copy of this file |
+| `project`, `reviews`, `screenshots`, `audit` | Copies of the folders above, as the table says |
+| `archive` | Drive only. Superseded copies, renamed `YYYY-MM-DD-<name>` with the date they were replaced, and private records that must not go in this public repository, such as the original handoff note of 2026-10-14 |
+| `work-in-progress` | Drive only. Work that cannot go to GitHub yet, one dated subfolder each, with a `README.md` saying what it is and where it goes. It moves to `archive` once it is on GitHub |
 
-Large files (the full specification, roadmap, findings and research) stay in GitHub only, with links from Drive, so
-there is one copy to keep current. Code lives in GitHub; it goes to Drive only when it cannot go to GitHub yet, and
-moves to GitHub as soon as it can.
+Material that more than one project uses lives in My Drive outside the project folders, and the folders that use it
+link to it from their `README.md`.

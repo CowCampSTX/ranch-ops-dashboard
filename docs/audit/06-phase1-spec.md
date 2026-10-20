@@ -2017,15 +2017,19 @@ D16 scenario-folder inputs updated to the data contract. Each can be reversed by
 
 **Starting point** (owner, 2026-10-20). Phase 1 starts from main with the redesign merged (pull request #2, merge
 commit `0315d09`), once the documentation pull request that adds `docs/audit/redesign/preserve.mjs` is merged, and
-keeps what section 6.3 lists. Only enhancements the redesign does not ship stay deferred
-(section 14). The preserve checks behind section 6.3 are kept in `docs/audit/redesign/preserve.mjs` and run by the
+keeps what section 6.3 lists. The page at `0315d09` is the reviewed baseline for what Phase 1 keeps, not a commit to
+branch from: each Phase 1 step branches from the newest `origin/main`, which includes the separate pull request for
+the known issues below once it has merged, and keeps that pull request's fixes too. Only enhancements the redesign
+does not ship stay deferred (section 14). The preserve checks behind section 6.3 are kept in `docs/audit/redesign/preserve.mjs` and run by the
 smoke test (section 11.4 item 6).
 
 **Known issues of the redesign, not features to keep** (recorded 2026-10-20). Two kinds of mark on main show status by
 colour without an icon or word of their own, against the rule that a status colour comes only with an icon and a
 label: the flagged gain dots, which differ from the others by hue only (1.10:1; their readings and the legend name
-the flag), and the meters on the gain and spend tiles, both noted in the review of the redesign, which is not in this
-repository. A separate pull request fixes them. Phase 1 adds no mark like them, and does not count them as features to
+the flag), and the meters on the gain and spend tiles. Both were found when Claude checked the redesigned page on main
+(`0315d09`, Playwright Chromium, 2026-10-20) for this specification; the notes of that check are not saved in this
+repository, and Codex's [Checkpoint 1 report](../reviews/2026-10-20-codex-checkpoint-1.md) does not cover them. A
+separate pull request fixes them. Phase 1 adds no mark like them, and does not count them as features to
 keep (section 6.3). A budget category with a long unbroken run of characters widens `#budgetTable` past a phone
 window, and a group with a gain target but no weigh-ins is in neither the gain chart nor its "Not shown" note; the
 same separate pull request fixes both. That pull request delivers no P1 item and is reviewed with Checkpoint 2 against
