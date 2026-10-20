@@ -24,7 +24,7 @@ demonstration on fictional data whatever the answers; none of them makes it prod
 | [OQ-10](#oq-10-a-test-only-browser-dependency) | May CI use a pinned, test-only Playwright dependency? | Yes / no | Yes |
 | [OQ-11](#oq-11-readme-edits-in-phase-1) | May Phase 1 pull requests edit README.md and retake its screenshots? | Yes / show me first | Yes, only the changes listed in 06 section 10.2 |
 | [OQ-12](#oq-12-fictional-demo-only-or-real-data-later) | Public fictional demo only, or might it run on a real ranch's data later? | Demo only / real later | Demo only |
-| [OQ-13](#oq-13-merging-the-redesign-pull-request) | Merge the redesign pull request (#2) before Phase 1 starts? | Yes / not yet | Phase 1 waits for the first Codex review and your merge |
+| [OQ-13](#oq-13-merging-the-redesign-pull-request) | Merge the redesign pull request (#2) before Phase 1 starts? | Yes / not yet | Answered: yes. Merged on 2026-10-20 (merge commit `0315d09`); Phase 1 branches from main |
 
 ## Data and time
 
@@ -182,9 +182,10 @@ the audit's scripts and the results are recorded in each pull request.
 wording first?
 
 **Why it matters.** The README is the portfolio's front page. Phase 1 changes some of the page text it quotes ("Water
-tanks OK" becomes "Sensors normal", "here now" becomes "there as of <date>"), and some README claims ("works on a
-phone", "replace the CSVs with exports in the same columns") would no longer be accurate
-([06-phase1-spec.md section 10.2](06-phase1-spec.md#102-page-copy-changes)).
+tanks OK" becomes "Sensors normal", "here now" becomes "there as of <date>"), and some README claims ("replace the CSVs
+with exports in the same columns", "the group grazing that pasture right now") would no longer be accurate
+([06-phase1-spec.md section 10.2](06-phase1-spec.md#102-page-copy-changes)). The README's chart paragraph (readings by
+mouse, tap or keyboard; cards on a phone) stays, because the page already does this.
 
 **Default.** Yes, limited to the changes listed in 06 section 10.2, in the same pull request as the code they describe,
 and reviewed by you before merge like every other change.
@@ -209,6 +210,9 @@ Phase 1 starts?
 **Why it matters.** Phase 1 work must start from the redesigned `app.js` ([HANDOFF.md](HANDOFF.md)). Nothing is merged
 or deployed without you.
 
-**Default.** Phase 1 waits for the first Codex review ([CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md), Checkpoint 1)
-and your merge, then each Phase 1 pull request branches from main. If you would rather not merge yet, Phase 1 branches
-from the redesign pull request's branch and its pull requests stack on it.
+**Answer (2026-10-20).** Yes. Codex Checkpoint 1 ([CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md)) cleared pull
+request #2 to merge at `e9d7ab3`, and you merged it into main the same day (merge commit `0315d09`). Each Phase 1 pull
+request branches from main and keeps what the redesigned page already does
+([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). Phase 1 still waits for the
+specification changes Checkpoint 1 asked for: their documentation pull request is reviewed with Checkpoint 1b and
+merged by you before any Phase 1 code.

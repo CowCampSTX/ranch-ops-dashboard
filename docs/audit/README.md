@@ -11,12 +11,12 @@ production code**: every file it added is under `docs/audit/`.
 | Item | Value |
 |---|---|
 | Repository | CowCampSTX/ranch-ops-dashboard |
-| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main), "Switch the dashboard to a black theme with green accents" |
+| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit ran), "Switch the dashboard to a black theme with green accents" |
 | Work branch | `claude/project-thread-nu46kf`. The audit was merged into main in pull request #1 (merge commit `71f3492`). |
 | When | Baseline run 2026-10-15; registries built 2026-10-16; documents reviewed and fixed 2026-10-19 |
 | Project guidance files | **There is no PROJECT_CONTEXT.md and no AGENTS.md in the repository.** The audit judged the code against README.md, the code itself, the committed fictional data and the project's stated purpose. |
 | Blocked checks | The published GitHub Pages site could not be reached (the environment's proxy answered 403), so the live deployment is unverified. Only Playwright Chromium, with phone and touch emulation, was run: no real phones, screen readers, Firefox or WebKit. No user testing was done. |
-| Separate pull request | A visual redesign of `index.html` and `app.js` that the owner asked for, in pull request #2 from the same branch. It is not part of the audit; see [The redesign](#the-redesign). |
+| Redesign | A visual redesign of `index.html` and `app.js` that the owner asked for, in pull request #2 from the same branch, merged into main on 2026-10-20 (merge commit `0315d09`). It is not part of the audit; see [The redesign](#the-redesign). |
 
 ## The five improvements most likely to make the dashboard more reliable and useful
 
@@ -69,10 +69,11 @@ Also in this folder:
 
 - [HANDOFF.md](HANDOFF.md): a short implementation handoff (what to build first, the Phase 1 definition of done, how to
   run the checks, the constraints).
-- [CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md): two ready-to-paste prompts for an independent review by OpenAI
-  Codex, one before any production code and one for each implementation pull request.
+- [CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md): ready-to-paste prompts for an independent review by OpenAI Codex:
+  Checkpoint 1 before any production code (run on 2026-10-20), Checkpoint 1b for the specification follow-up before
+  Phase 1, and Checkpoint 2 for each implementation pull request.
 - [08-redesign-coverage.md](08-redesign-coverage.md): which findings the redesign already addresses, written with the
-  redesign's pull request (#2). It is not part of this audit's evidence.
+  redesign's pull request (#2, merged). It is not part of this audit's evidence.
 
 Supporting folders:
 
@@ -83,6 +84,47 @@ Supporting folders:
 | [evidence/](evidence/) | The raw record: `baseline.json`; `audit_<area>.json` and the skeptic's `verify_<area>.json` for csv, time, water, grazing, gain, healthbudget and render; `research_<topic>.json` and the citation checker's `cite_<topic>.json` for water, grazing, gain, health, budget, context and workflow. |
 | [data/](data/) | The registries the documents are built from: `findings.json` (83 findings; stable IDs), `rules.json` (98 rules), `data-fields.json`, `integrations.json`, `sources.json`, their compact indexes, `findings-map.json`, and `registry-changelog.md` (the citation critic's pass and the review fixes). |
 | [screenshots/](screenshots/) | Baseline screenshots of the reviewed commit: desktop full page, focus on a filter chip, a gain tooltip, and the phone layout. |
+| [redesign/](redesign/) | Two read-only Playwright scripts for the redesigned page, not part of the audit's evidence. [coverage.mjs](redesign/coverage.mjs) re-runs the 23 checks behind [08-redesign-coverage.md](08-redesign-coverage.md) on a temporary copy of the page with its own server (`node docs/audit/redesign/coverage.mjs [port]`, default port 8802); it records the redesign's claims and is not a Phase 1 gate. [preserve.mjs](redesign/preserve.mjs) runs the 34 preserve checks (KEEP-01 to KEEP-34) against a page you serve (`node docs/audit/redesign/preserve.mjs [page URL]`); it is the reference for [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign) and the Phase 1 smoke test ([06 section 11.4](06-phase1-spec.md#114-browser-smoke-test)). |
+
+## Before running the review scripts
+
+The scripts in `diagnostics/` and `redesign/` were written and run on Linux, with Node 22, Python 3 and Playwright's
+Chromium. On another machine some of them stop before they check anything. Such a failure is an environment problem,
+not a result about the dashboard. Report it on its own, with the command and the error, and never as a finding, a FAIL
+or a MISMATCH. If you change a script to make it run, change only how it finds files or tools, and say exactly what you
+changed.
+
+- **Node 22**, as CI uses. `diagnostics/water.verify.mjs` calls `Object.groupBy`, which Node 20 and earlier don't
+  have.
+- **Python's time zone data.** `findings.handvalues.py` and `scenarios.build.py` look up America/Chicago through
+  `zoneinfo`, which needs the IANA time zone database. Most Linux and macOS systems include it; Windows doesn't. On
+  Windows, install the `tzdata` package into the Python that runs the scripts (`python -m pip install tzdata`), not
+  with `--user`: the scripts run with `-I`, which ignores user-installed packages. On Windows the command may be
+  `py -3` or `python` rather than `python3`.
+- **Playwright.** The diagnostics load it from `$PLAYWRIGHT_PATH`, else from
+  `/opt/node22/lib/node_modules/playwright/index.mjs`, the audit machine's path. Six of them use only that path
+  ([01-baseline.md section 8](01-baseline.md#8-how-to-re-run-every-diagnostic)). `browser-check`, `states-check`,
+  `render.browser`, `scenarios.run` and `workflow.usability.research` also try the `playwright` package by name. The
+  two `redesign/` scripts use `$PLAYWRIGHT_MODULE`, else `$PLAYWRIGHT_PATH`, if set, else the audit machine's path if
+  it exists, else the `playwright` package. If none loads they print a line starting "ENVIRONMENT:" and stop with exit
+  code 2, which is a set-up problem, not a FAIL. They do the same when `preserve.mjs` cannot reach its page URL and
+  when `coverage.mjs` cannot start its server on the port (for example, the port is in use).
+- **File paths on Windows.** Node's `import()` takes a URL, so a Windows path such as `C:\...\index.mjs` fails with
+  `ERR_UNSUPPORTED_ESM_URL_SCHEME` unless it goes through `pathToFileURL`. Every diagnostic that loads Playwright from
+  a path has this problem, and `gain.evidence.research`, `gain.noise.research`, `grazing.verify`, `registry.extra`
+  and `water.verify` also import `exceptions.js` by path. The diagnostics stay as they were reviewed (they are the
+  record of `cfd77e5`), so on Windows run them in WSL, or report the import error as an environment problem. The two
+  `redesign/` scripts convert their paths with `pathToFileURL`.
+- **Other tools.** Sixteen scripts start a local server with `python3 -m http.server` for their browser part, so a
+  `python3` command must exist. `gain.verify.browser.mjs` calls `ps`, `grep` and `awk`. `render.verify.browser.mjs`
+  writes to `/tmp/render-verify` unless it is given a folder. The workflow research scripts use `pdftoppm` and
+  `pdfinfo` if they are present. `redesign/preserve.mjs` starts no server: serve the page first (if nothing is
+  served at its page URL it stops with exit code 2, not 34 FAILs). The `REF` commands in [HANDOFF.md](HANDOFF.md) are
+  POSIX shell; on Windows, use Git Bash or WSL.
+- **What has been tried.** The audit ran the scripts on Linux only. Codex's Checkpoint 1 review ran the recorded
+  checks on Windows with Node 24.19.0. It needed a Python with time zone data for the hand-value script and a file URL
+  in `coverage.mjs`, and its run of `gain.repro.mjs` skipped the browser part because of the Linux default path. The
+  `pathToFileURL` change in the two `redesign/` scripts has been run on Linux only, not on Windows.
 
 ## What was verified, what the research concluded, what is recommended, and what is still assumption
 
@@ -164,21 +206,32 @@ described below is separate from the audit and is the only change meant to touch
 
 ## The redesign
 
-A **separate pull request** (#2, after the audit's #1) replaces `index.html` and `app.js`, the README's chart text and
-the screenshots in `docs/` with a visual redesign the owner asked for: black background, green accent, charts drawn at
-their real width, keyboard and touch chart reading, and phone layouts.
+A **separate pull request** (#2, after the audit's #1), merged into main on 2026-10-20 (merge commit `0315d09`),
+replaced `index.html` and `app.js`, the README's chart text and the screenshots in `docs/` with a visual redesign the
+owner asked for: black background, green accent, charts drawn at their real width, keyboard and touch chart reading,
+and phone layouts.
 
-- `exceptions.js`, `data/`, `tests/` and `scripts/` are unchanged by it, and every number on the page is meant to stay
-  identical.
+- `exceptions.js`, `data/`, `tests/` and `scripts/` are unchanged by it. The underlying values are the same: every
+  figure the old page worked out from the data has the same value. The redesign adds some figures worked out from the
+  same data, and changes wording, order and layout
+  ([08 section 4](08-redesign-coverage.md#4-intentional-differences-from-cfd77e5)).
 - **Line numbers in the findings refer to the reviewed commit `cfd77e5`, not to the redesign.** For example,
   [SEC-01](02-findings.md#sec-01)'s nine `innerHTML` places (`app.js:28, :54, :68, :82, :104, :143, :170, :194, :198`)
   are positions in `cfd77e5`'s `app.js`. Read them with `git show cfd77e5:app.js`.
 - Where 01-06 say the work branch "adds only `docs/audit/` files", they describe the audit's pull request (#1).
 - Which findings the redesign already addresses is mapped in [08-redesign-coverage.md](08-redesign-coverage.md). A
   finding counts as fixed only when its acceptance test passes, not because the mapping says so.
-- **Phase 1 work starts from the redesigned `app.js`.**
-- The first Codex review checks the redesign pull request on its own
-  ([CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md)).
+- **Phase 1 work starts from main, which has the redesigned `app.js`, and keeps what the redesigned page already
+  does:** chart readings by pointer, touch and keyboard, the phone layouts, chart text size, the tank cards and the
+  budget table ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). Only what it
+  does not do yet stays in Phase 2. The read-only script [redesign/preserve.mjs](redesign/preserve.mjs) checks the
+  kept behaviour (34 PASS on main at `0315d09`, Playwright Chromium, 2026-10-20; real phones, screen readers, Firefox
+  and WebKit not tested); the Phase 1 smoke test runs the same checks
+  ([06 section 11.4](06-phase1-spec.md#114-browser-smoke-test)).
+- Codex Checkpoint 1 ([CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md)) reviewed the redesign pull request on its own
+  at `e9d7ab3` and cleared it to merge. It asked for the Phase 1 specification to be brought in line with the
+  redesign before Phase 1 starts. That documentation follow-up is reviewed with Checkpoint 1b and merged by the owner
+  before any Phase 1 code.
 
 ## Scope limits that apply everywhere
 

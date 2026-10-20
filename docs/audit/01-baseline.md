@@ -604,7 +604,8 @@ swap file contents in flight.
 Before you start:
 
 - Run every command from the repository root.
-- You need Node 22 and python3.
+- You need Node 22 and python3. On Windows or another set-up, read
+  [Before running the review scripts](README.md#before-running-the-review-scripts) first.
 - Browser scripts need Playwright. Most use `$PLAYWRIGHT_PATH` when it is set and otherwise
   `/opt/node22/lib/node_modules/playwright/index.mjs`; `browser-check`, `states-check`, `render.browser` and
   `workflow.usability.research` also try the bare `playwright` package. Six scripts import the `/opt/node22/...` path

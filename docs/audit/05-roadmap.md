@@ -19,7 +19,8 @@ to the separate Ranch Tech ROI project.
 | Item | Value |
 |---|---|
 | Repository | CowCampSTX/ranch-ops-dashboard |
-| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main). The work branch `claude/project-thread-nu46kf` adds only `docs/audit/` files. |
+| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit was written). Findings, quoted outputs and line numbers describe this commit unless a line says otherwise. |
+| Updated for the redesign | 2026-10-20. Pull request #2 merged a redesigned page into main (merge commit `0315d09`). Phase 1 starts from that page and keeps what it already does ([section 1.3](#13-order-of-work), [section 2.1](#21-apply-from-phase-1-immediately) item 13). Statements about the redesigned page come from Playwright Chromium runs on main `0315d09` on 2026-10-20, at widths from 320 to 1920 px (mostly 1280 x 900 and 390 x 844), with touch emulated at phone width: `docs/audit/redesign/coverage.mjs` (23 checks pass) and the keep checks that [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign) lists (34 pass). Real phones, screen readers, Firefox and WebKit were not tested. |
 | Built from | `docs/audit/data/findings.json` (83 findings; compact index `findings-index.json`), `docs/audit/data/rules.json` (98 rules; compact index `rules-index.json`; data fields split into `data-fields.json`, integrations into `integrations.json`), `sources.json`, `registry-changelog.md`, and the evidence files in `docs/audit/evidence/` (`baseline.json`, `audit_*`, `verify_*`, `research_*`, `cite_*`). |
 | Earlier documents | [01-baseline.md](01-baseline.md) (how the code works today), [02-findings.md](02-findings.md) (every finding, with evidence), [03-research-and-data.md](03-research-and-data.md) (rules research and data requirements), [04-workflow-and-features.md](04-workflow-and-features.md) (morning workflow and the Phase 3 ranking). |
 | Project guidance files | There is **no PROJECT_CONTEXT.md or AGENTS.md** in the repository. This roadmap is judged against README.md, the code, the committed fictional data, the project purpose and the lead's phase defaults. |
@@ -106,7 +107,7 @@ not part of the audit's verified evidence and do not test the dashboard.
 | Phase | Items | Findings covered | Rules covered | Outcome for the manager |
 |---|---|---|---|---|
 | 1. Fix now | 17 (P1-01 to P1-17) | 55 (18 high, 19 medium, 18 low), each by exactly one item | 33 Phase 1 rules | The page reads ordinary exports correctly, never shows a missing or unreadable area as all-clear, says CAN'T TELL with a reason and a first step, uses one as-of time with a time zone, cannot be blanked by one bad file, renders CSV text safely, and labels every threshold as a demonstration setting. |
-| 2. Build next | 11 (P2-01 to P2-11) | 25 | 15 Phase 2 rules | A morning review built around freshness, consequence-ranked rows, filters, "why this row" explanations, chart details by keyboard and touch, phone-friendly tables, a printable crew briefing, rest checks, and optional per-device marks labelled "this device only". |
+| 2. Build next | 11 (P2-01 to P2-11) | 25 | 15 Phase 2 rules | A morning review built around freshness, consequence-ranked rows, filters by severity, pasture and group, "why this row" explanations, "Show data" tables, short dates in rows, a printable crew briefing, rest checks, and optional per-device marks labelled "this device only". Chart readings by mouse, touch and keyboard, the phone layouts, the summary card and area chips that keep focus are already on the page (the redesign, pull request #2; [08 section 3](08-redesign-coverage.md#3-coverage)) and are kept from Phase 1 on ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)); P2-02 to P2-06 say what each item still adds. |
 | 3. Add later | 3, ranked (P3-01 to P3-03) | 1 ([WAT-06](02-findings.md#wat-06)) | 10 Phase 3 rules | Water supply coverage from tank capacity and head count; forage observations at moves; drought and precipitation context as a dated snapshot. |
 | Deferred | none | 2 ([GAIN-10](02-findings.md#gain-10), [GRZ-09](02-findings.md#grz-09)) | 40 deferred rules | Recorded with reasons in [section 6](#6-deferred-and-excluded). |
 
@@ -129,8 +130,16 @@ tests, no framework, no backend, no paid service and no AI feature.
   percent and dollar lines.
 - **Safe rendering and honest copy.** CSV text is shown as text. The rules table shows each threshold's basis ("Demo
   setting"); "here now" becomes "as of <date>"; the tank tile becomes "Sensors normal".
+- **What the redesign already does stays.** Chart readings by mouse, touch and keyboard, the phone layout, the tank
+  cards, the budget table and charts drawn at their card's width are kept, not rebuilt (section 2.1, item 13).
 
 ### 1.3 Order of work
+
+Phase 1 starts from main at `0315d09`, which carries the redesigned page (pull request #2), and only after the
+documentation pull request that brings this roadmap and [06-phase1-spec.md](06-phase1-spec.md) in line with that page
+has been reviewed (Checkpoint 1b in `CODEX_REVIEW_PROMPT.md`) and merged by the owner. That pull request changes no
+page code. Every step below keeps what the redesigned page already does
+([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign); section 2.1, item 13).
 
 Phase 1 items can be built in this order. Items on the same line can run in parallel.
 
@@ -142,7 +151,7 @@ Phase 1 items can be built in this order. Items on the same line can run in para
 | 4 | P1-06 | Loading, error and partial-data states, the row model with CAN'T TELL, and section isolation. |
 | 5 | P1-07, P1-08, P1-09, P1-10, P1-11, P1-12 | Area rules, in parallel. P1-10 follows P1-09. |
 | 6 | P1-14, P1-15, P1-16 | Tiles, charts, wording and rule copy, once the structured results exist. |
-| 7 | P1-17 (part b) | Browser smoke test and the CI changes. |
+| 7 | P1-17 (part b) | Browser smoke test, including the checks that the redesign's keyboard, touch and phone behaviour is kept ([06 section 11.4](06-phase1-spec.md#114-browser-smoke-test)), and the CI changes. |
 
 Phase 2 starts when the Phase 1 acceptance bar ([section 3.1](#31-phase-1-acceptance-bar)) is met. Phase 3 items depend
 on named Phase 1 and Phase 2 items (see each item).
@@ -188,7 +197,10 @@ or Phase 3 feature, and no "every change must" rule below requires a later-phase
    stale, invalid or insufficient inputs give CAN'T TELL with a reason and a first step, never an all-clear
    ([RULE-WF-09](03-research-and-data.md#rule-wf-09) phase note: "CAN'T TELL rows also need a first step"). One
    documented exception until P2-08: a group with no current stay gets only an information note, because without
-   GRZ-07's group status a shipped or drylotted group cannot be told from a missing record (P1-08).
+   GRZ-07's group status a shipped or drylotted group cannot be told from a missing record (P1-08). A group whose
+   recorded head is 0 and that has no weigh-in in the 45 days (D) before the as-of date is not missing data: it has no
+   animals to judge on gain, and the page says so in a note (P1-10). Head 0 with a weigh-in inside those 45 days is an
+   inconsistent record and gives CAN'T TELL.
 4. **Visible data issues.** Any value the contract rejects becomes a data issue with file, row, column, value, code,
    message and severity. Nothing is dropped silently.
 5. **One as-of policy.** Every rule uses the same as-of instant and ranch calendar date; rows dated after it are left
@@ -207,17 +219,30 @@ or Phase 3 feature, and no "every change must" rule below requires a later-phase
     more than one viewer time zone.
 12. **The architecture stays simple.** Static site, plain ES modules, `node:test`; a pinned test-only browser dependency
     in CI is allowed (P1-17).
+13. **Keep the redesigned page's access and layout.** Every chart reading stays reachable by mouse, touch and keyboard
+    and stays inside the window; the page stays usable at 390 px wide with no sideways page scroll; the tank cards, the
+    budget table with its season-total row, the summary card, the area chips that keep focus, and charts drawn at the
+    width of their card with readable text all stay
+    ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign);
+    [RULE-WF-02](03-research-and-data.md#rule-wf-02), [RULE-WF-06](03-research-and-data.md#rule-wf-06),
+    [RULE-WF-07](03-research-and-data.md#rule-wf-07)). The redesign already does all of this, so the rule asks Phase 1
+    to keep it, not to build a later-phase feature; the browser smoke test checks it
+    ([06 section 11.4](06-phase1-spec.md#114-browser-smoke-test)). Two marks on that page show a state by colour alone
+    (the flagged gain dots and the gain and spend tile meters). They are known issues that a separate pull request
+    fixes, not features to keep, and Phase 1 adds no mark like them (item 9).
 
 ### 2.2 Apply from Phase 2
 
-1. Every chart detail now shown only on hover is also reachable by keyboard and by touch, or through a "Show data"
-   table ([RULE-WF-02](03-research-and-data.md#rule-wf-02)).
+1. Every chart also gets a "Show data" table and a short text alternative that states its decision-relevant state
+   ([RULE-WF-02](03-research-and-data.md#rule-wf-02), [RULE-WF-04](03-research-and-data.md#rule-wf-04)). Reaching chart
+   details by keyboard and touch already applies from Phase 1 (section 2.1, item 13).
 2. Any browser storage is a per-device convenience labelled "this device only", wrapped in try/catch, and never hides
    or clears a row; the page renders fully with an empty or blocked store
    ([RULE-WF-11](03-research-and-data.md#rule-wf-11), [RULE-WF-15](03-research-and-data.md#rule-wf-15)).
 3. Ranking within a severity follows the documented consequence order (P2-09); any new rule states where its rows rank.
 4. Each row can explain itself: the readings, their times, the threshold and its basis (P2-04).
-5. The page stays usable at 390 px wide (P2-06) and prints a one-page crew briefing (P2-07).
+5. The page prints a one-page crew briefing (P2-07). Staying usable at 390 px wide already applies from Phase 1
+   (section 2.1, item 13).
 6. No claim of "a 2-minute review" appears on the page or in the README until a stopwatch test with 2-3 managers is
    recorded ([RULE-WF-18](03-research-and-data.md#rule-wf-18)).
 
@@ -375,9 +400,9 @@ after the input update of decision D16.
 - **Dependencies:** P1-02, P1-05 (`tanks.csv`).
 - **Effort:** M.
 - **Acceptance criteria (headline):** the open Yearlings move to P9 gives no error, the two critical tank rows, at least
-  9 non-grazing rows and exactly one exception row mentioning 'P9'; the closed move to P9 still draws the grazing,
-  gain and budget charts; the committed budget appended to itself keeps Fuel at \$2,040 plus a duplicate note; CSV-35
-  gives exactly one booster row. Full list: [06 section 12, P1-04](06-phase1-spec.md#p1-04).
+  9 non-grazing rows and exactly one exception row mentioning 'P9'; the closed move to P9 still draws the grazing and
+  gain charts and the budget table; the committed budget appended to itself keeps Fuel at \$2,040 plus a duplicate
+  note; CSV-35 gives exactly one booster row. Full list: [06 section 12, P1-04](06-phase1-spec.md#p1-04).
 
 #### P1-05: Generator and example data
 
@@ -413,20 +438,24 @@ after the input update of decision D16.
   loading "'ready=false ... loadingText=false'", and one failed file gives an uncaught error, "empty as-of line, every
   section count 0" (LOAD-02).
 - **Proposed behaviour:** a new `load.js` that never throws and reports each file as loaded, missing, failed, empty or
-  unreadable. A visible "Loading example data…" message while files load. A banner naming each failed file ("health.csv
+  unreadable. The redesign's loading message ("Loading today's report…") stays on screen while files load
+  ([06 section 6.1](06-phase1-spec.md#61-page-sequence)). A banner naming each failed file ("health.csv
   could not be loaded (404)"). Each area, tank, group, task and category is **OK**, **needs attention** or **CAN'T TELL**;
   an area whose file is missing or empty is CAN'T TELL with a reason and a first step, never "Nothing ... needs
   attention". CAN'T TELL has its own marker shape plus the words "Can't tell" (extending RULE-WF-01). Data issues are
   listed in a "Data checks" panel under the exception table. Each section draws inside its own error boundary, so one
-  failure never blanks the others. New controls keep 24 x 24 px targets and a visible focus ring.
+  failure never blanks the others. New controls keep 24 x 24 px targets and a visible focus ring. The redesigned page
+  already shows a loading message, a "Try again" button after a failed load and a guard around each section, but one
+  failed file still stops the whole report ([08 section 3.2](08-redesign-coverage.md#32-partly-addressed)); Phase 1
+  keeps the button and the guards and replaces the whole-report failure with the per-file banner and per-area states.
 - **Files and data:** new `load.js`; `app.js`; `index.html`; `exceptions.js` (row model).
 - **Dependencies:** P1-02 (issue model).
 - **Effort:** M.
 - **Acceptance criteria (headline):** health.csv 404 shows text matching `/health\.csv/` and `/could not load|missing/i`
-  and the Health chip is not "Health (0)"; header-only water.csv names water.csv and the tile never reads "0 of 0";
-  budget.csv 404 or header-only puts no 'NaN' on the page; with water.csv 404 the Health row "Overdue by 15 days (due
-  2026-09-15)" still draws; a 3-second delay shows `/loading/i` at 1 second; aborting budget.csv gives a banner and
-  zero page errors. Full list: [06 section 12, P1-06](06-phase1-spec.md#p1-06).
+  and the Health chip's count badge reads "can't tell", never "0"; header-only water.csv names water.csv and the tile
+  never reads "0 of 0"; budget.csv 404 or header-only puts no 'NaN' on the page; with water.csv 404 the Health row
+  "Overdue by 15 days (due 2026-09-15)" still draws; a 3-second delay shows `/loading/i` at 1 second; aborting
+  budget.csv gives a banner and zero page errors. Full list: [06 section 12, P1-06](06-phase1-spec.md#p1-06).
 
 #### P1-07: Water rules
 
@@ -474,7 +503,9 @@ after the input update of decision D16.
   grazing is CAN'T TELL when its current stay cannot be judged. A group with no current stay is not judged in Phase 1
   and gets only an information note, a known exception to the three-state rule until GRZ-07's group status (P2-08) can
   tell a shipped group from a missing record ([06 section 5.3](06-phase1-spec.md#53-grazing)). On the due day the
-  warning reads "Move planned for today". The chart uses the same predicate and clips bars at the as-of date.
+  warning reads "Move planned for today". The chart uses the same predicate and ends every stay bar at or before the
+  as-of date; as on the redesigned page, its axis runs on to the latest planned move of a current stay, with the days
+  left shaded ([06 section 5.3](06-phase1-spec.md#53-grazing)).
 - **Files and data:** `exceptions.js` (grazing); `app.js` (rotation chart); optional `moves.csv` column.
 - **Dependencies:** P1-02, P1-03, P1-04, P1-06.
 - **Effort:** M.
@@ -525,7 +556,15 @@ after the input update of decision D16.
   group verdict is withheld (CAN'T TELL) below 80% coverage of matched animals or when the latest session is more than
   45 days before the as-of date (demo settings, D); the gain section shows "45 of 45 weighed" style coverage lines.
   Each weigh session records a `weight_basis` in `weigh_sessions.csv`; a pair with different or unknown bases is CAN'T
-  TELL for the serious and individual flags (RULE-GAIN-06; decision D9).
+  TELL for the serious and individual flags (RULE-GAIN-06; decision D9). A head of 0 in groups.csv means the group has
+  no animals now. With no weigh-in in the 45 days before the as-of date, the group is not judged on gain: a note and a
+  gain-section line, no row, and its weigh-ins stay in the file as history. With a weigh-in inside those 45 days the
+  record is inconsistent (animals were weighed recently, but the file says none are left): a gain CAN'T TELL row and a
+  warning naming the head and the weigh-in, so a mistyped 0 cannot hide a problem. Coverage is computed only when head
+  is 1 or more, so nothing divides by 0, and no matched animal at all is always CAN'T TELL. When more animals were
+  weighed at both sessions than the head count, the group is still judged and a warning names both numbers. A blank or
+  unreadable head is CAN'T TELL. These choices and their trade-offs are recorded in
+  [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions).
 - **Files and data:** `exceptions.js` (gain); `app.js`; `data/weigh_sessions.csv` (P1-05).
 - **Dependencies:** P1-09, P1-05.
 - **Effort:** M.
@@ -533,8 +572,13 @@ after the input update of decision D16.
   2508) and 7 gain gridlines; target '2.O' gives a data issue naming the Yearlings target and the exception table still
   draws; GN-13 gives a "too few weighed (3 of 150)" CAN'T TELL row; GN-18 with the 45-day limit gives CAN'T TELL naming
   2026-07-20 and 72 days, and no 'warning | 4 heifers'; the committed data shows "45 of 45" and "150 of 150" and still
-  gives 10 rows; sessions with bases 'full' and 'overnight_shrunk' give CAN'T TELL. Full list:
-  [06 section 12, P1-10](06-phase1-spec.md#p1-10).
+  gives 10 rows; sessions with bases 'full' and 'overnight_shrunk' give CAN'T TELL; the Yearlings head set to 0 with
+  their 2026-09-15 weigh-ins kept gives a Yearlings gain CAN'T TELL row and a `GROUP_HEAD_ZERO_RECENT_WEIGHINS` warning
+  in place of the "6 yearlings" row (10 rows); the same with their 2026-09-15 weigh-ins removed (the last one left is
+  72 days old) gives no Yearlings gain row and a `GROUP_HEAD_ZERO` note (9 rows); the Heifers head set to 0 gives a
+  Heifers gain CAN'T TELL row in place of the serious row, so the planted problem is not hidden behind a note; the
+  Yearlings head at 100 gives a `GAIN_MORE_THAN_HEAD` warning and the same 10 rows; no row, issue or tile text matches
+  `/\d of 0\b|NaN|Infinity/`. Full list: [06 section 12, P1-10](06-phase1-spec.md#p1-10).
 
 #### P1-11: Health rules
 
@@ -577,7 +621,8 @@ after the input update of decision D16.
   \$500 over (this includes more than 10.0% over with less than \$1,000, as scenario 09's "Vet and health" 10.5% and
   \$630 shows), or at least \$2,500 over at any percent; \$250 for unbudgeted spending. Every value is a demo setting (D)
   and labelled so. Percent is shown to one decimal.
-- **Files and data:** `exceptions.js` (budget); `app.js` (tile, chart, table); `meta.csv` fields (P1-05).
+- **Files and data:** `exceptions.js` (budget); `app.js` (tile and budget table; the redesign has no budget chart);
+  `meta.csv` fields (P1-05).
 - **Dependencies:** P1-02, P1-03, P1-05, P1-06.
 - **Effort:** M.
 - **Acceptance criteria (headline):** committed budget plus Oct and Nov plan rows still gives exactly the Fuel and
@@ -595,15 +640,22 @@ after the input update of decision D16.
   elements: {"img in #exceptions":4, ... "script in #budgetTable":1,"total":8}'", and a plain '<' in a pasture name
   "silently deletes alert context".
 - **Proposed behaviour:** every value that comes from a CSV file is set as text (`textContent` or DOM nodes), or passed
-  through one tested `esc()` function before any `innerHTML`. The same applies to the tooltip.
+  through one tested `esc()` function before any `innerHTML`. The same applies to the chart readings in `#tip`. The
+  redesigned page already passes its values through an `esc()` function, chart readings included
+  ([08 section 3.1](08-redesign-coverage.md#31-addressed-on-the-page)); P1-13 moves it into `format.js`, tests it, and
+  uses it on every path Phase 1 adds.
 - **Files and data:** `app.js`; new `format.js` (`esc`).
 - **Dependencies:** none; it can land first.
 - **Effort:** S.
 - **Acceptance criteria (headline):** a pasture named '<b>x</b>' appears as '&lt;b&gt;x&lt;/b&gt;' in #exceptions and
-  the T2 heading; a tag '<i>t</i>' appears escaped in the tooltip; markup in a tank, pasture, group or category name
-  shows as text in each of the water, grazing, gain and budget tooltips (the water tooltip, `app.js:104`, writes
-  `innerHTML` directly); 'Lone Tree <A' gives the T4 subject in full; the audit's render.repro.mjs cases R01-R04 flip
-  to MATCH. Full list: [06 section 12, P1-13](06-phase1-spec.md#p1-13).
+  as text on T2's tank card and in its chart reading; a tag '<i>t</i>' appears escaped in the gain reading (`#tip`)
+  when it is opened by mouse, by keyboard and by tap; markup in a tank, pasture or group name shows as text in the
+  water, grazing and gain readings, each opened by mouse, by keyboard and by tap, and markup in a budget category shows
+  as text in its budget table row (the page has no budget chart); 'Lone Tree <A' gives the T4 subject in full at
+  1280 x 900 and at 390 x 844; the audit's render.repro.mjs cases R01-R04, with their selectors mapped to the
+  redesigned page ([08 section 5](08-redesign-coverage.md#5-audit-scripts-on-the-redesigned-page)) and R04's budget
+  tooltip replaced by the budget table row, show the text escaped. Full list:
+  [06 section 12, P1-13](06-phase1-spec.md#p1-13).
 
 #### P1-14: Tiles and charts built from structured results
 
@@ -614,18 +666,23 @@ after the input update of decision D16.
   and shows "'6 of 8 2 need a look'" when names share a first word (UI-04); month ticks are fixed to June-September 2026
   (UI-05).
 - **Proposed behaviour:** the exception table draws first. Tiles read the structured results (per-tank, per-group,
-  per-category states), not alert text and not a fixed group name; the gain tile falls back to "No weigh-ins yet". A
-  tank with no recent readings draws an empty chart marked "no readings in the last 7 days". Month ticks come from the
-  loaded season.
+  per-category states), not alert text and not a fixed group name; the gain tile falls back to "No weigh-ins yet", and
+  a group with head 0 never supplies its figure ([06 section 5.4](06-phase1-spec.md#54-gain)). A tank with no recent
+  readings keeps its tank card and draws an empty chart marked "no readings in the last 7 days" (or the shorter text the
+  redesign draws on a narrow card). Month ticks come from the loaded season, on a chart still drawn at its card's width.
 - **Files and data:** `app.js`; new pure `tileSummary()` in `exceptions.js` or `format.js`.
 - **Dependencies:** P1-06, P1-07, P1-09.
 - **Effort:** M.
 - **Acceptance criteria (headline):** Yearlings renamed Steers gives 10 data rows and no page error; Yearlings shipped
   (removed from every file) gives 7 rows; T6 filtered to readings on or before 2026-09-22T12:00 gives no page error, 8
-  tank charts, all other charts and "No reading for 198 hours"; the water.repro:B-03 data (T2 and T4 renamed "Well 2"
-  and "Well 4" in water.csv and tanks.csv) gives "Sensors normal 5 of 8" and "3 need a look"; month labels for
-  grazing.repro:GB-09 to GB-12 and time.browser:TB-04 equal the hand-worked sets inside x 74..550. Full list:
-  [06 section 12, P1-14](06-phase1-spec.md#p1-14).
+  tank cards (`#tanks .tank`), the grazing and gain charts, the budget table with its 6 category rows and its
+  season-total row, and "No reading for 198 hours"; the water.repro:B-03 data (T2 and T4 renamed "Well 2" and "Well 4"
+  in water.csv and tanks.csv) gives a water tile, found by its label, reading "Sensors normal", "5 of 8" and "3 need a
+  look"; month labels for grazing.repro:GB-09 to GB-12 and time.browser:TB-04 equal the hand-worked sets and lie inside
+  the chart's plot area as measured on the page at 1280 x 900 and at 390 x 844 (the chart is drawn at its card's width,
+  so the bounds are read from the chart, not fixed); with no weigh-ins the gain tile reads "No weigh-ins yet"; with
+  every group that has a gain target at head 0 it reads "Not judged" or "Can't tell", never "No weigh-ins yet" or a
+  figure. Full list: [06 section 12, P1-14](06-phase1-spec.md#p1-14).
 
 #### P1-15: Wording and number formatting
 
@@ -643,8 +700,8 @@ after the input update of decision D16.
 - **Acceptance criteria (headline):** the TIME-18 fixture gives "Move planned for today" and "Due today (2026-09-30)";
   all-clear data gives "Nothing needs attention."; budgetWarnPct 0.07 gives "7-10%" in the rules table; \$104.50 prints
   as "\$105"; under LANG=de_DE.UTF-8 and a de-DE browser, Fuel shows "(\$2,040)", the tile "\$89,303 of \$88,400" and
-  the header "4,300 acres"; one slow animal gives "1 yearling"; targets 1.25 and 2.25 give "Under 0.625" and "Under
-  1.125". Full list: [06 section 12, P1-15](06-phase1-spec.md#p1-15).
+  the as-of facts (`#asof`) "4,300 acres"; one slow animal gives "1 yearling"; targets 1.25 and 2.25 give "Under
+  0.625" and "Under 1.125". Full list: [06 section 12, P1-15](06-phase1-spec.md#p1-15).
 
 #### P1-16: Honest rule copy and labels
 
@@ -663,9 +720,10 @@ after the input update of decision D16.
   tile becomes "Sensors normal". The grazing note says only the current stay's days past plan are marked. Gain and
   health first steps follow RULE-HLTH-11 ("Look at these animals at the next gather and record what you see"; "watch
   the group for illness or lameness and call your veterinarian if you see any"). "here now" becomes "there as of
-  <date>", and the grazing chart tooltip's "to now" (`app.js` line 143) becomes "to <as-of date> (as of)". README's
-  rules table and claims ("works on a phone", "To use real data, replace the CSVs", "the group grazing that pasture
-  right now") are updated to match.
+  <date>", and the grazing chart reading's "to now" (`app.js:398` on main; line 143 at `cfd77e5`) becomes "to <as-of
+  date> (as of)". README's rules table and claims ("To use real data, replace the CSVs", "the group grazing that
+  pasture right now") are updated to match; its chart paragraph ("Every chart can be read with a mouse, a tap or the
+  keyboard ...") stays, because the page already does this.
 - **Files and data:** `app.js` (rules table, notes); `index.html` (notes); `exceptions.js` (`RULE_INFO`, wording);
   README.md.
 - **Dependencies:** P1-06 to P1-12 (final wording).
@@ -834,6 +892,13 @@ Phase 2 makes the morning review faster and easier to trust, on the Phase 1 foun
 memory is per-device browser storage labelled "this device only", and nothing shared is stored. The workflow behind these
 items is in [04-workflow-and-features.md Part 1](04-workflow-and-features.md#part-1-recommended-morning-workflow).
 
+**What the redesign already ships.** The redesigned page (pull request #2, on main since `0315d09`) already does part
+of P2-02 to P2-06 ([08 section 3](08-redesign-coverage.md#3-coverage)). Each of those items says what is already on
+the page, which Phase 1 keeps ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)),
+and keeps only the rest as Phase 2 work. Its acceptance criteria say which checks already pass on that page and stay
+as regression checks, and which are new. Measurements quoted in these items are Playwright Chromium on main `0315d09`,
+2026-10-20; real phones, screen readers, Firefox and WebKit were not tested.
+
 **Phase 2 rule for the committed data.** Phase 2 items may add rows only where a planted problem is added on purpose
 and listed in `PLANTED` and the README. Unless an item says so, the committed data still gives the 10 rows of
 [section 3.1](#31-phase-1-acceptance-bar).
@@ -861,81 +926,136 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
 - **Findings:** none directly. **Rules:** [RULE-WF-18](03-research-and-data.md#rule-wf-18) (C, "design target (not validated)").
 - **Problem and evidence:** the page answers the morning question, but the order of reading is not designed around it
   ([04-workflow-and-features.md section 1.3](04-workflow-and-features.md#13-the-morning-review-step-by-step)).
+- **Already on the page (redesign):** a summary card (`#summary`) leads the page with the number of rows and counts by
+  severity, and the list comes before the charts. On the committed data at 1280 x 900 the counts and the first three
+  rows are visible without scrolling (row 3 ends at y 872); at 390 x 844 the counts are visible (they end at y 424)
+  and the first row ends at y 846, just below the fold. There is no freshness line, no Today / This week / Plan
+  grouping and no new or resolved counts. Phase 1 keeps the card and the order
+  ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)).
 - **Proposed behaviour:** the four steps from 04: freshness and coverage; new or changed, worst first, with counts
-  ("2 today / 6 this week / 2 plan"); why each row is there (P2-04); assign or print (P2-07). Charts move below as
-  drill-down. "New" and "Resolved since last review" use the per-device last-review time (P2-11).
+  ("2 today / 6 this week / 2 plan"), built on the summary card; why each row is there (P2-04); assign or print
+  (P2-07). Charts stay below as drill-down. "New" and "Resolved since last review" use the per-device last-review time
+  (P2-11).
 - **Files and data:** `index.html`, `app.js`.
 - **Dependencies:** P2-01, P2-03, P2-04, P2-07; P2-11 for the new and resolved counts.
 - **Effort:** M.
-- **Acceptance criteria:** at 1280 x 900 and 390 x 844 the freshness line, the severity counts and the first three rows
-  are visible without scrolling on the committed data; no page or README text claims a review time until a stopwatch
-  test with 2-3 managers is recorded (RULE-WF-18 phase note: "Measure with a stopwatch test before claiming a time").
+- **Acceptance criteria:** at 1280 x 900 and 390 x 844 the freshness line, the severity counts in the summary card and
+  the first three rows are visible without scrolling on the committed data (new at 390 x 844, where today the first row
+  ends just below the fold); the rows still become cards at 390 x 844 and the page has no sideways scroll (kept from
+  Phase 1); no page or README text claims a review time until a stopwatch test with 2-3 managers is recorded
+  (RULE-WF-18 phase note: "Measure with a stopwatch test before claiming a time").
 
 #### P2-03: Filters by severity, pasture, group and area
 
 - **Findings:** [UI-10](02-findings.md#ui-10) (low). **Rules:** [RULE-WF-05](03-research-and-data.md#rule-wf-05) (A).
-- **Problem and evidence:** "Keyboard focus is lost after activating a filter chip" (UI-10).
-- **Proposed behaviour:** filter chips for severity (including CAN'T TELL), pasture, group and area, combinable. Focus
-  stays on the chip; the result is announced as a status message ("Showing 3 of 10: Water"). The selected filter may be
-  remembered on this device (P2-11).
+- **Problem and evidence:** at `cfd77e5`, "Keyboard focus is lost after activating a filter chip" (UI-10).
+- **Already on the page (redesign):** the area chips are built once, set `aria-pressed`, keep focus and let Tab move
+  on to the next chip, so the UI-10 part of the acceptance criteria passes today (`docs/audit/redesign/coverage.mjs`,
+  check UI-10). Each chip shows its count in a badge ("Water 3"). Nothing is announced when a chip changes the list.
+  Phase 1 keeps the chips ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)).
+- **Proposed behaviour:** filter chips for severity (including CAN'T TELL), pasture and group beside the area chips,
+  combinable. Focus stays on the chip; the result is announced as a status message ("Showing 3 of 10: Water"). The
+  selected filter may be remembered on this device (P2-11).
 - **Files and data:** `app.js`, `index.html`.
 - **Dependencies:** P1-06 (row model with `refs`).
 - **Effort:** S.
-- **Acceptance criteria:** focusing the Water chip and pressing Enter leaves `document.activeElement.dataset.a ===
-  'Water'`, shows 3 data rows and `aria-pressed="true"` on Water only, and Tab goes to Grazing (UI-10); a live region
-  announces "Showing 3 of 10: Water"; the Pasture filter "Lone Tree" shows the T4 row.
+- **Acceptance criteria:** this check passes on the redesigned page and stays as a regression check: focusing the Water
+  chip and pressing Enter leaves `document.activeElement.dataset.a === 'Water'`, shows 3 data rows and
+  `aria-pressed="true"` on Water only, and Tab goes to Grazing (UI-10). New in P2-03: a live region announces "Showing
+  3 of 10: Water"; the Pasture filter "Lone Tree" shows the T4 row; a severity filter and an area chip combine.
 
 #### P2-04: Alert explanations ("Why this row?")
 
 - **Findings:** [GRZ-08](02-findings.md#grz-08) (low), [UI-16](02-findings.md#ui-16) (low).
 - **Problem and evidence:** the serious grazing action is "one blanket line based only on elapsed days: no escalation
-  and no destination" (GRZ-08); the gain chart "does not mark the animals the report flags, or the 50% and 80% lines"
-  (UI-16).
+  and no destination" (GRZ-08); at `cfd77e5` the gain chart "does not mark the animals the report flags, or the 50%
+  and 80% lines" (UI-16).
+- **Already on the page (redesign):** the gain chart draws the 6 yearlings the warning rule flags (Y027, Y031, Y058,
+  Y082, Y129, Y132) in the warning colour, with a legend and "Flagged: under 50% of target" in their reading, and
+  draws and labels the target, 80% and 50% lines (`docs/audit/redesign/coverage.mjs`, check UI-16: 6 flagged dots).
+  Phase 1 keeps the flagged readings, the legend and the lines
+  ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). The flagged dots differ
+  from the other dots by colour alone (1.10:1 against them): a known issue of the redesign that a separate pull request
+  fixes ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)), not a feature to keep as it is.
 - **Proposed behaviour:** each row opens a panel with the readings and their times, the threshold, its basis (A-D) and
   the rule ID (wireframe in [04 section 1.4b](04-workflow-and-features.md#14b-why-this-row-panels)). The grazing
   first step names candidate pastures past their minimum rest, with any open water problem on them. The gain chart
-  marks the flagged animals and the 50% and 80% lines.
+  keeps its flagged-animal readings, its legend and its 50% and 80% lines.
 - **Files and data:** `app.js`, `exceptions.js` (rows already carry `evidence`).
 - **Dependencies:** P1-06, P2-08 (rest days for candidate pastures).
 - **Effort:** M.
 - **Acceptance criteria:** committed data: the Yearlings action mentions 'Windmill' and its tank problem, or says no
-  rested pasture has water (Windmill rest Sep 30 - Aug 11 = 50 >= 45; T2 11.8% < 25) (GRZ-08); exactly 6 marked dots in
-  the Yearlings row labelled Y027, Y031, Y058, Y082, Y129, Y132, with reference marks at x(1.0) for yearlings and x(0.5)
-  for heifers (UI-16); the T4 panel lists the readings from 2026-09-29 18:00 (56.0%) to 2026-09-30 18:00 (10.0%).
+  rested pasture has water (Windmill rest Sep 30 - Aug 11 = 50 >= 45; T2 11.8% < 25) (GRZ-08); the T4 panel lists the
+  readings from 2026-09-29 18:00 (56.0%) to 2026-09-30 18:00 (10.0%). The UI-16 check passes on the redesigned page
+  and stays as a regression check: exactly 6 flagged dots in the Yearlings row, whose readings name Y027, Y031, Y058,
+  Y082, Y129 and Y132 (measured by check UI-16 and by the keep checks of 06 section 6.3), with the 50% line at 1.0
+  lbs/day for yearlings and at 0.5 for heifers (half of each target; by code reading, `app.js:518` draws the lines per
+  group).
 
 #### P2-05: Chart details by keyboard and touch
 
 - **Findings:** [UI-01](02-findings.md#ui-01) (medium), [UI-11](02-findings.md#ui-11) (low). **Rules:** [RULE-WF-02](03-research-and-data.md#rule-wf-02) (A), [RULE-WF-03](03-research-and-data.md#rule-wf-03) (A), [RULE-WF-04](03-research-and-data.md#rule-wf-04) (A), [RULE-WF-08](03-research-and-data.md#rule-wf-08) (B).
-- **Problem and evidence:** "a tap on a phone shows nothing, gain dots are 3.9 px targets, and keyboard or
-  screen-reader users cannot reach any chart detail" (UI-01); tooltips near an edge "are squeezed or open off-screen"
-  (UI-11).
-- **Proposed behaviour:** every hover detail is also reachable by tap and by keyboard, or through a "Show data" table
-  per chart; the tooltip closes with Escape and stays inside the viewport; each chart has a short text alternative
-  stating its decision-relevant state; decision marks reach 3:1 contrast.
+- **Problem and evidence:** at `cfd77e5`, "a tap on a phone shows nothing, gain dots are 3.9 px targets, and keyboard
+  or screen-reader users cannot reach any chart detail" (UI-01); tooltips near an edge "are squeezed or open
+  off-screen" (UI-11).
+- **Already on the page (redesign):** every chart reading opens on hover, on a tap or a finger slid along the chart,
+  and from the keyboard (Tab to the chart, then the arrow keys, Home and End); the reading shows the value first; it
+  flips and clamps to stay inside the window and below the top bar, and Escape hides it. The budget chart is now a
+  table, so its amounts are table cells. Phase 1 keeps all of this
+  ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)).
+- **Proposed behaviour:** a "Show data" table per chart; a short text alternative per chart that states its
+  decision-relevant state (for example "T4 Lone Tree: 10% now, down 46 points in the last 24 hours"; today the label
+  gives only the last reading); a reading the mouse can move onto, or that a click keeps open (RULE-WF-03; today the
+  reading ignores the pointer and a click does not keep it open); decision marks at 3:1 contrast or with the same
+  information in text (RULE-WF-08). The flagged gain dots, which today differ from the other dots by colour alone
+  (1.10:1), are left to a separate follow-up pull request to the redesign
+  ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)); P2-05 keeps that fix.
 - **Files and data:** `app.js`, `index.html`.
 - **Dependencies:** P1-13, P1-14.
 - **Effort:** M.
-- **Acceptance criteria:** at 390 x 844 with touch, tapping the H026 dot shows 'H026', '0.11 lbs/day' and 'Now 1136
-  lbs', and tapping the Repairs bar shows 'Budget \$7,200', 'Actual \$9,000', 'Over by \$1,800' (UI-01); on desktop,
-  Tab reaches a control in #gain or #water, or the chart's data table reads 'Sep 30, 6 PM: 10%' for T4; at 1280 x 900
-  the T4 tooltip's right edge is <= 1280 with width >= 120 (UI-11); Escape closes the tooltip without moving the
-  pointer.
+- **Acceptance criteria:** these pass on the redesigned page and stay as regression checks: at 390 x 844 with touch,
+  tapping the H026 dot shows '0.11 lbs/day', 'H026 · Heifers' and 'now 1,136 lbs' (restated for the redesign's
+  reading; [08 section 4](08-redesign-coverage.md#4-intentional-differences-from-cfd77e5)), and the Repairs row of
+  `#budgetTable` reads 'Serious', '\$9,000 of \$7,200' and '+\$1,800' (restated: there is no budget chart) (UI-01);
+  at 1280 x 900, Tab reaches T4's chart in `#tanks` and `#tip` reads '10%' and 'T4 Lone Tree · Sep 30, 6 PM'; the T4
+  reading's right edge is <= 1280 with width >= 120 (UI-11); Escape hides the reading without moving the pointer.
+  New in P2-05: each chart has a "Show data" table, where T4's reads 'Sep 30, 6 PM: 10%'; T4's text alternative
+  contains '10%' and '46 points'; moving the mouse from a data point onto its reading keeps the reading shown, or a
+  click keeps it shown until Escape or a click elsewhere.
 
 #### P2-06: Phone tables and chart legibility
 
 - **Findings:** [UI-02](02-findings.md#ui-02) (medium), [UI-03](02-findings.md#ui-03) (medium), [UI-12](02-findings.md#ui-12) (low), [UI-13](02-findings.md#ui-13) (low), [UI-14](02-findings.md#ui-14) (low), [UI-15](02-findings.md#ui-15) (low), [UI-17](02-findings.md#ui-17) (low).
-- **Problem and evidence:** "On a phone the 'Problem' and 'First step' columns are off-screen" (UI-02); "Chart text
-  renders at about 7 px on a phone" (UI-03); plus label collisions, raw ISO dates, long-name overflow, lines drawn across
-  sensor outages and budget-chart extremes (UI-12 to UI-17).
-- **Proposed behaviour:** a stacked row layout under about 600 px; chart text at least about 11 px as rendered; short
-  dates ("Jul 20") in every row in one change (decision D14); labels that never overlap; long names truncated with the
-  full name available; a break or shaded gap at sensor outages; capped budget bars.
-- **Files and data:** `index.html` (CSS), `app.js`, `format.js`; the Phase 1 tests that quote ISO dates.
+- **Problem and evidence:** at `cfd77e5`, "On a phone the 'Problem' and 'First step' columns are off-screen" (UI-02);
+  "Chart text renders at about 7 px on a phone" (UI-03); plus label collisions, raw ISO dates, long-name overflow,
+  lines drawn across sensor outages and budget-chart extremes (UI-12 to UI-17).
+- **Already on the page (redesign):** list rows become cards at 760 px or less, and the budget table drops its Budget
+  and Actual columns at 640 px or less (UI-02); chart text renders at 11.5 px at every width (UI-03); tank names sit on
+  one line and no gain labels overlap (UI-12); long group names end with an ellipsis and budget names wrap in their
+  cell (UI-14); the water line breaks where readings stop for more than 12 hours (UI-15); budget value labels sit
+  outside, inside or across the bar and never cover a category name (part of UI-17). Phase 1 keeps all of this
+  ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)).
+- **Proposed behaviour:** short dates ("Jul 20") in every row in one change (decision D14), and a cap on the budget
+  bar scale so one very large overrun does not shrink the other bars (today the scale grows with the largest
+  percentage; `budget()` in `app.js`).
+- **Files and data:** `app.js`, `format.js`; the Phase 1 tests that quote ISO dates.
 - **Dependencies:** P1-14, P1-15.
 - **Effort:** M.
-- **Acceptance criteria:** the regression tests of UI-02, UI-03, UI-12, UI-13, UI-14, UI-15 and UI-17 as written in
-  `findings.json`, for example "At 390 px, for each svg.chart, 12 x rendered width / viewBox width >= 11" (UI-03) and
-  "The Heifers row contains 'Jul 20'; the health rows contain 'Sep 15' and 'Oct 3'" (UI-13).
+- **Acceptance criteria:** the regression tests of UI-02, UI-03, UI-12, UI-14 and UI-15 pass on the redesigned page
+  (`docs/audit/redesign/coverage.mjs`) and stay, restated for it: UI-03 uses the computed font size ("at 390 px, for
+  each svg.chart, computed font size x rendered width / viewBox width >= 11"; 11.5 today); UI-12 checks that no two
+  text boxes in `#gain svg.chart` intersect and that the tank names (`#tanks .tank-name`) all have one height at 390 px;
+  UI-14 checks, on the long-names data (the `longnames` case of `coverage.mjs`), that each grazing label ends before the
+  first bar, that no gain group name (`#gain svg.chart text.hd`) covers a dot (the redesign writes each name above its
+  row; measured with Playwright Chromium on main `0315d09` on 2026-10-20 at 1280, 390 and 320 px, not yet in
+  `coverage.mjs`), and that each budget name fits its cell. New in P2-06: "The Heifers row contains 'Jul 20'; the
+  health rows contain 'Sep 15' and 'Oct 3'" (UI-13); and UI-17 restated for the budget table: with M1's data
+  (committed plus `2026-09,Hay,500,1500`, +200%) the bar scale stops at +-100%, Hay's bar is clipped and keeps its
+  "+200%" label, no two scale labels overlap, and the Fuel bar (+21%) is at least 21% of its track's half width
+  (UI-17's "at least 39 px" of a 183 px half plot); with AB-09's data no value label covers a category name (the AB-09
+  case was not run on the redesign). On main `0315d09` with M1's data (Playwright Chromium, 2026-10-20) the scale runs
+  to +-200% and Fuel's bar is 24.9 of 234 px at 1280 x 900, so the cap and the Fuel width are new in P2-06; the three
+  scale labels do not overlap there at 1280, 390 or 320 px.
 
 #### P2-07: Printable crew briefing
 
@@ -1029,6 +1149,11 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
 
 ### 4.1 Coverage: Phase 2 findings
 
+The redesigned page (pull request #2) already does what UI-01, UI-02, UI-03, UI-10, UI-12, UI-14, UI-15 and UI-16 ask,
+and UI-11 except its budget tooltip, which no longer exists. It does part of UI-17
+([08 section 3](08-redesign-coverage.md#3-coverage)). Each of these keeps that behaviour as a regression check from
+Phase 1 on. A finding counts as fixed only when its test exists and passes. The titles below describe `cfd77e5`.
+
 | Finding | Severity | Status | Effort | Title | Item |
 |---|---|---|---|---|---|
 | [LOAD-05](02-findings.md#load-05) | low | design-limitation | S | No data-age check: an old export is shown as the current report, and the as-of line has no time zone | P2-01 |
@@ -1058,6 +1183,15 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
 | [UI-18](02-findings.md#ui-18) | low | plausible | S | 'Head on grass 375' counts 180 cow-calf pairs as 180 head | P2-10 |
 
 ### 4.2 Phase 2 rules
+
+The "Current or proposed" column describes `cfd77e5`. On the redesigned page, in Chromium: RULE-WF-02 is met by
+keyboard and touch, without "Show data" tables; RULE-WF-03 is partly met (Escape hides the reading and a tap keeps it
+open, but the mouse cannot move onto it and a click does not keep it open); RULE-WF-04 is partly met (the tank charts'
+labels give the last reading; no chart label states the decision-relevant state); RULE-WF-05 keeps focus on the chip
+but announces nothing; RULE-WF-08 is met for the earlier grazing stays (3.28:1) and the over-plan segment (a line and
+a "days past plan" label), and not met for the flagged gain dots (1.10:1 against the other dots; a separate pull
+request fixes them, [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)). Phase 1 keeps what is met
+([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)).
 
 | Rule | Class | Current or proposed | Rule (short) | Item |
 |---|---|---|---|---|
