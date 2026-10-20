@@ -228,7 +228,7 @@ noted; the expected rows already followed the settled choice. Item 6 remains.
 - In node mode a missing file is emulated as an empty body. The browser run serves a real 404.
 - The published GitHub Pages site could not be reached (proxy 403), so these scenarios were run only against the local
   checkout at commit cfd77e50a050163b542cadfc6b38882c0341e99d.
-- There is no PROJECT_CONTEXT.md or AGENTS.md in the repository, so no project-level conventions beyond the audit
-  registries were applied.
+- At the reviewed commit cfd77e5 there was no PROJECT_CONTEXT.md or AGENTS.md, so no project-level conventions beyond
+  the audit registries were applied. Since 2026-10-20 the repository has [AGENTS.md](../../../AGENTS.md).
 - Health content stays on observation, scheduling and records. No scenario implies a treatment or a diagnosis. An
   overdue or due task means "schedule it, and involve the veterinarian as the ranch normally would".

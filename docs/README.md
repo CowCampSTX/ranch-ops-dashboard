@@ -2,7 +2,8 @@
 
 Everything about the Ranch Operations Dashboard beyond the page code. Agents start with [AGENTS.md](../AGENTS.md);
 people can start here. GitHub is the source of truth. The owner's Google Drive holds readable copies in folders with
-the same names (My Drive > `ranch-ops-dashboard`). Change a file here first, then refresh the Drive copy.
+the same names (My Drive > `ranch-ops-dashboard`). Change a file here first, then refresh the Drive copy. An agent
+that cannot reach Drive follows [AGENTS.md](../AGENTS.md#github-and-google-drive).
 
 ## Folders
 
@@ -14,7 +15,8 @@ the same names (My Drive > `ranch-ops-dashboard`). Change a file here first, the
 | [audit/](audit/README.md) | The October 2026 audit of the dashboard and the Phase 1 plan: baseline, findings, research, workflow, roadmap, specification, open questions, coverage of the redesign, the handoff and the review prompts | `audit`: the documents (`README.md`, `01` to `08`, `HANDOFF.md`, `CODEX_REVIEW_PROMPT.md`). Its subfolders (`data`, `diagnostics`, `evidence`, `redesign`, `scenarios`, `screenshots`) hold scripts and machine-readable records and stay on GitHub only |
 
 Every folder here has a `README.md` saying what belongs in it. The ten scenario data folders are described by
-[audit/scenarios/README.md](audit/scenarios/README.md) instead, because a script rebuilds them.
+[audit/scenarios/README.md](audit/scenarios/README.md) and by each folder's own `scenario.md` instead. At the top of
+the Drive folder, `Docs index.md` does that job.
 
 The most used files in `audit/`:
 

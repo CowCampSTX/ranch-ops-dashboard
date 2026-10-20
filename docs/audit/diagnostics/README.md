@@ -6,5 +6,8 @@ verification scripts, research diagnostics, the hand-value check, and the scenar
 script, and [scenarios/README.md](../scenarios/README.md) covers the three scenario scripts. Read "Before running the
 review scripts" in [the audit README](../README.md) first.
 
-They are read-only checks of the page and its data, not part of the page. This folder stays on GitHub only
-([docs/README.md](../../README.md)).
+They check the page and its data and are not part of the page. Most only read, but two can write into the
+repository: `scenarios.build.py` rewrites `docs/audit/scenarios/` (each scenario folder's CSV files, `settings.json`
+and every `expected.json`; see [scenarios/README.md](../scenarios/README.md)), and `browser-check.mjs` writes its
+screenshots to the folder given as its third argument, so give it a folder outside the repository unless you mean to
+replace `docs/audit/screenshots/`. This folder stays on GitHub only ([docs/README.md](../../README.md)).

@@ -12,8 +12,8 @@ must not change.
   files are those of `0315d09` (the redesign); `redesign/preserve.mjs` is not in `0315d09`. Phase 1 has not started.
   `0315d09` is the reviewed baseline for what Phase 1 keeps, not a commit to branch from: each step branches from the
   newest `origin/main`, which includes the redesign follow-up pull request once it has merged
-  ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)). Update this line when that pull request
-  merges.
+  ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)). Update this line, 06's header row and 05
+  section 1.3 when that pull request merges.
 - **Agent instructions:** [AGENTS.md](../../AGENTS.md) at the repository root (`CLAUDE.md` imports it). Project status
   is in [docs/project/STATUS.md](../project/STATUS.md); this handoff and the specification are the Phase 1 guidance.
 - **The dashboard is not production-ready**, and finishing Phase 1 will not make it so. The audit changed no production

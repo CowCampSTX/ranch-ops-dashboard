@@ -1,6 +1,7 @@
 # Project status
 
-Last updated 2026-10-20 by Claude. Update this file whenever a pull request opens or merges, or a blocker appears.
+Last updated 2026-10-20 by Claude. Update this file whenever a pull request opens or merges, or a blocker appears (a
+merge is recorded in the next pull request).
 
 ## Where things stand
 
@@ -35,7 +36,7 @@ Drive filing rules.
 
 ## Where the files are
 
-GitHub holds everything an agent needs ([docs/README.md](../README.md)). The owner's Google Drive folder
+GitHub holds the code, data, specifications, decisions, status and review records ([docs/README.md](../README.md)). The owner's Google Drive folder
 `ranch-ops-dashboard` holds readable copies, private records and work that is not on GitHub yet
 ([AGENTS.md](../../AGENTS.md#github-and-google-drive)).
 

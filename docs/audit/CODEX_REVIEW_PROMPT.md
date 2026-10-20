@@ -250,7 +250,9 @@ OUTPUT, in this order:
 
 ```text
 You are an independent reviewer for ONE implementation pull request. This is a REVIEW ONLY task.
-Do not merge, deploy, commit, push or edit files. The owner decides whether to merge.
+Do not merge, deploy, commit or push, and do not edit any tracked file by hand. Run the commands in task 2 in your
+own checkout of the pull request head: they may rewrite data/ (which must then show no difference) and create
+node_modules/. Write your report and anything else outside the repository. The owner decides whether to merge.
 
 REPOSITORY: CowCampSTX/ranch-ops-dashboard
 PULL REQUEST: [paste the pull request link here]

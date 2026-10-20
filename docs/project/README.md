@@ -1,7 +1,8 @@
 # Project
 
-The living files that say where the project stands. Update them in the same pull request as the change they
-describe.
+The living files that say where the project stands. Update them in the pull request that makes the change. A pull
+request cannot record its own merge, so a merge, or an owner decision made outside a pull request, goes in the next
+pull request.
 
 | File | What it holds |
 |---|---|

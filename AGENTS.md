@@ -2,7 +2,8 @@
 
 Instructions for every agent that works on this repository (Claude, Codex or any other) and for the people who direct
 them. `CLAUDE.md` imports this file, so Claude and Codex follow the same rules. Keep it short and current: when a rule
-or the project's state changes, update this file, or the file it points to, in the same pull request.
+or the project's state changes, update this file, or the file it points to, in the same pull request (a merge, or an
+owner decision made outside a pull request, goes in the next one).
 
 ## The project
 
@@ -79,8 +80,9 @@ AGENTS.md                this file
 CLAUDE.md                imports this file for Claude
 ```
 
-Every folder under `docs/` has a `README.md` saying what belongs in it (the ten scenario data folders are described
-by `docs/audit/scenarios/README.md`, because a script rebuilds them). Where new files go:
+Every folder under `docs/` has a `README.md` saying what belongs in it, except the ten scenario data folders, which
+`docs/audit/scenarios/README.md` and each folder's own `scenario.md` describe (filing rule 5 below). Where new files
+go:
 
 - A new specification, such as Phase 2: `docs/specs/<topic>.md` (create the folder, with its `README.md`, with the
   first one).
@@ -126,9 +128,11 @@ means a set-up problem, not a result about the page.
   docs/audit/CODEX_REVIEW_PROMPT.md on the pull request's branch, for <pull request link>." The prompt text lives in
   this repository, so any agent can read it. A prompt filled in for one pull request is saved in
   `docs/reviews/prompts/`, where the reviewer can read it from the pull request's branch.
-- A review is review only. The reviewer edits no repository file, pushes nothing and writes its working files outside
-  the repository, so the rule below about saving work before a session ends does not apply to it. Its report goes to
-  the owner.
+- A review is review only. The reviewer works in its own clone or detached checkout of the pull request head, never in
+  a builder's working copy. It may run the checkpoint's commands there, including the ones that rewrite `data/` or
+  create `node_modules/`. It changes no tracked file by hand, commits nothing and pushes nothing, and writes its report
+  and any other file outside the repository. So the rule below about saving work before a session ends does not
+  apply to it. Its report goes to the owner.
 - The owner passes the report to the builder. The builder saves it in `docs/reviews/`, replacing local folder paths
   with placeholders, lists it in `docs/reviews/README.md` and fixes what it asks for, in the pull request it reviewed
   if that is still open, otherwise in the next one.
@@ -142,12 +146,19 @@ Reviews.)
 
 - **GitHub is the source of truth** for code, data, specifications, decisions, status and review records. The
   repository is public, so nothing private goes in it.
-- **Google Drive** is the owner's My Drive, folder `ranch-ops-dashboard`: the account the owner also uses with Google
-  Drive for desktop. It holds readable copies of the documentation, private records and work that cannot go to GitHub
-  yet. Change the repository first, then refresh the copy. When a copy and GitHub disagree, GitHub is right.
-- A Drive connector can be signed in to a different Google account. Before writing through one, check that it shows
-  this project's folder with `Docs index.md` at its top. If it does not, write nothing and tell the owner.
-- An agent that cannot reach Drive loses nothing it needs to build: everything required is in this repository.
+- **Google Drive** is the owner's My Drive, folder `ranch-ops-dashboard`. It holds readable copies of the
+  documentation, private records and work that cannot go to GitHub yet. Change the repository first, then refresh
+  the copy. When a copy and GitHub disagree, GitHub is right.
+- A Drive connector can be signed in to a different Google account. Once per session, before the first write through
+  one, check that its My Drive shows `ranch-ops-dashboard` with `Docs index.md` at its top. If it does not, write
+  nothing and tell the owner. The one exception is when the owner asks for the folder to be set up or rebuilt: then
+  check that My Drive shows the owner's other project folders, such as `Ranch Tech ROI`, create
+  `ranch-ops-dashboard` there and add `Docs index.md` to it first.
+- An agent that cannot reach Drive, or whose connector fails that check, can still build: the code, data,
+  specifications, decisions, status and review records are in this repository. Only work parked in Drive's
+  `work-in-progress` is out of its reach; when a task needs it, ask the owner. Such an agent does the GitHub part of
+  each rule below and lists the Drive steps still to do (a new folder with its `README.md`, copies to refresh) in its
+  pull request, so the owner or an agent with Drive can do them.
 
 Filing rules for Drive:
 
@@ -161,13 +172,16 @@ Filing rules for Drive:
 4. Two folders exist only in Drive. `archive` holds superseded copies and private records, such as the original
    handoff note, which names personal details. `work-in-progress` holds work that cannot go to GitHub yet, one dated
    subfolder per piece; it moves to `archive` once the work is on GitHub.
-5. Every folder and subfolder, in Drive and under `docs/`, has a `README.md` saying what belongs in it. A new kind of
-   material gets a new folder in both places, with its `README.md`, and a row in `docs/README.md`.
+5. Every folder and subfolder, in Drive and under `docs/`, has a `README.md` saying what belongs in it, with two
+   exceptions. At the top of the Drive folder, `Docs index.md` does this job, because `README.md` there is the
+   repository's front page. The ten scenario data folders under `docs/audit/scenarios/` are described by
+   `docs/audit/scenarios/README.md` and by each folder's own `scenario.md`. A new kind of material gets a new folder
+   in both places, with its `README.md`, and a row in `docs/README.md`.
 6. Dated material is named `YYYY-MM-DD-what`.
-7. Nothing in Drive is deleted or trashed without the owner's OK. A connector cannot change a file's content, so to
-   refresh a copy through one, move the old copy to `archive`, renamed `YYYY-MM-DD-<name>` with the date it was
-   replaced, then add the new copy. On the owner's PC, copying a file over the old one in the Google Drive for
-   desktop folder refreshes it in place and keeps its link.
+7. Nothing in Drive is deleted or trashed without the owner's OK. The Google Drive connector Claude used on
+   2026-10-20 can change a file's name, folder and details but not its content (its update tool has no content
+   field). To refresh a copy through a connector like that, move the old copy to `archive`, renamed
+   `YYYY-MM-DD-<name>` with the date it was replaced, then add the new copy.
 
 ## Writing style
 
