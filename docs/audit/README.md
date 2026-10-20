@@ -26,8 +26,12 @@ These are recommendations. The finding IDs (for example `LOAD-01`) are the stabl
 1. **Never show "all clear" when the page cannot tell.** Add a third state, CAN'T TELL, plus a loading message, a
    visible error naming any file that failed, a master list of tanks, and page sections that draw on their own
    (P1-06, P1-07; [LOAD-01](02-findings.md#load-01), [LOAD-02](02-findings.md#load-02),
-   [LOAD-03](02-findings.md#load-03), [LOAD-04](02-findings.md#load-04), [WAT-02](02-findings.md#wat-02)). Today, of 32
-   single-file failure cases, 8 showed the affected area as clear and the other 24 left a blank page.
+   [LOAD-03](02-findings.md#load-03), [LOAD-04](02-findings.md#load-04), [WAT-02](02-findings.md#wat-02)). At the
+   reviewed commit `cfd77e5`, of 32 single-file failure cases, 8 showed the affected area as clear and the other 24
+   left a blank page. On main (`0315d09`, Playwright Chromium, 2026-10-20), 20 of the 32 show "The report didn't load"
+   with a retry button, which names no file and hides the whole report. The other 12, a garbled or header-only
+   `groups`, `moves`, `weights`, `water`, `health` or `budget` file, draw the report with the affected area's count at
+   0 ([08 section 3.2](08-redesign-coverage.md#32-partly-addressed)).
 2. **Read real exports correctly, and show what cannot be read.** Replace the CSV reader with one that handles quotes,
    line endings and blank rows, and give every file a data contract (blank means missing, IDs stay text, required
    columns, references, duplicates) whose violations appear as visible data-issue rows (P1-01, P1-02, P1-04;
@@ -106,9 +110,14 @@ changed.
   ([01-baseline.md section 8](01-baseline.md#8-how-to-re-run-every-diagnostic)). `browser-check`, `states-check`,
   `render.browser`, `scenarios.run` and `workflow.usability.research` also try the `playwright` package by name. The
   two `redesign/` scripts use `$PLAYWRIGHT_MODULE`, else `$PLAYWRIGHT_PATH`, if set, else the audit machine's path if
-  it exists, else the `playwright` package. If none loads they print a line starting "ENVIRONMENT:" and stop with exit
-  code 2, which is a set-up problem, not a FAIL. They do the same when `preserve.mjs` cannot reach its page URL and
-  when `coverage.mjs` cannot start its server on the port (for example, the port is in use).
+  it exists, else the `playwright` package. Only the first of these that is set (or, for the path, exists) is tried.
+  Node finds the package by name only in a `node_modules` folder in the repository or a folder above it; a global
+  install (`npm install -g playwright`) is not found, and a review must not install into the repository. Point
+  `PLAYWRIGHT_MODULE` at an install outside it instead, for example
+  `PLAYWRIGHT_MODULE="$(npm root -g)/playwright/index.mjs"`. If it cannot load they print a line starting
+  "ENVIRONMENT:" and stop with exit code 2, which is a set-up problem, not a FAIL. They do the same when
+  `preserve.mjs` cannot reach its page URL and when `coverage.mjs` cannot start its server on the port (for example,
+  the port is in use).
 - **File paths on Windows.** Node's `import()` takes a URL, so a Windows path such as `C:\...\index.mjs` fails with
   `ERR_UNSUPPORTED_ESM_URL_SCHEME` unless it goes through `pathToFileURL`. Every diagnostic that loads Playwright from
   a path has this problem, and `gain.evidence.research`, `gain.noise.research`, `grazing.verify`, `registry.extra`

@@ -43,7 +43,7 @@ let chromium;
 try {
   ({ chromium } = await import(existsSync(PW) ? pathToFileURL(PW).href : PW));
 } catch (e) {
-  console.error(`ENVIRONMENT: could not load Playwright from "${PW}" (${e.code ?? e.message}). Set PLAYWRIGHT_MODULE to the path of Playwright's index.mjs, or install the playwright package. This is a set-up problem, not a result about the page.`);
+  console.error(`ENVIRONMENT: could not load Playwright from "${PW}" (${e.code ?? e.message}). Set PLAYWRIGHT_MODULE to the path of Playwright's index.mjs, for example $(npm root -g)/playwright/index.mjs for a global install. This is a set-up problem, not a result about the page.`);
   process.exit(2);
 }
 const PORT = +(process.argv[2] ?? 8802);

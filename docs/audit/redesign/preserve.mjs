@@ -52,7 +52,7 @@ let chromium;
 try {
   ({ chromium } = await import(existsSync(PW) ? pathToFileURL(PW).href : PW));
 } catch (e) {
-  console.error(`ENVIRONMENT: could not load Playwright from "${PW}" (${e.code ?? e.message}). Set PLAYWRIGHT_MODULE to the path of Playwright's index.mjs, or install the playwright package. This is a set-up problem, not a result about the page.`);
+  console.error(`ENVIRONMENT: could not load Playwright from "${PW}" (${e.code ?? e.message}). Set PLAYWRIGHT_MODULE to the path of Playwright's index.mjs, for example $(npm root -g)/playwright/index.mjs for a global install. This is a set-up problem, not a result about the page.`);
   process.exit(2);
 }
 
@@ -825,6 +825,7 @@ await guard(["KEEP-28"], async () => {
     tanks: ["tank", "pasture"].filter((k) => document.getElementById("tanks").textContent.includes(P[k])),
     budget: document.getElementById("budgetTable").textContent.includes(P.cat),
     tiles: document.getElementById("tiles").textContent.includes(P.group.toLowerCase()),
+    now: ["lone", "group"].filter((k) => document.getElementById("nowGrazing").textContent.includes(P[k])),
   }), P);
   const per = await sweepAll(page);
   const rs = per.flatMap((p) => p.readings.map((r) => ({ ...r, label: p.label })));
@@ -835,8 +836,8 @@ await guard(["KEEP-28"], async () => {
   await hostile.page.focus("#gain svg.chart"); await hostile.page.keyboard.press("Home");
   const h = await hostile.page.evaluate(() => ({ xss: Object.keys(window).filter((k) => k.startsWith("__xss")).length, imgs: document.querySelectorAll("img").length, tip: document.getElementById("tip").textContent, list: document.getElementById("exceptions").textContent.includes("Lone Tree <A") }));
   await hostile.close();
-  const ok = f === 0 && dom.imgs === 0 && dom.onattr === 0 && dom.list.length === 6 && dom.tanks.length === 2 && dom.budget && dom.tiles && Object.values(tipFound).every(Boolean) && rs.every((r) => !r.bad) && !errs.length && h.xss === 0 && h.imgs === 0 && /<i>H\d+<\/i>/.test(h.tip) && h.list;
-  check("KEEP-28", ok, `six-field payload (pasture, tank id, group, ear tag, health task, budget category): window flags set ${f}; injected img/iframe/script elements ${dom.imgs}; elements with on* attributes ${dom.onattr}; shown literally in the list ${dom.list.length}/6, tank cards ${dom.tanks.length}/2, budget table ${dom.budget}, tiles ${dom.tiles}; ${rs.length} readouts stepped with the keyboard, readouts with markup elements ${rs.filter((r) => r.bad).length}, literal text found in readouts ${JSON.stringify(tipFound)}; page errors ${errs.length}; hostile case (coverage.mjs edits): flags ${h.xss}, img ${h.imgs}, gain readout "${h.tip.slice(0, 26)}", "Lone Tree <A" in the list ${h.list}`);
+  const ok = f === 0 && dom.imgs === 0 && dom.onattr === 0 && dom.list.length === 6 && dom.tanks.length === 2 && dom.budget && dom.tiles && dom.now.length === 2 && Object.values(tipFound).every(Boolean) && rs.every((r) => !r.bad) && !errs.length && h.xss === 0 && h.imgs === 0 && /<i>H\d+<\/i>/.test(h.tip) && h.list;
+  check("KEEP-28", ok, `six-field payload (pasture, tank id, group, ear tag, health task, budget category): window flags set ${f}; injected img/iframe/script elements ${dom.imgs}; elements with on* attributes ${dom.onattr}; shown literally in the list ${dom.list.length}/6, tank cards ${dom.tanks.length}/2, budget table ${dom.budget}, tiles ${dom.tiles}, Now grazing ${dom.now.length}/2; ${rs.length} readouts stepped with the keyboard, readouts with markup elements ${rs.filter((r) => r.bad).length}, literal text found in readouts ${JSON.stringify(tipFound)}; page errors ${errs.length}; hostile case (coverage.mjs edits): flags ${h.xss}, img ${h.imgs}, gain readout "${h.tip.slice(0, 26)}", "Lone Tree <A" in the list ${h.list}`);
   await close();
 });
 

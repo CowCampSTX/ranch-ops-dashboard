@@ -107,7 +107,7 @@ not part of the audit's verified evidence and do not test the dashboard.
 | Phase | Items | Findings covered | Rules covered | Outcome for the manager |
 |---|---|---|---|---|
 | 1. Fix now | 17 (P1-01 to P1-17) | 55 (18 high, 19 medium, 18 low), each by exactly one item | 33 Phase 1 rules | The page reads ordinary exports correctly, never shows a missing or unreadable area as all-clear, says CAN'T TELL with a reason and a first step, uses one as-of time with a time zone, cannot be blanked by one bad file, renders CSV text safely, and labels every threshold as a demonstration setting. |
-| 2. Build next | 11 (P2-01 to P2-11) | 25 | 15 Phase 2 rules | A morning review built around freshness, consequence-ranked rows, filters by severity, pasture and group, "why this row" explanations, "Show data" tables, short dates in rows, a printable crew briefing, rest checks, and optional per-device marks labelled "this device only". Chart readings by mouse, touch and keyboard, the phone layouts, the summary card and area chips that keep focus are already on the page (the redesign, pull request #2; [08 section 3](08-redesign-coverage.md#3-coverage)) and are kept from Phase 1 on ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)); P2-02 to P2-06 say what each item still adds. |
+| 2. Build next | 11 (P2-01 to P2-11) | 25 | 15 Phase 2 rules | A morning review built around freshness, consequence-ranked rows, filters by severity, pasture and group, "why this row" explanations, "Show data" tables, short dates in rows, a printable crew briefing, rest checks, and optional per-device marks labelled "this device only". Chart readings by mouse, touch and keyboard, the phone layouts, the tank cards' reading times, the summary card and area chips that keep focus are already on the page (the redesign, pull request #2; [08 section 3](08-redesign-coverage.md#3-coverage)) and are kept from Phase 1 on ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)); P2-01 to P2-06 say what each item still adds. |
 | 3. Add later | 3, ranked (P3-01 to P3-03) | 1 ([WAT-06](02-findings.md#wat-06)) | 10 Phase 3 rules | Water supply coverage from tank capacity and head count; forage observations at moves; drought and precipitation context as a dated snapshot. |
 | Deferred | none | 2 ([GAIN-10](02-findings.md#gain-10), [GRZ-09](02-findings.md#grz-09)) | 40 deferred rules | Recorded with reasons in [section 6](#6-deferred-and-excluded). |
 
@@ -893,7 +893,7 @@ memory is per-device browser storage labelled "this device only", and nothing sh
 items is in [04-workflow-and-features.md Part 1](04-workflow-and-features.md#part-1-recommended-morning-workflow).
 
 **What the redesign already ships.** The redesigned page (pull request #2, on main since `0315d09`) already does part
-of P2-02 to P2-06 ([08 section 3](08-redesign-coverage.md#3-coverage)). Each of those items says what is already on
+of P2-01 to P2-06 ([08 section 3](08-redesign-coverage.md#3-coverage)). Each of those items says what is already on
 the page, which Phase 1 keeps ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)),
 and keeps only the rest as Phase 2 work. Its acceptance criteria say which checks already pass on that page and stay
 as regression checks, and which are new. Measurements quoted in these items are Playwright Chromium on main `0315d09`,
@@ -906,8 +906,13 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
 #### P2-01: Freshness and coverage strip
 
 - **Findings:** [LOAD-05](02-findings.md#load-05) (low), [WAT-05](02-findings.md#wat-05) (medium). **Rules:** [RULE-WF-14](03-research-and-data.md#rule-wf-14) (C), the strip part.
-- **Problem and evidence:** "an old export is shown as the current report" (LOAD-05); a tank whose sensor stopped less
-  than 24 hours ago "is judged on its old reading and counted OK, with no sign of how old the shown level is" (WAT-05).
+- **Problem and evidence:** at `cfd77e5`, "an old export is shown as the current report" (LOAD-05); a tank whose sensor
+  stopped less than 24 hours ago "is judged on its old reading and counted OK, with no sign of how old the shown level
+  is" (WAT-05).
+- **Already on the page (redesign):** each tank card shows the time of its last reading ("11.8% at 6:00 PM"; a silent
+  tank "last heard 42 h ago"), and Phase 1 keeps it
+  ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). P2-01 adds the "late"
+  state, its CAN'T TELL row and the freshness strip.
 - **Proposed behaviour:** one line under the header per source, for example "Water: 7 of 8 tanks reported in the last
   24 h; weigh-in Sep 15; budget through Sep" (RULE-WF-14 recommendation). In demo mode the page says "Fictional
   snapshot, not live" instead of an age alarm; with real data, a banner when the viewer's clock is well past the as-of
@@ -988,9 +993,11 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
   rested pasture has water (Windmill rest Sep 30 - Aug 11 = 50 >= 45; T2 11.8% < 25) (GRZ-08); the T4 panel lists the
   readings from 2026-09-29 18:00 (56.0%) to 2026-09-30 18:00 (10.0%). The UI-16 check passes on the redesigned page
   and stays as a regression check: exactly 6 flagged dots in the Yearlings row, whose readings name Y027, Y031, Y058,
-  Y082, Y129 and Y132 (measured by check UI-16 and by the keep checks of 06 section 6.3), with the 50% line at 1.0
-  lbs/day for yearlings and at 0.5 for heifers (half of each target; by code reading, `app.js:518` draws the lines per
-  group).
+  Y082, Y129 and Y132 (measured by check UI-16 and KEEP-24 of 06 section 6.3; restated from "marked dots ...
+  labelled": the redesign names each flagged animal in its reading, as `cfd77e5` already did for every dot, so on the
+  chart the dot is marked by colour only; making that mark more than colour is the follow-up pull request of 06
+  section 15, and P2-05 keeps it), with the 50% line at 1.0 lbs/day for yearlings and at 0.5 for heifers (half of each
+  target; by code reading, `app.js:518` draws the lines per group).
 
 #### P2-05: Chart details by keyboard and touch
 

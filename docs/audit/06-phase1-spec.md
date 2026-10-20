@@ -749,11 +749,18 @@ when it has a weigh-in within `gainMaxAgeDays` (step 2), "Heifers: head 0 in gro
 2026-09-15; gain can't be judged". A group with more matched animals than head reads "Yearlings: 150 weighed at both
 2026-07-20 and 2026-09-15 (full), more than the 100 head in groups.csv; 1.94 lbs/day". No line reads "{n} of 0". A group
 with target 0 or head 0 draws no dots on the chart; its line says why, and the redesign's "Not shown" note under the
-chart names it. The chart heading reads "Daily gain between the last two weigh-ins".
+chart (`#gain p.hint`) names it with its own reason ("Not shown: Cows, with no gain target set; Yearlings, head 0 in
+groups.csv."). When some group has a gain target but no group draws dots, the gain card shows the gain section lines
+in place of the redesign's "No group with a gain target has two weigh-ins yet.", which is false when a group with head
+0 has two weigh-ins. The chart heading reads "Daily gain between the last two weigh-ins".
 
 **Gain tile.** Built from the results, never from a fixed group name ([LOAD-03](02-findings.md#load-03)): the
-judged group furthest below its target, as "{G} lbs/day {group} (target {target})", or "No weigh-ins yet" when no group
-has a figure. A group with head 0 is never chosen. When at least one group has a gain target and every such group has
+judged group furthest below its target, as "{G} lbs/day {group} (target {target})". A group with head 0 is never
+chosen. When some group has a gain target, no group has a figure and the head-0 cases below do not apply, it reads "No
+weigh-ins yet" if no group with a gain target has a weigh-in on or before D, and otherwise "Can't tell" with "{groups}
+can't be judged on gain", naming the groups with a gain target and no figure. With weights.csv missing, failed, empty
+or header-only, the tile is section 6.2's "Can't tell" with its reason; for an empty or header-only weights.csv that
+reason is "No weigh-ins yet" (P1-14 item 4). When at least one group has a gain target and every such group has
 head 0, the tile reads "Not judged" with "Head 0 in groups.csv: {groups}"; when any of those groups has a weigh-in
 within `gainMaxAgeDays` (step 2), it reads "Can't tell" with the same detail. It never reads "No weigh-ins yet" or a
 figure in either case. When no group has a gain target, the tile keeps the redesign's "None yet" and its note "No
@@ -818,7 +825,10 @@ row and no NaN ([BUD-03](02-findings.md#bud-03)).
 actual and `B` the sum of the budgets of the month-and-category rows whose actual is valid. A budget whose actual is
 blank or unreadable is left out, so a missing amount can never make spending look under budget. Value "{signed p}%"
 ("+1.0%", "0.0%" when equal, never "−0.0%"), detail "\${A} of \${B}, season to date through {C}", plus "(1 category
-can't tell)" when any. "No budget loaded" (CAN'T TELL) when the area is CAN'T TELL. Committed data: "+1.0%",
+can't tell)" when any. "No budget loaded" (CAN'T TELL) when the area is CAN'T TELL. When `B` is 0 and the area is not
+CAN'T TELL (every closed-month budget beside a valid actual is 0 or blank), the tile keeps the redesign's "No budget"
+with "\${A} spent, season to date through {C}", never a percent, and the season-total row shows "no budget" in place
+of a percent. Committed data: "+1.0%",
 "\$89,303 of \$88,400, season to date through 2026-09". Scenario folder 03 (Vet and health's September actual blank):
 "+1.0%", "\$87,783 of \$86,900" and "(1 category can't tell)"; counting the \$1,500 budget against the blank actual
 would read "\$87,783 of \$88,400", under budget. [BUD-02](02-findings.md#bud-02)'s case (Hay with a blank budget and
@@ -827,7 +837,10 @@ would read "\$87,783 of \$88,400", under budget. [BUD-02](02-findings.md#bud-02)
 **Budget table.** The redesign draws the budget as one table, `#budgetTable`, with a bar in each row, and Phase 1 keeps
 it (section 6.3); there is no separate budget chart. Bars for categories with `B > 0`; unbudgeted spending as a labelled
 bar "\$500, no budget"; a CAN'T TELL category shows "can't tell" instead of a bar. The season-total row shows the same
-totals as the spend tile; on the committed data it is the sum of the six rows (\$88,400, \$89,303, +\$903).
+totals as the spend tile; a CAN'T TELL category's Budget and Actual cells count the same month-and-category rows as the
+tile (a month's budget only where its actual is valid), so the rows still add up to the season total (scenario folder
+03: \$86,900 and \$87,783, with Vet and health's September \$1,500 left out). On the committed data the season-total
+row is the sum of the six rows (\$88,400, \$89,303, +\$903).
 Percentages in the table, the bar labels included, show one decimal ("+25.0%"), as the rows do
 ([05 P1-12](05-roadmap.md#p1-12-budget-rules): "Percent is shown to one decimal"). No attribute may contain NaN or
 Infinity.
@@ -921,7 +934,7 @@ Firefox and WebKit were not tested.
 | Kept | What the page does | Finding or rule | Checks |
 |---|---|---|---|
 | Severity by shape plus a word | Every badge and pill has an icon and a word: the list, the summary card, the tank cards ("Go now", "Check soon", "Fast drop", "No signal", "OK", "Can't tell"), the Now grazing list ("On plan", "Move soon", "Past plan", "No plan"), the budget table and its legend ("Serious", "Warning"), and the water tile's one icon per tank. A flagged budget row carries the same pill as its list row. The CAN'T TELL marker adds a shape and words. | [RULE-WF-01](03-research-and-data.md#rule-wf-01) (A) | KEEP-11, KEEP-15, KEEP-17, KEEP-33 |
-| Charts in the tab order | Every `svg.chart` with readings has `tabindex="0"`, an `aria-label`, an `aria-roledescription` and `aria-describedby="chart-help"`. The 10 charts (8 tanks, grazing, gain) are tab stops in page order at 1280 x 900 and 390 x 844; a chart with no readings in its window is not. | [UI-01](02-findings.md#ui-01), [RULE-WF-02](03-research-and-data.md#rule-wf-02) (A) | KEEP-01 |
+| Charts in the tab order | Every `svg.chart` with readings has `tabindex="0"`, an `aria-label`, an `aria-roledescription` and `aria-describedby="chart-help"`. The 10 charts (8 tanks, grazing, gain) are tab stops in page order (KEEP-01 checks this at 1280 x 900, and section 11.4 item 4 at 390 x 844 and 320 x 640); a chart with no readings in its window is not. | [UI-01](02-findings.md#ui-01), [RULE-WF-02](03-research-and-data.md#rule-wf-02) (A) | KEEP-01 |
 | Readings by keyboard | Focus shows a reading in `#tip` (`role="status"`, `aria-live="polite"`), value first, with a highlight; a tank chart opens on its latest reading. The arrow keys, Home and End step through readings, ArrowUp and ArrowDown change rows, and no key scrolls the page. Escape hides the reading and keeps focus; leaving the chart hides it. | [UI-01](02-findings.md#ui-01), [RULE-WF-02](03-research-and-data.md#rule-wf-02), [RULE-WF-03](03-research-and-data.md#rule-wf-03) (Escape part) | KEEP-02, KEEP-03, KEEP-04 |
 | Readings by touch and mouse | On a touch screen the hint reads "Tap a chart, or slide a finger along it, to read each reading."; a tap shows a reading, a sliding finger moves it, a tap outside the charts clears it, and charts keep `touch-action: pan-y`. Hovering shows a reading beside the pointer without moving focus. | [UI-01](02-findings.md#ui-01), [RULE-WF-02](03-research-and-data.md#rule-wf-02) | KEEP-06, KEEP-07 |
 | Readings stay on screen | All 443 readings of the 10 charts lie inside the window and below the sticky top bar at 1280 x 900, 390 x 844 and 320 x 640, and a reading follows its point when the page scrolls. At 1280 x 900 the T4 reading spans x 514 to 714. | [UI-11](02-findings.md#ui-11) | KEEP-05, KEEP-34 |
@@ -943,8 +956,10 @@ Basis column) fit at 320 px without sideways scroll. The banner uses `role="aler
 
 - Two kinds of mark show status by colour without an icon or word of their own: the flagged gain dots (the dot differs
   by hue only, although its reading and the legend name the flag) and the meters on the gain and spend tiles. They are
-  known issues of the redesign that a separate pull request fixes (section 15). No check keeps them, Phase 1 does not
-  count them as features to keep, and Phase 1 adds no mark like them.
+  known issues of the redesign that a separate pull request fixes (section 15). KEEP-24 counts the gain chart's dots
+  as `circle` elements, one per keyboard reading, and the flagged ones by a fill that differs from the other dots and
+  matches a legend key; the separate pull request that fixes the colour-only marks may change KEEP-24 to count its new
+  mark, and says so. Phase 1 does not count them as features to keep, and Phase 1 adds no mark like them.
 - `#tip` cannot be hovered or clicked to keep it open (`pointer-events: none`). That part of
   [RULE-WF-03](03-research-and-data.md#rule-wf-03) stays in P2-05 (section 14).
 - The whole-page failed-load state, and the uncaught page error it throws today, are replaced by section 6.2's
@@ -1195,7 +1210,7 @@ correctly rounded to the precision shown". The terms map to this specification a
 | `subject_key` by `kind` | `tank` → `refs.tankId`; `stay`, `group`, `animals` → `refs.group` (case-insensitive for `animals`); `task` → "{group}: {task}"; `category` → `refs.category`; `record`, `file` → the issue's subject, file or message |
 | `expected_absent` | no `alert` row with that area, kind and subject |
 | `area_states` `ok` / `needs-attention` / `cant-tell` | `ok` / `attention` / `cant_tell` |
-| `tile_expectations` | `tileSummary(result)`, with the same checks as `compareTiles` in `scenarios.run.mjs` |
+| `tile_expectations` | `tileSummary(result)`, with the same checks as `compareTiles` in `scenarios.run.mjs`; the `needs_attention` entry is checked against the counts `tileSummary` returns (section 5.1), which the page shows in the summary card `#summary`, not in a tile |
 | `render_expectations` (folder 10) | the browser smoke test (section 11.4) |
 | `must_not_appear_anywhere` | every row text, issue message and tile text |
 
@@ -1322,9 +1337,10 @@ static server and checks the redesigned page, using the page terms of section 12
    `tests/browser/smoke.mjs` or runs the reference script against the page it serves; either way they run in CI
    (section 11.5). The checks read structure and behaviour, not rule wording or pixel positions: all 34 also passed on
    a copy of main given the Phase 1 wording of sections 5.7 and 10.2. A check changes only where a Phase 1 item changes
-   the behaviour it tests, and the pull request says which and why. `docs/audit/redesign/coverage.mjs` is not a Phase 1
-   gate: it asserts pre-Phase 1 wording ("Heifers here now", "Water tanks OK") and stays as the record of the
-   redesign's claims.
+   the behaviour it tests, or where the pull request is the fix for the colour-only marks of section 15 (KEEP-24 counts
+   the flagged gain dots as circles in a second colour, section 6.3), and the pull request says which and why.
+   `docs/audit/redesign/coverage.mjs` is not a Phase 1 gate: it asserts pre-Phase 1 wording ("Heifers here now",
+   "Water tanks OK") and stays as the record of the redesign's claims.
 
 ### 11.5 CI changes (`.github/workflows/test.yml`)
 
@@ -1670,7 +1686,8 @@ Gain plausibility, target, coverage, age, weigh basis ([GAIN-04](02-findings.md#
    reads "225". With every Yearlings row removed from weights.csv and weigh_sessions.csv instead: the same, with one
    `GROUP_HEAD_ZERO` naming Yearlings without a weigh-in count. Control: head 150 with every Yearlings weigh-in removed
    gives one Yearlings Gain CAN'T TELL row "No weigh-ins recorded"; 10 rows, "2 critical, 6 serious, 2 warning (2
-   can't tell)".
+   can't tell)". [browser] In the first case, the "Not shown" note under `#gain svg.chart` (`#gain p.hint`) contains
+   "Yearlings, head 0 in groups.csv" and does not contain "Yearlings, with no gain target".
 8. [scenario] Head 0 with recent weigh-ins, an inconsistent record (section 5.4 step 2). Committed data with the
    Yearlings head set to 0 in groups.csv, every other file unchanged (their last weigh-in, 2026-09-15, is 15 days before
    the as-of date): no "6 yearlings" warning; one Yearlings Gain CAN'T TELL row, severity warning, "Head is 0 in
@@ -1992,7 +2009,7 @@ commit `0315d09`) and keeps what section 6.3 lists. Only enhancements the redesi
 (section 14). The preserve checks behind section 6.3 are kept in `docs/audit/redesign/preserve.mjs` and run by the
 smoke test (section 11.4 item 6).
 
-**Known issues of the redesign, not features to keep** (owner, 2026-10-20). Two kinds of mark on main show status by
+**Known issues of the redesign, not features to keep** (recorded 2026-10-20). Two kinds of mark on main show status by
 colour without an icon or word of their own, against the rule that a status colour comes only with an icon and a
 label: the flagged gain dots, which differ from the others by hue only (1.10:1; their readings and the legend name
 the flag), and the meters on the gain and spend tiles, both noted in the review of the redesign, which is not in this

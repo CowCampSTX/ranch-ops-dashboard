@@ -27,10 +27,11 @@ work starts from main and keeps the redesign's behaviour listed in
 
 **Done.** Run once, on 2026-10-20, on pull request #2 at `e9d7ab3`. Result: pull request #2 READY to merge (the owner
 merged it as `0315d09`); Phase 1 NO-GO until R1 (the Phase 1 scope excluded features the redesign already ships) and
-R2 (browser criteria named elements the redesign removed) are fixed. R3 to R5 were non-blocking suggestions. The
-prompt below is the one that was run, updated on 2026-10-20 after the merge (the pull request line, the set-up notes,
-"values" in place of "numbers", the recorded gain readout and output item 8). The text as run is
-`git show e9d7ab3:docs/audit/CODEX_REVIEW_PROMPT.md`. The follow-up review is
+R2 (browser criteria named elements the redesign removed) are fixed. R3 to R5 were recommendations for the same
+follow-up, with R4 to be resolved before the gain logic is built. The prompt below is the one that was run, updated on
+2026-10-20 after the merge (the pull request line, the set-up notes, "values" in place of "numbers", the recorded gain
+readout and output item 8). The text as run is `git show e9d7ab3:docs/audit/CODEX_REVIEW_PROMPT.md`. The follow-up
+review is
 [Checkpoint 1b](#checkpoint-1b-specification-follow-up-before-phase-1).
 
 ```text
@@ -282,7 +283,8 @@ TASKS
    - the preserve checks KEEP-01 to KEEP-34 (06 sections 6.3 and 11.4), if the smoke test does not carry them yet:
      serve the pull request head (python3 -m http.server 8766 --bind 127.0.0.1) and run
      node docs/audit/redesign/preserve.mjs http://localhost:8766/ (recorded on main at 0315d09: 34 PASS). A FAIL is
-     BLOCKING unless the pull request changes that behaviour on purpose under a P1 item and says which and why.
+     BLOCKING unless the pull request changes that behaviour on purpose, under a P1 item or as the fix for the
+     colour-only marks (06 section 15), and says which and why.
    Also check that CI passed on the pull request.
    If a command fails because of your set-up rather than the code (see "Before running the review scripts" in
    docs/audit/README.md), list it under Environment problems, not as an issue.

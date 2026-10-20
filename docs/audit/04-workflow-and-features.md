@@ -153,9 +153,10 @@ export disappears, and a header-only water.csv gives "WATER TANKS OK / 0 of 0 / 
 - *Phase 2.* Add the freshness and coverage strip. `RULE-WF-14` gives its wording: "Water: 7 of 8 tanks reported in the
   last 24 h; weigh-in Sep 15; budget through Sep". Add the age check against the clock with a demo flag, so the
   fictional page says "example data" rather than raising a false alarm ([LOAD-05](02-findings.md#load-05)). Add the
-  "sensor late" warning for a tank that stopped reporting less than 24 hours ago, with the time of the shown level
-  ([WAT-05](02-findings.md#wat-05); demo setting 12 hours). Show weighed head against inventory head beside every group
-  gain figure (`RULE-GAIN-10`, class C, Phase 1; on the committed data "45 of 45 heifers, 150 of 150 yearlings").
+  "sensor late" warning for a tank that stopped reporting less than 24 hours ago ([WAT-05](02-findings.md#wat-05);
+  demo setting 12 hours; each tank card already shows the time of its shown level since the redesign). Show weighed
+  head against inventory head beside every group gain figure (`RULE-GAIN-10`, class C, Phase 1; on the committed data
+  "45 of 45 heifers, 150 of 150 yearlings").
 
 ### Step 2. New or changed, worst first (about 35 seconds)
 
@@ -213,8 +214,10 @@ basis, "'Demo setting (D)' for every current value until it is sourced or set by
   For grazing, build the first step from the data: pastures past their minimum rest, with any open water alert on them
   ([GRZ-08](02-findings.md#grz-08), with [GRZ-04](02-findings.md#grz-04)). Show dates as "Sep 15", not "2026-09-15"
   ([UI-13](02-findings.md#ui-13)). Name animals with negative gain even when the group is flagged
-  ([GAIN-09](02-findings.md#gain-09)), and mark flagged animals and the 50% / 80% lines on the gain chart
-  ([UI-16](02-findings.md#ui-16)).
+  ([GAIN-09](02-findings.md#gain-09)). The gain chart's flagged-animal readings, legend key and 50% / 80% lines are on
+  the page since the redesign and Phase 1 keeps them ([UI-16](02-findings.md#ui-16);
+  [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)); the flagged dots'
+  colour-only difference is a known issue for a separate pull request.
 
 ### Step 4. Assign or print the crew briefing (about 25 seconds)
 
