@@ -1,5 +1,6 @@
 // Page wiring for the ranch operations dashboard: load the CSVs, run the rules in exceptions.js, draw the page.
 import { RULES, parseCSV, findExceptions, waterStatus, grazingStatus, gainStatus, budgetStatus } from "./exceptions.js";
+import { esc } from "./format.js";
 
 const $ = (id) => document.getElementById(id);
 const NS = "http://www.w3.org/2000/svg";
@@ -20,8 +21,6 @@ function text(parent, x, y, s, attrs = {}) {
   t.textContent = s;
   return t;
 }
-// CSV text is data, not markup: escape it before it goes into innerHTML.
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 // A long run with no space (a pasted code, say) may break anywhere, so it can't push a table past a phone screen;
 // ordinary words keep their width. The span wraps text esc() already made safe, so no entity is split. A no-break
 // space (pasted from a web page or a spreadsheet, say) joins words just as tightly, so it doesn't end a run.
