@@ -214,7 +214,8 @@ The dashboard is not production-ready today, and completing Phase 1, or the whol
 **This audit changed no production code.** Every audit commit touches only files under `docs/audit/`. For the merged
 audit, `git diff --stat cfd77e5 71f3492 -- . ':(exclude)docs/audit'` prints nothing: `index.html`, `app.js`,
 `exceptions.js`, `data/`, `scripts/`, `tests/`, `README.md` and `.github/` were exactly as reviewed. The redesign
-described below is separate from the audit and is the only change meant to touch production files.
+described below (#2) and its follow-up pull request (06 section 15) are separate from the audit; they are the changes
+before Phase 1 that touch production files.
 
 ## The redesign
 
@@ -237,9 +238,11 @@ and phone layouts.
   does:** chart readings by pointer, touch and keyboard, the phone layouts, chart text size, the tank cards and the
   budget table ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). Only what it
   does not do yet stays in Phase 2. The read-only script [redesign/preserve.mjs](redesign/preserve.mjs) checks the
-  kept behaviour (34 PASS on main at `0315d09`, Playwright Chromium, 2026-10-20; real phones, screen readers, Firefox
-  and WebKit not tested); the Phase 1 smoke test runs the same checks
-  ([06 section 11.4](06-phase1-spec.md#114-browser-smoke-test)).
+  kept behaviour (34 PASS on main at `0315d09` with the script as it was then, Playwright Chromium, 2026-10-20; real
+  phones, screen readers, Firefox and WebKit not tested). The follow-up pull request of
+  [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions) changed KEEP-24: the changed script passes 34 of
+  34 on that pull request's page and fails only KEEP-24 on `0315d09`'s page files, by design. The Phase 1 smoke test
+  runs the same checks ([06 section 11.4](06-phase1-spec.md#114-browser-smoke-test)).
 - Codex Checkpoint 1 ([CODEX_REVIEW_PROMPT.md](CODEX_REVIEW_PROMPT.md)) reviewed the redesign pull request on its own
   at `e9d7ab3` and cleared it to merge. It asked for the Phase 1 specification to be brought in line with the
   redesign before Phase 1 starts. That documentation follow-up is reviewed with Checkpoint 1b and merged by the owner

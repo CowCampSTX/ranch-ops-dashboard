@@ -216,7 +216,8 @@ const rows = (p) => p.$$eval("#exceptions tbody tr:not(.empty)", (t) => t.map((r
 // UI-16
 {
   const { page, close } = await open(PAGE);
-  const warn = await page.$$eval("#gain svg circle[fill='var(--warning)']", (c) => c.length);
+  // a flagged animal is an amber square (a rect), not a circle: count every mark in the flag colour
+  const warn = await page.$$eval("#gain svg [fill='var(--warning)']", (c) => c.length);
   const refs = await page.$$eval("#gain svg text", (t) => t.map((x) => x.textContent).filter((s) => /%/.test(s)));
   check("UI-16", warn === 6 && refs.length >= 2, `${warn} flagged dots; reference labels ${refs.join(", ")}`);
   await close();

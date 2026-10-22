@@ -286,9 +286,12 @@ TASKS
    List criteria that are missing, weakened or untested. Flag any new Phase 2 or Phase 3 feature (06 section 14). Do
    not flag behaviour the redesigned page already had on main before the pull request (06 section 6.3: chart readings
    by pointer, touch and keyboard, the phone layouts, chart text size, label fitting, line breaks at sensor outages,
-   the flagged-animal readings and legend, the tank cards and the budget table). Flag instead, as BLOCKING, any change
-   that removes or weakens it. The colour-only marks on main (the flagged gain dots and the gain and spend tile meters)
-   are known issues, not features to keep: a fix to them is not a weakening, and a new mark like them is an issue.
+   the flagged-animal readings and legend, the flagged animals' amber squares and their square legend key, the gain
+   tile's flag line and the tile meter colours, the tank cards and the budget table). Flag instead, as BLOCKING, any
+   change that removes or weakens it. The follow-up pull request of 06 section 15 fixed the colour-only marks of
+   0315d09 (the flagged gain dots and the gain and spend tile meters) on main; a new mark that shows a state by colour
+   alone is an issue. Look at the gain chart and its legend at 1280, 390 and 320 px wide yourself: KEEP-24 does not
+   see every way a flagged mark could lose its shape (06 section 6.3, "Limits of the checks").
 2. Run everything, from the repository root:
    - for tz in UTC America/Chicago Pacific/Auckland; do TZ=$tz node --test "tests/**/*.test.mjs"; done
      (results must be identical in all three zones);
@@ -298,9 +301,10 @@ TASKS
    - the browser smoke test if present: npm ci && npx playwright install chromium && node tests/browser/smoke.mjs;
    - the preserve checks KEEP-01 to KEEP-34 (06 sections 6.3 and 11.4), if the smoke test does not carry them yet:
      serve the pull request head (python3 -m http.server 8766 --bind 127.0.0.1) and run
-     node docs/audit/redesign/preserve.mjs http://localhost:8766/ (recorded on main at 0315d09: 34 PASS). A FAIL is
-     BLOCKING unless the pull request changes that behaviour on purpose, under the work item it delivers (a P1 item,
-     or the 05 item for Phase 2 or 3) or as the fix for the colour-only marks (06 section 15), and says which and why.
+     node docs/audit/redesign/preserve.mjs http://localhost:8766/ (recorded: 34 PASS on the page of the follow-up
+     pull request of 06 section 15; its changed KEEP-24 fails on 0315d09's page files by design). A FAIL is BLOCKING
+     unless the pull request changes that behaviour on purpose, under the work item it delivers (a P1 item, or the 05
+     item for Phase 2 or 3), and says which and why.
    Also check that CI passed on the pull request.
    If a command fails because of your set-up rather than the code (see "Before running the review scripts" in
    docs/audit/README.md), list it under Environment problems, not as an issue.

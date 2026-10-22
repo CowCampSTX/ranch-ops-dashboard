@@ -13,7 +13,13 @@
 //   KEEP-13 to KEEP-18           tank cards worst first with a pill each; the budget table, its pills, legend, season
 //                                total and $0-budget rows
 //   KEEP-19 to KEEP-24           charts drawn at their real width and redrawn on resize, chart text of 11 px or more, no
-//                                overlapping labels, a line break at a sensor gap, the flagged gain readings
+//                                overlapping labels, a line break at a sensor gap, the flagged gain readings and their
+//                                marks (a flagged mark differs from the plain dot in shape as well as colour, and
+//                                each legend key has the shape of its marks, at 1280, 390 and 320 px; judged from each
+//                                mark element's own fill and each key's own box and corner radii, so a mark or key
+//                                made invisible by its own or a parent's opacity, filter or CSS visibility (or a
+//                                mark's fill-opacity), a mark's stroke, clips or masks on ancestors and shapes painted
+//                                on top are not seen, and marks drawn with <use> are not counted)
 //   KEEP-25 to KEEP-28           loading text, a failed file, one section failing on its own, escaped CSV text
 //   KEEP-29 to KEEP-33           focus rings, reduced motion, area chips, skip link and top-bar links, an icon and a
 //                                word on every badge and pill
@@ -706,28 +712,102 @@ await guard(["KEEP-23"], async () => {
   check("KEEP-23", a.n === 2 && b.n === 1 && c.n === 2 && a.gap > 0 && c.gap > 0 && d.n === 1 && e.n === 2, `gap case (T1 silent Sep 26 00:00 to Sep 27 12:00): T1 line in ${a.n} pieces with a ${a.gap} px break at 1280 (chart ${a.w} wide) and ${c.n} pieces with a ${c.gap} px break at 390; committed data: ${b.n} piece; a 12-hour gap (gap12): ${d.n} piece(s), expected 1; an 18-hour gap (gap18): ${e.n} piece(s), expected 2`);
 });
 
-// KEEP-24: animals the warning rule flags are marked on the gain chart, and their readouts say so with an icon and words
+// KEEP-24: animals the warning rule flags are marked on the gain chart by a shape as well as a colour, and their
+// readouts say so with an icon and words. Changed by the follow-up pull request of 06-phase1-spec.md section 15: it
+// used to count the chart's circles and find the flagged ones by fill alone. It now counts every mark drawn in a legend
+// key's colour (the plain dots and the flagged marks), at 1280 x 900, 390 x 844 with touch and 320 x 640 with touch. At
+// each size the flagged marks must differ in shape from the plain marks, and each legend key must have the shape of the
+// marks in its colour. What it judges: each mark element's own fill geometry, not its element name or the text of a
+// style (nine points of its box tested with the browser's isPointInFill, in the chart's coordinates, so a transform
+// counts), and each legend key's own box and border radii in px. A shape is "round" when the points near its box's
+// corners fall outside it and the points on the diagonals, 85% of the way out to the circle that fits the box, fall
+// inside; it has "corners" when the points near its box's corners fall inside; anything else (a diamond, say) is
+// "other" and fails. A mark with its own clip-path or mask, or a key with its own clip-path, mask or transform, is "not
+// judged" and fails too. What it does not see: whether a mark or key can be seen at all. Its own or a parent's opacity,
+// filter or CSS visibility, or a mark's fill-opacity, can hide the flagged marks or the flag key and the check still
+// passes (a visibility attribute on the mark itself drops it from the count, and display none leaves no fill to test,
+// so those fail). Nor does it see a mark's stroke; clips or masks on its ancestors; shapes painted on top of a mark; a
+// key's background image or a clip on its wrapper. It counts only shape elements, so marks drawn with <use> are not
+// counted and the check fails. A reviewer still looks at the gain chart and its legend.
+const gainShapes = () => {
+  // the shape of a box's fill: points 12% of the box's smaller side in from each of its corners, its centre, and
+  // points on its diagonals 85% of the way out to the ellipse that fits it
+  const classify = (inFill, x, y, w, h) => {
+    if (!(w > 0 && h > 0) || !inFill(x + w / 2, y + h / 2)) return "other";
+    const t = 0.12 * Math.min(w, h), d = 0.85 * Math.SQRT1_2;
+    const near = [[x + t, y + t], [x + w - t, y + t], [x + t, y + h - t], [x + w - t, y + h - t]].filter(([a, b]) => inFill(a, b)).length;
+    const diag = [[-1, -1], [1, -1], [-1, 1], [1, 1]].filter(([a, b]) => inFill(x + (w / 2) * (1 + a * d), y + (h / 2) * (1 + b * d))).length;
+    return near === 4 ? "corners" : near === 0 && diag === 4 ? "round" : "other";
+  };
+  const unjudged = (c, props) => props.filter((p) => (c[p] ?? "none") !== "none").map((p) => `${p} ${c[p]}`).join("; ");
+  // a key's fill: its border box with its corner radii in px (a percentage is that share of the box's width, or of its
+  // height for a vertical radius; radii too large for a side are scaled down together, as CSS draws them)
+  const keyShape = (k) => {
+    const c = getComputedStyle(k), no = unjudged(c, ["clipPath", "maskImage", "webkitMaskImage", "transform"]);
+    if (no) return `not judged (${no})`;
+    const { width: w, height: h } = k.getBoundingClientRect();
+    const len = (v, side) => (v.endsWith("%") ? (parseFloat(v) / 100) * side : parseFloat(v) || 0);
+    const R = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map((corner) => { const [rh, rv = rh] = c[`border${corner}Radius`].split(" "); return [len(rh, w), len(rv, h)]; });
+    const f = Math.min(1, w / (R[0][0] + R[1][0]), w / (R[3][0] + R[2][0]), h / (R[0][1] + R[3][1]), h / (R[1][1] + R[2][1]));
+    const inFill = (x, y) => x >= 0 && y >= 0 && x <= w && y <= h && R.every(([rh, rv], i) => {
+      const dx = i === 0 || i === 3 ? x : w - x, dy = i < 2 ? y : h - y, a = rh * f, b = rv * f;
+      return !(dx < a && dy < b) || ((dx - a) / a) ** 2 + ((dy - b) / b) ** 2 <= 1;
+    });
+    return classify(inFill, 0, 0, w, h);
+  };
+  // the legend's filled keys, found by their background colour (the target and reference line keys have none; a key
+  // drawn as an SVG or by its border would not be found, and the check would fail)
+  const keys = [...document.querySelectorAll("#gain-sec .legend .key")].map((k) => ({ fill: getComputedStyle(k).backgroundColor, shape: keyShape(k) }))
+    .filter((k) => k.fill !== "rgba(0, 0, 0, 0)");
+  // a mark is a filled shape in a key's colour (not the hidden highlight ring, nor the group badge in another colour)
+  const s = document.querySelector("#gain svg.chart"), toChart = s.getScreenCTM().inverse();
+  const marks = [...s.querySelectorAll("*")].filter((m) => m instanceof SVGGeometryElement && m.tagName !== "line" && m.getAttribute("visibility") === null && keys.some((k) => k.fill === getComputedStyle(m).fill));
+  // a mark's shape, as drawn: its box in the chart's coordinates, each point mapped back into the mark's own
+  const markShape = (m) => {
+    const no = unjudged(getComputedStyle(m), ["clipPath", "maskImage", "webkitMaskImage"]);
+    if (no) return `not judged (${no})`;
+    const M = toChart.multiply(m.getScreenCTM()), back = M.inverse(), b = m.getBBox();
+    const p = [[b.x, b.y], [b.x + b.width, b.y], [b.x, b.y + b.height], [b.x + b.width, b.y + b.height]].map(([x, y]) => new DOMPoint(x, y).matrixTransform(M));
+    const xs = p.map((q) => q.x), ys = p.map((q) => q.y), x0 = Math.min(...xs), y0 = Math.min(...ys);
+    return classify((x, y) => m.isPointInFill(new DOMPoint(x, y).matrixTransform(back)), x0, y0, Math.max(...xs) - x0, Math.max(...ys) - y0);
+  };
+  const counts = {};
+  for (const m of marks) { const c = (counts[getComputedStyle(m).fill] ??= { n: 0, shapes: {} }), sh = markShape(m); c.n++; c.shapes[sh] = (c.shapes[sh] ?? 0) + 1; }
+  return { counts, keys, total: marks.length };
+};
 await guard(["KEEP-24"], async () => {
-  const { page, close } = await open(PAGE);
-  const list = await listRows(page);
-  const r = await page.evaluate(() => {
-    const s = document.querySelector("#gain svg.chart"), dots = [...s.querySelectorAll("circle")].filter((c) => c.getAttribute("visibility") === null && c.getAttribute("fill") !== "none");
-    const fills = dots.map((c) => getComputedStyle(c).fill), counts = {};
-    for (const f of fills) counts[f] = (counts[f] ?? 0) + 1;
-    const keys = [...document.querySelectorAll("#gain-sec .legend .key")].map((k) => getComputedStyle(k).backgroundColor);
-    return { counts, keys, total: dots.length };
-  });
+  // the list rows and the keyboard readouts at 1280 x 900 (KEEP-05's sweep); the marks and keys at each of three sizes
+  let list = [];
+  const sizes = [];
+  for (const [w, h, touch] of [[1280, 900, false], [390, 844, true], [320, 640, true]]) {
+    const { page, close } = await open(PAGE, { w, h, touch });
+    if (w === 1280) list = await listRows(page);
+    sizes.push({ at: `${w}x${h}${touch ? " touch" : ""}`, r: await page.evaluate(gainShapes) });
+    await close();
+  }
   const gainRows = list.filter((x) => x.area === "Gain" && x.sev === "warning");
   const listTags = new Set(gainRows.flatMap((x) => x.text.match(/\b[A-Z]\d{3}\b/g) ?? []));
   const gainSweep = sweep1280.find((p) => /^Average daily gain/.test(p.label))?.readings ?? [];
   const flaggedReadouts = gainSweep.filter((x) => x.flag);
   const readTags = new Set(flaggedReadouts.map((x) => (x.tl.match(/\b[A-Z]\d{3}\b/) ?? [""])[0]));
-  // the flag colour is the dot colour the legend also uses that is not the plain dot colour
-  const [plain] = Object.entries(r.counts).sort((a, b) => b[1] - a[1])[0];
-  const flagColors = Object.keys(r.counts).filter((c) => c !== plain), flagN = flagColors.reduce((s, c) => s + r.counts[c], 0);
-  const ok = listTags.size > 0 && flagN === listTags.size && flaggedReadouts.length === listTags.size && [...readTags].sort().join() === [...listTags].sort().join() && flaggedReadouts.every((x) => x.flagIcon && x.flagText.length > 3) && flagColors.every((c) => r.keys.includes(c)) && gainSweep.length === r.total;
-  check("KEEP-24", ok, `gain chart ${r.total} dots, ${flagN} in a second colour; Gain warning rows name ${listTags.size} tags ${[...listTags].join(",")}; keyboard readouts with a flag line ${flaggedReadouts.length}, tags ${[...readTags].sort().join(",")}, each with an icon and words ${flaggedReadouts.every((x) => x.flagIcon && x.flagText.length > 3)} ("${flaggedReadouts[0]?.flagText ?? ""}"); legend has a key in the flag colour ${flagColors.every((c) => r.keys.includes(c))}; every dot reachable by keyboard ${gainSweep.length}/${r.total}`);
-  await close();
+  // at each size: the plain colour is the most common mark colour; the flag colours are the other key colours used by
+  // marks. Each colour's marks must share one shape, round or with corners; the flagged shape must differ from the plain
+  // one, and each key must have the shape of its colour's marks
+  const judge = ({ at, r }) => {
+    const [plain, plainC] = Object.entries(r.counts).sort((a, b) => b[1].n - a[1].n)[0] ?? ["", { n: 0, shapes: {} }];
+    const flagColors = Object.keys(r.counts).filter((c) => c !== plain), flagN = flagColors.reduce((s, c) => s + r.counts[c].n, 0);
+    const shapeOf = (c) => Object.keys(r.counts[c]?.shapes ?? {}).join("+") || "none", judged = (sh) => sh === "round" || sh === "corners";
+    const plainShape = shapeOf(plain), flagShapes = flagColors.map(shapeOf);
+    const shapeDiffers = judged(plainShape) && flagShapes.length > 0 && flagShapes.every((sh) => judged(sh) && sh !== plainShape);
+    const plainKey = r.keys.find((k) => k.fill === plain), flagKeys = flagColors.map((c) => r.keys.find((k) => k.fill === c));
+    const keysMatch = judged(plainKey?.shape) && plainKey.shape === plainShape && flagKeys.length > 0 && flagKeys.every((k, i) => judged(k?.shape) && k.shape === flagShapes[i]);
+    const ok = flagN === listTags.size && shapeDiffers && keysMatch && r.total === gainSweep.length;
+    return { ok, text: `at ${at}: ${r.total} marks in a legend colour, ${plainC.n} plain (${plainShape}), ${flagN} flagged (${flagShapes.join(",") || "none"}), flagged marks differ in shape from the plain marks ${shapeDiffers}; legend keys: plain ${plainKey?.shape ?? "missing"}, flag ${flagKeys.map((k) => k?.shape ?? "missing").join(",") || "missing"}, each the shape of its colour's marks ${keysMatch}` };
+  };
+  const per = sizes.map(judge);
+  const words = flaggedReadouts.every((x) => x.flagIcon && x.flagText.length > 3);
+  const ok = listTags.size > 0 && flaggedReadouts.length === listTags.size && [...readTags].sort().join() === [...listTags].sort().join() && words && per.every((p) => p.ok);
+  check("KEEP-24", ok, `gain chart ${per.map((p) => p.text).join("; ")}; Gain warning rows name ${listTags.size} tags ${[...listTags].join(",")}; keyboard readouts with a flag line ${flaggedReadouts.length}, tags ${[...readTags].sort().join(",")}, each with an icon and words ${words} ("${flaggedReadouts[0]?.flagText ?? ""}"); every mark reachable by keyboard ${gainSweep.length}/${sizes[0].r.total}`);
 });
 
 // ================================================================ loading, failure, guards

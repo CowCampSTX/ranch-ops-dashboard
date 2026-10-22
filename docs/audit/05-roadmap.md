@@ -20,7 +20,7 @@ to the separate Ranch Tech ROI project.
 |---|---|
 | Repository | CowCampSTX/ranch-ops-dashboard |
 | Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit was written). Findings, quoted outputs and line numbers describe this commit unless a line says otherwise. |
-| Updated for the redesign | 2026-10-20. Pull request #2 merged a redesigned page into main (merge commit `0315d09`). Phase 1 starts from that page and keeps what it already does ([section 1.3](#13-order-of-work), [section 2.1](#21-apply-from-phase-1-immediately) item 13). Statements about the redesigned page come from Playwright Chromium runs on main `0315d09` on 2026-10-20, at widths from 320 to 1920 px (mostly 1280 x 900 and 390 x 844), with touch emulated at phone width: `docs/audit/redesign/coverage.mjs` (23 checks pass) and the keep checks that [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign) lists (34 pass). Real phones, screen readers, Firefox and WebKit were not tested. |
+| Updated for the redesign | 2026-10-20. Pull request #2 merged a redesigned page into main (merge commit `0315d09`). Phase 1 starts from that page and keeps what it already does ([section 1.3](#13-order-of-work), [section 2.1](#21-apply-from-phase-1-immediately) item 13). Statements about the redesigned page come from Playwright Chromium runs on main `0315d09` on 2026-10-20, at widths from 320 to 1920 px (mostly 1280 x 900 and 390 x 844), with touch emulated at phone width: `docs/audit/redesign/coverage.mjs` (23 checks pass) and the keep checks that [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign) lists (34 pass, with the script before the follow-up pull request of [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions) changed KEEP-24). Real phones, screen readers, Firefox and WebKit were not tested. |
 | Built from | `docs/audit/data/findings.json` (83 findings; compact index `findings-index.json`), `docs/audit/data/rules.json` (98 rules; compact index `rules-index.json`; data fields split into `data-fields.json`, integrations into `integrations.json`), `sources.json`, `registry-changelog.md`, and the evidence files in `docs/audit/evidence/` (`baseline.json`, `audit_*`, `verify_*`, `research_*`, `cite_*`). |
 | Earlier documents | [01-baseline.md](01-baseline.md) (how the code works today), [02-findings.md](02-findings.md) (every finding, with evidence), [03-research-and-data.md](03-research-and-data.md) (rules research and data requirements), [04-workflow-and-features.md](04-workflow-and-features.md) (morning workflow and the Phase 3 ranking). |
 | Project guidance files | At the reviewed commit `cfd77e5` there was **no PROJECT_CONTEXT.md or AGENTS.md**. This roadmap is judged against README.md, the code, the committed fictional data, the project purpose and the lead's phase defaults. The repository now has [AGENTS.md](../../AGENTS.md) (added 2026-10-20) with the instructions for every agent. |
@@ -229,9 +229,10 @@ or Phase 3 feature, and no "every change must" rule below requires a later-phase
     [RULE-WF-02](03-research-and-data.md#rule-wf-02), [RULE-WF-06](03-research-and-data.md#rule-wf-06),
     [RULE-WF-07](03-research-and-data.md#rule-wf-07)). The redesign already does all of this, so the rule asks Phase 1
     to keep it, not to build a later-phase feature; the browser smoke test checks it
-    ([06 section 11.4](06-phase1-spec.md#114-browser-smoke-test)). Two marks on that page show a state by colour alone
-    (the flagged gain dots and the gain and spend tile meters). They are known issues that a separate pull request
-    fixes, not features to keep, and Phase 1 adds no mark like them (item 9).
+    ([06 section 11.4](06-phase1-spec.md#114-browser-smoke-test)). Two marks on that page showed a state by colour
+    alone (the flagged gain dots and the gain and spend tile meters). The follow-up pull request of
+    [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions) fixed them on main, Phase 1 keeps the fixed
+    marks, and Phase 1 adds no mark like them (item 9).
 
 ### 2.2 Apply from Phase 2
 
@@ -723,8 +724,8 @@ after the input update of decision D16.
   tile becomes "Sensors normal". The grazing note says only the current stay's days past plan are marked. Gain and
   health first steps follow RULE-HLTH-11 ("Look at these animals at the next gather and record what you see"; "watch
   the group for illness or lameness and call your veterinarian if you see any"). "here now" becomes "there as of
-  <date>", and the grazing chart reading's "to now" (`app.js:398` on main; line 143 at `cfd77e5`) becomes "to <as-of
-  date> (as of)". README's rules table and claims ("To use real data, replace the CSVs", "the group grazing that
+  <date>", and the grazing chart reading's "to now" (`app.js:398` at `0315d09`; line 143 at `cfd77e5`) becomes "to
+  <as-of date> (as of)". README's rules table and claims ("To use real data, replace the CSVs", "the group grazing that
   pasture right now") are updated to match; its chart paragraph ("Every chart can be read with a mouse, a tap or the
   keyboard ...") stays, because the page already does this.
 - **Files and data:** `app.js` (rules table, notes); `index.html` (notes); `exceptions.js` (`RULE_INFO`, wording);
@@ -982,9 +983,10 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
   Y082, Y129, Y132) in the warning colour, with a legend and "Flagged: under 50% of target" in their reading, and
   draws and labels the target, 80% and 50% lines (`docs/audit/redesign/coverage.mjs`, check UI-16: 6 flagged dots).
   Phase 1 keeps the flagged readings, the legend and the lines
-  ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). The flagged dots differ
-  from the other dots by colour alone (1.10:1 against them): a known issue of the redesign that a separate pull request
-  fixes ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)), not a feature to keep as it is.
+  ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). At `0315d09` the flagged
+  dots differed from the other dots by colour alone (1.10:1 against them). The follow-up pull request of
+  [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions) draws them as amber squares on main, and Phase 1
+  keeps the squares.
 - **Proposed behaviour:** each row opens a panel with the readings and their times, the threshold, its basis (A-D) and
   the rule ID (wireframe in [04 section 1.4b](04-workflow-and-features.md#14b-why-this-row-panels)). The grazing
   first step names candidate pastures past their minimum rest, with any open water problem on them. The gain chart
@@ -995,12 +997,13 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
 - **Acceptance criteria:** committed data: the Yearlings action mentions 'Windmill' and its tank problem, or says no
   rested pasture has water (Windmill rest Sep 30 - Aug 11 = 50 >= 45; T2 11.8% < 25) (GRZ-08); the T4 panel lists the
   readings from 2026-09-29 18:00 (56.0%) to 2026-09-30 18:00 (10.0%). The UI-16 check passes on the redesigned page
-  and stays as a regression check: exactly 6 flagged dots in the Yearlings row, whose readings name Y027, Y031, Y058,
-  Y082, Y129 and Y132 (measured by check UI-16 and KEEP-24 of 06 section 6.3; restated from "marked dots ...
-  labelled": the redesign names each flagged animal in its reading, as `cfd77e5` already did for every dot, so on the
-  chart the dot is marked by colour only; making that mark more than colour is the follow-up pull request of 06
-  section 15, and P2-05 keeps it), with the 50% line at 1.0 lbs/day for yearlings and at 0.5 for heifers (half of each
-  target; by code reading, `app.js:518` draws the lines per group).
+  and stays as a regression check: exactly 6 flagged marks in the Yearlings row (amber squares since the follow-up
+  pull request of 06 section 15; check UI-16's detail still says "6 flagged dots"), whose readings name Y027, Y031,
+  Y058, Y082, Y129 and Y132 (measured by check UI-16 and KEEP-24 of 06 section 6.3; restated from "marked dots ...
+  labelled": the redesign names each flagged animal in its reading, as `cfd77e5` already did for every dot, so at
+  `0315d09` the dot was marked by colour only; the follow-up pull request of 06 section 15 draws it as an amber square
+  on main, and P2-05 keeps it), with the 50% line at 1.0 lbs/day for yearlings and at 0.5 for heifers (half of each
+  target; by code reading, `app.js:518` at `0315d09` draws the lines per group).
 
 #### P2-05: Chart details by keyboard and touch
 
@@ -1017,9 +1020,9 @@ and listed in `PLANTED` and the README. Unless an item says so, the committed da
   decision-relevant state (for example "T4 Lone Tree: 10% now, down 46 points in the last 24 hours"; today the label
   gives only the last reading); a reading the mouse can move onto, or that a click keeps open (RULE-WF-03; today the
   reading ignores the pointer and a click does not keep it open); decision marks at 3:1 contrast or with the same
-  information in text (RULE-WF-08). The flagged gain dots, which today differ from the other dots by colour alone
-  (1.10:1), are left to a separate follow-up pull request to the redesign
-  ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)); P2-05 keeps that fix.
+  information in text (RULE-WF-08). The flagged gain dots, which differed from the other dots by colour alone (1.10:1)
+  at `0315d09`, were fixed on main by the follow-up pull request of
+  [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions) (amber squares); P2-05 keeps that fix.
 - **Files and data:** `app.js`, `index.html`.
 - **Dependencies:** P1-13, P1-14.
 - **Effort:** M.
@@ -1199,9 +1202,10 @@ keyboard and touch, without "Show data" tables; RULE-WF-03 is partly met (Escape
 open, but the mouse cannot move onto it and a click does not keep it open); RULE-WF-04 is partly met (the tank charts'
 labels give the last reading; no chart label states the decision-relevant state); RULE-WF-05 keeps focus on the chip
 but announces nothing; RULE-WF-08 is met for the earlier grazing stays (3.28:1) and the over-plan segment (a line and
-a "days past plan" label), and not met for the flagged gain dots (1.10:1 against the other dots; a separate pull
-request fixes them, [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)). Phase 1 keeps what is met
-([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)).
+a "days past plan" label), and not met at `0315d09` for the flagged gain dots (1.10:1 against the other dots). The
+follow-up pull request of [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions) draws them as amber
+squares, still 1.10:1 in colour (the two colours are unchanged), so the shape carries the flag. Phase 1 keeps what is
+met and the squares ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)).
 
 | Rule | Class | Current or proposed | Rule (short) | Item |
 |---|---|---|---|---|

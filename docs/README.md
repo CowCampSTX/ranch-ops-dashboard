@@ -11,7 +11,7 @@ that cannot reach Drive follows [AGENTS.md](../AGENTS.md#github-and-google-drive
 |---|---|---|
 | [project/](project/README.md) | [STATUS.md](project/STATUS.md): what is merged, what is open, what comes next. [DECISIONS.md](project/DECISIONS.md): the owner's decisions, newest first | `project`: every file |
 | [reviews/](reviews/README.md) | Independent review reports (Codex checkpoints), one file each; [prompts/](reviews/prompts/README.md) holds the prompt given to the reviewer for each one | `reviews` and `reviews/prompts`: every file |
-| [screenshots/](screenshots/README.md) | The images on the repository's front page | `screenshots`: every file |
+| [screenshots/](screenshots/README.md) | The images on the repository's front page, and the script that takes them | `screenshots`: every file |
 | [audit/](audit/README.md) | The October 2026 audit of the dashboard and the Phase 1 plan: baseline, findings, research, workflow, roadmap, specification, open questions, coverage of the redesign, the handoff and the review prompts | `audit`: the documents (`README.md`, `01` to `08`, `HANDOFF.md`, `CODEX_REVIEW_PROMPT.md`). Its subfolders (`data`, `diagnostics`, `evidence`, `redesign`, `scenarios`, `screenshots`) hold scripts and machine-readable records and stay on GitHub only |
 
 Every folder here has a `README.md` saying what belongs in it. The ten scenario data folders are described by

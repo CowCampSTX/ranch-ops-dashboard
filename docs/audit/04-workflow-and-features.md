@@ -217,8 +217,10 @@ basis, "'Demo setting (D)' for every current value until it is sourced or set by
   ([UI-13](02-findings.md#ui-13)). Name animals with negative gain even when the group is flagged
   ([GAIN-09](02-findings.md#gain-09)). The gain chart's flagged-animal readings, legend key and 50% / 80% lines are on
   the page since the redesign and Phase 1 keeps them ([UI-16](02-findings.md#ui-16);
-  [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)); the flagged dots'
-  colour-only difference is a known issue for a separate pull request.
+  [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). The flagged dots differed
+  from the others by colour alone at `0315d09`; the follow-up pull request of
+  [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions) draws them as amber squares, and Phase 1 keeps
+  them.
 
 ### Step 4. Assign or print the crew briefing (about 25 seconds)
 
@@ -409,8 +411,9 @@ rarely same-day actions". Whether it fits on one page with a full day's list was
 [08-redesign-coverage.md](08-redesign-coverage.md#3-coverage)): the page now does part of a, b, c and f. It opens with
 a summary card that counts the rows by severity (part of a). The area chips keep focus
 ([UI-10](02-findings.md#ui-10); part of b). The gain chart marks the animals the report flags and draws the 50% and
-80% lines ([UI-16](02-findings.md#ui-16); part of c); the flagged dots differ from the others by colour alone, a known
-issue that a separate pull request fixes. Chart readings open by mouse, tap and keyboard and stay on screen
+80% lines ([UI-16](02-findings.md#ui-16); part of c); the flagged dots differed from the others by colour alone, and
+the follow-up pull request of [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions) fixed that on main
+with amber squares. Chart readings open by mouse, tap and keyboard and stay on screen
 ([UI-01](02-findings.md#ui-01), [UI-11](02-findings.md#ui-11)); list rows become cards on a phone and chart text is
 11.5 px ([UI-02](02-findings.md#ui-02), [UI-03](02-findings.md#ui-03)) (part of f). Phase 1 keeps these
 ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). The rest of a, b, c and f

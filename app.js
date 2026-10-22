@@ -22,6 +22,10 @@ function text(parent, x, y, s, attrs = {}) {
 }
 // CSV text is data, not markup: escape it before it goes into innerHTML.
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+// A long run with no space (a pasted code, say) may break anywhere, so it can't push a table past a phone screen;
+// ordinary words keep their width. The span wraps text esc() already made safe, so no entity is split. A no-break
+// space (pasted from a web page or a spreadsheet, say) joins words just as tightly, so it doesn't end a run.
+const brk = (s) => esc(s).replace(/(?:\S|[\u00a0\u2007\u202f\ufeff]){16,}/g, (m) => `<span class="brk">${m}</span>`);
 const money = (x) => (x < 0 ? "−$" : "$") + Math.abs(Math.round(x)).toLocaleString();
 const signed = (v, s) => (v > 0 ? "+" : v < 0 ? "−" : "") + s;
 const pct = (v) => +(v * 100).toFixed(1);   // 0.07 -> 7, not 7.000000000000001
@@ -36,6 +40,17 @@ function fitText(s, max, size, weight) {
   if (measure(s, size, weight) <= max) return s;
   while (s.length > 1 && measure(s + "…", size, weight) > max) s = s.slice(0, -1);
   return s + "…";
+}
+// measure() can't see CSS letter or word spacing, such as a reader's own. Text placed beside other marks is measured
+// again once drawn, and whenever its size changes: each f in fs re-places marks from the drawn text in els.
+function relayout(box, fs, els) {
+  box._ro?.disconnect();
+  if (!fs.length) return;
+  // one step that fails (odd data) leaves the others, and the watch, in place
+  const run = () => fs.forEach(safe);
+  run();
+  box._ro = new ResizeObserver(run);
+  els.forEach((e) => box._ro.observe(e));
 }
 const safe = (f) => { try { f(); } catch (err) { console.error(err); } };
 
@@ -198,29 +213,35 @@ function tiles(d, exc) {
   const headUnknown = d.groups.some((g) => !Number.isFinite(g.head));
   const tile = (i, k, ico, v, mid, sub) =>
     `<div class="card tile rise" style="--i:${2 + i * 0.5}"><div class="top"><span class="k">${k}</span><span class="ico">${ico}</span></div><div class="v">${v}</div>${mid}<div class="d">${sub}</div></div>`;
-  const gainMax = gain ? gain.target * 1.25 : 1, gainLow = !!gain && gain.adg < gain.target * RULES.adgSerious;
+  const gainMax = gain ? gain.target * 1.25 : 1;
+  // The gain meter is in the series colour. A group the rules flag (its own list row; the slow-animal row names a
+  // count, not the group) gets the rule's colour, always with the rule's icon and words under it: the series green
+  // would read as "good". The rules never judge the season total, so the spend meter claims no verdict: it is in
+  // --s1-mute, as the budget table draws the season total ("Not flagged" in its key).
+  const gainRow = gain && exc.find((e) => e.area === "Gain" && e.subject === gain.group);
   const gainName = gain && (gain.group === "Yearlings" ? "Yearling gain" : `${esc(gain.group)} gain`);
   const spendMax = 1 + RULES.budgetSerious * 2.5;
-  const spendColor = over > RULES.budgetSerious ? "var(--serious)" : over > RULES.budgetWarn ? "var(--warning)" : "var(--s1)";
   $("tiles").innerHTML =
     tile(0, "Head on grass", SVGI.tag, head.toLocaleString() + (headUnknown ? " <small>+ ?</small>" : ""),
       `<div class="split">${d.groups.map((g) => `<span><b>${count(g)}</b> ${esc(g.group.toLowerCase())}</span>`).join("")}</div>`,
-      `Grazing ${new Set(grazingStatus(d.moves, d.pastures, d.meta[0].as_of).map((g) => g.pastureId)).size} of ${d.pastures.length} pastures`) +
+      // the count keeps its noun, so a narrow tile never ends on "pastures" alone
+      `Grazing ${new Set(grazingStatus(d.moves, d.pastures, d.meta[0].as_of).map((g) => g.pastureId)).size} of <span class="nw">${d.pastures.length} pastures</span>`) +
     // one status icon per tank, the same glyphs as every other status on the page, so a state never rides on colour alone
     // no readings at all is not "all reading normally"
     (!tanks.length ? tile(1, "Water tanks OK", SVGI.drop, "No data", "", "No tank readings were loaded")
     : tile(1, "Water tanks OK", SVGI.drop, `${tanks.length - flagged.length} <small>of ${tanks.length}</small>`,
       `<div class="pips" role="img" aria-label="${esc(states.map((s) => `${s.t.tank} ${s.label}`).join(", "))}">${states.map((s) => `<span title="${esc(s.t.tank)}: ${s.label}">${ICON[s.sev]}</span>`).join("")}</div>`,
-      flagged.length ? `${flagged.length} need a look: ${flagged.map((s) => `${esc(s.t.tank)} ${s.label.toLowerCase()}`).join(", ")}` : "All reading normally")) +
+      // each tank and its state wrap as one unit, the comma inside it, so no line starts with one
+      flagged.length ? `${flagged.length} need a look: ${flagged.map((s, i) => `<span class="keep">${esc(s.t.tank)} ${s.label.toLowerCase()}${i < flagged.length - 1 ? "," : ""}</span>`).join(" ")}` : "All reading normally")) +
     (!gain ? tile(2, "Daily gain", SVGI.gain, "None yet", "", gainNote(d))
       // a weight that isn't a number leaves the group with no average: say so rather than print NaN
       : !Number.isFinite(gain.adg) ? tile(2, gainName, SVGI.gain, "Can't tell", "", `No average: ${unreadable(gain)}`)
       : tile(2, gainName, SVGI.gain, `${gain.adg.toFixed(2)} <small>lbs/day</small>`,
-        `<div class="meter" role="img" aria-label="${gain.adg.toFixed(2)} against a target of ${gain.target.toFixed(1)}"><i style="width:${Math.min(100, (gain.adg / gainMax) * 100)}%;background:${gainLow ? "var(--serious)" : "var(--s1)"}"></i><b style="left:${(gain.target / gainMax) * 100}%"></b></div>`,
-        `Target ${gain.target.toFixed(1)}, since ${fmtDate(gain.from)}`)) +
+        `<div class="meter" role="img" aria-label="${gain.adg.toFixed(2)} against a target of ${gain.target.toFixed(1)}"><i style="width:${Math.min(100, (gain.adg / gainMax) * 100)}%;background:var(--${gainRow ? gainRow.severity : "s1"})"></i><b style="left:${(gain.target / gainMax) * 100}%"></b></div>`,
+        `${gainRow ? `<span class="tflag">${ICON[gainRow.severity]}Under ${pct(RULES.adgSerious)}% of target</span> ` : ""}Target ${gain.target.toFixed(1)}, since ${fmtDate(gain.from)}`)) +
     (tb > 0
       ? tile(3, "Spend vs budget", SVGI.money, `${signed(overPct, Math.abs(overPct).toFixed(1))}<small>%</small>`,
-        `<div class="meter" role="img" aria-label="${money(ta)} spent of ${money(tb)} budgeted"><i style="width:${Math.min(100, (ta / tb / spendMax) * 100)}%;background:${spendColor}"></i><b style="left:${(1 / spendMax) * 100}%"></b></div>`,
+        `<div class="meter" role="img" aria-label="${money(ta)} spent of ${money(tb)} budgeted"><i style="width:${Math.min(100, (ta / tb / spendMax) * 100)}%;background:var(--s1-mute)"></i><b style="left:${(1 / spendMax) * 100}%"></b></div>`,
         `${money(ta)} of ${money(tb)}, season to date`)
       : tile(3, "Spend vs budget", SVGI.money, "No budget", "", `${money(ta)} spent, season to date`));
 }
@@ -243,7 +264,7 @@ function exceptionsTable(exc) {
   const rows = exc.filter((e) => area === "All" || e.area === area);
   $("exceptions").innerHTML = "<thead><tr><th>Severity</th><th>Area</th><th>What</th><th>Problem</th><th>First step</th></tr></thead><tbody>" +
     (rows.length
-      ? rows.map((e) => `<tr class="sev-${e.severity}"><td class="c-sev">${badge(e.severity)}</td><td class="c-area"><span class="tag">${esc(e.area)}</span></td><td class="c-what">${esc(e.subject)}</td><td class="c-problem">${esc(e.problem)}</td><td class="c-action">${esc(e.action)}</td></tr>`).join("")
+      ? rows.map((e) => `<tr class="sev-${e.severity}"><td class="c-sev">${badge(e.severity)}</td><td class="c-area"><span class="tag">${esc(e.area)}</span></td><td class="c-what">${brk(e.subject)}</td><td class="c-problem">${brk(e.problem)}</td><td class="c-action">${esc(e.action)}</td></tr>`).join("")
       : `<tr class="empty"><td colspan="5">${area === "All" ? "Nothing needs attention." : `Nothing in ${area.toLowerCase()} needs attention.`}</td></tr>`) + "</tbody>";
 }
 
@@ -266,7 +287,8 @@ function waterMultiples(d, exc) {
     return;
   }
   $("waterSum").className = `pill ${worst}`;
-  $("waterSum").innerHTML = `${ICON[worst]}${ok} of ${tanks.length} OK`;
+  // the status icon and tint come with the status's word, so a red stop sign never sits beside "OK" alone
+  $("waterSum").innerHTML = `${ICON[worst]}${worst === "good" ? "" : `${cap(worst)} · `}${ok} of ${tanks.length} OK`;
   grid.replaceChildren(...tanks.map((t, i) => {
     const st = states[i], silent = t.silentHours >= RULES.sensorSilentHours, name = names[t.pasture] ?? t.pasture;
     // A reading from an earlier day shows its date, so it can't pass for one later than the as-of time.
@@ -304,8 +326,11 @@ function tankChart(box, t, name, from, asOf) {
   for (const v of [RULES.waterLow, RULES.waterCritical]) {
     svg("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: v === RULES.waterLow ? "var(--warning)" : "var(--critical)", "stroke-opacity": 0.8, "stroke-dasharray": "3 3" }, s);
   }
-  text(s, m.l, H - 4, fmtDate(new Date(from).toISOString()));
-  text(s, W - m.r, H - 4, fmtDate(asOf.toISOString()), { "text-anchor": "end" });
+  const d0 = text(s, m.l, H - 4, fmtDate(new Date(from).toISOString()));
+  const d1 = text(s, W - m.r, H - 4, fmtDate(asOf.toISOString()), { "text-anchor": "end" });
+  // a reader's letter or word spacing can draw the two dates into each other on a narrow card: then only the end
+  // date, the one the card's reading is from, is shown
+  const dates = () => (m.l + d0.getComputedTextLength() + 6 > W - m.r - d1.getComputedTextLength() ? d0.setAttribute("visibility", "hidden") : d0.removeAttribute("visibility"));
   if (!rows.length) {
     // the longest message that fits; on a narrow chart two short lines, both above the 40% line
     const room = W - m.l - m.r - 8, cx = (m.l + W - m.r) / 2, o = { "text-anchor": "middle", class: "lbl" };
@@ -315,6 +340,7 @@ function tankChart(box, t, name, from, asOf) {
     if (msg) text(s, cx, y(50) + 4, msg, o);
     else { text(s, cx, y(50) - 11, lines[2], o); text(s, cx, y(50) + 4, lines[3], o); }
     box.replaceChildren(s);
+    relayout(box, [dates], [d1]);
     return;
   }
   // Break the line where readings stop for more than two intervals, so an outage isn't drawn as a straight line.
@@ -335,7 +361,9 @@ function tankChart(box, t, name, from, asOf) {
     svg("line", { x1: x0, x2: x0, y1: m.t, y2: y(0), stroke: "var(--axis)", "stroke-dasharray": "2 3" }, s);
     if (W - m.r - x0 > measure("no signal", 12.5) + 16) text(s, (x0 + W - m.r) / 2, m.t + 16, "no signal", { "text-anchor": "middle", class: "lbl" });
   }
-  svg("circle", { cx: x(last.time), cy: y(last.level_pct), r: 4, fill: silent ? "var(--surface-2)" : "var(--s1)", stroke: silent ? "var(--s1)" : "var(--surface-2)", "stroke-width": 2 }, s);
+  // the card shows no current level, so the end dot mustn't look like one: hollow, as for a silent sensor
+  const stale = silent || !Number.isFinite(t.level);
+  svg("circle", { cx: x(last.time), cy: y(last.level_pct), r: 4, fill: stale ? "var(--surface-2)" : "var(--s1)", stroke: stale ? "var(--s1)" : "var(--surface-2)", "stroke-width": 2 }, s);
   // crosshair
   const cross = svg("g", { visibility: "hidden" }, s);
   const vline = svg("line", { y1: m.t, y2: y(0), stroke: "var(--ink-2)", "stroke-width": 1 }, cross);
@@ -350,6 +378,7 @@ function tankChart(box, t, name, from, asOf) {
       vdot.setAttribute("cx", pts[j].x); vdot.setAttribute("cy", pts[j].y);
     }, pts.length - 1);
   box.replaceChildren(s);
+  relayout(box, [dates], [d1]);
 }
 
 // ---------------------------------------------------------------- grazing
@@ -382,7 +411,7 @@ function grazingTimeline(d, exc) {
     const lab = mo.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
     if (x(iso) + 4 + measure(lab, 11.5) <= W) text(s, x(iso) + 4, H - 6, lab);
   }
-  const pts = [], marks = [];
+  const pts = [], marks = [], later = [], els = [];
   groups.forEach((g, i) => {
     const y = m.t + i * rowH + (rowH - barH) / 2;
     const head = d.groups.find((x) => x.group === g).head;
@@ -403,10 +432,13 @@ function grazingTimeline(d, exc) {
           svg("rect", { x: xp, y, width: Math.max(2, x1 - xp), height: barH, rx: 4, fill: "var(--serious)" }, s);
           svg("rect", { x: xp, y, width: Math.min(4, x1 - xp), height: barH, fill: "var(--serious)" }, s);
           svg("line", { x1: xp, x2: xp, y1: y - 4, y2: y + barH + 4, stroke: "var(--ink)", "stroke-width": 2 }, s);
-          // the status colour ships with its icon and its words
-          const lab = `${over} day${over === 1 ? "" : "s"} past plan`, lw = measure(lab, 11.5, 600), tx = x1 - lw - 15;
-          text(s, x1, y - 6, lab, { "text-anchor": "end", class: "ink halo", style: "font-size:11.5px" });
-          svg("path", { d: `M${tx + 5},${y - 15} l5,9 h-10 z`, fill: "var(--serious)", stroke: "var(--surface)", "stroke-width": 2, "paint-order": "stroke", "stroke-linejoin": "round" }, s);
+          // the status colour ships with its icon and its words; the words end 5px short, so their halo stays off Today
+          const lab = `${over} day${over === 1 ? "" : "s"} past plan`, lx = x1 - 5, lw = measure(lab, 11.5, 600);
+          const triAt = (tx) => `M${tx + 5},${y - 15} l5,9 h-10 z`;
+          const lt = text(s, lx, y - 6, lab, { "text-anchor": "end", class: "ink halo", style: "font-size:11.5px" });
+          const tri = svg("path", { d: triAt(lx - lw - 15), fill: "var(--serious)", stroke: "var(--surface)", "stroke-width": 2, "paint-order": "stroke", "stroke-linejoin": "round" }, s);
+          later.push(() => tri.setAttribute("d", triAt(lx - lt.getComputedTextLength() - 15)));
+          els.push(lt);
           html += `<span class="tf">${ICON.serious}${over} day${over === 1 ? "" : "s"} past the planned move</span>`;
         } else if (pe) {
           // days left: a wash of the series hue, closed by a tick on the planned move date
@@ -435,7 +467,9 @@ function grazingTimeline(d, exc) {
   $("nowGrazing").innerHTML = groups.filter((g) => current[g]).map((g) => {
     const c = current[g], pe = planEnd(c), e = exc.find((e) => e.area === "Grazing" && e.subject === `${g} in ${c.pasture}`);
     const left = c.planned - c.days;
-    const when = !pe ? "no planned move date" : left > 0 ? `move by ${fmtDate(pe)}` : left === 0 ? "move due today" : `move was due ${fmtDate(pe)}`;
+    // a date stays on one line; it's a <time>, as .now .who span would put a span on a line of its own
+    const day = pe && `<time class="nw" datetime="${pe}">${fmtDate(pe)}</time>`;
+    const when = !pe ? "no planned move date" : left > 0 ? `move by ${day}` : left === 0 ? "move due today" : `move was due ${day}`;
     return `<li><span class="who"><b>${esc(g)}</b> in ${esc(c.pastureId)} ${esc(c.pasture)}<span>Day ${c.days}${pe ? ` of ${esc(c.planned)}` : ""}, ${when}</span></span>` +
       (e ? pill(e.severity, e.severity === "serious" ? "Past plan" : "Move soon") : pe ? pill("good", "On plan") : pill("unknown", "No plan")) + "</li>";
   }).join("");
@@ -446,73 +480,120 @@ function grazingTimeline(d, exc) {
     return bd <= 12 ? best : -1;
   }, (j) => marks.forEach((r, k) => r.setAttribute("visibility", k === j ? "visible" : "hidden")), pts.findLastIndex((p) => p.row === 0));
   box.replaceChildren(s);
+  relayout(box, later, els);
 }
 
 // ---------------------------------------------------------------- gain
-// Lay dots out as a beeswarm: each dot takes the free spot nearest the row's centre line.
-function swarm(xs, r, maxOff) {
-  const placed = [], out = new Array(xs.length), dmin = 2 * r + 2;   // a 2px surface gap between dots
+// Lay marks out as a beeswarm: each mark takes the free spot nearest the row's centre line. A mark is a dot of radius
+// h or, where sq[i], a square of half side h. Each pair is measured by its own shapes, so every pair keeps a 2px gap
+// between fills and a stack of squares sits 2h + 2 apart, as a stack of dots does.
+function swarm(xs, sq, h, maxOff) {
+  const placed = [], out = new Array(xs.length), dmin = 2 * h + 2;   // no pair of marks reaches further across
   for (const [px, i] of xs.map((v, i) => [v, i]).sort((a, b) => a[0] - b[0])) {
     const near = placed.filter((p) => px - p.x < dmin);
+    // how far above or below p a mark at px must sit: two squares, dmin; a square and a dot, so the dot's centre is
+    // h + 2 from the square's nearest point (dx clamped to the square); two dots, dmin centre to centre
+    const clear = (p) => {
+      const dx = px - p.x;
+      if (sq[i] && p.sq) return dmin;
+      if (sq[i] || p.sq) return h + Math.sqrt(Math.max(0, (h + 2) ** 2 - Math.max(0, dx - h) ** 2));
+      return Math.sqrt(dmin * dmin - dx * dx);
+    };
     const cands = [0];
-    for (const p of near) { const dy = Math.sqrt(dmin * dmin - (px - p.x) ** 2); cands.push(p.y + dy, p.y - dy); }
+    for (const p of near) { const dy = clear(p); cands.push(p.y + dy, p.y - dy); }
     cands.sort((a, b) => Math.abs(a) - Math.abs(b));
-    const free = (c) => near.every((p) => (px - p.x) ** 2 + (c - p.y) ** 2 >= dmin * dmin - 0.01);
-    // past the soft cap, take the nearest free spot further out rather than one that overlaps another dot
+    const free = (c) => near.every((p) => (sq[i] || p.sq ? Math.abs(c - p.y) >= clear(p) - 0.01 : (px - p.x) ** 2 + (c - p.y) ** 2 >= dmin * dmin - 0.01));
+    // past the soft cap, take the nearest free spot further out rather than one that overlaps another mark
     const y = cands.find((c) => Math.abs(c) <= maxOff && free(c)) ?? cands.find(free) ?? Math.max(0, ...near.map((p) => p.y)) + dmin;
-    placed.push({ x: px, y });
+    placed.push({ x: px, y, sq: sq[i] });
     while (placed.length && px - placed[0].x >= dmin) placed.shift();
     out[i] = y;
   }
   return out;
 }
+// fitText() measures without CSS letter or word spacing, such as a reader's own. Once drawn, shorten its pick s
+// further while the text element el is drawn wider than max (1px of slack, so plain text keeps measure()'s pick).
+function fitDrawn(el, s, max) {
+  el.textContent = s;
+  for (let t = s.replace(/…$/, ""); t.length > 1 && el.getComputedTextLength() > max + 1; ) { t = t.slice(0, -1); el.textContent = t + "…"; }
+}
 
 function gainStrip(d) {
   const box = $("gain");
   const gs = gainStatus(d.weights, d.groups).filter((g) => g.target > 0);
+  // every group the chart leaves out is named with its reason, rather than left out silently
+  const drawn = new Set(gs.map((g) => g.group));
+  const noTarget = d.groups.filter((g) => !(g.target_adg_lbs > 0)).map((g) => esc(g.group));
+  const noWeighIns = d.groups.filter((g) => g.target_adg_lbs > 0 && !drawn.has(g.group)).map((g) => esc(g.group));
+  const why = [noTarget.length && `${noTarget.join(", ")}, with no gain target set`, noWeighIns.length && `${noWeighIns.join(", ")}, with no weigh-ins yet`].filter(Boolean);
+  const hint = why.length ? `<p class="hint">Not shown: ${why.join("; ")}.</p>` : "";
   if (!gs.length) {
-    box.innerHTML = `<p class="empty-note">${gainNote(d)}</p>`;
+    // with no chart at all, the note gives the reason; the hint still names each group that has a target
+    box.innerHTML = `<p class="empty-note">${gainNote(d)}</p>${noWeighIns.length ? hint : ""}`;
     return;
   }
-  const W = box.clientWidth || 600, m = { l: 6, r: 14, t: 4, b: 40 }, r = W < 460 ? 3.5 : 4;
+  // hs: half a flagged square's side, so the square is as wide as the dot; rq: how far the square reaches from its
+  // centre, at its corners (rounded by 1px)
+  const W = box.clientWidth || 600, m = { l: 0, r: 14, t: 4, b: 40 }, r = W < 460 ? 3.5 : 4, hs = r, rq = hs * Math.SQRT2 - (Math.SQRT2 - 1);
+  // Text starts at m.l, in line with the legend and the note. Values are mapped inside a pad as wide as a keyboard
+  // ring reaches (a square's corner, 3px to the ring, 1px of its stroke) and 1px more, so a gain at the axis start keeps
+  // its whole mark and ring inside the chart.
+  const pad = m.l + rq + 5;
   // only animals with a gain are drawn; the group's line says how many weren't
   const all = gs.flatMap((g) => g.animals.filter(readable).map((a) => a.adg));
   const lo = Math.min(0, Math.floor(Math.min(...all) * 2) / 2), hi = Math.ceil(Math.max(...all, ...gs.map((g) => g.target)) * 2) / 2;
-  const x = (v) => m.l + ((v - lo) / (hi - lo)) * (W - m.l - m.r);
+  const x = (v) => pad + ((v - lo) / (hi - lo)) * (W - pad - m.r);
   const layouts = gs.map((g) => {
-    const shown = g.animals.filter(readable);
-    const offs = swarm(shown.map((a) => x(a.adg)), r, W < 460 ? 104 : 72);
-    const half = Math.max(22, ...offs.map(Math.abs)) + r + 4;
-    return { g, shown, offs, half };
+    const shown = g.animals.filter(readable), groupLow = g.adg < g.target * RULES.adgSerious;
+    // a flagged animal is a square as well as amber, so the flag never rides on colour alone. The swarm packs the
+    // squares by their sides (hs is r); rs, how far each mark reaches (rq or r), sizes its ring and the row.
+    const flag = shown.map((a) => !groupLow && a.adg < g.target * RULES.animalShare), rs = flag.map((f) => (f ? rq : r));
+    const offs = swarm(shown.map((a) => x(a.adg)), flag, hs, W < 460 ? 104 : 72);
+    const half = Math.max(22 + r, ...offs.map((o, k) => Math.abs(o) + rs[k])) + 4;
+    return { g, shown, offs, half, groupLow, flag, rs };
   });
   const headH = 48;
   const H = m.t + m.b + layouts.reduce((s, L) => s + headH + 2 * L.half + 22, 0);
   const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": "Average daily gain per animal since the last weigh-in, by group" });
   // Half steps only when they leave room: the first label is start-anchored, and a negative one ("-0.5") is ~25px wide.
-  const tickStep = (hi - lo) / 0.5 > 8 || (W - m.l - m.r) / ((hi - lo) / 0.5) < (lo < 0 ? 46 : 34) ? 1 : 0.5;
+  const tickStep = (hi - lo) / 0.5 > 8 || (W - pad - m.r) / ((hi - lo) / 0.5) < (lo < 0 ? 46 : 34) ? 1 : 0.5;
   for (let v = Math.ceil(lo / tickStep - 1e-9) * tickStep; v <= hi + 1e-9; v += tickStep) {
-    const v0 = Math.abs(v) < 1e-9 ? 0 : v;
+    const v0 = Math.abs(v) < 1e-9 ? 0 : v, first = Math.abs(v - lo) < 1e-9;
     svg("line", { x1: x(v), x2: x(v), y1: m.t, y2: H - m.b, stroke: v0 === 0 ? "var(--axis)" : "var(--grid)" }, s);
-    text(s, x(v), H - m.b + 16, v0.toFixed(1), { "text-anchor": Math.abs(v - lo) < 1e-9 ? "start" : v >= hi - 1e-9 ? "end" : "middle", class: "num" });
+    // the axis start's label starts at m.l with the other text
+    text(s, first ? m.l : x(v), H - m.b + 16, v0.toFixed(1), { "text-anchor": first ? "start" : v >= hi - 1e-9 ? "end" : "middle", class: "num" });
   }
   text(s, m.l, H - 4, "Average daily gain, lbs per day");
-  const pts = [], dots = [];
+  const pts = [], dots = [], later = [], els = [];
   const ring = svg("circle", { r: r + 3, fill: "none", stroke: "var(--ink)", "stroke-width": 2, visibility: "hidden" });
   const badgeLab = `Under ${pct(RULES.adgSerious)}% of target`, badgeW = measure(badgeLab, 11.5, 600) + 26;
   let top = m.t;
-  layouts.forEach(({ g, shown, offs, half }, gi) => {
-    const groupLow = g.adg < g.target * RULES.adgSerious;
+  layouts.forEach(({ g, shown, offs, half, groupLow, flag, rs }, gi) => {
     const cy = top + headH + half;
     // a long name gives way to the badge, not the other way round
-    const name = fitText(g.group, W - m.r - x(lo) - (groupLow ? badgeW + 10 : 0), 13, 600);
-    text(s, x(lo), top + 14, name, { class: "hd halo" });
+    // as text: a name of digits only (a calf-crop year) can come from the CSV as a number
+    const name = fitText(String(g.group), W - m.r - m.l - (groupLow ? badgeW + 10 : 0), 13, 600);
+    const nameT = text(s, m.l, top + 14, name, { class: "hd halo" });
     const line = Number.isFinite(g.adg) ? `average ${g.adg.toFixed(2)} vs ${g.target.toFixed(1)} target` : `no average, ${unreadable(g)}`;
-    text(s, x(lo), top + 30, fitText(`${g.head} weighed · ${line}`, W - m.r - x(lo), 11.5), { class: "num halo" });
+    const lineFit = fitText(`${g.head} weighed · ${line}`, W - m.r - m.l, 11.5);
+    const lineT = text(s, m.l, top + 30, lineFit, { class: "num halo" });
+    // as drawn, the line stays inside the chart (a spacing change resizes the name, which is watched; the line is not)
+    later.push(() => fitDrawn(lineT, lineFit, W - m.r - m.l));
+    els.push(nameT);
     if (groupLow) {
-      const bx = x(lo) + measure(name, 13, 600) + 10;
-      svg("rect", { x: bx, y: top + 1, width: badgeW, height: 18, rx: 9, fill: "var(--serious)", "fill-opacity": 0.14, stroke: "var(--serious)", "stroke-opacity": 0.5 }, s);
-      svg("path", { d: `M${bx + 11},${top + 5} l5,9 h-10 z`, fill: "var(--serious)" }, s);
-      text(s, bx + 20, top + 14, badgeLab, { class: "ink", style: "font-size:11.5px" });
+      const bx = m.l + measure(name, 13, 600) + 10, bg = svg("g", {}, s);
+      const pillRect = svg("rect", { x: bx, y: top + 1, width: badgeW, height: 18, rx: 9, fill: "var(--serious)", "fill-opacity": 0.14, stroke: "var(--serious)", "stroke-opacity": 0.5 }, bg);
+      svg("path", { d: `M${bx + 11},${top + 5} l5,9 h-10 z`, fill: "var(--serious)" }, bg);
+      const bt = text(bg, bx + 20, top + 14, badgeLab, { class: "ink", style: "font-size:11.5px" });
+      // as drawn, the pill holds all its words, starts clear of the name and ends inside the chart: the name gives way
+      later.push(() => {
+        const pw = Math.max(badgeW, bt.getComputedTextLength() + 26);
+        pillRect.setAttribute("width", pw);
+        fitDrawn(nameT, name, W - m.r - m.l - 10 - pw);
+        const shift = nameT.getComputedTextLength() - measure(name, 13, 600);
+        bg.setAttribute("transform", `translate(${nameT.textContent === name ? Math.max(0, shift) : shift},0)`);
+      });
+      els.push(bt);
     }
     // 80% and 50% of target; when the two lines sit close, one label names both
     const refs = [RULES.animalShare, RULES.adgSerious].map((share) => ({ x: x(g.target * share), lab: `${pct(share)}%` })).sort((a, b) => a.x - b.x);
@@ -525,11 +606,13 @@ function gainStrip(d) {
     svg("line", { x1: xt, x2: xt, y1: cy - half - 2, y2: cy + half + 2, stroke: "var(--ink)", "stroke-width": 2, "stroke-linecap": "round" }, s);
     const order = shown.map((a, k) => k).sort((a, b) => shown[a].adg - shown[b].adg);
     for (const k of order) {
-      const a = shown[k], flagged = !groupLow && a.adg < g.target * RULES.animalShare;
+      const a = shown[k], flagged = flag[k];
       const cx = x(a.adg), py = cy + offs[k];
-      const c = svg("circle", { cx, cy: py, r, fill: flagged ? "var(--warning)" : "var(--s1)", stroke: "var(--surface)", "stroke-width": 4, "paint-order": "stroke" }, s);
+      const c = flagged
+        ? svg("rect", { x: cx - hs, y: py - hs, width: 2 * hs, height: 2 * hs, rx: 1, fill: "var(--warning)", stroke: "var(--surface)", "stroke-width": 3, "paint-order": "stroke", "stroke-linejoin": "round" }, s)
+        : svg("circle", { cx, cy: py, r, fill: "var(--s1)", stroke: "var(--surface)", "stroke-width": 4, "paint-order": "stroke" }, s);
       dots.push(c);
-      pts.push({ x: cx, y: py, row: gi, html: `<span class="tv">${a.adg.toFixed(2)} lbs/day</span><span class="tl">${esc(a.tag)} · ${esc(g.group)}</span>${fmtDate(a.from)} to ${fmtDate(a.to)}, now ${esc(a.weight.toLocaleString())} lbs${flagged ? `<span class="tf">${ICON.warning}Flagged: under ${pct(RULES.animalShare)}% of target</span>` : ""}` });
+      pts.push({ x: cx, y: py, rad: rs[k], row: gi, html: `<span class="tv">${a.adg.toFixed(2)} lbs/day</span><span class="tl">${esc(a.tag)} · ${esc(g.group)}</span>${fmtDate(a.from)} to ${fmtDate(a.to)}, now ${esc(a.weight.toLocaleString())} lbs${flagged ? `<span class="tf">${ICON.warning}Flagged: under ${pct(RULES.animalShare)}% of target</span>` : ""}` });
     }
     const tl = `target ${g.target.toFixed(1)}`, tw = measure(tl, 11.5, 600);
     text(s, xt + tw + 6 > W ? xt - 5 : xt + 5, cy - half - 2, tl, { class: "ink halo", style: "font-size:11.5px", "text-anchor": xt + tw + 6 > W ? "end" : "start" });
@@ -542,12 +625,13 @@ function gainStrip(d) {
     return best;
   }, (j) => {
     ring.setAttribute("visibility", j < 0 ? "hidden" : "visible");
-    if (j >= 0) { ring.setAttribute("cx", pts[j].x); ring.setAttribute("cy", pts[j].y); }
+    // the ring keeps 2px clear of the mark it circles, a dot or the further reach of a square's corners
+    if (j >= 0) { ring.setAttribute("cx", pts[j].x); ring.setAttribute("cy", pts[j].y); ring.setAttribute("r", pts[j].rad + 3); }
   });
   box.replaceChildren(s);
-  // groups with no gain target aren't judged on gain; say so rather than leave them out silently
-  const skipped = d.groups.filter((g) => !(g.target_adg_lbs > 0)).map((g) => esc(g.group));
-  if (skipped.length) box.insertAdjacentHTML("beforeend", `<p class="hint">Not shown: ${skipped.join(", ")}, with no gain target set.</p>`);
+  // the hint goes in first, so no re-fit can keep it off the page
+  box.insertAdjacentHTML("beforeend", hint);
+  relayout(box, later, els);
 }
 
 // ---------------------------------------------------------------- budget: one table, with the over/under bar in a column
@@ -573,7 +657,7 @@ function budget(d, exc) {
     `<th class="num c-budget">Budget</th><th class="num c-actual">Actual</th><th class="num">Difference</th></tr></thead><tbody>` +
     rows.map((r) => {
       const sev = sevOf(r.category);
-      return `<tr><td>${esc(r.category)}${sev ? ` ${pill(sev, cap(sev))}` : ""}<span class="cat-sub">${money(r.actual)} of ${money(r.budget)}</span></td><td class="c-bar">${bar(r, sev)}</td>` +
+      return `<tr><td>${brk(r.category)}${sev ? ` ${pill(sev, cap(sev))}` : ""}<span class="cat-sub">${money(r.actual)} of ${money(r.budget)}</span></td><td class="c-bar">${bar(r, sev)}</td>` +
         `<td class="num c-budget">${money(r.budget)}</td><td class="num c-actual">${money(r.actual)}</td><td class="num">${signed(r.variance, money(Math.abs(r.variance)))}</td></tr>`;
     }).join("") +
     `</tbody><tfoot><tr><td>Season total<span class="cat-sub">${money(ta)} of ${money(tb)}</span></td><td class="c-bar">${bar({ pct: (ta - tb) / tb })}</td>` +
@@ -583,10 +667,24 @@ function budget(d, exc) {
     `<span>${ICON.warning}Warning: ${pct(RULES.budgetWarn)}–${pct(RULES.budgetSerious)}% over</span>` +
     `<span><i class="key box" style="background:var(--s1-mute)"></i>Not flagged</span>`;
   placeBudgetLabels();
+  // A reader's text spacing or text size can widen the table, and its labels, with no change to the window's width:
+  // measure again whenever the table's size changes. In the next frame, so the class it sets can't loop back here.
+  const bt = $("budgetTable");
+  if (!bt._ro) {
+    let q = 0;
+    bt._ro = new ResizeObserver(() => { q ||= requestAnimationFrame(() => { q = 0; safe(placeBudgetLabels); }); });
+    bt._ro.observe(bt);
+  }
 }
 
 // Each % label goes past the end of its bar if there's room, else inside the bar, else across the zero line.
 function placeBudgetLabels() {
+  // First the table's width. A category name the table can't fit (one long word on a narrow phone) may break anywhere,
+  // but only then: when the table already fits inside its card and the window, every cell keeps its width.
+  const bt = $("budgetTable"), card = bt.closest("section");
+  bt.classList.remove("tight");
+  const edge = Math.min(card.getBoundingClientRect().left + card.clientLeft + card.clientWidth, document.documentElement.clientWidth);
+  bt.classList.toggle("tight", bt.getBoundingClientRect().right > edge + 0.5);
   for (const t of document.querySelectorAll("#budgetTable .track[data-p]")) {
     const val = t.querySelector(".val"), W = t.clientWidth, lw = val.offsetWidth, gap = 6;
     const p = (t.dataset.p / 100) * W, z = (t.dataset.z / 100) * W, over = t.dataset.dir === "1";
@@ -707,12 +805,15 @@ new ResizeObserver(() => {
 {
   const links = [...nav.querySelectorAll("a")], targets = links.map((a) => document.getElementById(a.hash.slice(1)));
   const calm = matchMedia("(prefers-reduced-motion: reduce)");
-  let cur = null, q = 0;
+  // picked: the section last chosen, by a click or by the address (Back, Forward, a link in), as Grazing and Gain share
+  // a top edge side by side
+  const byHash = () => links.find((a) => a.hash === location.hash);
+  let cur = null, q = 0, picked = byHash() ?? null;
   const spy = () => {
     q = 0;
     const line = document.querySelector(".topbar").offsetHeight + innerHeight * 0.3;
     let k = -1, kt = -Infinity;
-    targets.forEach((t, n) => { const top = t?.getBoundingClientRect().top; if (top <= line && top > kt + 1) { k = n; kt = top; } });
+    targets.forEach((t, n) => { const top = t?.getBoundingClientRect().top; if (top <= line && (top > kt + 1 || (Math.abs(top - kt) <= 1 && links[n] === picked))) { k = n; kt = top; } });
     if (k >= 0 && innerHeight + scrollY >= document.documentElement.scrollHeight - 2) k = targets.length - 1;
     const a = links[k] ?? null;
     if (a === cur) return;
@@ -724,6 +825,9 @@ new ResizeObserver(() => {
     if (ar.left < nr.left || ar.right > nr.right - 40) nav.scrollTo({ left: nav.scrollLeft + ar.left - nr.left - 12, behavior: calm.matches ? "instant" : "smooth" });
   };
   addEventListener("scroll", () => { q ||= requestAnimationFrame(spy); }, { passive: true });
+  // a click that doesn't scroll (the section is already in place) still lights its link
+  links.forEach((a) => a.addEventListener("click", () => { picked = a; q ||= requestAnimationFrame(spy); }));
+  addEventListener("hashchange", () => { picked = byHash() ?? picked; q ||= requestAnimationFrame(spy); });
   spy();
 }
 // The rules are reference: open on wide screens, one tap away on a phone, and opened by any link that points at them.

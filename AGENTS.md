@@ -73,7 +73,7 @@ docs/
   project/               living project files: STATUS.md, DECISIONS.md
   reviews/               independent review reports (Codex checkpoints)
     prompts/             the prompt given to the reviewer for each report
-  screenshots/           images used by the README
+  screenshots/           images used by the README, and capture.mjs that retakes them
   audit/                 the October 2026 audit and the Phase 1 plan: specification, roadmap, handoff, open
                          questions, review prompts and the preserve checks
 AGENTS.md                this file
