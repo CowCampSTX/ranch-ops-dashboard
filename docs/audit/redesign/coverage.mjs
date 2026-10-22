@@ -6,9 +6,14 @@
 // Usage (from the repository root):
 //   node docs/audit/redesign/coverage.mjs [port]      # default port 8802
 //
-// Needs Node 22 and Playwright ($PLAYWRIGHT_PATH, else /opt/node22/lib/node_modules/playwright/index.mjs).
+// Needs Node 22 and Playwright: $PLAYWRIGHT_MODULE or $PLAYWRIGHT_PATH (a path to Playwright's index.mjs) if set, else
+// /opt/node22/lib/node_modules/playwright/index.mjs if it exists, else the "playwright" package. Exit code 2 means
+// Playwright could not be loaded or the server could not start on the port (for example, the port is in use): a set-up
+// problem, not a result about the page, reported on one line that starts "ENVIRONMENT:".
 // Each line is PASS or FAIL with what was measured. A PASS shows the page behaves as the finding expects in that one
-// case; it is not the finding's Phase 1 acceptance test.
+// case; it is not the finding's Phase 1 acceptance test. This script records the redesign's claims and is not a Phase 1
+// gate: several checks assert wording Phase 1 changes on purpose. The checks Phase 1 must keep passing are in
+// preserve.mjs (docs/audit/06-phase1-spec.md sections 6.3 and 11.4).
 //
 // Cases (each is the committed data with one edit)
 //   hostile    pasture P2 named '<img src=x onerror="window.__xss=1">', P4 named 'Lone Tree <A', heifer tags '<i>H001</i>'
@@ -27,10 +32,20 @@ import { cpSync, mkdtempSync, readFileSync, writeFileSync, rmSync, existsSync } 
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join, extname, resolve, sep } from "node:path";
+import { pathToFileURL } from "node:url";
 
-const PW = [process.env.PLAYWRIGHT_PATH, "/opt/node22/lib/node_modules/playwright/index.mjs"].filter(Boolean).find((p) => existsSync(p));
-if (!PW) throw new Error("Playwright not found; set PLAYWRIGHT_PATH");
-const { chromium } = await import(PW);
+// Playwright: $PLAYWRIGHT_MODULE (or $PLAYWRIGHT_PATH, as the diagnostics use) if set, else the audit machine's path if
+// it exists, else the "playwright" package. A path is imported as a file URL, because import() does not accept a
+// Windows path such as C:\...\index.mjs.
+const PW_DEFAULT = "/opt/node22/lib/node_modules/playwright/index.mjs";
+const PW = process.env.PLAYWRIGHT_MODULE || process.env.PLAYWRIGHT_PATH || (existsSync(PW_DEFAULT) ? PW_DEFAULT : "playwright");
+let chromium;
+try {
+  ({ chromium } = await import(existsSync(PW) ? pathToFileURL(PW).href : PW));
+} catch (e) {
+  console.error(`ENVIRONMENT: could not load Playwright from "${PW}" (${e.code ?? e.message}). Set PLAYWRIGHT_MODULE to the path of Playwright's index.mjs, for example $(npm root -g)/playwright/index.mjs for a global install. This is a set-up problem, not a result about the page.`);
+  process.exit(2);
+}
 const PORT = +(process.argv[2] ?? 8802);
 
 // ---------------------------------------------------------------- build the cases in a temporary folder
@@ -74,7 +89,15 @@ const server = createServer((req, res) => {
   if (!f.startsWith(ROOT + sep) || !existsSync(f)) { res.writeHead(404); return res.end("not found"); }
   res.writeHead(200, { "content-type": TYPES[extname(f)] ?? "application/octet-stream" });
   res.end(readFileSync(f));
-}).listen(PORT, "127.0.0.1");
+});
+// A port in use is a set-up problem, not a result about the page: say so on its own and stop with exit code 2.
+try {
+  await new Promise((ok, fail) => { server.once("error", fail); server.listen(PORT, "127.0.0.1", ok); });
+} catch (e) {
+  rmSync(ROOT, { recursive: true, force: true });
+  console.error(`ENVIRONMENT: could not start the server on port ${PORT} (${e.code ?? e.message}). Pass a free port: node docs/audit/redesign/coverage.mjs PORT. This is a set-up problem, not a result about the page.`);
+  process.exit(2);
+}
 const PAGE = `http://127.0.0.1:${PORT}/`, CASES = `${PAGE}cases/`;
 
 // ---------------------------------------------------------------- checks

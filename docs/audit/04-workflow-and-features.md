@@ -47,11 +47,11 @@ left to the separate Ranch Tech ROI project.
 | Item | Value |
 |---|---|
 | Repository | CowCampSTX/ranch-ops-dashboard |
-| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main). The work branch `claude/project-thread-nu46kf` adds only `docs/audit/` files. |
+| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when this document was written). "Today" and "Verified, today" below describe this commit. Pull request #2 has since merged a redesigned page into main (merge commit `0315d09`, 2026-10-20); [section 1.5](#15-evaluation-of-each-element-the-owner-listed) and [section 1.8](#18-part-1-by-phase) note what it changed. |
 | Registries used | `docs/audit/data/findings.json` (83 findings), `docs/audit/data/rules.json` (98 rules, 152 data fields, 47 integrations; split copies in `data-fields.json` and `integrations.json`), `docs/audit/data/sources.json`, and the critic notes in `docs/audit/data/registry-changelog.md`. |
 | Evidence used | `docs/audit/evidence/baseline.json`, the `audit_*`/`verify_*` files, and `research_workflow.json`, `research_context.json`, `research_water.json`, `research_grazing.json`, `research_health.json`, `research_gain.json`, `research_budget.json` with their `cite_*` checks. |
 | Earlier documents | `01-baseline.md` (how the code works today, baseline test results) and `02-findings.md` (every finding, by phase). Finding IDs below link to their entries in `02-findings.md`. |
-| Project guidance files | There is **no PROJECT_CONTEXT.md or AGENTS.md** in the repository. The workflow is judged against README.md, the code, the committed data and the lead's phase defaults. |
+| Project guidance files | At the reviewed commit `cfd77e5` there was **no PROJECT_CONTEXT.md or AGENTS.md**. The workflow is judged against README.md, the code, the committed data and the lead's phase defaults. The repository now has [AGENTS.md](../../AGENTS.md) (added 2026-10-20) with the instructions for every agent. |
 | Blocked checks | The published GitHub Pages site could not be reached (the environment's proxy answered 403), so the live deployment is unverified. Only Playwright Chromium, with phone and touch emulation, was run. No real phones, screen readers, Firefox or WebKit were tested. |
 | What this document did not do | No new test, browser run or user test was made for it. Every observed number is quoted from the evidence files or the registries. The few readings shown in the wireframes are copied from the committed fictional data files, which are named where they are used. **No user testing of any workflow was done.** |
 
@@ -153,9 +153,11 @@ export disappears, and a header-only water.csv gives "WATER TANKS OK / 0 of 0 / 
 - *Phase 2.* Add the freshness and coverage strip. `RULE-WF-14` gives its wording: "Water: 7 of 8 tanks reported in the
   last 24 h; weigh-in Sep 15; budget through Sep". Add the age check against the clock with a demo flag, so the
   fictional page says "example data" rather than raising a false alarm ([LOAD-05](02-findings.md#load-05)). Add the
-  "sensor late" warning for a tank that stopped reporting less than 24 hours ago, with the time of the shown level
-  ([WAT-05](02-findings.md#wat-05); demo setting 12 hours). Show weighed head against inventory head beside every group
-  gain figure (`RULE-GAIN-10`, class C, Phase 1; on the committed data "45 of 45 heifers, 150 of 150 yearlings").
+  "sensor late" warning for a tank that stopped reporting less than 24 hours ago ([WAT-05](02-findings.md#wat-05);
+  demo setting 12 hours; each tank card already shows the time of its shown level since the redesign, by code reading
+  of `app.js` on main `0315d09`, [08 section 3.2](08-redesign-coverage.md#32-partly-addressed)). Show weighed head
+  against inventory head beside every group gain figure (`RULE-GAIN-10`, class C, Phase 1; on the committed data
+  "45 of 45 heifers, 150 of 150 yearlings").
 
 ### Step 2. New or changed, worst first (about 35 seconds)
 
@@ -213,8 +215,10 @@ basis, "'Demo setting (D)' for every current value until it is sourced or set by
   For grazing, build the first step from the data: pastures past their minimum rest, with any open water alert on them
   ([GRZ-08](02-findings.md#grz-08), with [GRZ-04](02-findings.md#grz-04)). Show dates as "Sep 15", not "2026-09-15"
   ([UI-13](02-findings.md#ui-13)). Name animals with negative gain even when the group is flagged
-  ([GAIN-09](02-findings.md#gain-09)), and mark flagged animals and the 50% / 80% lines on the gain chart
-  ([UI-16](02-findings.md#ui-16)).
+  ([GAIN-09](02-findings.md#gain-09)). The gain chart's flagged-animal readings, legend key and 50% / 80% lines are on
+  the page since the redesign and Phase 1 keeps them ([UI-16](02-findings.md#ui-16);
+  [06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)); the flagged dots'
+  colour-only difference is a known issue for a separate pull request.
 
 ### Step 4. Assign or print the crew briefing (about 25 seconds)
 
@@ -390,16 +394,29 @@ rarely same-day actions". Whether it fits on one page with a full day's list was
 
 ### Summary
 
-| Element | Today (verified) | Recommendation | Phase | IDs |
+| Element | At `cfd77e5` (verified) | Recommendation | Phase | IDs |
 |---|---|---|---|---|
 | a. Top-priority action list | Worst first with a first step; ties by area A-Z and file order | Keep; group Today / This week / Plan; rank by consequence; mark new or worse on this device | 2 | [UI-09](02-findings.md#ui-09), [WAT-06](02-findings.md#wat-06), [WAT-09](02-findings.md#wat-09); `RULE-WF-09`, `RULE-WF-10`, `RULE-BUD-14`, `RULE-WAT-05` |
 | b. Filters by severity, pasture, herd group and area | Area chips only; counts correct; focus lost after a chip; result not announced | Keep area chips; add severity; add pasture and group selectors built from the master lists; always show "Showing N of M" | 2 | [UI-10](02-findings.md#ui-10); `RULE-WF-05`, `RULE-WF-06` |
 | c. Alert explanations with readings and thresholds | One sentence per row; readings only in hover tooltips; rules table without basis | Basis column now; "Why this row?" panel with readings, times, threshold and basis | 1 (basis) and 2 | [GRZ-08](02-findings.md#grz-08), [UI-16](02-findings.md#ui-16), [GAIN-09](02-findings.md#gain-09), [GAIN-11](02-findings.md#gain-11); `RULE-WF-04`, `RULE-WF-20` |
 | d. Visible data freshness and coverage | As-of line only, no zone, no age, no coverage | Zone and fictional badge now; freshness and coverage strip next | 1 and 2 | [TIME-02](02-findings.md#time-02), [LOAD-05](02-findings.md#load-05), [WAT-05](02-findings.md#wat-05), [GAIN-07](02-findings.md#gain-07), [GAIN-08](02-findings.md#gain-08); `RULE-WF-14`, `RULE-GAIN-10` |
 | e. "No issues detected" vs "insufficient information" | Missing or empty data reads as all-clear | Three states everywhere: OK, needs attention, CAN'T TELL; visible data-issue rows | 1 | [LOAD-01](02-findings.md#load-01), [LOAD-02](02-findings.md#load-02), [WAT-02](02-findings.md#wat-02), [GAIN-08](02-findings.md#gain-08), [HLTH-02](02-findings.md#hlth-02), [UI-07](02-findings.md#ui-07); `RULE-WAT-15`, `RULE-WF-14` |
-| f. Chart details on phones and keyboard | Hover only; a tap shows nothing; no chart detail reachable by keyboard; 7 px chart text on a phone | "Show data" table under each chart; tap-to-pin details; stacked rows on phones | 2 | [UI-01](02-findings.md#ui-01), [UI-02](02-findings.md#ui-02), [UI-03](02-findings.md#ui-03), [UI-11](02-findings.md#ui-11); `RULE-WF-02`, `RULE-WF-03`, `RULE-WF-04`, `RULE-WF-08` |
+| f. Chart details on phones and keyboard | Hover only; a tap shows nothing; no chart detail reachable by keyboard; 7 px chart text on a phone | "Show data" table under each chart (tap and keyboard readings and stacked rows on phones are on the page since the redesign and Phase 1 keeps them) | 2 | [UI-01](02-findings.md#ui-01), [UI-02](02-findings.md#ui-02), [UI-03](02-findings.md#ui-03), [UI-11](02-findings.md#ui-11); `RULE-WF-02`, `RULE-WF-03`, `RULE-WF-04`, `RULE-WF-08` |
 | g. Printable or exportable crew briefing | No print styles; 4 pages; key text faintest | One-page black-on-white briefing grouped by place | 2 | `RULE-WF-17`, `RULE-WAT-15` |
 | h. Acknowledgement, assignment, notes, resolution history | None; the page stores nothing | Optional "this device only" mark and notes that never clear a condition; shared owners, history and shelving deferred | 2 (device only); Defer (shared) | `RULE-WF-11`, `RULE-WF-12`, `RULE-WF-13`, `RULE-WF-15`, `RULE-WF-16` |
+
+**Since the redesign** (pull request #2, merged into main as `0315d09` on 2026-10-20;
+[08-redesign-coverage.md](08-redesign-coverage.md#3-coverage)): the page now does part of a, b, c and f. It opens with
+a summary card that counts the rows by severity (part of a). The area chips keep focus
+([UI-10](02-findings.md#ui-10); part of b). The gain chart marks the animals the report flags and draws the 50% and
+80% lines ([UI-16](02-findings.md#ui-16); part of c); the flagged dots differ from the others by colour alone, a known
+issue that a separate pull request fixes. Chart readings open by mouse, tap and keyboard and stay on screen
+([UI-01](02-findings.md#ui-01), [UI-11](02-findings.md#ui-11)); list rows become cards on a phone and chart text is
+11.5 px ([UI-02](02-findings.md#ui-02), [UI-03](02-findings.md#ui-03)) (part of f). Phase 1 keeps these
+([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). The rest of a, b, c and f
+stays in Phase 2: Today / This week / Plan grouping and consequence ranking, severity, pasture and group filters with
+an announced result, "Why this row?" panels, and "Show data" tables. These page facts were measured with Playwright
+Chromium on main `0315d09` on 2026-10-20; real phones, screen readers, Firefox and WebKit were not tested.
 
 ### a. Top-priority action list
 
@@ -434,7 +451,9 @@ focus on the chip. No source in the evidence studies how useful pasture or group
 **Recommendation (Phase 2).**
 
 - Keep the area chips; create them once and update `aria-pressed` and counts in place ([UI-10](02-findings.md#ui-10)
-  proposed fix); add a hidden `role="status"` line that announces the result (`RULE-WF-05`).
+  proposed fix). The redesign already does this and Phase 1 keeps it
+  ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)). Add a hidden
+  `role="status"` line that announces the result (`RULE-WF-05`).
 - Add severity filters that match the time windows (Today, This week, Plan), plus CAN'T TELL and data issues.
 - Add **pasture** and **group** selectors whose options come from `pastures.csv` and `groups.csv`, never from row text or
   hard-coded names (the lesson of [LOAD-03](02-findings.md#load-03) and [UI-04](02-findings.md#ui-04)). A pasture
@@ -514,13 +533,16 @@ click-to-pin details"; the checker notes the Escape failure holds only if the to
 `RULE-WF-04` (class A, SC 1.1.1): each chart needs a text alternative and a data table. `RULE-WF-08` (class B, SC
 1.4.11): past grazing stays (1.38:1) and the over-plan segment against the current stay (1.25:1) are below 3:1.
 
+Already on the page since the redesign and kept in Phase 1
+([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)): details show and stay on tap
+and close on a tap elsewhere ([UI-01](02-findings.md#ui-01)); readings stay inside the window
+([UI-11](02-findings.md#ui-11)); charts are drawn at their container width ([UI-03](02-findings.md#ui-03)); exception
+rows become stacked cards at 760 px wide or less ([UI-02](02-findings.md#ui-02)).
+
 **Recommendation (Phase 2).** Put a `<details><summary>Show data</summary>` table under each chart: per tank the last 8
 readings, per group the stays, per animal tag, weight and gain, slow animals first (`RULE-WF-02` recommendation: "This
-one change also satisfies 1.1.1 and gives the crew briefing its source tables"). Show and pin details on tap and dismiss
-them on a tap elsewhere ([UI-01](02-findings.md#ui-01)); clamp tooltips to the window ([UI-11](02-findings.md#ui-11));
-draw charts at their container width ([UI-03](02-findings.md#ui-03)); render exception rows as stacked rows below about
-600 px ([UI-02](02-findings.md#ui-02)); give past stays and the over-plan segment an outline or label as well as hue
-(`RULE-WF-08`).
+one change also satisfies 1.1.1 and gives the crew briefing its source tables"). Give past stays and the over-plan
+segment an outline or label as well as hue (`RULE-WF-08`).
 
 ### g. Printable or exportable crew briefing
 
@@ -633,15 +655,21 @@ unacknowledged, never hidden" (`RULE-WF-11` missing-data rule).
 | As-of with ranch time zone; fictional snapshot badge | 1 | [TIME-02](02-findings.md#time-02) (M) | `RULE-WF-14`, `RULE-WF-21` |
 | Honest copy: Basis column, "as of <date>", "Sensors normal", observation wording, structured tile counts, cows not judged | 1 | [UI-04](02-findings.md#ui-04) (S), [GAIN-11](02-findings.md#gain-11) (S), [GAIN-13](02-findings.md#gain-13) (S), [UI-06](02-findings.md#ui-06) (S), [UI-07](02-findings.md#ui-07) (S) | `RULE-WF-20`, `RULE-WAT-15`, `RULE-HLTH-11` |
 | Safe rendering of CSV text | 1 | [SEC-01](02-findings.md#sec-01) (S) | |
-| Morning review layout: counts, Today / This week / Plan, new or worse on this device | 2 | | `RULE-WF-18`, `RULE-WF-13` (device part), `RULE-WF-15` |
+| Morning review layout: counts, Today / This week / Plan, new or worse on this device | 2 (a summary card with counts by severity: on the page since the redesign, kept from 1) | | `RULE-WF-18`, `RULE-WF-13` (device part), `RULE-WF-15` |
 | Consequence-aware ranking within a severity | 2 | [UI-09](02-findings.md#ui-09) (S), [WAT-09](02-findings.md#wat-09) (S), [WAT-06](02-findings.md#wat-06) (Phase 2 part) | `RULE-WF-10`, `RULE-BUD-14`, `RULE-WAT-05`, `RULE-WAT-07` |
-| Filters (severity, pasture, group, area) with announced results | 2 | [UI-10](02-findings.md#ui-10) (S) | `RULE-WF-05`, `RULE-WF-06` |
-| "Why this row?" explanations | 2 | [GRZ-08](02-findings.md#grz-08) (M), [UI-16](02-findings.md#ui-16) (S), [GAIN-09](02-findings.md#gain-09) (S), [UI-13](02-findings.md#ui-13) (S) | `RULE-WF-04`, `RULE-WF-19` |
+| Filters (severity, pasture, group, area) with announced results | 2 (area chips that keep focus, [UI-10](02-findings.md#ui-10): on the page since the redesign, kept from 1) | [UI-10](02-findings.md#ui-10) (S) | `RULE-WF-05`, `RULE-WF-06` |
+| "Why this row?" explanations | 2 (the gain chart's flagged-animal readings and 50% / 80% lines, [UI-16](02-findings.md#ui-16): on the page since the redesign, kept from 1) | [GRZ-08](02-findings.md#grz-08) (M), [UI-16](02-findings.md#ui-16) (S), [GAIN-09](02-findings.md#gain-09) (S), [UI-13](02-findings.md#ui-13) (S) | `RULE-WF-04`, `RULE-WF-19` |
 | Freshness and coverage strip; sensor-late warning | 2 | [LOAD-05](02-findings.md#load-05) (S), [WAT-05](02-findings.md#wat-05) (S) | `RULE-WF-14` (strip part) |
-| Keyboard and touch chart details; phone tables | 2 | [UI-01](02-findings.md#ui-01) (M), [UI-02](02-findings.md#ui-02) (M), [UI-03](02-findings.md#ui-03) (M), [UI-11](02-findings.md#ui-11) (S) | `RULE-WF-02`, `RULE-WF-03`, `RULE-WF-04`, `RULE-WF-08` |
+| Keyboard and touch chart details; phone tables | On the page since the redesign and kept from 1 ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)); 2 for "Show data" tables, chart text alternatives, a reading the mouse can move onto, short dates and the budget scale cap (the rest of P2-05 and P2-06) | [UI-01](02-findings.md#ui-01) (M), [UI-02](02-findings.md#ui-02) (M), [UI-03](02-findings.md#ui-03) (M), [UI-11](02-findings.md#ui-11) (S) | `RULE-WF-02`, `RULE-WF-03`, `RULE-WF-04`, `RULE-WF-08` |
 | Printable crew briefing | 2 | none (no finding; effort not estimated in the registry) | `RULE-WF-17`, `RULE-WAT-15` |
 | Optional per-device mark and notes; "resolved since last review" strip | 2 | none (no finding) | `RULE-WF-11`, `RULE-WF-15` |
 | Shared acknowledgement, owners, first-seen history, shelving, resolution history | Defer | none | `RULE-WF-12`, `RULE-WF-13`, `RULE-WF-16` |
+
+"On the page since the redesign" means pull request #2 (main `0315d09`, 2026-10-20) already does that part; Phase 1
+keeps it ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign)), and only the rest is
+Phase 2 work ([05-roadmap.md section 4](05-roadmap.md#4-phase-2-build-next)). The redesign also already shows a
+loading message and draws each section inside its own guard; the Phase 1 loading row adds the per-file messages. See
+the note in [section 1.5](#15-evaluation-of-each-element-the-owner-listed).
 
 One Phase 2 grazing item also touches the morning list. The rest check ([GRZ-04](02-findings.md#grz-04)) must ship
 together with the generator fix ([GRZ-05](02-findings.md#grz-05)), because in the example season "11 of 13 sequential

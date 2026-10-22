@@ -6,7 +6,7 @@ short list of rules, and puts the problems at the top, worst first, each with a 
 
 **Try it:** https://cowcampstx.github.io/ranch-ops-dashboard/
 
-![The dashboard: summary numbers and the exception report](docs/screenshot.png)
+![The dashboard: summary numbers and the exception report](docs/screenshots/screenshot.png)
 
 > Example Ranch and all of its data are fictional. `scripts/generate_data.py` builds them from a fixed seed.
 
@@ -46,14 +46,14 @@ Some design choices:
 | Daily gain | One dot per animal against the group's target and its 80% and 50% lines, with the animals the report flags highlighted |
 | Spending against budget | One table: each category's percent over or under as a bar, beside its budget, actual and difference |
 
-![Water tank levels](docs/water.png)
-![Grazing rotation and daily gain](docs/grazing-gain.png)
+![Water tank levels](docs/screenshots/water.png)
+![Grazing rotation and daily gain](docs/screenshots/grazing-gain.png)
 
 Every chart can be read with a mouse, a tap or the keyboard (focus a chart and use the arrow keys), and each is drawn
 at the size it's shown, so its text stays readable on a phone. On a phone the report turns into cards and the tables
 fit the screen. The page uses a dark theme, and it has no dependencies or build step.
 
-<img src="docs/phone.png" alt="The dashboard on a phone" width="320">
+<img src="docs/screenshots/phone.png" alt="The dashboard on a phone" width="320">
 
 ## The example data
 
@@ -93,7 +93,9 @@ exceptions.js            the rules and summaries: pure functions shared by the p
 data/                    the fictional example data
 scripts/generate_data.py builds data/ from a fixed seed
 tests/                   node:test unit tests
-docs/                    screenshots
+docs/                    documentation: start at docs/README.md (status, decisions, reviews, the audit and plan)
+docs/screenshots/        the images on this page
+AGENTS.md                instructions for coding agents (Claude and Codex); CLAUDE.md points to it
 ```
 
 ## License

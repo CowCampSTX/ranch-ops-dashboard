@@ -33,7 +33,7 @@ operating value.
 | Worktree | baseline.json: "tracked files unchanged (\"git diff --stat\" empty); the only untracked path is docs/audit/." |
 | Baseline run | 2026-10-15. The browser report's `ranAt` is 2026-10-15T18:08:26.848Z; that report is kept in session scratch space and is not committed. The registrar re-ran the main checks on 2026-10-16 with matching output (findings.json `spot_checks`). |
 | Tools | node v22.22.0, Python 3.13.16 (regeneration), Playwright Chromium 141.0.7390.37 |
-| Project guidance files | There is **no PROJECT_CONTEXT.md or AGENTS.md** in the repository. Behaviour was judged against README.md, the code and the committed data (findings.json `context_notes`). |
+| Project guidance files | At the reviewed commit `cfd77e5` there was **no PROJECT_CONTEXT.md or AGENTS.md**. Behaviour was judged against README.md, the code and the committed data (findings.json `context_notes`). The repository now has [AGENTS.md](../../AGENTS.md) (added 2026-10-20) with the instructions for every agent. |
 
 ## How to read this document
 
@@ -604,7 +604,8 @@ swap file contents in flight.
 Before you start:
 
 - Run every command from the repository root.
-- You need Node 22 and python3.
+- You need Node 22 and python3. On Windows or another set-up, read
+  [Before running the review scripts](README.md#before-running-the-review-scripts) first.
 - Browser scripts need Playwright. Most use `$PLAYWRIGHT_PATH` when it is set and otherwise
   `/opt/node22/lib/node_modules/playwright/index.mjs`; `browser-check`, `states-check`, `render.browser` and
   `workflow.usability.research` also try the bare `playwright` package. Six scripts import the `/opt/node22/...` path

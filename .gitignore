@@ -1,0 +1,17 @@
+# Secrets never go in the repository (AGENTS.md, rule 2)
+.env
+.env.*
+*.pem
+*.key
+
+# Local tools and test output
+node_modules/
+playwright-report/
+test-results/
+__pycache__/
+*.log
+
+# Editor and system files
+.DS_Store
+.vscode/
+.idea/

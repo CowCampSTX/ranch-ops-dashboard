@@ -178,7 +178,7 @@ These points summarise the registry; each names the entries it rests on.
 | Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main). The work branch `claude/project-thread-nu46kf` adds only `docs/audit/` files, so the reviewed code is unchanged at its HEAD. |
 | Findings registry | `findings.json`, generated 2026-10-16. It merges 144 raw findings (baseline, seven audit areas and seven skeptic passes) into 83 entries. No skeptic verdict was "refuted", so nothing was dropped. A completeness critic then edited it in place (findings.json `revisions`). |
 | Rules registry | `rules.json`: 98 rules (classes A 14, B 28, C 45, D 11), 152 data fields and 47 integrations, checked by a citation critic on 2026-10-16 (`registry-changelog.md`). |
-| Project guidance files | There is **no PROJECT_CONTEXT.md or AGENTS.md** in the repository. Findings are judged against README.md, the code and the committed data. |
+| Project guidance files | At the reviewed commit `cfd77e5` there was **no PROJECT_CONTEXT.md or AGENTS.md**. Findings are judged against README.md, the code and the committed data. The repository now has [AGENTS.md](../../AGENTS.md) (added 2026-10-20) with the instructions for every agent. |
 | Blocked checks | The published GitHub Pages site could not be reached (the environment's proxy answered 403), so its 404 page and caching are unverified, and LOAD-02's statement about the live site is an inference. Only Playwright Chromium (with mobile and touch emulation) was run: no real phones, screen readers, Firefox or WebKit. |
 | Earlier document | `01-baseline.md`: how the code works today and the baseline test results. |
 
