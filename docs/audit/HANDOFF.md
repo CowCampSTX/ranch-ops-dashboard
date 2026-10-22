@@ -137,7 +137,7 @@ another set-up, read [Before running the review scripts](README.md#before-runnin
 a failure caused by the set-up apart from the results.
 
 ```bash
-node --test tests/exceptions.test.mjs                               # today: 8 pass
+node --test tests/exceptions.test.mjs                               # today: 19 pass
 python3 scripts/generate_data.py && git diff --exit-code data/      # data matches the generator
 python3 -I docs/audit/diagnostics/findings.handvalues.py            # recorded: "85 of 85 checks match"
 node docs/audit/diagnostics/csv.repro.mjs                           # recorded: "66 cases: 8 MATCH, 58 MISMATCH"

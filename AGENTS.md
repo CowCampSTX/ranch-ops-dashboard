@@ -63,7 +63,7 @@ These are the owner's standing instructions. They hold until the owner changes t
 
 ```
 index.html, app.js,      the page; stays at the root because GitHub Pages serves it from there
-  exceptions.js
+  exceptions.js, format.js
 data/                    fictional CSVs, written only by scripts/generate_data.py
 scripts/                 generate_data.py (fixed seed, same output every run)
 tests/                   node:test unit tests; browser tests go in tests/browser/
@@ -101,14 +101,15 @@ From the repository root. CI uses Node 22 and Python 3.12.
 
 ```bash
 python3 -m http.server 8766 --bind 127.0.0.1                   # serve the page at http://localhost:8766/
-node --test tests/*.mjs                                        # unit tests (8 today)
+node --test tests/*.mjs                                        # unit tests (21 today)
 python3 scripts/generate_data.py && git diff --exit-code data/ # committed data matches the generator
 node docs/audit/redesign/preserve.mjs http://localhost:8766/   # preserve checks KEEP-01 to KEEP-34
+node tests/browser/safe-rendering.mjs http://localhost:8766/   # safe rendering checks (P1-13), run by hand
 ```
 
-The preserve checks need Playwright with Chromium. If Playwright is not found, set `PLAYWRIGHT_MODULE` to its
-`index.mjs`; see "Before running the review scripts" in [docs/audit/README.md](docs/audit/README.md). Exit code 2
-means a set-up problem, not a result about the page.
+The preserve checks and the safe rendering checks need Playwright with Chromium. If Playwright is not found, set
+`PLAYWRIGHT_MODULE` to its `index.mjs`; see "Before running the review scripts" in
+[docs/audit/README.md](docs/audit/README.md). Exit code 2 means a set-up problem, not a result about the page.
 
 ## Before opening a pull request
 
