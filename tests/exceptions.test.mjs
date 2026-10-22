@@ -103,6 +103,7 @@ test("water boundary 4: level lines at 25% and 40%", () => {
 });
 
 const FALL = ["2026-09-29T18:00,80", "2026-09-30T00:00,50", "2026-09-30T18:00,45"];
+// Today's wording. P1-07 adds " (unexplained fall; leak not confirmed)" (06 section 12, P1-17 item 1(5)).
 const FALL_ROW = [{ severity: "critical", subject: T1, problem: "Dropped 35 points in 24 hours, now 45%", action: LEAK }];
 
 test("water boundary 5: the drop is taken from the reading 24 hours back", () => {

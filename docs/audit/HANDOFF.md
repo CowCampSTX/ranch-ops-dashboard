@@ -158,8 +158,12 @@ maps them). `node docs/audit/redesign/coverage.mjs` checks the redesign's claims
 `node docs/audit/redesign/preserve.mjs http://localhost:8766/` runs the preserve checks against a page you serve
 (recorded: 34 PASS on main at `0315d09` with the script before the follow-up pull request of 06 section 15, see
 [08 section 2](08-redesign-coverage.md#2-how-it-was-checked); the changed script passes 34 on that pull request's page
-and fails only KEEP-24 on `0315d09`, see [08 section 6](08-redesign-coverage.md#6-the-follow-up-pull-request)). To
-reproduce a finding as recorded, run the scripts against an extracted copy of the reviewed commit (the scripts find the
+and fails only KEEP-24 on `0315d09`, see [08 section 6](08-redesign-coverage.md#6-the-follow-up-pull-request)).
+coverage.mjs copies a fixed list of page files to its temporary site (coverage.mjs:53). Phase 1 step 1 added
+`format.js` to that list, because the page imports it from that step on; with it, the script gave 23 PASS on that
+step's head on 2026-10-22. Without it, the copied page stays on "Loading data" and the script stops with a
+TimeoutError (run on 2026-10-22). A step that adds another module at the root adds it to the list too. To reproduce a
+finding as recorded, run the scripts against an extracted copy of the reviewed commit (the scripts find the
 code relative to their own folder):
 
 ```bash

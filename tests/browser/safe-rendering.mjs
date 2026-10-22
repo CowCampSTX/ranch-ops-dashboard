@@ -11,10 +11,13 @@
 //   ITEM-3     pasture P4 named "Lone Tree <A": T4's What cell and tank card name at 1280 x 900 and 390 x 844 (where
 //              list rows are cards). Today's wording (SEC-01); P1-07 restates the subject, then T4_SUBJECT changes
 //   ITEM-4     the audit's xss-onload file set (render.browser.mjs), the category quoted with its quotes doubled, at
-//              1280 x 900 and 390 x 844, every reading of every chart stepped by keyboard
+//              1280 x 900 and 390 x 844: the list's Problem cell shows the tag literally, and every reading of every
+//              chart is stepped by keyboard, to the last reading of each chart (the chart itself gives the count)
 //   ITEM-6     one <img onerror> payload as tank T2, pasture P3's name, group Heifers and category Repairs: a reading
 //              of that tank, a stay of that group, a stay in that pasture and a gain dot of that group, each by keys
-//              and hover at 1280 x 900, keys at 390 x 844 and a hasTouch tap at 1280 x 900; the Repairs budget row
+//              and hover at 1280 x 900, keys at 390 x 844 and a hasTouch tap at 1280 x 900; the Repairs budget row;
+//              and the payload shown literally in the water tile's "need a look" list and in Now grazing (the group,
+//              and the pasture name)
 //   SET-G      places no item reaches (06 section 7, places and "Attributes"): the gain note's "Not shown" groups
 //              (no target; a target and no weigh-ins), the gain tile's group name, the head tile's group names, and a
 //              tank ID that closes a quoted attribute, in the water tile's icon title and aria-label
@@ -22,17 +25,22 @@
 //              grazing reading
 //   ASOF       markup appended to every acres cell: the facts line under the title (#asof)
 //   FOLDER-10  docs/audit/scenarios/10-malformed-and-hostile-csv served as the data, at 1280 x 900 and 390 x 844,
-//              every reading of every chart (Checkpoint 2 task 4). The number of list rows is not checked
+//              every reading of every chart, to the last reading of each (Checkpoint 2 task 4). The number of list
+//              rows is not checked
 //
 // How: each file set is the page's own committed CSVs with cells edited by column name inside the browser
 // (page.route), so there are no fixture files and the checks follow whatever data and code the page serves. A hover or
 // a tap goes to the centre of the highlight the chart draws for a reading reached by keyboard, never to fixed pixels.
-// The script writes no file and starts no server, so serve the page first.
+// A page that does not draw its data (a file not served, a script error) fails each check with the reason: what
+// #stamp reads, the failed requests and the page errors. The script writes no file and starts no server, so serve the
+// page first.
 //
 // --mutants: a self-check that the checks can fail. It reads the page's app.js and, one "esc(" at a time, serves a
 // copy with that "esc(" replaced by "String(" (the escaping dropped at that one place), runs every check and prints
 // which checks catch it. A call no check can catch is accepted only if it is listed in CONSTANT_ONLY with the reason
-// (it only ever receives text the code writes, or a number); any other uncaught call is a gap and fails the run.
+// (it only ever receives text the code writes, or a number); any other uncaught call is a gap and fails the run. Each
+// key covers exactly one call, so a second call with the same argument is a gap until its entry is re-checked. If the
+// unmutated page fails a check, --mutants stops there and runs no mutant.
 //
 // Usage (from the repository root):
 //   python3 -m http.server 8766 --bind 127.0.0.1         # in another terminal
@@ -94,25 +102,27 @@ try {
 const S10_P2 = S10.pastures.toString("utf8").split(/\r?\n/).find((l) => l.startsWith("P2,"))?.split(",")[1];
 
 // ---------------------------------------------------------------- file sets: the committed CSVs, cells edited by column name
-// Plain comma-separated files with a header row, as committed. Keeps the file's line endings. Returns the new text and
-// how many rows changed, so a set whose edit no longer applies (the data changed) fails instead of passing on nothing.
-function editCSV(text, fn = (r) => r, add = []) {
+// Plain comma-separated files with a header row, as committed. Keeps the file's line endings. Returns the new text, how
+// many rows changed, and how many edits matched no row: each part of a chain counts on its own, so a set with an edit
+// that no longer applies (the data changed) fails instead of passing on less.
+function editCSV(text, fn = null, add = []) {
   const nl = text.includes("\r\n") ? "\r\n" : "\n", lines = text.split(/\r?\n/).filter((l) => l !== "");
   const head = lines[0].split(","), out = [lines[0]];
+  const parts = fn ? (fn.parts ?? [fn]) : [], hits = parts.map(() => 0);
   let changed = add.length;
   for (const l of lines.slice(1)) {
     const cells = l.split(","), row = Object.fromEntries(head.map((h, i) => [h, cells[i]]));
-    const r = fn(row);
+    const r = parts.reduce((x, f, i) => { if (!x) return x; const y = f(x); if (y !== x) hits[i]++; return y; }, row);
     if (!r) { changed++; continue; }
     const line = head.map((h) => r[h] ?? "").join(",");
     if (line !== l) changed++;
     out.push(line);
   }
   for (const a of add) out.push(head.map((h) => a[h] ?? "").join(","));
-  return { text: out.join(nl) + nl, changed };
+  return { text: out.join(nl) + nl, changed, missed: hits.filter((h) => !h).length };
 }
 const swapCol = (col, map) => (r) => (Object.hasOwn(map, r[col] ?? "") ? { ...r, [col]: map[r[col]] } : r);
-const chain = (...fs) => (r) => fs.reduce((x, f) => (x ? f(x) : x), r);
+const chain = (...fs) => Object.assign((r) => fs.reduce((x, f) => (x ? f(x) : x), r), { parts: fs });
 // Files Phase 1 adds (P1-03: tanks.csv and weigh_sessions.csv). Today's page does not ask for them; once it does, the
 // same edits apply to them.
 const LATER = new Set(["tanks", "weigh_sessions"]);
@@ -121,6 +131,7 @@ const groupSwap = (map) => Object.fromEntries(GROUP_FILES.map((f) => [f, swapCol
 
 const IMG = '<img src=x onerror="window.__xss_tip=1">';                     // P1-13 item 6, written bare
 const H4 = { Heifers: 'Heifers<img src=x onerror="window.__xss_group=1">' };  // render.browser.mjs xss-onload
+const TAG4 = '<img src=x onerror="window.__xss_tag=1">';                     // the same set's tag for Y027
 const T4_SUBJECT = "Tank T4 (Lone Tree <A, Heifers here now)";              // SEC-01 (02-findings.md); P1-07 restates it
 const COWS = 'Cows<img src=x onerror="window.__xss_cows=1">';
 const BULLS = 'Bulls<img src=x onerror="window.__xss_b=1">';
@@ -138,7 +149,7 @@ const SETS = {
     pastures: swapCol("name", { "Lone Tree": '<img src=x onerror="window.__xss_pasture=1">' }),
     health: chain(swapCol("group", H4), swapCol("task", { "Booster vaccine": "Booster <b>vaccine</b>" })),
     budget: swapCol("category", { Fuel: '"""><script>window.__xss_script=1</script>"' }),
-    weights: chain(swapCol("group", H4), swapCol("tag", { Y027: '<img src=x onerror="window.__xss_tag=1">' })),
+    weights: chain(swapCol("group", H4), swapCol("tag", { Y027: TAG4 })),
     groups: swapCol("group", H4), moves: swapCol("group", H4), weigh_sessions: swapCol("group", H4),
   },
   item6: {
@@ -172,20 +183,28 @@ async function open(setName, o = {}, mutant = null) {
   });
   ctx.setDefaultTimeout(10000);
   const page = await ctx.newPage();
-  const errs = [], seen = {}, set = SETS[setName];
+  const errs = [], failed = [], seen = {}, set = SETS[setName];
   page.on("pageerror", (e) => errs.push(e.message));
+  page.on("response", (r) => { if (r.status() >= 400) failed.push(`${new URL(r.url()).pathname} HTTP ${r.status()}`); });
   if (mutant !== null) await page.route("**/app.js", (r) => r.fulfill({ status: 200, contentType: "text/javascript", body: mutant }));
   await page.route("**/data/*.csv", async (r) => {
     const name = r.request().url().match(/data\/([^/?#]+)\.csv/)[1], e = set[name];
     if (!e) return r.continue();
     if (e.body) { seen[name] = 1; return r.fulfill({ status: 200, contentType: "text/csv", body: e.body }); }
     const resp = await r.fetch();
-    const { text, changed } = editCSV(await resp.text(), e.fn ?? e, e.add);
-    seen[name] = changed;
+    const { text, changed, missed } = editCSV(await resp.text(), e.fn ?? e, e.add);
+    seen[name] = missed ? 0 : changed;
     await r.fulfill({ response: resp, body: text });
   });
   await page.goto(PAGE, { waitUntil: "networkidle" });
   await page.waitForFunction(() => !/Loading/.test(document.getElementById("stamp")?.textContent ?? "Loading"), null, { timeout: 5000 }).catch(() => {});
+  // A page that never drew its data (a file not served, a script error) fails here with the reason, not later on an
+  // empty page.
+  const stamp = (await page.textContent("#stamp").catch(() => null))?.trim() ?? null;
+  if (!/^Data as of/.test(stamp ?? "")) {
+    await ctx.close();
+    throw new Error(`the page did not load (file set ${setName}): #stamp reads ${JSON.stringify(stamp)}; failed requests ${JSON.stringify(failed)}; page errors ${JSON.stringify(errs)}`);
+  }
   await page.waitForTimeout(200);
   const missing = Object.keys(set).filter((f) => !LATER.has(f) && !seen[f]);
   return { page, errs, edits: missing.length ? `edit not applied to ${missing.join(", ")}` : "applied", applied: !missing.length, close: () => ctx.close() };
@@ -200,13 +219,15 @@ const TIP = () => {
   const b = m?.getBoundingClientRect();
   const all = [...t.querySelectorAll("*")];
   return {
-    hidden: t.hidden, text: t.textContent, html: t.innerHTML, tags: all.map((e) => e.localName),
+    hidden: t.hidden, text: t.textContent, html: t.innerHTML, tags: all.map((e) => e.localName), idx: s?._index?.() ?? null,
     bad: all.filter((e) => /^(img|script|iframe|object|embed)$/i.test(e.localName) || [...e.attributes].some((a) => /^on/i.test(a.name))).length,
     mx: b && (b.width || b.height) ? +((b.left + b.right) / 2).toFixed(2) : null, my: b && (b.width || b.height) ? +((b.top + b.bottom) / 2).toFixed(2) : null,
   };
 };
 const tipNow = (page) => page.evaluate(TIP);
-const same = (a, b) => a.text === b.text && a.mx === b.mx && a.my === b.my && a.hidden === b.hidden;
+// Two probes show the same reading when the chart's own reading index is the same. Text and position are not enough:
+// two readings can share both (a repeated row).
+const same = (a, b) => a.idx === b.idx;
 // Injected markup: elements the page never builds itself, or any on* attribute, in main and in #tip; and any flag.
 const INJECTED = () => {
   const els = [...document.querySelectorAll("main *, #tip *")];
@@ -255,12 +276,19 @@ async function sweep(page, stop = () => false) {
   }
   return out;
 }
-// Every reading of every chart in the tab order.
+// Every reading of every chart in the tab order. partial lists each chart whose sweep reached fewer readings than the
+// chart has (the count comes from the chart's own _place(), not from the keys).
 async function sweepAll(page) {
   const ks = await page.evaluate(() => [...document.querySelectorAll("svg.chart")].map((s, i) => (s.getAttribute("tabindex") === "0" ? i : -1)).filter((i) => i >= 0));
-  const out = [];
-  for (const k of ks) { await focusChart(page, k); out.push(...(await sweep(page))); }
-  return { charts: ks.length, readings: out };
+  const out = [], partial = [];
+  for (const k of ks) {
+    const n = await page.evaluate((k) => { const s = document.querySelectorAll("svg.chart")[k]; let n = 0; while (s._place(n) !== false) n++; s._clear(); return n; }, k);
+    await focusChart(page, k);
+    const rs = await sweep(page), got = new Set(rs.map((t) => t.idx)).size;
+    if (got !== n) partial.push(`chart ${k} ${got} of ${n}`);
+    out.push(...rs);
+  }
+  return { charts: ks.length, readings: out, partial };
 }
 // Reach the reading whose text includes want by keyboard. With how ("hover" or "tap"), then hide the tooltip and show
 // the same reading with the pointer, at the centre of the highlight the chart drew for it.
@@ -289,7 +317,10 @@ async function reach(page, where, want, how = null) {
   await page.waitForTimeout(150);
   const t = await tipNow(page);
   // the pointer shows the very reading the keyboard reached, after the tooltip was hidden
-  return { key, ptr: { ...t, found: before.hidden && !t.hidden && t.text === key.text } };
+  const found = before.hidden && !t.hidden && t.text === key.text;
+  const why = found ? undefined : !before.hidden ? "tooltip still shown before the pointer" : t.hidden ? "tooltip stayed hidden"
+    : `pointer showed ${short(t.text, 40)}, keyboard showed ${short(key.text, 40)}`;
+  return { key, ptr: { ...t, found, why } };
 }
 const clean = (t) => t.found && !t.bad && !t.tags.includes("img") && !t.tags.includes("script");
 const short = (s, n = 60) => JSON.stringify(String(s ?? "").replace(/\s+/g, " ").slice(0, n));
@@ -325,14 +356,14 @@ const CHECKS = [
       const inj = await injected(page);
       await close();
       const ok = applied && clean(t) && t.html.includes("&lt;i&gt;t&lt;/i&gt;") && !t.tags.includes("i") && !inj.els && !inj.flags.length && !errs.length;
-      ways.push({ label, ok, text: t.text, steps: how ? 0 : key.steps, flags: inj.flags });
+      ways.push({ label, ok, text: t.text, why: t.why, steps: how ? 0 : key.steps, flags: inj.flags });
     };
     await run("hover 1280", {}, "hover");
     await run("keys 1280", {}, null);
     await run("keys 390", { w: 390, h: 844 }, null);
     await run("tap 390 isMobile", { w: 390, h: 844, touch: true, mobile: true }, "tap");
     await run("tap 1280 hasTouch", { touch: true }, "tap");
-    return { ok: ways.every((w) => w.ok), measured: ways.map((w) => `${w.label} ${w.ok ? "ok" : "FAIL"} ${short(w.text, 45)}${w.steps ? ` (step ${w.steps})` : ""}${w.flags.length ? ` flags ${w.flags}` : ""}`).join("; ") };
+    return { ok: ways.every((w) => w.ok), measured: ways.map((w) => `${w.label} ${w.ok ? "ok" : "FAIL"} ${w.why ?? short(w.text, 45)}${w.steps ? ` (step ${w.steps})` : ""}${w.flags.length ? ` flags ${w.flags}` : ""}`).join("; ") };
   }],
 
   ["ITEM-3", async (m) => {
@@ -359,15 +390,17 @@ const CHECKS = [
       const base = await open("committed", o, m);
       const want = await countBI(base.page);
       await base.close();
-      const { page, errs, applied, close } = await open("item4", o, m);
+      const { page, errs, edits, applied, close } = await open("item4", o, m);
       const got = await countBI(page);
+      // the list's Problem cell names the tag literally (Y027's gain row)
+      const prob = await page.evaluate((T) => [...document.querySelectorAll("#exceptions td.c-problem")].some((c) => c.textContent.includes(T)), TAG4);
       const before = await page.evaluate(INJECTED);
       const sw = await sweepAll(page);
       const tipBad = sw.readings.filter((t) => t.bad || t.tags.includes("script") || t.tags.includes("img")).length;
       const inj = await injected(page);
       await close();
-      const ok = applied && got === want && !before.els && !inj.els && !inj.flags.length && !tipBad && sw.readings.length > 0 && !errs.length;
-      res.push({ ok, s: `${o.w}: b and i per section same as on the committed data ${got === want}${got === want ? "" : ` (committed ${want}; this set ${got})`}; img or script in main ${inj.els}; ${sw.charts} charts, ${sw.readings.length} readings by keyboard, readings with markup in #tip ${tipBad}; flags ${JSON.stringify(inj.flags)}; page errors ${errs.length}` });
+      const ok = applied && got === want && prob && !before.els && !inj.els && !inj.flags.length && !tipBad && sw.readings.length > 0 && !sw.partial.length && !errs.length;
+      res.push({ ok, s: `${o.w}: edits ${edits}; b and i per section same as on the committed data ${got === want}${got === want ? "" : ` (committed ${want}; this set ${got})`}; Problem cell shows the Y027 tag literally ${prob}; img or script in main ${inj.els}; ${sw.charts} charts, ${sw.readings.length} readings by keyboard, charts not swept to the end ${JSON.stringify(sw.partial)}, readings with markup in #tip ${tipBad}; flags ${JSON.stringify(inj.flags)}; page errors ${errs.length}` });
     }
     return { ok: res.every((x) => x.ok), measured: res.map((x) => x.s).join(" | ") };
   }],
@@ -382,28 +415,34 @@ const CHECKS = [
     const rows = [], fail = [];
     const way = async (label, o, how) => {
       const { page, errs, applied, close } = await open("item6", o, m);
+      // the budget row, and the payload shown literally: the water tile's "need a look" list (T2 is flagged "go now"),
+      // Now grazing's group (Heifers graze P4 now) and pasture name (Yearlings are in P3 now)
       const b = how === "hover" ? await page.evaluate((IMG) => ({
         first: [...document.querySelectorAll("#budgetTable tbody tr")].some((r) => r.cells[0].textContent.startsWith(IMG)),
         bad: document.querySelectorAll("#budgetTable img, #budgetTable script").length,
+        look: [...document.querySelectorAll("#tiles .keep")].some((e) => e.textContent.startsWith(`${IMG} `)),
+        nowG: [...document.querySelectorAll("#nowGrazing .who > b")].some((e) => e.textContent === IMG),
+        nowP: (document.getElementById("nowGrazing")?.textContent ?? "").includes(`P3 ${IMG}`),
       }), IMG) : null;
       for (const [name, where, want] of targets) {
         const { key, ptr } = await reach(page, where, want, how);
         for (const [w, t] of [[`keys ${o.w ?? 1280}`, key], ...(how ? [[`${how} ${o.w ?? 1280}`, ptr ?? { found: false, text: "not shown", tags: [] }]] : [])]) {
           const ok = clean(t) && t.text.includes(want);
           rows.push(ok);
-          if (!ok) fail.push(`${name}, ${w}: ${short(t.text, 50)}`);
+          if (!ok) fail.push(`${name}, ${w}: ${t.why ?? short(t.text, 50)}`);
         }
       }
       const inj = await injected(page);
       await close();
       if (!applied || inj.els || inj.flags.length || errs.length) fail.push(`${label}: edits applied ${applied}, injected ${inj.els}, flags ${JSON.stringify(inj.flags)}, page errors ${errs.length}`);
       if (b && (!b.first || b.bad)) fail.push(`budget: Repairs row starts with the payload ${b.first}, img or script in #budgetTable ${b.bad}`);
+      if (b && !(b.look && b.nowG && b.nowP)) fail.push(`literal text: water tile list ${b.look}, Now grazing group ${b.nowG}, Now grazing pasture name ${b.nowP}`);
       return b;
     };
     const b = await way("1280 x 900", {}, "hover");
     await way("390 x 844", { w: 390, h: 844 }, null);
     await way("1280 x 900 hasTouch", { touch: true }, "tap");
-    return { ok: !fail.length, measured: `4 places, each by keys and hover at 1280, keys at 390, and keys then a tap at 1280 hasTouch: ${rows.length} readings, ${rows.filter(Boolean).length} shown as text with no markup; Repairs budget row starts with the payload ${b?.first}, img or script in #budgetTable ${b?.bad}${fail.length ? `; failing: ${fail.join("; ")}` : ""}` };
+    return { ok: !fail.length, measured: `4 places, each by keys and hover at 1280, keys at 390, and keys then a tap at 1280 hasTouch: ${rows.length} readings, ${rows.filter(Boolean).length} shown as text with no markup; Repairs budget row starts with the payload ${b?.first}, img or script in #budgetTable ${b?.bad}; shown literally in the water tile list ${b?.look}, as Now grazing's group ${b?.nowG} and as its pasture name ${b?.nowP}${fail.length ? `; failing: ${fail.join("; ")}` : ""}` };
   }],
 
   ["SET-G", async (m) => {
@@ -455,21 +494,25 @@ const CHECKS = [
       const bad = sw.readings.filter((t) => t.bad).length;
       const inj = await injected(page);
       await close();
-      const ok = applied && name === S10_P2 && sw.readings.length > 0 && !bad && !inj.els && !inj.flags.length && !errs.length;
-      res.push({ ok, s: `${o.w}: T2 card name ${short(name)}; ${sw.charts} charts, ${sw.readings.length} readings by keyboard, ${bad} with markup in #tip; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${errs.length}` });
+      const ok = applied && name === S10_P2 && sw.readings.length > 0 && !sw.partial.length && !bad && !inj.els && !inj.flags.length && !errs.length;
+      res.push({ ok, s: `${o.w}: T2 card name ${short(name)}; ${sw.charts} charts, ${sw.readings.length} readings by keyboard, charts not swept to the end ${JSON.stringify(sw.partial)}, ${bad} with markup in #tip; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${errs.length}` });
     }
     return { ok: res.every((x) => x.ok), measured: res.map((x) => x.s).join(" | ") };
   }],
 ];
 
-// A check that throws (a selector gone, a timeout) counts as FAIL with the error. A page that stops answering during
-// the run (the server stopped) is a set-up problem, not a FAIL: the run stops there with exit code 2.
+// A check that throws (a selector gone, a timeout) counts as FAIL with the error, and the browser contexts it left open
+// are closed. A page that stops answering during the run (the server stopped) is a set-up problem, not a FAIL: the run
+// stops there with exit code 2.
 const served = async () => { try { const r = await fetch(PAGE, { signal: AbortSignal.timeout(10000) }); await r.body?.cancel(); return r.ok; } catch { return false; } };
 async function runAll(mutant, print) {
   const fails = [];
   for (const [id, fn] of CHECKS) {
     let r;
-    try { r = await fn(mutant); } catch (e) { r = { ok: false, measured: `error: ${String(e.message ?? e).split("\n")[0].slice(0, 200)}` }; }
+    try { r = await fn(mutant); } catch (e) {
+      r = { ok: false, measured: `error: ${String(e.message ?? e).split("\n")[0].slice(0, 200)}` };
+      for (const c of browser.contexts()) await c.close().catch(() => {});
+    }
     if (!r.ok && !(await served())) { await browser.close(); setupProblem(`${PAGE} stopped answering during ${id}; no result is reported for it or later checks.`); }
     if (!r.ok) fails.push(id);
     if (print) console.log(`${r.ok ? "PASS" : "FAIL"} ${id}: ${r.measured}`);
@@ -485,7 +528,8 @@ if (!MUTANTS) {
   process.exitCode = fails.length ? 1 : 0;
 } else {
   // Calls that only ever receive text the code writes, or a number. Keyed by the call's argument as written in app.js.
-  // Each later step that changes one of these calls re-checks the reason.
+  // Each later step that changes one of these calls re-checks the reason. Each key covers exactly one call, so a second
+  // call with the same argument is a gap until its entry is re-checked.
   const CONSTANT_ONLY = {
     "": "a comment, not a call: the mutant is the same program",
     label: "pill(): every caller passes a word the code writes (OK, Can't tell, No signal, Fast drop, Go now, Check soon, Past plan, Move soon, On plan, No plan, or a severity)",
@@ -500,16 +544,18 @@ if (!MUTANTS) {
   const lineOf = (i) => APP.slice(0, i).split("\n").length;
   const argOf = (i) => { let d = 0, j = i + 3; for (; j < APP.length; j++) { if (APP[j] === "(") d++; else if (APP[j] === ")" && --d === 0) break; } return APP.slice(i + 4, j); };
   const inComment = (i) => { const ls = APP.lastIndexOf("\n", i) + 1, line = APP.slice(ls, i); return /^\s*\/\//.test(line) || /\s\/\/\s/.test(line); };
+  const sites = {}; for (const i of at) { const a = inComment(i) ? "" : argOf(i); sites[a] = (sites[a] ?? 0) + 1; }
   console.log(`PRE  page ${PAGE}; Playwright ${PW}; ${at.length} "esc(" in the served app.js; each mutant replaces one with "String("`);
   // the control: the unmutated app.js, served through the same route as each mutant
   const base = await runAll(APP, true);
-  console.log(`BASE unmutated app.js, served the way each mutant is: ${base.length ? `FAIL ${base.join(", ")}` : `all ${CHECKS.length} checks pass`}`);
+  console.log(`BASE unmutated app.js, served the way each mutant is: ${base.length ? `FAIL ${base.join(", ")}; no mutant is run, since a check that fails here would "catch" every one` : `all ${CHECKS.length} checks pass`}`);
   const rows = [];
-  for (const i of at) {
+  for (const i of base.length ? [] : at) {
     const line = lineOf(i), arg = inComment(i) ? "" : argOf(i);
     const caught = await runAll(APP.slice(0, i) + "String(" + APP.slice(i + 4), false);
-    const listed = Object.hasOwn(CONSTANT_ONLY, arg);
-    const row = { line, arg, listed, call: arg === "" ? "esc() in a comment" : `esc(${arg})`, caught, ...(caught.length ? {} : { reason: CONSTANT_ONLY[arg] ?? "NOT LISTED: no check reaches this call" }) };
+    const listed = Object.hasOwn(CONSTANT_ONLY, arg) && (arg === "" || sites[arg] === 1);
+    const reason = listed ? CONSTANT_ONLY[arg] : Object.hasOwn(CONSTANT_ONLY, arg) ? `NOT LISTED: CONSTANT_ONLY's "${arg}" covers one call; app.js has ${sites[arg]}` : "NOT LISTED: no check reaches this call";
+    const row = { line, arg, listed, call: arg === "" ? "esc() in a comment" : `esc(${arg})`, caught, ...(caught.length ? {} : { reason }) };
     rows.push(row);
     console.log(`${caught.length ? "CAUGHT  " : listed ? "UNCAUGHT" : "GAP     "} app.js:${line} ${row.call} -> ${caught.length ? caught.join(", ") : row.reason}`);
   }
