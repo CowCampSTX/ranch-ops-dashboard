@@ -53,11 +53,12 @@
 //   python3 -m http.server 8766 --bind 127.0.0.1         # in another terminal
 //   node tests/browser/safe-rendering.mjs [page]          # page default http://localhost:8766/
 //   node tests/browser/safe-rendering.mjs [page] --mutants
-// A run took about 35 seconds, and --mutants (every check once per "esc(") about 17 minutes, when this was written.
+// A run took about 35 seconds, and --mutants (every check once per "esc(") about 20 minutes, on 2026-10-26.
 // Exit code 0 when every check passes (with --mutants: the unmutated page passes and every uncaught call is listed in
 // CONSTANT_ONLY), 1 otherwise, 2 for a set-up problem (an argument it does not know, a page that is not an http(s) URL,
-// Playwright not found, nothing served at the page URL, scenario folder 10 missing, or the page or Chromium stopped
-// answering during the run), reported on one line that starts "ENVIRONMENT:".
+// Playwright not found or Chromium would not start, nothing served at the page URL, scenario folder 10 missing, the
+// page or Chromium stopped answering during the run, or a SIGINT, SIGTERM or SIGHUP stopped it), reported on one line
+// that starts "ENVIRONMENT:".
 //
 // Needs Node 22 and Playwright with Chromium, loaded as docs/audit/redesign/preserve.mjs loads it: $PLAYWRIGHT_MODULE,
 // else $PLAYWRIGHT_PATH, if set (a path to Playwright's index.mjs, or a package name), else
@@ -73,6 +74,10 @@ const setupProblem = (msg) => {
   console.error(`ENVIRONMENT: ${msg} This is a set-up problem, not a result about the page.`);
   process.exit(2);
 };
+// A stop signal (Ctrl+C, a job timeout, timeout(1), kill) ends the run at once with the check in progress named, before
+// the pages it closes can fail that check. Set before Playwright loads, so this handler runs before Playwright's own.
+let current = "the set-up";
+for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(sig, () => setupProblem(`${sig} received during ${current}; no result is reported for it or later checks.`));
 // Arguments: one page URL and --mutants. Anything else stops the run, so a mistyped option never runs the plain checks
 // in its place.
 const args = process.argv.slice(2);
@@ -189,10 +194,6 @@ const SETS = {
 
 // ---------------------------------------------------------------- browser
 const browser = await chromium.launch().catch((e) => setupProblem(`could not start Chromium (${e.message.split("\n")[0]}).`));
-// A stop signal (a job timeout, timeout(1), kill) ends the run at once with the check in progress named, before the
-// pages it closes can fail that check.
-let current = "the set-up";
-for (const sig of ["SIGTERM", "SIGHUP"]) process.on(sig, () => setupProblem(`${sig} received during ${current}; no result is reported for it or later checks.`));
 
 // A page with one file set (and, under --mutants, one mutated app.js). edits says, per file of the set the page asked
 // for, how many rows the edit changed.
@@ -534,7 +535,7 @@ const CHECKS = [
 // A check that throws (a selector gone, a timeout) counts as FAIL with the error, and the browser contexts it left open
 // are closed. A page that stops answering during the run (the server stopped), or Chromium closing, is a set-up
 // problem, not a FAIL: the run stops there with exit code 2. Under --mutants this keeps a dead browser from "catching"
-// every later mutant. A SIGTERM or SIGHUP stops the run at once with exit code 2 (see the browser set-up above).
+// every later mutant. A SIGINT, SIGTERM or SIGHUP stops the run at once with exit code 2 (see the set-up at the top).
 const served = async () => { try { const r = await fetch(PAGE, { signal: AbortSignal.timeout(10000) }); await r.body?.cancel(); return r.ok; } catch { return false; } };
 async function runAll(mutant, print) {
   const fails = [];
