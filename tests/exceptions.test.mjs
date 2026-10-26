@@ -68,6 +68,11 @@ test("CSV parsing keeps text as text and numbers as numbers", () => {
 // Boundary tests for TEST-01 (water) and TEST-02 (grazing), 06 section 12 P1-17 part a. They pin today's rules before
 // any refactor and encode the demonstration settings in RULES, not validated thresholds. Inputs go through parseCSV,
 // as the committed files do. As of 2026-09-30T18:00. Water: one tank, T1 in P1 (North Flat), and no moves.
+// Expected text is today's wording. 06 sections 5.2 and 5.3 restate some of it, and the step that lands each change
+// edits these tests on purpose: " at {stamp}" on the silent rows (boundaries 1 and 2), " (unexplained fall; leak not
+// confirmed)" on the drop rows (3, 5 and 6), and new problem or action text for in_date 09-08 and 09-09. Step 3 adds
+// a tanks list with T1 in P1 only and a meta timezone to these inputs, as 06 section 13 does for the threshold test;
+// today's code reads neither.
 const AS_OF = parseCSV("as_of\n2026-09-30T18:00\n");
 const pick = ({ severity, subject, problem, action }) => ({ severity, subject, problem, action });
 const waterRows = (...readings) => findExceptions({ ...D, meta: AS_OF, moves: [],
@@ -127,7 +132,8 @@ test("grazing boundary: one day over plan is serious", () => {
 });
 
 test("grazing boundary: the planned move day is a warning, not over plan", () => {
-  // Today's wording. P1-08 or P1-15, whichever lands first, changes it to "Move planned for today" (UI-06).
+  // Today's wording. P1-08 or P1-15, whichever lands first, changes the problem to "Move planned for today" and the
+  // action to "Move them today, or record a new planned_out_date" (06 section 5.3; UI-06).
   assert.deepEqual(grazingRows("2026-09-09"), [{ severity: "warning", subject: YS, problem: "Planned move in 0 days", action: LINE_UP }]);
 });
 

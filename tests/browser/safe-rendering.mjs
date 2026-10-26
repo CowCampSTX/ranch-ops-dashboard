@@ -14,8 +14,9 @@
 //              1280 x 900 and 390 x 844: the list's Problem cell shows the tag literally, and every reading of every
 //              chart is stepped by keyboard, to the last reading of each chart (the chart itself gives the count)
 //   ITEM-6     one <img onerror> payload as tank T2, pasture P3's name, group Heifers and category Repairs: a reading
-//              of that tank, a stay of that group, a stay in that pasture and a gain dot of that group, each by keys
-//              and hover at 1280 x 900, keys at 390 x 844 and a hasTouch tap at 1280 x 900; the Repairs budget row;
+//              of that tank, a reading of the tank that stands in that pasture (T3 in P3), a stay of that group, a stay
+//              in that pasture and a gain dot of that group, each by keys and hover at 1280 x 900, keys at 390 x 844
+//              and a hasTouch tap at 1280 x 900; the Repairs budget row;
 //              and the payload shown literally in the water tile's "need a look" list and in Now grazing (the group,
 //              and the pasture name)
 //   SET-G      places no item reaches (06 section 7, places and "Attributes"): the gain note's "Not shown" groups
@@ -32,8 +33,10 @@
 // (page.route), so there are no fixture files and the checks follow whatever data and code the page serves. A hover or
 // a tap goes to the centre of the highlight the chart draws for a reading reached by keyboard, never to fixed pixels.
 // A page that does not draw its data (a file not served, a script error) fails each check with the reason: what
-// #stamp reads, the failed requests and the page errors. The script writes no file and starts no server, so serve the
-// page first.
+// #stamp reads, the failed requests and the page errors. A section or chart that throws fails the check too: the page
+// catches the error and logs it (safe(), app.js), and a logged error counts as a page error. An edit that matches no
+// row (the data changed) fails the check and names the file. The script writes no file and starts no server, so serve
+// the page first.
 //
 // --mutants: a self-check that the checks can fail. It reads the page's app.js and, one "esc(" at a time, serves a
 // copy with that "esc(" replaced by "String(" (the escaping dropped at that one place), runs every check and prints
@@ -48,8 +51,9 @@
 //   node tests/browser/safe-rendering.mjs [page] --mutants
 // A run took about 35 seconds, and --mutants (every check once per "esc(") about 17 minutes, when this was written.
 // Exit code 0 when every check passes (with --mutants: the unmutated page passes and every uncaught call is listed in
-// CONSTANT_ONLY), 1 otherwise, 2 for a set-up problem (Playwright not found, nothing served at the page URL, scenario
-// folder 10 missing, or the page stopped answering during the run), reported on one line that starts "ENVIRONMENT:".
+// CONSTANT_ONLY), 1 otherwise, 2 for a set-up problem (an argument it does not know, a page that is not an http(s) URL,
+// Playwright not found, nothing served at the page URL, scenario folder 10 missing, or the page or Chromium stopped
+// answering during the run), reported on one line that starts "ENVIRONMENT:".
 //
 // Needs Node 22 and Playwright with Chromium, loaded as docs/audit/redesign/preserve.mjs loads it: $PLAYWRIGHT_MODULE,
 // else $PLAYWRIGHT_PATH, if set (a path to Playwright's index.mjs, or a package name), else
@@ -65,6 +69,18 @@ const setupProblem = (msg) => {
   console.error(`ENVIRONMENT: ${msg} This is a set-up problem, not a result about the page.`);
   process.exit(2);
 };
+// Arguments: one page URL and --mutants. Anything else stops the run, so a mistyped option never runs the plain checks
+// in its place.
+const args = process.argv.slice(2);
+const USAGE = "Usage: node tests/browser/safe-rendering.mjs [page URL, for example http://localhost:8766/] [--mutants].";
+const MUTANTS = args.includes("--mutants");
+const pages = args.filter((a) => !a.startsWith("-"));
+const unknown = args.filter((a) => a.startsWith("-") && a !== "--mutants");
+if (unknown.length || pages.length > 1) setupProblem(`unknown or extra argument ${[...unknown, ...pages.slice(1)].join(" ")}. ${USAGE}`);
+const PAGE = pages[0] ?? "http://localhost:8766/";
+let proto = "";
+try { proto = new URL(PAGE).protocol; } catch {}
+if (!/^https?:$/.test(proto)) setupProblem(`"${PAGE}" is not a page URL. ${USAGE}`);
 const PW_DEFAULT = "/opt/node22/lib/node_modules/playwright/index.mjs";
 const PW = process.env.PLAYWRIGHT_MODULE || process.env.PLAYWRIGHT_PATH || (existsSync(PW_DEFAULT) ? PW_DEFAULT : "playwright");
 let chromium;
@@ -73,10 +89,6 @@ try {
 } catch (e) {
   setupProblem(`could not load Playwright from "${PW}" (${e.code ?? e.message}). Set PLAYWRIGHT_MODULE to the path of Playwright's index.mjs, for example $(npm root -g)/playwright/index.mjs for a global install.`);
 }
-
-const args = process.argv.slice(2);
-const MUTANTS = args.includes("--mutants");
-const PAGE = args.find((a) => !a.startsWith("--")) ?? "http://localhost:8766/";
 
 // ---------------------------------------------------------------- set-up: the page is served, scenario folder 10 is here
 let APP = "";
@@ -185,6 +197,8 @@ async function open(setName, o = {}, mutant = null) {
   const page = await ctx.newPage();
   const errs = [], failed = [], seen = {}, set = SETS[setName];
   page.on("pageerror", (e) => errs.push(e.message));
+  // safe() (app.js) catches an error thrown in a section or a chart and only logs it, so a logged error counts too.
+  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
   page.on("response", (r) => { if (r.status() >= 400) failed.push(`${new URL(r.url()).pathname} HTTP ${r.status()}`); });
   if (mutant !== null) await page.route("**/app.js", (r) => r.fulfill({ status: 200, contentType: "text/javascript", body: mutant }));
   await page.route("**/data/*.csv", async (r) => {
@@ -207,7 +221,7 @@ async function open(setName, o = {}, mutant = null) {
   }
   await page.waitForTimeout(200);
   const missing = Object.keys(set).filter((f) => !LATER.has(f) && !seen[f]);
-  return { page, errs, edits: missing.length ? `edit not applied to ${missing.join(", ")}` : "applied", applied: !missing.length, close: () => ctx.close() };
+  return { page, errs, edits: missing.length ? `not applied to ${missing.join(", ")}` : "applied", applied: !missing.length, close: () => ctx.close() };
 }
 
 // ---------------------------------------------------------------- page-side probes
@@ -305,10 +319,12 @@ async function reach(page, where, want, how = null) {
     const s = document.activeElement;
     let m = [...s.querySelectorAll('[visibility="visible"]')][0];
     if (m && m.tagName === "g") m = m.querySelector("circle") ?? m;
+    if (!m) return null;
     m.scrollIntoView({ block: "center", behavior: "instant" });
     const b = m.getBoundingClientRect();
     return { x: (b.left + b.right) / 2, y: (b.top + b.bottom) / 2 };
   });
+  if (!c) return { key, ptr: { found: false, text: "", tags: [], why: "the chart drew no highlight for the reading the keyboard reached" } };
   await page.evaluate(() => document.activeElement?.blur());
   await page.waitForTimeout(100);
   const before = await tipNow(page);
@@ -324,6 +340,8 @@ async function reach(page, where, want, how = null) {
 }
 const clean = (t) => t.found && !t.bad && !t.tags.includes("img") && !t.tags.includes("script");
 const short = (s, n = 60) => JSON.stringify(String(s ?? "").replace(/\s+/g, " ").slice(0, n));
+// The count of page errors, with the first one, so a FAIL says why.
+const perr = (errs) => `${errs.length}${errs.length ? ` (first: ${short(errs[0], 80)})` : ""}`;
 
 // ---------------------------------------------------------------- the checks
 // Each returns { ok, measured }. mutant is null, or the app.js text to serve instead of the page's.
@@ -344,32 +362,32 @@ const CHECKS = [
     await close();
     const ok = applied && r.esc && !r.raw && r.name.includes("&lt;b&gt;") && r.bText === "<b>x</b>" && r.bKids === 0 && r.bx === 0 &&
       !t.hidden && t.text.includes("<b>x</b>") && !t.tags.includes("b") && !inj.els && !inj.flags.length && !errs.length;
-    return { ok, measured: `1280 x 900, edits ${edits}: #exceptions has &lt;b&gt;x&lt;/b&gt; ${r.esc}, raw <b>x ${r.raw}; T2 card .tank-name has &lt;b&gt; ${r.name.includes("&lt;b&gt;")}, .tank-name b text ${short(r.bText)} with ${r.bKids} child elements; b elements reading "x" ${r.bx}; ArrowLeft on T2's chart: #tip ${short(t.text)}, tags ${JSON.stringify([...new Set(t.tags)])}; injected ${inj.els}, flags ${JSON.stringify(inj.flags)}, page errors ${errs.length}` };
+    return { ok, measured: `1280 x 900, edits ${edits}: #exceptions has &lt;b&gt;x&lt;/b&gt; ${r.esc}, raw <b>x ${r.raw}; T2 card .tank-name has &lt;b&gt; ${r.name.includes("&lt;b&gt;")}, .tank-name b text ${short(r.bText)} with ${r.bKids} child elements; b elements reading "x" ${r.bx}; ArrowLeft on T2's chart: #tip ${short(t.text)}, tags ${JSON.stringify([...new Set(t.tags)])}; injected ${inj.els}, flags ${JSON.stringify(inj.flags)}, page errors ${perr(errs)}` };
   }],
 
   ["ITEM-2", async (m) => {
     const want = "<i>t</i>", ways = [];
     const run = async (label, o, how) => {
-      const { page, errs, applied, close } = await open("item2", o, m);
+      const { page, errs, edits, applied, close } = await open("item2", o, m);
       const { key, ptr } = await reach(page, { sel: "#gain svg.chart" }, want, how);
       const t = how ? ptr ?? { found: false, text: key.text, tags: [] } : key;
       const inj = await injected(page);
       await close();
       const ok = applied && clean(t) && t.html.includes("&lt;i&gt;t&lt;/i&gt;") && !t.tags.includes("i") && !inj.els && !inj.flags.length && !errs.length;
-      ways.push({ label, ok, text: t.text, why: t.why, steps: how ? 0 : key.steps, flags: inj.flags });
+      ways.push({ label, ok, edits, text: t.text, why: t.why, steps: how ? 0 : key.steps, flags: inj.flags, errs });
     };
     await run("hover 1280", {}, "hover");
     await run("keys 1280", {}, null);
     await run("keys 390", { w: 390, h: 844 }, null);
     await run("tap 390 isMobile", { w: 390, h: 844, touch: true, mobile: true }, "tap");
     await run("tap 1280 hasTouch", { touch: true }, "tap");
-    return { ok: ways.every((w) => w.ok), measured: ways.map((w) => `${w.label} ${w.ok ? "ok" : "FAIL"} ${w.why ?? short(w.text, 45)}${w.steps ? ` (step ${w.steps})` : ""}${w.flags.length ? ` flags ${w.flags}` : ""}`).join("; ") };
+    return { ok: ways.every((w) => w.ok), measured: `edits ${ways[0].edits}; ` + ways.map((w) => `${w.label} ${w.ok ? "ok" : "FAIL"} ${w.why ?? short(w.text, 45)}${w.steps ? ` (step ${w.steps})` : ""}${w.flags.length ? ` flags ${w.flags}` : ""}${w.errs.length ? ` page errors ${perr(w.errs)}` : ""}`).join("; ") };
   }],
 
   ["ITEM-3", async (m) => {
     const res = [];
     for (const o of [{ w: 1280, h: 900 }, { w: 390, h: 844, touch: true, mobile: true }]) {
-      const { page, errs, applied, close } = await open("item3", o, m);
+      const { page, errs, edits, applied, close } = await open("item3", o, m);
       const r = await page.evaluate(() => {
         const tr = [...document.querySelectorAll("#exceptions tbody tr")].find((x) => x.querySelector("td.c-what")?.textContent.startsWith("Tank T4"));
         const card = [...document.querySelectorAll("#tanks .tank")].find((t) => t.querySelector(".tank-name span")?.textContent === "T4");
@@ -379,7 +397,7 @@ const CHECKS = [
       await close();
       // at 390 the list rows are laid out as cards, not table rows
       const ok = applied && r.what === T4_SUBJECT && r.card === "Lone Tree <A" && (o.w > 640 || r.display !== "table-row") && !inj.els && !inj.flags.length && !errs.length;
-      res.push({ ok, s: `${o.w}: T4 What cell ${short(r.what)} (row display ${r.display}), card name ${short(r.card)}` });
+      res.push({ ok, s: `${o.w}: edits ${edits}; T4 What cell ${short(r.what)} (row display ${r.display}), card name ${short(r.card)}; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${perr(errs)}` });
     }
     return { ok: res.every((x) => x.ok), measured: `today's wording ${JSON.stringify(T4_SUBJECT)}; ${res.map((x) => x.s).join("; ")}` };
   }],
@@ -400,7 +418,7 @@ const CHECKS = [
       const inj = await injected(page);
       await close();
       const ok = applied && got === want && prob && !before.els && !inj.els && !inj.flags.length && !tipBad && sw.readings.length > 0 && !sw.partial.length && !errs.length;
-      res.push({ ok, s: `${o.w}: edits ${edits}; b and i per section same as on the committed data ${got === want}${got === want ? "" : ` (committed ${want}; this set ${got})`}; Problem cell shows the Y027 tag literally ${prob}; img or script in main ${inj.els}; ${sw.charts} charts, ${sw.readings.length} readings by keyboard, charts not swept to the end ${JSON.stringify(sw.partial)}, readings with markup in #tip ${tipBad}; flags ${JSON.stringify(inj.flags)}; page errors ${errs.length}` });
+      res.push({ ok, s: `${o.w}: edits ${edits}; b and i per section same as on the committed data ${got === want}${got === want ? "" : ` (committed ${want}; this set ${got})`}; Problem cell shows the Y027 tag literally ${prob}; img or script in main ${inj.els}; ${sw.charts} charts, ${sw.readings.length} readings by keyboard, charts not swept to the end ${JSON.stringify(sw.partial)}, readings with markup in #tip ${tipBad}; flags ${JSON.stringify(inj.flags)}; page errors ${perr(errs)}` });
     }
     return { ok: res.every((x) => x.ok), measured: res.map((x) => x.s).join(" | ") };
   }],
@@ -408,13 +426,14 @@ const CHECKS = [
   ["ITEM-6", async (m) => {
     const targets = [
       ["tank T2", { tank: IMG }, IMG],
+      ["tank T3, pasture P3", { tank: "T3" }, `T3 ${IMG}`],
       ["grazing, a stay of the group", { sel: "#grazing svg.chart" }, `${IMG} in P`],
       ["grazing, a stay in pasture P3", { sel: "#grazing svg.chart" }, `in P3 ${IMG}`],
       ["gain, a dot of the group", { sel: "#gain svg.chart" }, IMG],
     ];
     const rows = [], fail = [];
     const way = async (label, o, how) => {
-      const { page, errs, applied, close } = await open("item6", o, m);
+      const { page, errs, edits, applied, close } = await open("item6", o, m);
       // the budget row, and the payload shown literally: the water tile's "need a look" list (T2 is flagged "go now"),
       // Now grazing's group (Heifers graze P4 now) and pasture name (Yearlings are in P3 now)
       const b = how === "hover" ? await page.evaluate((IMG) => ({
@@ -434,7 +453,7 @@ const CHECKS = [
       }
       const inj = await injected(page);
       await close();
-      if (!applied || inj.els || inj.flags.length || errs.length) fail.push(`${label}: edits applied ${applied}, injected ${inj.els}, flags ${JSON.stringify(inj.flags)}, page errors ${errs.length}`);
+      if (!applied || inj.els || inj.flags.length || errs.length) fail.push(`${label}: edits ${edits}, injected ${inj.els}, flags ${JSON.stringify(inj.flags)}, page errors ${perr(errs)}`);
       if (b && (!b.first || b.bad)) fail.push(`budget: Repairs row starts with the payload ${b.first}, img or script in #budgetTable ${b.bad}`);
       if (b && !(b.look && b.nowG && b.nowP)) fail.push(`literal text: water tile list ${b.look}, Now grazing group ${b.nowG}, Now grazing pasture name ${b.nowP}`);
       return b;
@@ -442,7 +461,7 @@ const CHECKS = [
     const b = await way("1280 x 900", {}, "hover");
     await way("390 x 844", { w: 390, h: 844 }, null);
     await way("1280 x 900 hasTouch", { touch: true }, "tap");
-    return { ok: !fail.length, measured: `4 places, each by keys and hover at 1280, keys at 390, and keys then a tap at 1280 hasTouch: ${rows.length} readings, ${rows.filter(Boolean).length} shown as text with no markup; Repairs budget row starts with the payload ${b?.first}, img or script in #budgetTable ${b?.bad}; shown literally in the water tile list ${b?.look}, as Now grazing's group ${b?.nowG} and as its pasture name ${b?.nowP}${fail.length ? `; failing: ${fail.join("; ")}` : ""}` };
+    return { ok: !fail.length, measured: `${targets.length} places, each by keys and hover at 1280, keys at 390, and keys then a tap at 1280 hasTouch: ${rows.length} readings, ${rows.filter(Boolean).length} shown as text with no markup; Repairs budget row starts with the payload ${b?.first}, img or script in #budgetTable ${b?.bad}; shown literally in the water tile list ${b?.look}, as Now grazing's group ${b?.nowG} and as its pasture name ${b?.nowP}${fail.length ? `; failing: ${fail.join("; ")}` : ""}` };
   }],
 
   ["SET-G", async (m) => {
@@ -461,7 +480,7 @@ const CHECKS = [
     const inj = await injected(page);
     await close();
     const ok = applied && r.hintCows && r.hintBulls && r.gainTile && r.head && r.title && r.aria && !inj.els && !inj.flags.length && !errs.length;
-    return { ok, measured: `edits ${edits}; gain note names the Cows payload ${r.hintCows} and the Bulls payload ${r.hintBulls}; gain tile name ${short(r.gainK, 50)} (${r.gainTile}); head tile names cows<img ...> ${r.head}; T1 icon title starts with the T1 payload ${r.title}; icons' aria-label has it ${r.aria}; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${errs.length}` };
+    return { ok, measured: `edits ${edits}; gain note names the Cows payload ${r.hintCows} and the Bulls payload ${r.hintBulls}; gain tile name ${short(r.gainK, 50)} (${r.gainTile}); head tile names cows<img ...> ${r.head}; T1 icon title starts with the T1 payload ${r.title}; icons' aria-label has it ${r.aria}; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${perr(errs)}` };
   }],
 
   ["SET-G2", async (m) => {
@@ -473,7 +492,7 @@ const CHECKS = [
     await close();
     const id = rs.filter((t) => t.text.includes(PID)).length, pg = rs.filter((t) => t.text.includes(`plan ${PG}`)).length, bad = rs.filter((t) => t.bad).length;
     const ok = applied && now && id > 0 && pg > 0 && !bad && !inj.els && !inj.flags.length && !errs.length;
-    return { ok, measured: `edits ${edits}; Now grazing shows the ID literally ${now}; ${rs.length} grazing readings by keyboard, ${id} show the ID, ${pg} show "plan " and the planned-days payload, ${bad} with markup in #tip; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${errs.length}` };
+    return { ok, measured: `edits ${edits}; Now grazing shows the ID literally ${now}; ${rs.length} grazing readings by keyboard, ${id} show the ID, ${pg} show "plan " and the planned-days payload, ${bad} with markup in #tip; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${perr(errs)}` };
   }],
 
   ["ASOF", async (m) => {
@@ -482,28 +501,29 @@ const CHECKS = [
     const inj = await injected(page);
     await close();
     const ok = applied && lit && !inj.els && !inj.flags.length && !errs.length;
-    return { ok, measured: `edits ${edits}; #asof shows the acres payload literally ${lit}; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${errs.length}` };
+    return { ok, measured: `edits ${edits}; #asof shows the acres payload literally ${lit}; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${perr(errs)}` };
   }],
 
   ["FOLDER-10", async (m) => {
     const res = [];
     for (const o of [{ w: 1280, h: 900 }, { w: 390, h: 844 }]) {
-      const { page, errs, applied, close } = await open("folder10", o, m);
+      const { page, errs, edits, applied, close } = await open("folder10", o, m);
       const name = await page.evaluate(() => [...document.querySelectorAll("#tanks .tank")].find((t) => t.querySelector(".tank-name span")?.textContent === "T2")?.querySelector(".tank-name b")?.textContent);
       const sw = await sweepAll(page);
       const bad = sw.readings.filter((t) => t.bad).length;
       const inj = await injected(page);
       await close();
       const ok = applied && name === S10_P2 && sw.readings.length > 0 && !sw.partial.length && !bad && !inj.els && !inj.flags.length && !errs.length;
-      res.push({ ok, s: `${o.w}: T2 card name ${short(name)}; ${sw.charts} charts, ${sw.readings.length} readings by keyboard, charts not swept to the end ${JSON.stringify(sw.partial)}, ${bad} with markup in #tip; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${errs.length}` });
+      res.push({ ok, s: `${o.w}: edits ${edits}; T2 card name ${short(name)}; ${sw.charts} charts, ${sw.readings.length} readings by keyboard, charts not swept to the end ${JSON.stringify(sw.partial)}, ${bad} with markup in #tip; injected ${inj.els}; flags ${JSON.stringify(inj.flags)}; page errors ${perr(errs)}` });
     }
     return { ok: res.every((x) => x.ok), measured: res.map((x) => x.s).join(" | ") };
   }],
 ];
 
 // A check that throws (a selector gone, a timeout) counts as FAIL with the error, and the browser contexts it left open
-// are closed. A page that stops answering during the run (the server stopped) is a set-up problem, not a FAIL: the run
-// stops there with exit code 2.
+// are closed. A page that stops answering during the run (the server stopped), or Chromium closing, is a set-up
+// problem, not a FAIL: the run stops there with exit code 2. Under --mutants this keeps a dead browser from "catching"
+// every later mutant.
 const served = async () => { try { const r = await fetch(PAGE, { signal: AbortSignal.timeout(10000) }); await r.body?.cancel(); return r.ok; } catch { return false; } };
 async function runAll(mutant, print) {
   const fails = [];
@@ -513,6 +533,7 @@ async function runAll(mutant, print) {
       r = { ok: false, measured: `error: ${String(e.message ?? e).split("\n")[0].slice(0, 200)}` };
       for (const c of browser.contexts()) await c.close().catch(() => {});
     }
+    if (!r.ok && !browser.isConnected()) setupProblem(`Chromium closed during ${id}; no result is reported for it or later checks.`);
     if (!r.ok && !(await served())) { await browser.close(); setupProblem(`${PAGE} stopped answering during ${id}; no result is reported for it or later checks.`); }
     if (!r.ok) fails.push(id);
     if (print) console.log(`${r.ok ? "PASS" : "FAIL"} ${id}: ${r.measured}`);
