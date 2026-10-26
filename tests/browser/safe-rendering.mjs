@@ -25,6 +25,10 @@
 //   SET-G2     markup in a pasture ID (pastures, moves, water) and in planned_graze_days: Now grazing and every
 //              grazing reading
 //   ASOF       markup appended to every acres cell: the facts line under the title (#asof)
+//              SET-G2's planned days and ASOF reach the page only because today's reader keeps a non-number as text.
+//              P1-02 (step 2) types acres and planned_graze_days, so from then on ASOF has no CSV text to check (the
+//              acres total is always a number) and SET-G2 drops its planned-days part; then re-check CONSTANT_ONLY for
+//              the esc() calls only they caught (the acres total and the "plan" text in app.js)
 //   FOLDER-10  docs/audit/scenarios/10-malformed-and-hostile-csv served as the data, at 1280 x 900 and 390 x 844,
 //              every reading of every chart, to the last reading of each (Checkpoint 2 task 4). The number of list
 //              rows is not checked
@@ -96,7 +100,7 @@ try {
   const r = await fetch(PAGE, { signal: AbortSignal.timeout(10000) });
   await r.body?.cancel();
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  const a = await fetch(new URL("app.js", PAGE), { signal: AbortSignal.timeout(10000) });
+  const a = await fetch(new URL("app.js", r.url), { signal: AbortSignal.timeout(10000) });   // r.url: after any redirect
   if (!a.ok) throw new Error(`app.js: HTTP ${a.status}`);
   APP = await a.text();
 } catch (e) {
@@ -185,6 +189,10 @@ const SETS = {
 
 // ---------------------------------------------------------------- browser
 const browser = await chromium.launch().catch((e) => setupProblem(`could not start Chromium (${e.message.split("\n")[0]}).`));
+// A stop signal (a job timeout, timeout(1), kill) ends the run at once with the check in progress named, before the
+// pages it closes can fail that check.
+let current = "the set-up";
+for (const sig of ["SIGTERM", "SIGHUP"]) process.on(sig, () => setupProblem(`${sig} received during ${current}; no result is reported for it or later checks.`));
 
 // A page with one file set (and, under --mutants, one mutated app.js). edits says, per file of the set the page asked
 // for, how many rows the edit changed.
@@ -291,15 +299,18 @@ async function sweep(page, stop = () => false) {
   return out;
 }
 // Every reading of every chart in the tab order. partial lists each chart whose sweep reached fewer readings than the
-// chart has (the count comes from the chart's own _place(), not from the keys).
+// chart has. The count comes from the chart itself, not from the keys: _place(n) shows reading n, and _index() says
+// which reading is shown, so the first n it does not show is the count. It stops at 10000 and then reports the count as
+// unknown, so a chart that shows every index cannot hang the run.
 async function sweepAll(page) {
   const ks = await page.evaluate(() => [...document.querySelectorAll("svg.chart")].map((s, i) => (s.getAttribute("tabindex") === "0" ? i : -1)).filter((i) => i >= 0));
   const out = [], partial = [];
   for (const k of ks) {
-    const n = await page.evaluate((k) => { const s = document.querySelectorAll("svg.chart")[k]; let n = 0; while (s._place(n) !== false) n++; s._clear(); return n; }, k);
+    const n = await page.evaluate((k) => { const s = document.querySelectorAll("svg.chart")[k]; let n = 0; while (n < 10000) { s._place(n); if (s._index() !== n) break; n++; } s._clear(); return n < 10000 ? n : null; }, k);
     await focusChart(page, k);
     const rs = await sweep(page), got = new Set(rs.map((t) => t.idx)).size;
-    if (got !== n) partial.push(`chart ${k} ${got} of ${n}`);
+    if (n === null) partial.push(`chart ${k} count unknown`);
+    else if (got !== n) partial.push(`chart ${k} ${got} of ${n}`);
     out.push(...rs);
   }
   return { charts: ks.length, readings: out, partial };
@@ -523,11 +534,12 @@ const CHECKS = [
 // A check that throws (a selector gone, a timeout) counts as FAIL with the error, and the browser contexts it left open
 // are closed. A page that stops answering during the run (the server stopped), or Chromium closing, is a set-up
 // problem, not a FAIL: the run stops there with exit code 2. Under --mutants this keeps a dead browser from "catching"
-// every later mutant.
+// every later mutant. A SIGTERM or SIGHUP stops the run at once with exit code 2 (see the browser set-up above).
 const served = async () => { try { const r = await fetch(PAGE, { signal: AbortSignal.timeout(10000) }); await r.body?.cancel(); return r.ok; } catch { return false; } };
 async function runAll(mutant, print) {
   const fails = [];
   for (const [id, fn] of CHECKS) {
+    current = id;
     let r;
     try { r = await fn(mutant); } catch (e) {
       r = { ok: false, measured: `error: ${String(e.message ?? e).split("\n")[0].slice(0, 200)}` };
