@@ -136,7 +136,7 @@ for (const u of [PAGE, ...(MODE === "servers" ? Object.entries(SERVER).map(([n, 
 if (MODE === "servers") {
   const get = async (u) => (await fetch(u)).text();
   const same = [];
-  for (const f of ["app.js", "index.html", "exceptions.js"]) {
+  for (const f of ["app.js", "index.html", "exceptions.js", "format.js"]) {
     const a = await get(new URL(f, PAGE).href), c = await get(`${CB}gap/${f}`);
     same.push(`${f}: cases-b ${a === c ? "same" : "DIFFERENT"}`);
     const b2 = await get(`${CA}zerobudget/${f}`);
