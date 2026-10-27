@@ -12,11 +12,11 @@ observation, scheduling, records and escalation to a veterinarian.
 
 | Item | Value |
 |---|---|
-| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit was written). Phase 1 branches from the newest `origin/main` after the documentation pull request that adds this section and `docs/audit/redesign/preserve.mjs` is merged. `0315d09`, which adds the redesigned `index.html` and `app.js` (pull request #2), is the reviewed baseline for what Phase 1 keeps; main also has the redesign follow-up pull request once it has merged ([section 15](#15-open-decisions-and-assumptions)); see [section 1.2](#12-non-goals) and [section 6.3](#63-accessibility-and-layout-kept-from-the-redesign). |
+| Commit reviewed | `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit was written). Phase 1 branches from the newest `origin/main`. The documentation pull request that adds this section and `docs/audit/redesign/preserve.mjs` merged as #3 (`fa22dc8`), and the redesign follow-up of [section 15](#15-open-decisions-and-assumptions) merged as #4 (`3251d37`), both on 2026-10-22. `0315d09`, which adds the redesigned `index.html` and `app.js` (pull request #2), is the reviewed baseline for what Phase 1 keeps; see [section 1.2](#12-non-goals) and [section 6.3](#63-accessibility-and-layout-kept-from-the-redesign). |
 | Built from | [05-roadmap.md](05-roadmap.md) (work items and decisions D1-D16), `docs/audit/data/findings.json`, `rules.json`, `data-fields.json`, `integrations.json`, the code at the reviewed commit, and [02-findings.md](02-findings.md) / [03-research-and-data.md](03-research-and-data.md). The page terms and the keep-list come from the redesigned page on main at `0315d09`, [08-redesign-coverage.md](08-redesign-coverage.md) and the preserve checks in `docs/audit/redesign/preserve.mjs`. |
 | Project guidance files | [AGENTS.md](../../AGENTS.md) at the repository root (added 2026-10-20; `CLAUDE.md` imports it), with the project status in [docs/project/STATUS.md](../project/STATUS.md). The reviewed commit had no PROJECT_CONTEXT.md or AGENTS.md. |
 | Scenario files | `docs/audit/scenarios/`: 10 end-to-end folders (01-planted-problems to 10-malformed-and-hostile-csv), each with CSV files, `expected.json` and `scenario.md`, plus `settings.json`. A parallel audit step wrote them while this specification was being finished; they are committed on the work branch only in the work-in-progress commit `b548e4f` and were read on 2026-10-19. The 2026-10-19 review fixes then revised `expected.json` in 03, 04, 06, 08 and 09 and `settings.json` (no CSV changed; see `data/registry-changelog.md`, "Review fixes"). Section 11.2 says how Phase 1 runs them, which inputs must be added first (decision D16), and where their settings differ from section 9. The audit's single-change test cases (W-02, GN-07 ...) are built under `tests/fixtures/`. |
-| Not verified | The published GitHub Pages site (proxy 403). Only Chromium was used in the audit. Nothing in this document has been implemented. The selectors and values that describe the redesigned page (sections 5.1 to 5.6, 6.1 to 6.3, 7, 10.2, 11.4 and 12; the `app.js` function names and line numbers are from reading the code on main) were measured with Playwright Chromium on main at `0315d09` on 2026-10-20; real phones, screen readers, Firefox and WebKit were not tested. |
+| Not verified | The published GitHub Pages site (proxy 403). Only Chromium was used in the audit. Nothing in this document had been implemented when it was written; [docs/project/STATUS.md](../project/STATUS.md) says which Phase 1 steps have merged since. The selectors and values that describe the redesigned page (sections 5.1 to 5.6, 6.1 to 6.3, 7, 10.2, 11.4 and 12; the `app.js` function names and line numbers are from reading the code on main) were measured with Playwright Chromium on main at `0315d09` on 2026-10-20; real phones, screen readers, Firefox and WebKit were not tested. |
 
 Statement types follow the roadmap: **verified findings** carry a finding ID and quoted evidence; **research
 conclusions** carry a RULE ID and class; everything else here is a **recommendation**; open points are in
@@ -2049,8 +2049,8 @@ D16 scenario-folder inputs updated to the data contract. Each can be reversed by
 commit `0315d09`), once the documentation pull request that adds `docs/audit/redesign/preserve.mjs` is merged, and
 keeps what section 6.3 lists. The page at `0315d09` is the reviewed baseline for what Phase 1 keeps, not a commit to
 branch from: each Phase 1 step branches from the newest `origin/main`, which includes the separate pull request for
-the known issues below once it has merged, and keeps that pull request's fixes too. Only enhancements the redesign
-does not ship stay deferred (section 14). The preserve checks behind section 6.3 are kept in `docs/audit/redesign/preserve.mjs` and run by the
+the known issues below once it has merged, and keeps that pull request's fixes too. Both pull requests merged on
+2026-10-22 (#3 and #4). Only enhancements the redesign does not ship stay deferred (section 14). The preserve checks behind section 6.3 are kept in `docs/audit/redesign/preserve.mjs` and run by the
 smoke test (section 11.4 item 6).
 
 **Known issues of the redesign, not features to keep** (recorded 2026-10-20). Two kinds of mark on main at `0315d09`
@@ -2118,7 +2118,8 @@ from every file; BUD-04's cases use one closed month per category. The audit's s
 group files were not re-read for this specification. If a fixture differs, the criterion should be adjusted to the
 fixture, not the rule.
 
-**Not verified.** Nothing here was implemented. The statements about the redesigned page (sections 5.1 to 5.6, 6.1
+**Not verified.** Nothing here had been implemented when it was written; docs/project/STATUS.md says which Phase 1
+steps have merged since. The statements about the redesigned page (sections 5.1 to 5.6, 6.1
 to 6.3, 7, 10.2, 11.4 and 12; the `app.js` function names and line numbers are from reading the code on main) were
 measured with Playwright Chromium on main at `0315d09` on 2026-10-20, at 1280 x 900, at 390 x 844 with touch, and
 at 320 x 640 where stated; the new P1-10 and P1-14 head-count criteria are expectations derived from section 5.7 and

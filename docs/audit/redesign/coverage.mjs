@@ -50,7 +50,7 @@ const PORT = +(process.argv[2] ?? 8802);
 
 // ---------------------------------------------------------------- build the cases in a temporary folder
 const ROOT = mkdtempSync(join(tmpdir(), "redesign-coverage-"));
-const site = (dir) => { for (const f of ["index.html", "app.js", "exceptions.js", "data"]) cpSync(f, join(dir, f), { recursive: true }); };
+const site = (dir) => { for (const f of ["index.html", "app.js", "exceptions.js", "format.js", "data"]) cpSync(f, join(dir, f), { recursive: true }); };
 site(ROOT);
 const read = (n) => readFileSync(`data/${n}.csv`, "utf8").trim().split("\n").map((l) => l.split(","));
 function makeCase(name, edits) {

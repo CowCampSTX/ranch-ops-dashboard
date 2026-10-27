@@ -135,11 +135,11 @@ tests, no framework, no backend, no paid service and no AI feature.
 
 ### 1.3 Order of work
 
-Phase 1 starts from the newest `origin/main`, and only after the documentation pull request that brings this roadmap
-and [06-phase1-spec.md](06-phase1-spec.md) in line with the redesigned page has been reviewed (Checkpoint 1b in
-`CODEX_REVIEW_PROMPT.md`) and merged by the owner. That documentation pull request changes no page code. The
-redesigned page of `0315d09` (pull request #2) is the reviewed baseline for what Phase 1 keeps; main also has the
-redesign follow-up pull request once it has merged ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)).
+Phase 1 starts from the newest `origin/main`. The documentation pull request that brings this roadmap and
+[06-phase1-spec.md](06-phase1-spec.md) in line with the redesigned page was reviewed (Checkpoint 1b in
+`CODEX_REVIEW_PROMPT.md`) and merged by the owner as #3 on 2026-10-22; it changes no page code. The redesigned page of
+`0315d09` (pull request #2) is the reviewed baseline for what Phase 1 keeps; main also has the redesign follow-up pull
+request, #4, merged on 2026-10-22 ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)).
 Every step below keeps what the redesigned page already does
 ([06 section 6.3](06-phase1-spec.md#63-accessibility-and-layout-kept-from-the-redesign); section 2.1, item 13).
 

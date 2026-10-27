@@ -15,4 +15,4 @@ jobs:
           python-version: "3.12"
       - name: The committed data matches the generator
         run: python scripts/generate_data.py && git diff --exit-code data/
-      - run: node --test tests/exceptions.test.mjs
+      - run: node --test "tests/**/*.test.mjs"

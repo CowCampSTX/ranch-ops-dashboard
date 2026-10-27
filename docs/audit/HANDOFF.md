@@ -7,13 +7,12 @@ must not change.
 - **Reviewed commit:** `cfd77e50a050163b542cadfc6b38882c0341e99d` (main when the audit ran).
   **Branch:** `claude/project-thread-nu46kf`.
 - **Audit merged** into main in pull request #1 (merge commit `71f3492`). **Redesign merged** into main in pull
-  request #2 from the same branch (redesign commit `f9ef651`, merge commit `0315d09`, 2026-10-20).
-- **Starting point for Phase 1:** `origin/main` once the Checkpoint 1b documentation pull request is merged. Its page
-  files are those of `0315d09` (the redesign); `redesign/preserve.mjs` is not in `0315d09`. Phase 1 has not started.
-  `0315d09` is the reviewed baseline for what Phase 1 keeps, not a commit to branch from: each step branches from the
-  newest `origin/main`, which includes the redesign follow-up pull request once it has merged
-  ([06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)). Update this line, 06's header row and 05
-  section 1.3 when that pull request merges.
+  request #2 from the same branch (redesign commit `f9ef651`, merge commit `0315d09`, 2026-10-20). The Checkpoint 1b
+  documentation pull request #3 (merge commit `fa22dc8`) and the redesign follow-up pull request #4 (merge commit
+  `3251d37`, [06 section 15](06-phase1-spec.md#15-open-decisions-and-assumptions)) merged on 2026-10-22.
+- **Starting point for Phase 1:** each step branches from the newest `origin/main`; step 1 started from `3251d37`.
+  `0315d09` is the reviewed baseline for what Phase 1 keeps, not a commit to branch from; `redesign/preserve.mjs` is
+  not in `0315d09`. Which steps are open or merged is in [docs/project/STATUS.md](../project/STATUS.md).
 - **Agent instructions:** [AGENTS.md](../../AGENTS.md) at the repository root (`CLAUDE.md` imports it). Project status
   is in [docs/project/STATUS.md](../project/STATUS.md); this handoff and the specification are the Phase 1 guidance.
 - **The dashboard is not production-ready**, and finishing Phase 1 will not make it so. The audit changed no production
@@ -137,7 +136,7 @@ another set-up, read [Before running the review scripts](README.md#before-runnin
 a failure caused by the set-up apart from the results.
 
 ```bash
-node --test tests/exceptions.test.mjs                               # today: 8 pass
+node --test "tests/**/*.test.mjs"                                   # today: 21 pass
 python3 scripts/generate_data.py && git diff --exit-code data/      # data matches the generator
 python3 -I docs/audit/diagnostics/findings.handvalues.py            # recorded: "85 of 85 checks match"
 node docs/audit/diagnostics/csv.repro.mjs                           # recorded: "66 cases: 8 MATCH, 58 MISMATCH"
@@ -158,9 +157,18 @@ maps them). `node docs/audit/redesign/coverage.mjs` checks the redesign's claims
 `node docs/audit/redesign/preserve.mjs http://localhost:8766/` runs the preserve checks against a page you serve
 (recorded: 34 PASS on main at `0315d09` with the script before the follow-up pull request of 06 section 15, see
 [08 section 2](08-redesign-coverage.md#2-how-it-was-checked); the changed script passes 34 on that pull request's page
-and fails only KEEP-24 on `0315d09`, see [08 section 6](08-redesign-coverage.md#6-the-follow-up-pull-request)). To
-reproduce a finding as recorded, run the scripts against an extracted copy of the reviewed commit (the scripts find the
-code relative to their own folder):
+and fails only KEEP-24 on `0315d09`, see [08 section 6](08-redesign-coverage.md#6-the-follow-up-pull-request)).
+coverage.mjs copies a fixed list of page files to its temporary site (coverage.mjs:53). Phase 1 step 1 added
+`format.js` to that list, because the page imports it from that step on; with it, the script gave 23 PASS on that
+step's head on 2026-10-22. Without it, the copied page stays on "Loading data" and the script stops with a
+TimeoutError (run on 2026-10-22). Later steps do not keep that list up to date: the script is not a Phase 1 gate and
+asserts pre-Phase 1 wording that P1-07 changes ([06 section 11.4](06-phase1-spec.md#114-browser-smoke-test) item 6,
+[section 13](06-phase1-spec.md#13-migration-and-compatibility)). For its recorded 23 PASS, run it from an extracted
+copy of `3251d37` (main before Phase 1) with that commit's own coverage.mjs. preserve.mjs is a Phase 1 gate, so its
+servers-mode check that the case folders run the page's code (preserve.mjs:139) names every page file: step 1 added
+`format.js` there, and a step that adds a module the page loads adds it there too. To reproduce a finding as
+recorded, run the scripts against an extracted copy of the reviewed commit (the scripts find the code relative to
+their own folder):
 
 ```bash
 REF=$(mktemp -d)
