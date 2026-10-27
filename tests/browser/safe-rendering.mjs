@@ -214,8 +214,15 @@ async function open(setName, o = {}, mutant = null) {
     const name = r.request().url().match(/data\/([^/?#]+)\.csv/)[1], e = set[name];
     if (!e) return r.continue();
     if (e.body) { seen[name] = 1; return r.fulfill({ status: 200, contentType: "text/csv", body: e.body }); }
-    const resp = await r.fetch();
-    const { text, changed, missed } = editCSV(await resp.text(), e.fn ?? e, e.add);
+    // A fetch that fails (the server stopped, or the check's context closed) leaves the file unedited, so the check
+    // fails and runAll reports a stopped server with exit code 2. Thrown here, it would stop Node with exit code 1 and
+    // no summary line.
+    let resp, body;
+    try { resp = await r.fetch(); body = await resp.text(); } catch {
+      seen[name] = 0;
+      return r.abort().catch(() => {});
+    }
+    const { text, changed, missed } = editCSV(body, e.fn ?? e, e.add);
     seen[name] = missed ? 0 : changed;
     await r.fulfill({ response: resp, body: text });
   });
